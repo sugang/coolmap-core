@@ -1,0 +1,39 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package coolmap.application.widget.misc;
+
+import com.javadocking.dockable.Dockable;
+import com.javadocking.dockable.DockableState;
+import coolmap.application.CoolMapMaster;
+import java.awt.Menu;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+/**
+ *
+ * @author sugang
+ */
+public class CanvasWidgetPropertyChangedListener implements PropertyChangeListener {
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (Dockable.class.isAssignableFrom(
+                evt.getSource().getClass()) && evt.getPropertyName().equals("state") ) {
+            //System.out.println("Dockable state changed");
+            System.out.println(((Dockable)evt.getSource()).getTitle());
+            if(evt.getNewValue().equals(DockableState.MAXIMIZED)){
+                //disable a menu
+                Menu view = CoolMapMaster.getCMainFrame().findRootMenu("View");
+                view.setEnabled(false);
+            }
+            else if(evt.getNewValue().equals(DockableState.NORMAL)){
+                Menu view = CoolMapMaster.getCMainFrame().findRootMenu("View");
+                if(!view.isEnabled()){
+                    view.setEnabled(true);
+                }
+            }
+        }
+    }
+}
