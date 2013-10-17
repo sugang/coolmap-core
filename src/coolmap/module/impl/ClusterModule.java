@@ -7,7 +7,6 @@ package coolmap.module.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.module.Module1;
 import coolmap.utils.cluster.HCluster;
-import coolmap.utils.cluster.KMeans;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.common.Similarity;
 import java.awt.MenuItem;

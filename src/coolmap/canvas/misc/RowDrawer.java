@@ -5,23 +5,18 @@
 package coolmap.canvas.misc;
 
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.*;
-
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import javax.media.j3d.Background;
 import javax.swing.*;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
-import sun.security.pkcs11.P11TlsKeyMaterialGenerator;
 
 /**
  *

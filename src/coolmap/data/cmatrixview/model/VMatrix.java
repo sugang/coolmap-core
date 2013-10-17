@@ -10,8 +10,9 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.utils.Tools;
-import edu.ucla.sspace.util.HashMultiMap;
 import java.util.*;
+import com.google.common.collect.HashMultimap;
+
 
 /**
  * no need to have a name; an ID is enough. It's simply a view
@@ -29,8 +30,8 @@ public class VMatrix<BASE, VIEW> {
     protected final ArrayList<VNode> _activeRowNodesInTree = new ArrayList<VNode>();
     protected final ArrayList<VNode> _activeColNodesInTree = new ArrayList<VNode>();
     //
-    protected final HashMultiMap<String, VNode> _activeColumnNameToNodeMap = new HashMultiMap<String, VNode>();
-    protected final HashMultiMap<String, VNode> _activeRowNameToNodeMap = new HashMultiMap<String, VNode>();
+    protected final HashMultimap<String, VNode> _activeColumnNameToNodeMap = HashMultimap.create();
+    protected final HashMultimap<String, VNode> _activeRowNameToNodeMap = HashMultimap.create();
 
     public void destroy() {
         _activeRowNodes.clear();

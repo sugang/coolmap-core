@@ -6,19 +6,15 @@ package coolmap.data.contology.model;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeNameComparator;
-import coolmap.data.contology.utils.COntologyUtils;
 import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.util.*;
 import java.util.Map.Entry;
-import org.tartarus.snowball.ext.englishStemmer;
 
 /**
  *

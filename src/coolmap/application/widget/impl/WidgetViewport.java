@@ -4,25 +4,16 @@
  */
 package coolmap.application.widget.impl;
 
-import com.google.common.util.concurrent.ServiceManager;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.utils.LongTask;
-import coolmap.application.utils.ServiceMaster;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.data.CoolMapObject;
-import coolmap.utils.cluster.HCluster;
 import coolmap.utils.graphics.UI;
-import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
-import edu.ucla.sspace.common.Similarity;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -72,7 +72,7 @@ public class Main {
                 COntology onto;
 
                 if (true) {
-                    CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/0correlation.txt"));
+                    CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 
 
                     //import sample
@@ -115,7 +115,7 @@ public class Main {
 ////////            CoolMapMaster.addNewCOntology(eisenGenes);
 ////////            CoolMapMaster.addNewCOntology(eisenSamples);
 //////            
-                    onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/0Child_Parent.txt"));
+                    onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
                     CoolMapMaster.addNewCOntology(onto);
                 }
 

@@ -4,18 +4,12 @@
  */
 package coolmap.application.utils;
 
-import com.sun.media.jai.codec.PNGEncodeParam;
 import coolmap.application.CoolMapMaster;
 import coolmap.utils.graphics.UI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayDeque;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import javax.swing.*;
 
 /**

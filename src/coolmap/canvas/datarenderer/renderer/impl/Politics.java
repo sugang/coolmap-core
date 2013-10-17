@@ -4,10 +4,9 @@
  */
 package coolmap.canvas.datarenderer.renderer.impl;
 
-import coolmap.application.CoolMapMaster;
+import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
 import java.awt.*;
@@ -18,7 +17,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import javax.swing.*;
-import javax.vecmath.Color3b;
 
 /**
  *
