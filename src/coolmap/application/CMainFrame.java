@@ -19,6 +19,7 @@ import com.javadocking.dockable.action.DefaultDockableStateAction;
 import com.javadocking.event.DockingEvent;
 import com.javadocking.event.DockingListener;
 import com.javadocking.model.FloatDockModel;
+import com.javadocking.model.codec.DockModelPropertiesDecoder;
 import com.javadocking.model.codec.DockModelPropertiesEncoder;
 import com.javadocking.visualizer.DockingMinimizer;
 import com.javadocking.visualizer.FloatExternalizer;
@@ -81,6 +82,7 @@ public class CMainFrame extends JFrame {
     }
     
     public void loadWorkspace(String fileUrlString) {
+        DockModelPropertiesDecoder dockModelDecoder = new DockModelPropertiesDecoder();
         
     }
     
