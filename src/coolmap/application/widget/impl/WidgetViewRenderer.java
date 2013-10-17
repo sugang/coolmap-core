@@ -128,6 +128,7 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
     }
 
     private void _initBuiltInViewRenderers() {
+        
         registerViewRenderer(DoubleToColor.class.getName());
         registerViewRenderer(DoubleToBar.class.getName());
         registerViewRenderer(DoubleToShape.class.getName());
@@ -149,7 +150,7 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
             }
         }
 
-        System.out.println("Model:" + _model);
+//        System.out.println("Model:" + _model);
         _viewRenderers.setModel(_model);
     }
 

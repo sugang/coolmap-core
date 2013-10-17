@@ -708,6 +708,9 @@ is divided into following sections:
         <copy todir="${dist.dir}">
             <fileset dir="${src.dir}/config"></fileset>
         </copy>
+        <mkdir dir= "${dist.dir}/plugin"/>
+        <mkdir dir= "${dist.dir}/workspace"/>
+        
     </target>
     <target depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass,-do-jar-with-libraries,-post-jar" description="Build JAR." name="jar"/>
     <!--

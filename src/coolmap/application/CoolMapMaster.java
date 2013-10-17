@@ -19,6 +19,7 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
+import coolmap.utils.Config;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.util.*;
@@ -33,13 +34,16 @@ import org.omg.CORBA.MARSHAL;
 public final class CoolMapMaster {
 
     private final static ActiveCoolMapObjectListenerTunnel _activeCoolMapObjectListenerTunnel = ActiveCoolMapObjectListenerTunnel.getInstance();
-    private final static CMainFrame _cMainFrame = new CMainFrame();
+    
     private final static LinkedHashMap<String, CMatrix> _cMatrices = new LinkedHashMap<String, CMatrix>();
     private final static LinkedHashSet<CoolMapObject> _coolMapObjects = new LinkedHashSet<CoolMapObject>();
     private final static HashSet<ActiveCoolMapChangedListener> _activeCoolMapChangedListeners = new HashSet<ActiveCoolMapChangedListener>();
     private final static LinkedHashMap<String, COntology> _contologies = new LinkedHashMap<String, COntology>();
     private static CoolMapObject _activeCoolMapObject = null;
     private static String _sessionName = null;
+    
+    //can't be final because I need Config to load before static inialization
+    private static CMainFrame _cMainFrame;
 
     public static String getSessionName() {
         return _sessionName;
@@ -69,7 +73,7 @@ public final class CoolMapMaster {
         CoolMapObject object = _activeCoolMapObject;
         _activeCoolMapObject = null;
         _fireActiveCoolMapChanged(object, null);
-        
+
         List<CoolMapObject> coolMapObjects = new ArrayList<CoolMapObject>(_coolMapObjects);
         for (CoolMapObject obj : coolMapObjects) {
             destroyCoolMapObject(obj);
@@ -86,7 +90,7 @@ public final class CoolMapMaster {
         }
 
         setSessionName(name);
-        
+
     }
 
     public static ActiveCoolMapObjectListenerTunnel getActiveCoolMapObjectListenerDelegate() {
@@ -101,6 +105,12 @@ public final class CoolMapMaster {
      * initialize the neceesary elements
      */
     public static void initialize() {
+
+        Config.initialize();
+        
+        //
+        _cMainFrame = new CMainFrame();
+        
         UI.initialize();
         Tools.initialize();
         SnippetMaster.initialize();
@@ -110,10 +120,8 @@ public final class CoolMapMaster {
         IOMaster.initialize();
         CreaterMaster.initialize();
 
-
         //new session
         CoolMapMaster.newSession("");
-
 
         SwingUtilities.invokeLater(new Runnable() {
 
@@ -125,6 +133,7 @@ public final class CoolMapMaster {
             }
         });
     }
+
 
     public static void addActiveCoolMapChangedListener(ActiveCoolMapChangedListener lis) {
         if (lis != null) {
@@ -166,7 +175,6 @@ public final class CoolMapMaster {
 
         }
 
-
     }
 
 //    public static JComponent getMainFrame() {
@@ -184,14 +192,10 @@ public final class CoolMapMaster {
         }
         _coolMapObjects.add(object);
 
-
         //bunch of other listeners need to be added.
         //by default, the are added here.
         //There's then an opportunity to add it to the syncer directly.
         //but when it is removed, how do we remove them easily?
-
-
-        
         object.getCoolMapView().addColumnMap(new ColumnLabels(object));
         object.getCoolMapView().addColumnMap(new ColumnTree(object));
         object.getCoolMapView().addRowMap(new RowLabels(object));

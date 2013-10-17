@@ -25,7 +25,7 @@ import javax.swing.*;
  *
  * @author gangsu
  */
-public class WidgetCoolMapAttributes extends Widget implements ActiveCoolMapChangedListener, CObjectListener {
+public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChangedListener, CObjectListener {
 
     private JPanel _container = new JPanel();
     private JToolBar _toolBar = new JToolBar();
@@ -33,7 +33,7 @@ public class WidgetCoolMapAttributes extends Widget implements ActiveCoolMapChan
     private JList _cmatrixList = new JList();
     private JList _allCMatrixList = new JList();
 
-    public WidgetCoolMapAttributes() {
+    public WidgetCoolMapProperties() {
         super("Active CoolMap Matrices", W_MODULE, L_LEFTBOTTOM, UI.getImageIcon("commentDots"), "Comments in the current view");
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCObjectListener(this);

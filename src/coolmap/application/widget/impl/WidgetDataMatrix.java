@@ -27,13 +27,13 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author gangsu
  */
-public class WidgetMatrix extends Widget implements CObjectListener, CViewListener, ActiveCoolMapChangedListener {
+public class WidgetDataMatrix extends Widget implements CObjectListener, CViewListener, ActiveCoolMapChangedListener {
 
     private final JPanel _container = new JPanel();
     private final JTable _dataTable = new JTable();
 //    private DefaultTableCellRenderer _rowCellRenderer = new DefaultTableCellRenderer();
 
-    public WidgetMatrix() {
+    public WidgetDataMatrix() {
         super("Data Matrix", W_DATA, L_DATAPORT, UI.getImageIcon("grid"), null);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCObjectListener(this);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCViewListener(this);

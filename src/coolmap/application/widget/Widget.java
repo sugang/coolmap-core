@@ -29,14 +29,19 @@ import org.json.JSONObject;
  */
 public abstract class Widget {
 
+//    locations
     public static final int L_LEFTTOP = 0;
     public static final int L_LEFTCENTER = 1;
     public static final int L_LEFTBOTTOM = 2;
     public static final int L_VIEWPORT = 3;
     public static final int L_DATAPORT = 4;
+    
+//    widget types
     public static final int W_VIEWPORT = -1;
     public static final int W_MODULE = -2;
     public static final int W_DATA = -3;
+    
+//    
     private JPanel _contentPane = new JPanel();
     private DefaultDockable _dockable;
     private StateActionDockable _dockableWrapper;
@@ -44,7 +49,8 @@ public abstract class Widget {
     private int _type = W_DATA;
     private Icon _icon = null;
     private String _description = null;
-    private String _uniqueName = null;
+    private String _title = null;
+//    private String _id = null;
 
     
     /**
@@ -69,19 +75,30 @@ public abstract class Widget {
 
         this(null, 0, 0, null, null);
     }
+    
+    public void setPreferredLocation(int preferredLocation){
+        _preferredLocation = preferredLocation;
+    }
+    
+    
 
     public Widget(String name, int type, int preferredLocation, Icon icon, String description) {
-        _uniqueName = name;
+        //There's a possibility that the unique names are not unique
+        
+//        _id = name;
+        _title = name;
         _contentPane.setName(name);
         _type = type;
         _preferredLocation = preferredLocation;
         _icon = icon;
         _description = description;
         _contentPane.setPreferredSize(new Dimension(400, 300));
-        _initDockable();
+        
+        //init dockable
+        initDockable();
         
         final DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(getDockable(), DockableState.NORMAL);
-        _showWidgetItem = new MenuItem(_uniqueName);
+        _showWidgetItem = new MenuItem(_title);
         _showWidgetItem.setEnabled(false);
         _showWidgetItem.addActionListener(new ActionListener() {
 
@@ -112,10 +129,10 @@ public abstract class Widget {
             }
         });
         
-        
+        System.out.println("ID:" + getID());
     }
 
-    private void _initDockable() {
+    protected void initDockable() {
         int[] dockableStates = null;
         switch (_type) {
             case W_VIEWPORT:
@@ -128,7 +145,7 @@ public abstract class Widget {
                 dockableStates = new int[]{DockableState.NORMAL, DockableState.EXTERNALIZED, DockableState.CLOSED};
                 break;
         }
-        _dockable = new DefaultDockable(_uniqueName, _contentPane, getName(), _icon);
+        _dockable = new DefaultDockable(getClass().getName(), _contentPane, _title, _icon);
         _dockableWrapper = new StateActionDockable(_dockable, new DefaultDockableStateActionFactory(), dockableStates);
     }
 
@@ -156,7 +173,7 @@ public abstract class Widget {
     }
 
     public String getName() {
-        return _uniqueName;
+        return _title;
     }
 
     public final int getPreferredLocation() {

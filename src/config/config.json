@@ -1,3 +1,25 @@
 {
-    "version": "1.0"
+    "version": "1.0",
+    "R": {"R-Path": "usr/bin/R", "RScript-Path": "/usr/bin/Rscript"},
+    "plugin": {"directory": "plugin"},
+    "workspace": {"directory": "workspace"},
+    "module": {
+        "load": [
+                    "coolmap.application.widget.impl.WidgetViewport", 
+                    "coolmap.application.widget.impl.WidgetAggregator", 
+                    "coolmap.application.widget.impl.WidgetSyncer", 
+                    "coolmap.application.widget.impl.WidgetSearch",
+                    "coolmap.application.widget.impl.WidgetCMatrix",
+                    "coolmap.application.widget.impl.WidgetCOntology",
+                    "coolmap.application.widget.impl.WidgetViewRenderer",
+                    "coolmap.application.widget.impl.WidgetDataMatrix"
+                 ],
+        "config": {
+            "coolmap.application.widget.impl.WidgetViewRenderer":
+                    {
+                        "load": ["DoubleToColor", "DoubleToBar"],
+                        "preferred-location":"left-bottom"
+                    }
+        }
+    }
 }

@@ -19,12 +19,18 @@ import com.javadocking.dockable.action.DefaultDockableStateAction;
 import com.javadocking.event.DockingEvent;
 import com.javadocking.event.DockingListener;
 import com.javadocking.model.FloatDockModel;
+import com.javadocking.model.codec.DockModelPropertiesEncoder;
 import com.javadocking.visualizer.DockingMinimizer;
 import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.SingleMaximizer;
+import coolmap.utils.Config;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
 /**
@@ -37,6 +43,13 @@ public class CMainFrame extends JFrame {
     private MenuBar _menuBar = new MenuBar();
     //private final HashMap<String, MenuItem> _menus = new HashMap<String, MenuItem>();
     //private Menu _fileMenu = new Menu("File");
+    private FloatDockModel dockModel;
+    private TabDock leftTabDock1;
+    private TabDock leftTabDock2;
+    private TabDock leftTabDock3;
+    private TabDock rightTopTabDock;
+    private TabDock rightBottomTabDock;
+    private final SplitDock rootDock = new SplitDock();
 
     public CMainFrame() {
         _initFrame();
@@ -44,16 +57,44 @@ public class CMainFrame extends JFrame {
         _initMenuBar();
         _initDockableFrame();
     }
-    private TabDock leftTabDock1;
-    private TabDock leftTabDock2;
-    private TabDock leftTabDock3;
-    private TabDock rightTopTabDock;
-    private TabDock rightBottomTabDock;
-    private SplitDock rootDock = new SplitDock();
+
+    public void saveWorkspace(String fileUrlString) {
+
+        //not quite working now as I can't export
+        DockModelPropertiesEncoder encoder = new DockModelPropertiesEncoder();
+        System.out.println("DockModel:" + dockModel);
+        System.out.println("Can export?" + encoder.canExport(dockModel, fileUrlString + "/workspace"));
+        System.out.println("Can save?" + encoder.canSave(dockModel));
+        System.out.println("Source?" + dockModel.getSource());
+
+        try {
+            
+            //encoder.export(dockModel, fileUrlString);
+
+            encoder.save(dockModel);
+
+        } catch (IOException ex) {
+            Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void loadWorkspace(String fileUrlString) {
+        
+    }
+    
+    
 
     private void _initDockableFrame() {
         JPanel contentPane = (JPanel) getContentPane();
-        FloatDockModel dockModel = new FloatDockModel();
+
+        String source = Config.getProperty(Config.WORKSPACE_DIRECTORY) + File.separator + "default.dck";
+
+        //cmain frame intialized before config??
+        System.out.println("CMainFrame was created + Source:" + source);
+
+        dockModel = new FloatDockModel(source);
 
         dockModel.addOwner("MainFrame", this);
         DockingManager.setDockModel(dockModel);
@@ -68,7 +109,6 @@ public class CMainFrame extends JFrame {
         });
 
 //        DockingManager.setComponentFactory(new DefaultSwComponentFactory());
-
         leftTabDock1 = new TabDock();
         leftTabDock2 = new TabDock();
         leftTabDock3 = new TabDock();
@@ -101,16 +141,12 @@ public class CMainFrame extends JFrame {
         dockModel.addVisualizer("externalizer", externalizer, this);
 
 //        The line minimizer setup
-
 //        LineMinimizer minimizer = new LineMinimizer(rootDock);
 //        dockModel.addVisualizer("minimizer", minimizer, this);
 //        SingleMaximizer maximizer = new SingleMaximizer(minimizer);
 //        dockModel.addVisualizer("maximizer", maximizer, this);
 //        contentPane.add(maximizer, BorderLayout.CENTER);
-
-
-//        the 
-
+//        the
         SingleMaximizer maximizer = new SingleMaximizer(rootDock);
         dockModel.addVisualizer("maximizer", maximizer, this);
         BorderDock borderDock = new BorderDock(new ToolBarDockFactory());
@@ -123,13 +159,6 @@ public class CMainFrame extends JFrame {
         dockModel.addRootDock("minimizerBorderDock", borderDock, this);
         contentPane.add(borderDock, BorderLayout.CENTER);
 
-
-
-
-
-
-
-
         rightSplitDock.setDividerLocation((int) (_defaultToolkit.getScreenSize().height * 0.8 * 0.7));
         rootDock.setDividerLocation(400);
         leftSplitDock1.setDividerLocation(200);
@@ -139,7 +168,7 @@ public class CMainFrame extends JFrame {
 
     public void addWidget(final Widget widget) {
         if (widget != null) {
-            
+
             switch (widget.getPreferredLocation()) {
                 case Widget.L_LEFTTOP:
                     leftTabDock1.addDockable(widget.getDockable(), new Position(0));
@@ -158,9 +187,7 @@ public class CMainFrame extends JFrame {
                     break;
             }
 
-            
-            
-//            final MenuItem showWidget = new MenuItem("Show " + widget.getName());            
+//            final MenuItem showWidget = new MenuItem("Show " + widget.getName());
 //            final DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(widget.getDockable(), DockableState.NORMAL);
 //            showWidget.setEnabled(false);
 //            showWidget.addActionListener(new ActionListener() {
@@ -186,62 +213,20 @@ public class CMainFrame extends JFrame {
 //                    }
 //                }
 //            });
-
         }
     }
+
     //private final Menu _viewMenu = new Menu("View");
-    
-    public Menu findRootMenu(String title){
-        for(int i=0; i<_menuBar.getMenuCount(); i++){
+    public Menu findRootMenu(String title) {
+        for (int i = 0; i < _menuBar.getMenuCount(); i++) {
             Menu menu = _menuBar.getMenu(i);
-            if(menu != null && menu.getLabel().equals(title)){
+            if (menu != null && menu.getLabel().equals(title)) {
                 return menu;
             }
         }
         return null;
     }
-    
 //    public MenuItem findMenuItem(String parentPath){
-//        if(parentPath == null || parentPath.length() == 0)
-//            return null;
-//        if(parentPath.startsWith("/")){
-//            parentPath = parentPath.substring(1);
-//        }
-//        if(parentPath.endsWith("/")){
-//            parentPath = parentPath.substring(0, parentPath.length()-1);
-//        }
-//        
-//        String ele[] = parentPath.split("/");
-//        
-//        if(ele.length == 0){
-//            return null;
-//        }
-//        
-//        MenuItem 
-//        
-//        //find the root menu
-//        
-////        Menu currentMenu;
-////        for(int i = 0; i < _menuBar.getMenuCount(); i++){
-////            currentMenu = _menuBar.getMenu(i);
-////            if(currentMenu != null && currentMenu.getLabel().equals(ele[0])){
-////                return currentMenu;
-////            }
-////        }
-////        
-////        //find the root menu first
-////        for(int i=1; i < ele.length; i++){
-////            
-////        }
-//        
-//
-//    }
-    
-    //need to find a way to search for it
-    
-    
-    
-    
 
     //private MenuBar _menuBar = new MenuBar();
     public void addMenuItem(String parentPath, MenuItem item, boolean sepBefore) {
@@ -249,7 +234,6 @@ public class CMainFrame extends JFrame {
             return;
         }
 
-        
         if ((parentPath == null || parentPath.equals(""))) {
             if (item instanceof Menu) {
                 _menuBar.add((Menu) item);
@@ -305,94 +289,66 @@ public class CMainFrame extends JFrame {
         }
 
     }
-    
-    
-    
-    
+
     public MenuItem findMenuItem(String parentPath) {
 
-            if(parentPath.startsWith("/")){
-                
-            }
-        
+        if (parentPath.startsWith("/")) {
 
-            String ele[] = parentPath.split("/");
-            Menu currentMenu = null;
-            String menuLabel = null;
-            Menu searchMenu = null;
-            MenuItem searchItem = null;
-            
-            
-            
-            
-            System.out.println(Arrays.toString(ele));
+        }
 
-            for (int i = 0; i < ele.length; i++) {
-                menuLabel = ele[i].trim();
-                if (currentMenu == null) {
-                    //search root
-                    boolean found = false;
-                    for (int j = 0; j < _menuBar.getMenuCount(); j++) {
-                        searchMenu = _menuBar.getMenu(j);
-                        if (searchMenu.getLabel().equalsIgnoreCase(menuLabel)) {
-                            currentMenu = searchMenu;
-                            found = true;
-                            break;
-                        }
-                    }//end of search all items, not found, add new entry
-                    if (found == false) {
-                        return null;
-                        //currentMenu = new Menu(menuLabel);
-                        //_menuBar.add((Menu) currentMenu);
+        String ele[] = parentPath.split("/");
+        Menu currentMenu = null;
+        String menuLabel = null;
+        Menu searchMenu = null;
+        MenuItem searchItem = null;
+
+        System.out.println(Arrays.toString(ele));
+
+        for (int i = 0; i < ele.length; i++) {
+            menuLabel = ele[i].trim();
+            if (currentMenu == null) {
+                //search root
+                boolean found = false;
+                for (int j = 0; j < _menuBar.getMenuCount(); j++) {
+                    searchMenu = _menuBar.getMenu(j);
+                    if (searchMenu.getLabel().equalsIgnoreCase(menuLabel)) {
+                        currentMenu = searchMenu;
+                        found = true;
+                        break;
                     }
-                } else {
-                    boolean found = false;
-                    for (int j = 0; j < currentMenu.getItemCount(); j++) {
-                        searchItem = currentMenu.getItem(j);
-                        if (searchItem instanceof Menu && ((Menu) searchItem).getLabel().equalsIgnoreCase(menuLabel)) {
-                            currentMenu = (Menu) searchItem;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found == false) {
-                        //Menu newMenu = new Menu(menuLabel);
-                        //currentMenu.add(newMenu);
-                        //currentMenu = newMenu;
-                        return null;
+                }//end of search all items, not found, add new entry
+                if (found == false) {
+                    return null;
+                    //currentMenu = new Menu(menuLabel);
+                    //_menuBar.add((Menu) currentMenu);
+                }
+            } else {
+                boolean found = false;
+                for (int j = 0; j < currentMenu.getItemCount(); j++) {
+                    searchItem = currentMenu.getItem(j);
+                    if (searchItem instanceof Menu && ((Menu) searchItem).getLabel().equalsIgnoreCase(menuLabel)) {
+                        currentMenu = (Menu) searchItem;
+                        found = true;
+                        break;
                     }
                 }
-            }//Should iterate all and found it
+                if (found == false) {
+                    //Menu newMenu = new Menu(menuLabel);
+                    //currentMenu.add(newMenu);
+                    //currentMenu = newMenu;
+                    return null;
+                }
+            }
+        }//Should iterate all and found it
 
 //            currentMenu.add(item);
-        
-            return currentMenu;
-    }    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        return currentMenu;
+    }
 
     private void _initMenuBar() {
-        
+
         setMenuBar(_menuBar);
 
-
-        
-        
-        
         addMenuItem("", new Menu("File"), false);
         addMenuItem("", new Menu("Edit"), false);
         addMenuItem("", new Menu("View"), false);
@@ -405,7 +361,7 @@ public class CMainFrame extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            
+
         }
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

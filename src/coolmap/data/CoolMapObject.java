@@ -51,7 +51,7 @@ public final class CoolMapObject<BASE, VIEW> {
     //can contain many matrices
     private ArrayList<CMatrix<BASE>> _cMatrices = new ArrayList<CMatrix<BASE>>();
     //vMatrix carries all the other info
-    private final VMatrix<BASE, VIEW> _vMatrix = new VMatrix<BASE, VIEW>();
+    private final VMatrix<BASE, VIEW> _vMatrix = new VMatrix<>();
     ;
     //Aggregator
     private CAggregator<BASE, VIEW> _cAggregator = null;
