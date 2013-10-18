@@ -5,7 +5,6 @@ import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.canvas.datarenderer.renderer.impl.*;
 import coolmap.canvas.sidemaps.impl.*;
-import coolmap.utils.graphics.UI;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.DoubleToNetwork;
@@ -15,28 +14,13 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.state.StateSnapshot;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
-import coolmap.data.snippet.SnippetConverter;
 import coolmap.utils.Config;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.UnsupportedEncodingException;
-
-import java.lang.management.*;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Properties;
-import javax.management.Notification;
-import javax.management.NotificationEmitter;
-import javax.management.NotificationListener;
 import javax.swing.*;
 import org.json.JSONObject;
-import org.mortbay.util.ajax.JSON;
 import rcaller.RCaller;
 import rcaller.RCode;
 
@@ -62,6 +46,10 @@ public class Main {
 //        dockmodel can not be saved?
 //        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
         
+        CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/workspace/default.dck");
+        
+        sdf
+                
     }
     
     

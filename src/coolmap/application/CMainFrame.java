@@ -51,6 +51,7 @@ public class CMainFrame extends JFrame {
     private TabDock rightTopTabDock;
     private TabDock rightBottomTabDock;
     private final SplitDock rootDock = new SplitDock();
+    //private 
 
     public CMainFrame() {
         _initFrame();
@@ -83,7 +84,8 @@ public class CMainFrame extends JFrame {
     
     public void loadWorkspace(String fileUrlString) {
         DockModelPropertiesDecoder dockModelDecoder = new DockModelPropertiesDecoder();
-        
+        //Need to load all the current dockables
+        System.out.println("Loading from:" + fileUrlString);
     }
     
     
@@ -98,7 +100,9 @@ public class CMainFrame extends JFrame {
 
         dockModel = new FloatDockModel(source);
 
+        //make sure the owner is always the main frame
         dockModel.addOwner("MainFrame", this);
+        
         DockingManager.setDockModel(dockModel);
         DockingManager.setComponentFactory(new DefaultSwComponentFactory() {
 
@@ -159,6 +163,8 @@ public class CMainFrame extends JFrame {
         DockingMinimizer minimizer = new DockingMinimizer(borderDocker);
         dockModel.addVisualizer("minimizer", minimizer, this);
         dockModel.addRootDock("minimizerBorderDock", borderDock, this);
+        
+        //It is a border dock that was added
         contentPane.add(borderDock, BorderLayout.CENTER);
 
         rightSplitDock.setDividerLocation((int) (_defaultToolkit.getScreenSize().height * 0.8 * 0.7));
