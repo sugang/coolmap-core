@@ -4,6 +4,8 @@
  */
 package coolmap.application.widget.impl;
 
+import com.javadocking.dockable.DockableState;
+import com.javadocking.dockable.action.DefaultDockableStateAction;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
@@ -15,10 +17,19 @@ import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.MenuItem;
+import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -55,8 +66,32 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 //    }
     private void _initMainMenuItem() {
         CMainFrame frame = CoolMapMaster.getCMainFrame();
-        MenuItem item = new MenuItem("Tile");
-        frame.addMenuItem("View/Arrange Views", item, false);
+        
+        MenuItem item = new MenuItem("Toggle Canvas", new MenuShortcut(KeyEvent.VK_1));
+        frame.addMenuItem("View", item, false, true);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                WidgetViewport viewport = CoolMapMaster.getViewport();
+                int state = viewport.getDockable().getState();
+                if(state == DockableState.MAXIMIZED || state == DockableState.EXTERNALIZED){
+                    DefaultDockableStateAction action = new DefaultDockableStateAction(viewport.getDockable(), DockableState.NORMAL);
+                    action.actionPerformed(null);
+                }
+                else{
+                    DefaultDockableStateAction action = new DefaultDockableStateAction(viewport.getDockable(), DockableState.MAXIMIZED);
+                    action.actionPerformed(null);
+                }
+            }
+        });
+       
+        
+        
+        
+        item = new MenuItem("Tile");
+        frame.addMenuItem("View/Arrange Maps", item, false, false);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -66,7 +101,7 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         });
 
         item = new MenuItem("Cascade");
-        frame.addMenuItem("View/Arrange Views", item, false);
+        frame.addMenuItem("View/Arrange Maps", item, false, false);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -74,6 +109,9 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
                 cascadeWindows();
             }
         });
+        
+        
+        
 
         JMenuItem toggleRows = new JMenuItem("Toggle row panels");
         JMenuItem toggleColumns = new JMenuItem("Toggle column panels");
@@ -205,6 +243,7 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
     private JToolBar _zoomSubBar;
 
     private void _initToolbar() {
+        
         _toolBar.setFloatable(false);
 
         JButton button = new JButton(UI.getImageIcon("zoomIn"));
@@ -462,6 +501,11 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 
     public void cascadeWindows() {
         JInternalFrame[] frames = _desktop.getAllFrames();
+        if(frames == null || frames.length == 0){
+            return;
+        }
+        
+        
         int x = 0;
         int y = 0;
         int width = _desktop.getWidth() / 2;
@@ -493,6 +537,9 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 
     public void tileWindows() {
         JInternalFrame[] frames = _desktop.getAllFrames();
+        if(frames == null || frames.length == 0){
+            return;
+        }
 
         // count frames that aren't iconized
         int frameCount = 0;

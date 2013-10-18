@@ -4,28 +4,34 @@
  */
 package coolmap.application;
 
-import com.google.common.util.concurrent.ServiceManager;
 import coolmap.application.io.IOMaster;
-import coolmap.module.Module1;
-import coolmap.module.ModuleMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.utils.*;
-import coolmap.application.widget.Widget;
+import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
+import coolmap.application.utils.CreaterMaster;
+import coolmap.application.utils.DataMaster;
+import coolmap.application.utils.ServiceMaster;
 import coolmap.application.widget.WidgetMaster;
-import coolmap.application.widget.impl.WidgetMemoryUsage;
 import coolmap.application.widget.impl.WidgetViewport;
-import coolmap.canvas.sidemaps.impl.*;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
+import coolmap.module.ModuleMaster;
 import coolmap.utils.Config;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
-import java.util.*;
-import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import javax.swing.SwingUtilities;
-import org.omg.CORBA.MARSHAL;
 
 /**
  *
@@ -151,8 +157,13 @@ public final class CoolMapMaster {
         return _cMainFrame;
     }
 
+    /**
+     * return the viewport
+     * @return 
+     */
     public static WidgetViewport getViewport() {
-        return ((WidgetViewport) WidgetMaster.getWidget(WidgetMaster.CANVAS));
+        //return ((WidgetViewport) WidgetMaster.getWidget(WidgetMaster.CANVAS));
+        return WidgetMaster.getViewport();
     }
 
     public static CoolMapObject getActiveCoolMapObject() {

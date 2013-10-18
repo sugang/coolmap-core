@@ -22,7 +22,7 @@ public class ClusterModule extends Module1 {
     public ClusterModule() {
 
         MenuItem item = new MenuItem("H-Cluster Row");
-        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false, false);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -32,7 +32,7 @@ public class ClusterModule extends Module1 {
         });
 
         item = new MenuItem("H-Cluster Column");
-        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false, false);
         item.addActionListener(new ActionListener() {
 
             @Override

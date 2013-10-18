@@ -18,15 +18,12 @@ import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
 import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
-import coolmap.data.aggregator.impl.DoubleDoubleMax;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.PassThrough;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
-import coolmap.data.contology.utils.COntologyUtils;
-import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
 import coolmap.data.state.StateSnapshot;
@@ -38,9 +35,13 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFileChooser;
@@ -49,7 +50,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -62,7 +62,7 @@ public class IOMaster {
 
     private static void _initActions() {
         MenuItem menuItem = new MenuItem("New project", new MenuShortcut(KeyEvent.VK_N, true));
-        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -74,7 +74,7 @@ public class IOMaster {
         });
 
         menuItem = new MenuItem("Open project", new MenuShortcut(KeyEvent.VK_O, false));
-        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, true);
+        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, true, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -375,7 +375,7 @@ public class IOMaster {
         });
 
         menuItem = new MenuItem("Numeric Table from .tsv");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -427,7 +427,7 @@ public class IOMaster {
 
 
         menuItem = new MenuItem("Ontology from .tsv");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -463,7 +463,7 @@ public class IOMaster {
 
 
         menuItem = new MenuItem("view to TSV file");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -511,7 +511,7 @@ public class IOMaster {
         });
 
         menuItem = new MenuItem("view to Excel file");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -603,7 +603,7 @@ public class IOMaster {
 
 
         MenuItem item = new MenuItem("Save Project", new MenuShortcut(KeyEvent.VK_S));
-        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true);
+        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
         item.addActionListener(new ActionListener() {
 
             @Override

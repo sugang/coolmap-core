@@ -36,7 +36,7 @@ public class CreaterMaster {
     public static void initialize() {
         Menu createMenu = new Menu("Create New");
         CMainFrame frame = CoolMapMaster.getCMainFrame();
-        frame.addMenuItem("Edit", createMenu, true);
+        frame.addMenuItem("Edit", createMenu, true, false);
 
         //MenuItem item = frame.findMenuItem("/View/Arrange Views");
         //System.out.println("Found menu item:" + item);

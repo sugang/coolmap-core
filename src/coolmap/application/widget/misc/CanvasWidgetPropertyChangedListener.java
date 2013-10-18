@@ -23,16 +23,21 @@ public class CanvasWidgetPropertyChangedListener implements PropertyChangeListen
                 evt.getSource().getClass()) && evt.getPropertyName().equals("state") ) {
             //System.out.println("Dockable state changed");
             System.out.println(((Dockable)evt.getSource()).getTitle());
+            
             if(evt.getNewValue().equals(DockableState.MAXIMIZED)){
                 //disable a menu
-                Menu view = CoolMapMaster.getCMainFrame().findRootMenu("View");
+                Menu view = (Menu)CoolMapMaster.getCMainFrame().findMenuItem("View/Show Widgets");
                 view.setEnabled(false);
+                //fix this later
+                
+                
             }
             else if(evt.getNewValue().equals(DockableState.NORMAL)){
-                Menu view = CoolMapMaster.getCMainFrame().findRootMenu("View");
+                Menu view = (Menu)CoolMapMaster.getCMainFrame().findMenuItem("View/Show Widgets");
                 if(!view.isEnabled()){
                     view.setEnabled(true);
                 }
+                                
             }
         }
     }

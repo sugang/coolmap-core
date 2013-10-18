@@ -10,14 +10,10 @@ import com.javadocking.dockable.DockableState;
 import com.javadocking.dockable.StateActionDockable;
 import com.javadocking.dockable.action.DefaultDockableStateAction;
 import com.javadocking.dockable.action.DefaultDockableStateActionFactory;
-import com.javadocking.event.DockingEvent;
-import com.javadocking.event.DockingListener;
 import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -99,7 +95,10 @@ public abstract class Widget {
         
         final DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(getDockable(), DockableState.NORMAL);
         _showWidgetItem = new MenuItem(_title);
-        _showWidgetItem.setEnabled(false);
+        
+        //initialy set to true
+        _showWidgetItem.setEnabled(true);
+        
         _showWidgetItem.addActionListener(new ActionListener() {
 
             @Override
@@ -109,27 +108,33 @@ public abstract class Widget {
         });
         
         
-        getDockable().addDockingListener(new DockingListener() {
-
-            @Override
-            public void dockingWillChange(DockingEvent dockingEvent) {
-            }
-
-            @Override
-            public void dockingChanged(DockingEvent dockingEvent) {
-                if (dockingEvent.getDestinationDock() == null) {
-                    _showWidgetItem.setEnabled(true);
-                    //System.out.println(dockingEvent.getDestinationDock());
-                } else {
-                    _showWidgetItem.setEnabled(false);
-                    //destination dock
-                }
-                
-                
-            }
-        });
+//      Hide this action temporarily        
+//        getDockable().addDockingListener(new DockingListener() {
+//
+//            @Override
+//            public void dockingWillChange(DockingEvent dockingEvent) {
+//            }
+//
+//            @Override
+//            public void dockingChanged(DockingEvent dockingEvent) {
+//                
+//                
+//                
+//                if (dockingEvent.getDestinationDock() == null) {
+//                    _showWidgetItem.setEnabled(true);
+//                    //System.out.println(dockingEvent.getDestinationDock());
+//                } else {
+//                    _showWidgetItem.setEnabled(false);
+//                    //destination dock
+//                }
+//                
+//                
+//            }
+//        });
         
-        System.out.println("ID:" + getID());
+        
+        
+//        System.out.println("ID:" + getID());
     }
 
     protected void initDockable() {
@@ -194,6 +199,14 @@ public abstract class Widget {
     public final void show(){
         DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(getDockable(), DockableState.NORMAL);
         restoreAction.actionPerformed(null);
+        _showWidgetItem.setEnabled(false);
+    }
+    
+    public final void enableMenuItem(){
+        _showWidgetItem.setEnabled(true);
+    }
+    
+    public final void disableMenuItem(){
         _showWidgetItem.setEnabled(false);
     }
     

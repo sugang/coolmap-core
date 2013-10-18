@@ -3,23 +3,28 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
-import coolmap.canvas.datarenderer.renderer.impl.*;
-import coolmap.canvas.sidemaps.impl.*;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
+import coolmap.canvas.datarenderer.renderer.impl.NetworkToForceLayout;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.DoubleToNetwork;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.data.state.StateSnapshot;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
+import coolmap.data.state.StateSnapshot;
 import coolmap.utils.Config;
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import org.json.JSONObject;
 import rcaller.RCaller;
 import rcaller.RCode;
@@ -38,25 +43,50 @@ public class Main {
     public static StateSnapshot snapshotRow;
     public static StateSnapshot snapshotColumn;
 
-    public static void main(String args[]){
+    public static void main(String args[]) {
 
-        CoolMapMaster.initialize();
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                //First initialize
+                CoolMapMaster.initialize();
+                //CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
+                //CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
+            
+                
+//                CoolMapMaster.getCMainFrame().addMenuItem(null, null, true);
+//            FloatExternalizer 
+                
+//                MenuItem saveWorkSpace = new MenuItem("Save Workspace");
+//                CoolMapMaster.getCMainFrame().addMenuItem("View", saveWorkSpace, true);
+//                saveWorkSpace.addActionListener(new ActionListener() {
+//
+//                    @Override
+//                    public void actionPerformed(ActionEvent e) {
+//                        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
+//                    }
+//                });
+                
+                
+                //then restore workspace
+                CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
+            
+                
+                
+            }
+        });
         
+        
+
 //        System.out.println(Config.getProperty(Config.WORKSPACE_DIRECTORY));
 //        dockmodel can not be saved?
 //        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
         
-        CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/workspace/default.dck");
-        
-        sdf
                 
     }
-    
-    
-    
-    
-    
-    
+
     public static void main3(String args[]) {
         CoolMapMaster.initialize();
         //Use this mechanism to determine which widgets should be loaded.
@@ -70,7 +100,6 @@ public class Main {
 //////            //object.setViewRenderer(new DoubleToColor(object));
 //////            object.setViewRenderer(new DoubleToColor());
 //////            CoolMapMaster.addNewCoolMapObject(object);
-
                 //FileTSVDoubleImporter importer = new FileTSVDoubleImporter();
                 //CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
                 //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/T1D/DataTables/229RTCGM.txt"));
@@ -80,14 +109,12 @@ public class Main {
                 if (true) {
                     CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 
-
                     //import sample
                     //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
                     System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
                     object = new CoolMapObject();
                     object.addBaseCMatrix(matrix);
-
 
                     ArrayList<VNode> nodes = new ArrayList<VNode>();
                     for (Object label : matrix.getRowLabelsAsList()) {
@@ -126,9 +153,7 @@ public class Main {
                 }
 
 //                mx.printMatrix();
-
 //                create a network 
-
                 if (false) {
                     NetworkCMatrix mx = new NetworkCMatrix(100, 100);
                     for (int i = 0; i < mx.getNumRows(); i++) {
@@ -155,10 +180,6 @@ public class Main {
                     }
 
                     //COntologyUtils.printOntology(onto);
-
-
-
-
                     object = new CoolMapObject();
                     object.addBaseCMatrix(mx);
                     object.insertRowNodes(onto.getRootNodesOrdered());
@@ -178,32 +199,10 @@ public class Main {
 //                ArrayList<Integer> rowIndices = new ArrayList<Integer>();
 //                ArrayList<Integer> colIndices = new ArrayList<Integer>();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //            
 //            object.clearStateStorage();
-
                 //System.out.println(object + object.getAggregator().toString() + object.getViewRenderer().toString());
                 //CoolMapMaster.addNewCoolMapObject(object);
-
-
 //            object = CoolMapObject.createSampleCoolMapObject(500, 100);
 //            object.setName("Obj2");
 //            object.setViewRenderer(new DoubleToColor());
@@ -213,18 +212,12 @@ public class Main {
 //            object.setName("Obj3");
 //            object.setViewRenderer(new DoubleToHeight(object));
 //            CoolMapMaster.addNewCoolMapObject(object);
-
-
 //            object = CoolMapObject.createSampleCoolMapObject(20, 100);
 //            object.setName("Obj2");
 //            CoolMapMaster.addNewCoolMapObject(object);
-
 //            object = CoolMapObject.createSampleCoolMapObject(300, 100);
 //            object.setName("Obj3");
 //            CoolMapMaster.addNewCoolMapObject(object);
-
-
-
 //            object = CoolMapObject.createSampleCoolMapObject(200, 100);
 //            object.setName("Obj2");
 //            CoolMapMaster.addNewCoolMapObject(object);
@@ -232,7 +225,6 @@ public class Main {
 //            object = CoolMapObject.createSampleCoolMapObject(200, 200);
 //            object.setName("Obj3");
 //            CoolMapMaster.addNewCoolMapObject(object);
-
 //            object = CoolMapObject.createSampleCoolMapObject(2000, 2000);
 //            object.setName("Obj2");
 //            CoolMapMaster.addNewCoolMapObject(object);
@@ -241,12 +233,9 @@ public class Main {
 //            object = CoolMapObject.createSampleCoolMapObject(1000, 1000);
 //            object.setName("Obj3");
 //            CoolMapMaster.addNewCoolMapObject(object);
-
 //            object = CoolMapObject.createSampleCoolMapObject(100, 40);
 //            object.setName("Obj2");
 //            CoolMapMaster.addNewCoolMapObject(object);
-
-
 //            CoolMapObject object1 = CoolMapObject.createSampleCoolMapObject(40, 30);
 ////            object1.setName("Obj2");
 //            CoolMapMaster.addNewCoolMapObject(object1);
@@ -258,8 +247,6 @@ public class Main {
 //            CoolMapObject object2 = CoolMapObject.createSampleCoolMapObject(40, 50);
 ////            object2.setName("Obj3");
 //            CoolMapMaster.addNewCoolMapObject(object2);
-
-
 //            object = CoolMapObject.createSampleCoolMapObject(20, 30);
 //            CoolMapMaster.addNewCoolMapObject(object);
 //
@@ -268,11 +255,7 @@ public class Main {
 //
 //            object = CoolMapObject.createSampleCoolMapObject(20, 30);
 //            CoolMapMaster.addNewCoolMapObject(object);
-
-
 //            Test R    
-
-
                 if (true) {
                     //test RCaller
                     try {
@@ -280,7 +263,6 @@ public class Main {
                         //need to get the json file
 //                        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 //                        String decodedPath = path;
-                        
                         //The working path can't be set to the dist path
 //                        System.out.println("\nWorking path:" + path);
 //                        System.out.println("\nUser Directory:" + System.getProperty("user.dir"));
@@ -291,73 +273,53 @@ public class Main {
 //                        } catch (UnsupportedEncodingException e) {
 //                            e.printStackTrace();
 //                        }
-
                         //String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf("/")) + "\\";
                         RCaller caller = new RCaller();
-                        
+
                         //not quite right
 //                        System.out.println("Running path:" + decodedPath);
-                        
 //                        Try to load R
                         String coolMapPath = System.getProperty("user.dir");
-                        
-                        
-                        
-                        
-                        try{
+
+                        try {
                             File file = new File(coolMapPath + File.separator + "config.json");
 //                            file = new File(file.getParentFile() + File.separator + "rconfig.json");
                             BufferedReader reader = new BufferedReader(new FileReader(file));
                             StringBuffer sb = new StringBuffer();
                             String line = null;
-                            while((line = reader.readLine())!=null){
+                            while ((line = reader.readLine()) != null) {
                                 sb.append(line);
                             }
-                            
+
                             JSONObject config = new JSONObject(sb.toString());
-                            
-                            
-                            
-                            
+
                             JSONObject rConfig = config.getJSONObject("R");
-                            
-                            
+
                             String rscriptPath = rConfig.getString("Rscript-Path");
                             System.out.println("Rscript Path:: " + rscriptPath);
                             caller.setRscriptExecutable(rscriptPath);
-                        }
-                        catch(Exception e){
+                        } catch (Exception e) {
                             System.out.println("--R config file not found or eading error, set to default path");
                             caller.setRscriptExecutable("/usr/bin/Rscript");
                             e.printStackTrace();
                         }
-                        
-                        
+
                         //Inspect properties.
                         //
 //                        Properties properties = System.getProperties();
 //                        for( Map.Entry<Object, Object> entry : properties.entrySet()){
 //                            System.out.println(entry.getKey() + "==>" + entry.getValue());
 //                        }
-                        
-                        
-                        
                         RCode code = new RCode();
                         caller.setRCode(code);
                         caller.runOnly(); //see whether it works
-                        
-                        
-                        
+
                         //JOptionPane.showMessageDialog(null, "R engine initialization successful!");
-                        
                     } catch (Exception e) {
                         JOptionPane.showMessageDialog(null, "R engine initialization failed.\nPlease config the R path in rconfig.json");
                         e.printStackTrace();
                     }
                 }
-
-
-
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -366,9 +328,6 @@ public class Main {
         }
     }
 
-    
-    
-    
     //obsolete code with mostly testing 
 //    public static void main2(String[] args) {
 //        //initializers

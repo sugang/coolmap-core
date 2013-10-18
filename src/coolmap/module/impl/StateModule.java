@@ -5,11 +5,11 @@
 package coolmap.module.impl;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.module.Module1;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.data.CoolMapObject;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.data.state.StateStorage;
+import coolmap.module.Module1;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
@@ -27,7 +27,7 @@ public class StateModule extends Module1 implements ActiveCoolMapChangedListener
 
     public StateModule() {
         _undoOperation = new MenuItem("Undo", new MenuShortcut(KeyEvent.VK_Z));
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false, false);
         _undoOperation.addActionListener(new ActionListener() {
 
             @Override
@@ -45,7 +45,7 @@ public class StateModule extends Module1 implements ActiveCoolMapChangedListener
         });
 
         _redoOperation = new MenuItem("Redo", new MenuShortcut(KeyEvent.VK_Y));
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false, false);
         _redoOperation.addActionListener(new ActionListener() {
 
             @Override

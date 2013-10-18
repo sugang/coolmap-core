@@ -4,35 +4,43 @@
  */
 package coolmap.application;
 
-import coolmap.application.widget.Widget;
 import com.javadocking.DockingManager;
-import com.javadocking.component.*;
-import com.javadocking.dock.BorderDock;
+import com.javadocking.component.DefaultSwComponentFactory;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.SplitDock;
 import com.javadocking.dock.TabDock;
-import com.javadocking.dock.docker.BorderDocker;
-import com.javadocking.dock.factory.ToolBarDockFactory;
-import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockableState;
 import com.javadocking.dockable.action.DefaultDockableStateAction;
-import com.javadocking.event.DockingEvent;
-import com.javadocking.event.DockingListener;
 import com.javadocking.model.FloatDockModel;
 import com.javadocking.model.codec.DockModelPropertiesDecoder;
 import com.javadocking.model.codec.DockModelPropertiesEncoder;
-import com.javadocking.visualizer.DockingMinimizer;
 import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.SingleMaximizer;
+import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.utils.Config;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.UIManager;
 
 /**
  *
@@ -52,6 +60,10 @@ public class CMainFrame extends JFrame {
     private TabDock rightBottomTabDock;
     private final SplitDock rootDock = new SplitDock();
     //private 
+    private final HashMap<String, Widget> widgetHashMap = new HashMap<>();
+//    private DockingMinimizer minimizer = null;
+    private SingleMaximizer maximizer = null;
+    private FloatExternalizer externalizer = null;
 
     public CMainFrame() {
         _initFrame();
@@ -64,45 +76,191 @@ public class CMainFrame extends JFrame {
 
         //not quite working now as I can't export
         DockModelPropertiesEncoder encoder = new DockModelPropertiesEncoder();
-        System.out.println("DockModel:" + dockModel);
-        System.out.println("Can export?" + encoder.canExport(dockModel, fileUrlString + "/workspace"));
-        System.out.println("Can save?" + encoder.canSave(dockModel));
-        System.out.println("Source?" + dockModel.getSource());
 
+//        System.out.println("DockModel:" + dockModel);
+//        System.out.println("Can export?" + encoder.canExport(dockModel, fileUrlString + "/workspace"));
+//        System.out.println("Can save?" + encoder.canSave(dockModel));
+//        System.out.println("Source?" + dockModel.getSource());
         try {
-            
-            //encoder.export(dockModel, fileUrlString);
 
+            //encoder.export(dockModel, fileUrlString);
             encoder.save(dockModel);
 
+            //write custom parameters
+            File file = new File(fileUrlString + "/default.dck");
+//            System.out.println("Viewport:" + CoolMapMaster.getViewport());
+            WidgetViewport viewport = CoolMapMaster.getViewport();
+            FileWriter writer = new FileWriter(file, true);
+
+            if (viewport != null && viewport.getDockable().getState() == DockableState.MAXIMIZED) {
+                writer.write("#coolMap.widgetViewport.state=maximized\n");
+            } else {
+                writer.write("#coolMap.widgetViewport.state=minimized\n");
+            }
+
+            writer.flush();
+            writer.close();
+
+            //append
         } catch (IOException ex) {
             Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        System.out.println("Message: Current Work space saved.");
     }
-    
+
     public void loadWorkspace(String fileUrlString) {
+
+        File file = new File(fileUrlString);
+        if (!file.exists()) {
+            return;
+        }
+
         DockModelPropertiesDecoder dockModelDecoder = new DockModelPropertiesDecoder();
         //Need to load all the current dockables
         System.out.println("Loading from:" + fileUrlString);
+
+        //This works
+        Map dockableMap = new HashMap();
+
+        for (Widget w : widgetHashMap.values()) {
+            dockableMap.put(w.getID(), w.getDockable());
+            w.getDockable().getDock().removeDockable(w.getDockable()); //remove itself
+        }
+
+        //This works
+        Map ownerMap = new HashMap();
+        ownerMap.put("MainFrame", this);
+
+        //maximizer does not work. Why?
+        Map visualizerMap = new HashMap();
+//        visualizerMap.put("maximizer", maximizer);
+
+//        apparently the externalizer will work
+//        visualizerMap.put("minimizer", minimizer);
+        visualizerMap.put("externalizer", externalizer);
+
+        try {
+
+            boolean maximizeViewport = false;
+            FloatDockModel newDockModel;
+            try {
+                //need a way to revert to default, if 
+                newDockModel = (FloatDockModel) dockModelDecoder.decode(fileUrlString, dockableMap, ownerMap, visualizerMap);
+            } catch (Exception IOException) {
+                return;
+            }
+
+//            try {
+//                for (Widget w : widgetHashMap.values()) {
+//                    System.out.println(w + " :Docked at: " + w.getDockable().getDock().getParentDock());
+//                    System.out.println(w.getDockable().getState());
+//                }
+//            } catch (Exception e) {
+//                return;
+//            }
+
+            //File file = new File(fileUrlString);
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    line = line.substring(1);
+
+                    String[] ele = line.split("=");
+                    if (ele.length == 2) {
+                        if (ele[0].equals("coolMap.widgetViewport.state")) {
+                            if (ele[1].equals("maximized")) {
+                                //maximize!
+                                //System.out.println("Maximize viewport!");
+                                maximizeViewport = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+//            System.out.println("old dockmodel owner count:" + dockModel.getOwnerCount());
+//            System.out.println(dockModel.getOwner(0));//it is the ownder but can't be removed?
+//
+//            System.out.println("Contents of the old dockmodel:");
+//            Iterator it = dockModel.getRootKeys(this);
+//            while (it.hasNext()) {
+//                Object key = it.next();
+//                System.out.println(key + "->" + dockModel.getRootDock(key.toString()));
+//            }
+//            System.out.println("");
+            //dockModel.getRootDock("splitDock")
+
+//            System.out.println("new dockmodel owner count:" + newDockModel.getOwnerCount());
+//            System.out.println("Contents of the new dockmodel:");
+//            it = newDockModel.getRootKeys(this);
+//            while (it.hasNext()) {
+//                Object key = it.next();
+//                System.out.println(key + "->" + newDockModel.getRootDock(key.toString()));
+//            }
+            
+            
+//            System.out.println("");
+//
+//            System.out.println(newDockModel.getOwnerCount() + " " + newDockModel.getOwner(0));
+//            System.out.println("");
+            
+            
+            dockModel.removeVisualizer(maximizer);
+            dockModel.removeVisualizer(externalizer);
+
+            JPanel contentPane = (JPanel) this.getContentPane();
+
+            contentPane.removeAll();
+
+            //Add the new maximizer;
+            maximizer = new SingleMaximizer((SplitDock) newDockModel.getRootDock("splitDock"));
+            newDockModel.addVisualizer("maximizer", maximizer, this);
+            contentPane.add(maximizer, BorderLayout.CENTER);
+
+            doLayout();
+
+//            for(Widget w : widgetHashMap.values()){
+//                Dockable d = w.getDockable();
+//                System.out.println(w.getName() + " dock:" + d.getState() + " " + DockableState.NORMAL);
+//            }
+            //replace with current model
+
+            dockModel = newDockModel;
+
+            //determine whether maximize is needed
+//            System.out.println("Is maximizing viewport needed?");
+            if (maximizeViewport) {
+                WidgetViewport viewport = CoolMapMaster.getViewport();
+                if (viewport != null) {
+                    DefaultDockableStateAction maximizeAction = new DefaultDockableStateAction(viewport.getDockable(), DockableState.MAXIMIZED);
+                    maximizeAction.actionPerformed(null);
+                }
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
-    
-    
 
     private void _initDockableFrame() {
+
+//        System.out.println("\n\nThe content pane is:" + getContentPane() + "\n\n");
         JPanel contentPane = (JPanel) getContentPane();
 
         String source = Config.getProperty(Config.WORKSPACE_DIRECTORY) + File.separator + "default.dck";
 
         //cmain frame intialized before config??
-        System.out.println("CMainFrame was created + Source:" + source);
-
+//        System.out.println("CMainFrame was created + Source:" + source);
         dockModel = new FloatDockModel(source);
 
         //make sure the owner is always the main frame
         dockModel.addOwner("MainFrame", this);
-        
+
         DockingManager.setDockModel(dockModel);
         DockingManager.setComponentFactory(new DefaultSwComponentFactory() {
 
@@ -143,7 +301,7 @@ public class CMainFrame extends JFrame {
 
         dockModel.addRootDock("splitDock", rootDock, this);
 
-        FloatExternalizer externalizer = new FloatExternalizer(this);
+        externalizer = new FloatExternalizer(this);
         dockModel.addVisualizer("externalizer", externalizer, this);
 
 //        The line minimizer setup
@@ -153,19 +311,21 @@ public class CMainFrame extends JFrame {
 //        dockModel.addVisualizer("maximizer", maximizer, this);
 //        contentPane.add(maximizer, BorderLayout.CENTER);
 //        the
-        SingleMaximizer maximizer = new SingleMaximizer(rootDock);
+        maximizer = new SingleMaximizer(rootDock);
         dockModel.addVisualizer("maximizer", maximizer, this);
-        BorderDock borderDock = new BorderDock(new ToolBarDockFactory());
-        borderDock.setMode(BorderDock.MODE_MINIMIZE_BAR);
-        borderDock.setCenterComponent(maximizer);
-        BorderDocker borderDocker = new BorderDocker();
-        borderDocker.setBorderDock(borderDock);
-        DockingMinimizer minimizer = new DockingMinimizer(borderDocker);
-        dockModel.addVisualizer("minimizer", minimizer, this);
-        dockModel.addRootDock("minimizerBorderDock", borderDock, this);
-        
+
+//        BorderDock borderDock = new BorderDock(new ToolBarDockFactory());
+//        borderDock.setMode(BorderDock.MODE_MINIMIZE_BAR);
+//        borderDock.setCenterComponent(maximizer);
+//        BorderDocker borderDocker = new BorderDocker();
+//        borderDocker.setBorderDock(borderDock);
+//        minimizer = new DockingMinimizer(borderDocker);
+//        dockModel.addVisualizer("minimizer", minimizer, this);
+//        dockModel.addRootDock("minimizerBorderDock", borderDock, this);
         //It is a border dock that was added
-        contentPane.add(borderDock, BorderLayout.CENTER);
+        //contentPane.add(borderDock, BorderLayout.CENTER);
+        //maximer is the one to be added
+        contentPane.add(maximizer, BorderLayout.CENTER);
 
         rightSplitDock.setDividerLocation((int) (_defaultToolkit.getScreenSize().height * 0.8 * 0.7));
         rootDock.setDividerLocation(400);
@@ -176,7 +336,8 @@ public class CMainFrame extends JFrame {
 
     public void addWidget(final Widget widget) {
         if (widget != null) {
-
+            widgetHashMap.put(widget.getID(), widget);
+            //System.out.println(widget.getID() + "->" + widget.getDockable());
             switch (widget.getPreferredLocation()) {
                 case Widget.L_LEFTTOP:
                     leftTabDock1.addDockable(widget.getDockable(), new Position(0));
@@ -195,32 +356,6 @@ public class CMainFrame extends JFrame {
                     break;
             }
 
-//            final MenuItem showWidget = new MenuItem("Show " + widget.getName());
-//            final DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(widget.getDockable(), DockableState.NORMAL);
-//            showWidget.setEnabled(false);
-//            showWidget.addActionListener(new ActionListener() {
-//
-//                @Override
-//                public void actionPerformed(ActionEvent ae) {
-//                    restoreAction.actionPerformed(ae);
-//                }
-//            });
-//
-//            widget.getDockable().addDockingListener(new DockingListener() {
-//
-//                @Override
-//                public void dockingWillChange(DockingEvent dockingEvent) {
-//                }
-//
-//                @Override
-//                public void dockingChanged(DockingEvent dockingEvent) {
-//                    if (dockingEvent.getDestinationDock() == null) {
-//                        showWidget.setEnabled(true);
-//                    } else {
-//                        showWidget.setEnabled(false);
-//                    }
-//                }
-//            });
         }
     }
 
@@ -237,7 +372,7 @@ public class CMainFrame extends JFrame {
 //    public MenuItem findMenuItem(String parentPath){
 
     //private MenuBar _menuBar = new MenuBar();
-    public void addMenuItem(String parentPath, MenuItem item, boolean sepBefore) {
+    public void addMenuItem(String parentPath, MenuItem item, boolean sepBefore, boolean sepAfter) {
         if (item == null) {
             return;
         }
@@ -294,6 +429,9 @@ public class CMainFrame extends JFrame {
                 currentMenu.addSeparator();
             }
             currentMenu.add(item);
+            if (sepAfter){
+                currentMenu.addSeparator();
+            }
         }
 
     }
@@ -352,16 +490,24 @@ public class CMainFrame extends JFrame {
 //            currentMenu.add(item);
         return currentMenu;
     }
+    
+    
+    
+    
+    
+    
+    
+    
 
     private void _initMenuBar() {
 
         setMenuBar(_menuBar);
 
-        addMenuItem("", new Menu("File"), false);
-        addMenuItem("", new Menu("Edit"), false);
-        addMenuItem("", new Menu("View"), false);
-        addMenuItem("", new Menu("Analysis"), false);
-        addMenuItem("", new Menu("About"), false);
+        addMenuItem("", new Menu("File"), false, false);
+        addMenuItem("", new Menu("Edit"), false, false);
+        addMenuItem("", new Menu("View"), false, false);
+        addMenuItem("", new Menu("Analysis"), false, false);
+        addMenuItem("", new Menu("About"), false, false);
     }
 
     private void _initFrame() {
@@ -391,7 +537,10 @@ public class CMainFrame extends JFrame {
 
         public void windowClosing(WindowEvent e) {
             //Do some prompt of asking the user to - save the current session
-            System.out.println("CoolMap Application will be closed");
+            //Here -> CoolMap will be closed
+            CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
+
+            System.out.println("CoolMap Application will be closed.");
             System.exit(0);
         }
     }
