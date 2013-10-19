@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
@@ -161,7 +162,6 @@ public class CMainFrame extends JFrame {
 //            } catch (Exception e) {
 //                return;
 //            }
-
             //File file = new File(fileUrlString);
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
@@ -193,7 +193,6 @@ public class CMainFrame extends JFrame {
 //            }
 //            System.out.println("");
             //dockModel.getRootDock("splitDock")
-
 //            System.out.println("new dockmodel owner count:" + newDockModel.getOwnerCount());
 //            System.out.println("Contents of the new dockmodel:");
 //            it = newDockModel.getRootKeys(this);
@@ -201,14 +200,10 @@ public class CMainFrame extends JFrame {
 //                Object key = it.next();
 //                System.out.println(key + "->" + newDockModel.getRootDock(key.toString()));
 //            }
-            
-            
 //            System.out.println("");
 //
 //            System.out.println(newDockModel.getOwnerCount() + " " + newDockModel.getOwner(0));
 //            System.out.println("");
-            
-            
             dockModel.removeVisualizer(maximizer);
             dockModel.removeVisualizer(externalizer);
 
@@ -228,7 +223,6 @@ public class CMainFrame extends JFrame {
 //                System.out.println(w.getName() + " dock:" + d.getState() + " " + DockableState.NORMAL);
 //            }
             //replace with current model
-
             dockModel = newDockModel;
 
             //determine whether maximize is needed
@@ -428,8 +422,15 @@ public class CMainFrame extends JFrame {
             if (sepBefore) {
                 currentMenu.addSeparator();
             }
-            currentMenu.add(item);
-            if (sepAfter){
+            //if (item instanceof MenuItem) {
+                currentMenu.add((MenuItem)item);
+            //}
+            
+//            else if(item instanceof JSeparator){
+//                currentMenu.addSeparator();
+//            }
+
+            if (sepAfter) {
                 currentMenu.addSeparator();
             }
         }
@@ -490,14 +491,6 @@ public class CMainFrame extends JFrame {
 //            currentMenu.add(item);
         return currentMenu;
     }
-    
-    
-    
-    
-    
-    
-    
-    
 
     private void _initMenuBar() {
 

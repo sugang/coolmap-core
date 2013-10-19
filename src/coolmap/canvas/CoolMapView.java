@@ -856,6 +856,24 @@ public final class CoolMapView<BASE, VIEW> {
         }
     }
 
+    public synchronized void toggleTooltip() {
+        if (paintHoverTip) {
+            paintHoverTip = false;
+        } else {
+            paintHoverTip = true;
+        }
+        redrawCanvas();
+    }
+
+    public synchronized void toggleLabeltip() {
+        if (paintLabelsTip){
+            paintLabelsTip = false;
+        } else{
+            paintLabelsTip = true;
+        }
+        redrawCanvas();
+    }
+
     public synchronized void setMouseXY(int x, int y) {
         _cursor.x = x;
         _cursor.y = y;
@@ -3457,6 +3475,7 @@ public final class CoolMapView<BASE, VIEW> {
 
         private final Font labelFont;
         private final Font labelFontRotated;
+        private final Font labelFontValue;
 
         public HoverLayer() {
             setOpaque(false);
@@ -3465,6 +3484,7 @@ public final class CoolMapView<BASE, VIEW> {
             AffineTransform at = new AffineTransform();
             at.rotate(-Math.PI / 2);
             labelFontRotated = labelFont.deriveFont(at);
+            labelFontValue = UI.fontPlain.deriveFont(16f).deriveFont(Font.BOLD);
         }
 
         @Override
@@ -3565,13 +3585,13 @@ public final class CoolMapView<BASE, VIEW> {
                 int colLabelMargin;
                 int rowLabelTick;
                 int colLabelTick;
-                
+
                 if (toColNode.getViewOffset() + _mapDimension.x + toColNode.getViewSizeInMap(_zoom.x) > center.x + 120) {
                     rowLabelMargin = (int) (toColNode.getViewOffset() + _mapDimension.x - center.x + toColNode.getViewSizeInMap(_zoom.x));
-                    
+
                 } else {
                     rowLabelMargin = 120;
-                    
+
                 }
                 rowLabelTick = rowLabelMargin - 20;
 
@@ -3646,7 +3666,7 @@ public final class CoolMapView<BASE, VIEW> {
                     String label = node.getViewLabel();
                     int height = g2D.getFontMetrics().stringWidth(label);
 
-                    System.out.println(height);
+//                    System.out.println(height);
 
                     if (columnLabelHeight < height) {
                         columnLabelHeight = height;
@@ -3669,6 +3689,20 @@ public final class CoolMapView<BASE, VIEW> {
                     VNode node = _coolMapObject.getViewNodeRow(i);
                     g2D.drawString(node.getViewLabel(), columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2 + 4, center.y - colLabelMargin - 10);
                 }
+                
+                //also need to paint the value
+                String value = _coolMapObject.getViewValueAsSnippet(row, col);
+                g2D.setFont(labelFontValue);
+                int stringWidth = g2D.getFontMetrics().stringWidth(value);
+                int vHeight = 25;
+                int vWidth = 20 + stringWidth;
+                
+                g2D.setColor(_hoverSubTipBackgroundColor);
+                g2D.fillRoundRect(center.x - vWidth/2, rowLabelTop + rowLabelHeight + 5, vWidth, vHeight, 5, 5);
+                
+                g2D.setColor(UI.colorBlack2);
+                g2D.drawString(value, center.x - vWidth/2 + 10, rowLabelTop + rowLabelHeight + 23);
+                
 
             } catch (Exception e) {
                 e.printStackTrace(); //debugging when error occurs

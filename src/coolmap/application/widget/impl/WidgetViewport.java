@@ -9,6 +9,11 @@ import com.javadocking.dockable.action.DefaultDockableStateAction;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.utils.viewportActions.CascadeMaps;
+import coolmap.application.utils.viewportActions.TileMaps;
+import coolmap.application.utils.viewportActions.ToggleCanvasState;
+import coolmap.application.utils.viewportActions.ToggleLabeltip;
+import coolmap.application.utils.viewportActions.ToggleTooltip;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
 import coolmap.canvas.CoolMapView;
@@ -67,48 +72,26 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
     private void _initMainMenuItem() {
         CMainFrame frame = CoolMapMaster.getCMainFrame();
         
-        MenuItem item = new MenuItem("Toggle Canvas", new MenuShortcut(KeyEvent.VK_1));
-        frame.addMenuItem("View", item, false, true);
-        item.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                WidgetViewport viewport = CoolMapMaster.getViewport();
-                int state = viewport.getDockable().getState();
-                if(state == DockableState.MAXIMIZED || state == DockableState.EXTERNALIZED){
-                    DefaultDockableStateAction action = new DefaultDockableStateAction(viewport.getDockable(), DockableState.NORMAL);
-                    action.actionPerformed(null);
-                }
-                else{
-                    DefaultDockableStateAction action = new DefaultDockableStateAction(viewport.getDockable(), DockableState.MAXIMIZED);
-                    action.actionPerformed(null);
-                }
-            }
-        });
+        MenuItem item = new MenuItem("Toggle Canvas state", new MenuShortcut(KeyEvent.VK_1));
+        frame.addMenuItem("View/Canvas config", item, false, false);
+        item.addActionListener(new ToggleCanvasState());
        
+        item = new MenuItem("Toggle hover tooltip", new MenuShortcut(KeyEvent.VK_2));
+        frame.addMenuItem("View/Canvas config", item, false, false);
+        item.addActionListener(new ToggleTooltip());
         
+        item = new MenuItem("Toggle label tooltip", new MenuShortcut(KeyEvent.VK_3));
+        frame.addMenuItem("View/Canvas config", item, true, true);
+        item.addActionListener(new ToggleLabeltip());
         
-        
-        item = new MenuItem("Tile");
+        item = new MenuItem("Tile", new MenuShortcut(KeyEvent.VK_OPEN_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
-        item.addActionListener(new ActionListener() {
+        item.addActionListener(new TileMaps());
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                tileWindows();
-            }
-        });
-
-        item = new MenuItem("Cascade");
+        item = new MenuItem("Cascade", new MenuShortcut(KeyEvent.VK_CLOSE_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
-        item.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                cascadeWindows();
-            }
-        });
+        item.addActionListener(new CascadeMaps());
+        
         
         
         
