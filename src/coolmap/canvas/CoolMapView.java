@@ -50,6 +50,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -3330,9 +3331,7 @@ public final class CoolMapView<BASE, VIEW> {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
     private boolean paintHoverTip = true; //paint tip
     private boolean paintLabelsTip = true; //paint labels tip
-    
-    
-    
+
     private class HoverLayer extends JPanel {
 
         private TargetHoverPan _panTarget = new TargetHoverPan();
@@ -3457,10 +3456,15 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
         private final Font labelFont;
+        private final Font labelFontRotated;
+
         public HoverLayer() {
             setOpaque(false);
             //_hoverColor = _defaultHoverColor;
             labelFont = UI.fontPlain.deriveFont(labelFontSize);
+            AffineTransform at = new AffineTransform();
+            at.rotate(-Math.PI / 2);
+            labelFontRotated = labelFont.deriveFont(at);
         }
 
         @Override
@@ -3479,7 +3483,7 @@ public final class CoolMapView<BASE, VIEW> {
                 }
 
                 final float shadowOpacity = _opacity * 0.7f;
-            //_hoverColor = UI.mixOpacity(_defaultHoverColor, _opacity);
+                //_hoverColor = UI.mixOpacity(_defaultHoverColor, _opacity);
 
 //          The hover rectangle should always be visible.  
                 g2D.setColor(UI.mixOpacity(_defaultHoverColor, _opacity));
@@ -3489,115 +3493,188 @@ public final class CoolMapView<BASE, VIEW> {
                 g2D.setColor(UI.mixOpacity(_defaultHoverColor, shadowOpacity));
                 g2D.drawRoundRect(_hoverBounds.x - 1, _hoverBounds.y - 1, _hoverBounds.width + 2, _hoverBounds.height + 2, 2, 2);
 
-                
                 //
-                if(paintHoverTip)
+                if (paintHoverTip) {
                     _paintHovertip(g2D);
-                
-                if(paintLabelsTip)
+                }
+
+                if (paintLabelsTip) {
                     _paintLabelsTip(g2D);
+                }
             }
         }
 
         private float labelFontSize = 12f;
         private int labelSize = 18;
-        private int labelMargin = 120;
-        private int labelTick = 100;
-        private void _paintLabelsTip(Graphics2D g2D){
-            try{
-                if(!_activeCell.isValidCell(_coolMapObject))
+        //private int labelMargin = 120;
+        //private int labelTick = 100;
+
+        private void _paintLabelsTip(Graphics2D g2D) {
+            try {
+                if (!_activeCell.isValidCell(_coolMapObject)) {
                     return;
-                
+                }
+
                 int row = _activeCell.row.intValue();
                 int col = _activeCell.col.intValue();
-                
+
                 int fromRow = row - 5;
                 int toRow = row + 5;
-                
+
                 int fromCol = col - 5;
                 int toCol = col + 5;
-                
-                if(fromRow < 0 ) fromRow = 0;
-                if(fromCol < 0 ) fromCol = 0;
-                if(toRow >= _coolMapObject.getViewNumRows())
-                    toRow = _coolMapObject.getViewNumRows()-1;
-                if(toCol >= _coolMapObject.getViewNumColumns())
-                    toCol = _coolMapObject.getViewNumColumns()-1;
-                
-                //System.out.println(fromRow + " " + toRow + "========" + fromCol + " " + toCol);
-                
-//                VNode fromRowNode = _coolMapObject.getViewNodeRow(fromRow);
-//                VNode toRowNode = _coolMapObject.getViewNodeRow(toRow);
-//                VNode fromColNode = _coolMapObject.getViewNodeColumn(fromCol);
-//                VNode toColNode = _coolMapObject.getViewNodeColumn(toCol);
-                
+
+                if (fromRow < 0) {
+                    fromRow = 0;
+                }
+                if (fromCol < 0) {
+                    fromCol = 0;
+                }
+                if (toRow >= _coolMapObject.getViewNumRows()) {
+                    toRow = _coolMapObject.getViewNumRows() - 1;
+                }
+                if (toCol >= _coolMapObject.getViewNumColumns()) {
+                    toCol = _coolMapObject.getViewNumColumns() - 1;
+                }
+
                 //center
-                Point center = new Point(Math.round((int)_hoverBounds.getCenterX()), (int)Math.round(_hoverBounds.getCenterY()));
-                
-//                g2D.setColor(Color.RED);
-//                g2D.fillRect(center.x-5, center.y-5, 11, 11);
-                
-                //get the column
+                Point center = new Point(Math.round((int) _hoverBounds.getCenterX()), (int) Math.round(_hoverBounds.getCenterY()));
+
+                //rows
                 int rowLabelHeight = (toRow - fromRow + 1) * labelSize;
                 int rowLabelWidth = 5;
+                int rowLabelTop = center.y - rowLabelHeight / 2;
+                //columns
+                int columnLabelWidth = (toCol - fromCol + 1) * labelSize;
+                int columnLabelHeight = 5;
+                int columnLabelLeft = center.x - columnLabelWidth / 2;
+
+                //determine margin and tick
+                //center.x + labelmargin
+//                if(columnLabelLeft + columnLabelWidth > center.x + 120){
+//                    labelMargin = columnLabelLeft + columnLabelWidth - center.x + 10;
+//                    labelTick = labelMargin - 20;
+//                }
+//                else{
+//                    labelMargin = 120;
+//                    labelTick = 100;
+//                }
+                VNode toColNode = _coolMapObject.getViewNodeColumn(toCol);
+                VNode fromRowNode = _coolMapObject.getViewNodeRow(fromRow);
+                int rowLabelMargin;
+                int colLabelMargin;
+                int rowLabelTick;
+                int colLabelTick;
                 
-                g2D.setColor(Color.RED);
-                
-                int rowLabelTop = center.y - rowLabelHeight/2;
-                
-                
+                if (toColNode.getViewOffset() + _mapDimension.x + toColNode.getViewSizeInMap(_zoom.x) > center.x + 120) {
+                    rowLabelMargin = (int) (toColNode.getViewOffset() + _mapDimension.x - center.x + toColNode.getViewSizeInMap(_zoom.x));
+                    
+                } else {
+                    rowLabelMargin = 120;
+                    
+                }
+                rowLabelTick = rowLabelMargin - 20;
+
+                if (fromRowNode.getViewOffset() + _mapDimension.y < center.y - 120) {
+                    colLabelMargin = -(int) (fromRowNode.getViewOffset() + _mapDimension.y - center.y);
+                } else {
+                    colLabelMargin = 120;
+                }
+                colLabelTick = colLabelMargin - 20;
+
+                if (rowLabelTop < _mapDimension.y) {
+                    rowLabelTop = _mapDimension.y;
+                }
+
+                if (rowLabelTop + rowLabelHeight > _mapDimension.y + _mapDimension.height) {
+                    rowLabelTop = _mapDimension.y + _mapDimension.height - rowLabelHeight;
+                }
+
                 g2D.setFont(labelFont);
-                
-//                System.out.println(labelFont);
-                
-                //and also need to know the offset of those nodes
                 g2D.setStroke(UI.strokeDash1_5);
                 int rowX, rowY;
-                
-                
-                for(int i=fromRow; i<=toRow; i++){
+                for (int i = fromRow; i <= toRow; i++) {
                     VNode node = _coolMapObject.getViewNodeRow(i);
-                    int nodeY = (int)(node.getViewOffset() + _mapDimension.y);
+                    int nodeY = (int) (node.getViewOffset() + _mapDimension.y);
                     g2D.setColor(_hoverTipBackgroundColor);
-                    rowX = center.x + labelTick;
-                    rowY = (int)(nodeY-2 + node.getViewSizeInMap(_zoom.y)/2);
-                    g2D.fillOval(rowX-2, rowY-2, 5, 5);
-                    
+                    rowX = center.x + rowLabelTick;
+                    rowY = (int) (nodeY - 2 + node.getViewSizeInMap(_zoom.y) / 2);
+                    g2D.fillOval(rowX - 2, rowY - 2, 5, 5);
+
                     String label = node.getViewLabel();
                     int width = g2D.getFontMetrics().stringWidth(label);
-                    if(rowLabelWidth < width)
+                    if (rowLabelWidth < width) {
                         rowLabelWidth = width;
-                    
-                    g2D.drawLine(rowX, rowY, center.x + labelMargin, rowLabelTop + (i - fromRow) * labelSize + labelSize/2);
-                    
+                    }
+
+                    g2D.drawLine(rowX, rowY, center.x + rowLabelMargin, rowLabelTop + (i - fromRow) * labelSize + labelSize / 2);
+
                 }
-                
-                //g2D.drawRect(center.x + labelMargin, rowLabelTop, rowLabelWidth, rowLabelHeight);
+
                 g2D.setColor(_hoverTipBackgroundColor);
-                
+
                 rowLabelWidth += 20;
-                g2D.fillRoundRect(center.x + labelMargin, rowLabelTop, rowLabelWidth, rowLabelHeight,5,5);
+                g2D.fillRoundRect(center.x + rowLabelMargin, rowLabelTop, rowLabelWidth, rowLabelHeight, 5, 5);
+
                 g2D.setColor(UI.colorLightGreen0);
-                g2D.fillRoundRect(center.x + labelMargin, rowLabelTop + (row - fromRow) * labelSize, rowLabelWidth, labelSize, 5, 5);
-                //valid cell
-                
-                
-                
+                g2D.fillRoundRect(center.x + rowLabelMargin, rowLabelTop + (row - fromRow) * labelSize, rowLabelWidth, labelSize, 5, 5);
+
                 g2D.setColor(UI.colorBlack2);
-                for(int i=fromRow; i<=toRow; i++){
-                    
+                for (int i = fromRow; i <= toRow; i++) {
+
                     VNode node = _coolMapObject.getViewNodeRow(i);
-                    g2D.drawString(node.getViewLabel(), center.x + labelMargin + 10, rowLabelTop + (i - fromRow) * labelSize + labelSize/2 + 4);
+                    g2D.drawString(node.getViewLabel(), center.x + rowLabelMargin + 10, rowLabelTop + (i - fromRow) * labelSize + labelSize / 2 + 4);
                 }
-                
-            }
-            catch(Exception e){
+
+                //////////////////////end of rows
+                if (columnLabelLeft < _mapDimension.x) {
+                    columnLabelLeft = _mapDimension.x;
+                }
+                if (columnLabelLeft + columnLabelWidth > _mapDimension.x + _mapDimension.width) {
+                    columnLabelLeft = _mapDimension.x + _mapDimension.width - columnLabelWidth;
+                }
+                g2D.setFont(labelFont);
+                g2D.setStroke(UI.strokeDash1_5);
+                int colX, colY;
+                for (int i = fromCol; i <= toCol; i++) {
+                    VNode node = _coolMapObject.getViewNodeColumn(i);
+                    int nodeX = (int) (node.getViewOffset() + _mapDimension.x);
+                    g2D.setColor(_hoverTipBackgroundColor);
+                    colX = (int) (nodeX - 2 + node.getViewSizeInMap(_zoom.x) / 2);
+                    colY = center.y - colLabelTick;
+                    g2D.fillOval(colX - 2, colY - 2, 5, 5);
+                    String label = node.getViewLabel();
+                    int height = g2D.getFontMetrics().stringWidth(label);
+
+                    System.out.println(height);
+
+                    if (columnLabelHeight < height) {
+                        columnLabelHeight = height;
+                    }
+
+                    g2D.drawLine(colX, colY, columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2, center.y - colLabelMargin);
+                }
+                g2D.setColor(_hoverTipBackgroundColor);
+                columnLabelHeight += 20;
+
+                g2D.fillRoundRect(columnLabelLeft, center.y - colLabelMargin - columnLabelHeight, columnLabelWidth, columnLabelHeight, 5, 5);
+
+                g2D.setColor(UI.colorLightGreen0);
+                g2D.fillRoundRect(columnLabelLeft + (col - fromCol) * labelSize, center.y - colLabelMargin - columnLabelHeight, labelSize, columnLabelHeight, 5, 5);
+
+                g2D.setColor(UI.colorBlack2);
+                g2D.setFont(labelFontRotated);
+                for (int i = fromCol; i <= toCol; i++) {
+
+                    VNode node = _coolMapObject.getViewNodeRow(i);
+                    g2D.drawString(node.getViewLabel(), columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2 + 4, center.y - colLabelMargin - 10);
+                }
+
+            } catch (Exception e) {
                 e.printStackTrace(); //debugging when error occurs
             }
         }
-        
-        
-        
+
         //This layer is always visible; but opacity can be different
         private void _paintHovertip(Graphics2D g2D) {
 
@@ -3667,7 +3744,7 @@ public final class CoolMapView<BASE, VIEW> {
                 Composite translucent = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity);
                 g2D.setComposite(translucent);
             }
-            
+
             g2D.drawImage(_mainToolTip, hoverX, hoverY, null);
 
 //            }
@@ -3694,7 +3771,6 @@ public final class CoolMapView<BASE, VIEW> {
                 //Subtip hovershadow
                 //g2D.setColor(_hoverShadow);
                 //g2D.fillRoundRect(hoverX + hoverWidth - subTipWidth - 15, hoverHeight + hoverY + 10, subTipWidth + 16, subTipHeight + 16, 8, 8);
-
                 if (_coolMapObject.canPass(_activeCell.row.intValue(), _activeCell.col.intValue())) {
                     g2D.setColor(_hoverTipBackgroundColor);
                 } else {
@@ -3811,7 +3887,6 @@ public final class CoolMapView<BASE, VIEW> {
             //remove hover shadow
 //            gI.setColor(_hoverShadow);
 //            gI.fillRoundRect(3, 3, hoverWidth - 3, hoverHeight - 3, 8, 8);
-
 //          change color here
 //            active cell
             if (_coolMapObject.canPass(activeRow, activeCol)) {
