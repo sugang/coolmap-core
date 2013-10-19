@@ -7,17 +7,28 @@ package coolmap.application.widget.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.widget.Widget;
-import coolmap.canvas.datarenderer.renderer.impl.*;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToBar;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToBoxPlot;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToNumber;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToShape;
+import coolmap.canvas.datarenderer.renderer.impl.DoubleToSortedLines;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
-import coolmap.data.aggregator.model.CAggregator;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.LinkedHashSet;
-import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 
 /**
  *
@@ -135,9 +146,10 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
         registerViewRenderer(DoubleToNumber.class.getName());
         registerViewRenderer(DoubleToBoxPlot.class.getName());
         registerViewRenderer(DoubleToSortedLines.class.getName());
-        registerViewRenderer(NetworkToForceLayout.class.getName());
-        registerViewRenderer(ImageTest.class.getName());
-        registerViewRenderer(Politics.class.getName());
+        
+//        registerViewRenderer(NetworkToForceLayout.class.getName());
+//        registerViewRenderer(ImageTest.class.getName());
+//        registerViewRenderer(Politics.class.getName());
     }
 
     private void _updateList() {

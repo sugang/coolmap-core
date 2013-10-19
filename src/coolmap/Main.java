@@ -19,12 +19,14 @@ import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
 import coolmap.data.state.StateSnapshot;
 import coolmap.utils.Config;
-import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import org.json.JSONObject;
 import rcaller.RCaller;
 import rcaller.RCode;
@@ -45,20 +47,18 @@ public class Main {
 
     public static void main(String args[]) {
 
-        EventQueue.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                
+
                 //First initialize
                 CoolMapMaster.initialize();
                 //CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
                 //CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
-            
-                
+
 //                CoolMapMaster.getCMainFrame().addMenuItem(null, null, true);
 //            FloatExternalizer 
-                
 //                MenuItem saveWorkSpace = new MenuItem("Save Workspace");
 //                CoolMapMaster.getCMainFrame().addMenuItem("View", saveWorkSpace, true);
 //                saveWorkSpace.addActionListener(new ActionListener() {
@@ -68,23 +68,61 @@ public class Main {
 //                        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
 //                    }
 //                });
-                
-                
                 //then restore workspace
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
-            
-                
-                
+
+                loadSampleCoolMapProject();
             }
         });
-        
-        
 
 //        System.out.println(Config.getProperty(Config.WORKSPACE_DIRECTORY));
 //        dockmodel can not be saved?
 //        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
-        
-                
+    }
+
+    private static void loadSampleCoolMapProject() {
+        try {
+            CoolMapObject object;
+            COntology onto;
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+            
+            //import sample
+            //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
+            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
+            
+            object = new CoolMapObject();
+            object.addBaseCMatrix(matrix);
+            
+            ArrayList<VNode> nodes = new ArrayList<VNode>();
+            for (Object label : matrix.getRowLabelsAsList()) {
+                nodes.add(new VNode(label.toString()));
+            }
+            object.insertRowNodes(nodes);
+            
+            nodes.clear();
+            for (Object label : matrix.getColLabelsAsList()) {
+                nodes.add(new VNode(label.toString()));
+            }
+            object.insertColumnNodes(nodes);
+            
+            object.setAggregator(new DoubleDoubleMean());
+            object.setViewRenderer(new DoubleToColor());
+            
+            object.setSnippetConverter(SnippetMaster.getConverter("D13"));
+            object.getCoolMapView().addRowMap(new RowLabels(object));
+            object.getCoolMapView().addRowMap(new RowTree(object));
+            object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+            object.getCoolMapView().addColumnMap(new ColumnTree(object));
+            CoolMapMaster.addNewBaseMatrix(matrix);
+            CoolMapMaster.addNewCoolMapObject(object);
+            
+            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+            CoolMapMaster.addNewCOntology(onto);
+            CoolMapMaster.setActiveCoolMapObject(object);
+            
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void main3(String args[]) {
@@ -136,18 +174,8 @@ public class Main {
                     object.getCoolMapView().addRowMap(new RowTree(object));
                     object.getCoolMapView().addColumnMap(new ColumnLabels(object));
                     object.getCoolMapView().addColumnMap(new ColumnTree(object));
-//////
-//////            //some checks later on.
                     CoolMapMaster.addNewBaseMatrix(matrix);
                     CoolMapMaster.addNewCoolMapObject(object);
-//////            
-////////            COntology eisenGenes = ImportCOntologyFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/sampleGroups.txt"));
-////////            COntology eisenSamples = ImportCOntologyFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/selectedPathways.txt"));
-////////
-////////
-////////            CoolMapMaster.addNewCOntology(eisenGenes);
-////////            CoolMapMaster.addNewCOntology(eisenSamples);
-//////            
                     onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
                     CoolMapMaster.addNewCOntology(onto);
                 }

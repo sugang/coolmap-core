@@ -4,57 +4,73 @@
  */
 package coolmap.canvas;
 
-import coolmap.canvas.misc.RowDrawer;
-import coolmap.canvas.misc.ProgressMask;
-import coolmap.canvas.misc.HilightLayer;
-import coolmap.canvas.misc.ColDrawer;
-import coolmap.canvas.misc.ZoomControl;
-import com.google.common.base.Objects;
-import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
-import com.sun.corba.se.spi.servicecontext.UEInfoServiceContext;
-import com.sun.imageio.spi.RAFImageInputStreamSpi;
-import coolmap.application.CoolMapMaster;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
-//import coolmap.canvas.sidemaps.impl.SampleColumnMap;
-//import coolmap.canvas.sidemaps.impl.SampleRowMap;
-//import coolmap.canvas.listeners.CViewActiveCellChangedListener;
-//import coolmap.canvas.listeners.CViewAnchorMovedListener;
 import coolmap.canvas.listeners.CViewListener;
-//import coolmap.canvas.listeners.CViewSelectionChangedListener;
-import coolmap.canvas.misc.*;
+import coolmap.canvas.misc.ColDrawer;
+import coolmap.canvas.misc.HilightLayer;
+import coolmap.canvas.misc.MatrixCell;
+import coolmap.canvas.misc.ProgressMask;
+import coolmap.canvas.misc.RowDrawer;
+import coolmap.canvas.misc.ZoomControl;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.canvas.viewmaps.CoolMapLayer;
-import coolmap.canvas.viewmaps.MapLayer;
 import coolmap.canvas.viewmaps.FilterLayer;
+import coolmap.canvas.viewmaps.MapLayer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.RangeComparator;
 import coolmap.utils.graphics.CAnimator;
+import coolmap.utils.graphics.UI;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.geom.Point2D;
-import java.util.HashSet;
-import javax.swing.JComponent;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.swing.JComponent;
+import javax.swing.JInternalFrame;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
-import quicktime.app.event.MouseEnterExitAdapter;
-import sun.awt.image.OffScreenImage;
 
 /**
  *
@@ -374,9 +390,9 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
         Set<Rectangle> viewRegions = convertNodeRegionToViewRegion(Collections.singleton(nodeRegion));
-        
+
         System.out.println("View Region:" + viewRegions);
-        
+
         if (viewRegions.isEmpty()) {
             return;
         }
@@ -398,41 +414,34 @@ public final class CoolMapView<BASE, VIEW> {
     private void _centerToView(Rectangle viewRegion) {
 
 //        System.out.println("Center to view called");
-
         int centerX = (int) viewRegion.getCenterX();
         int centerY = (int) viewRegion.getCenterY();
 
 //        simply move centerX, centerY to the center
         Rectangle viewport = _getViewportBounds();
-        
-        int viewportCenterX = (int)viewport.getCenterX();
-        int viewportCenterY = (int)viewport.getCenterY();
-        
+
+        int viewportCenterX = (int) viewport.getCenterX();
+        int viewportCenterY = (int) viewport.getCenterY();
+
         int xOffset = viewportCenterX - centerX; //move by these much
         int yOffset = viewportCenterY - centerY; //move by these much
-        
+
         int newAnchorX = _mapDimension.x + xOffset;
         int newAnchorY = _mapDimension.y + yOffset;
-        
+
         //System.out.println(centerX + " " + centerY);
         //Integer centerRow = getCurrentRow(centerY);
         //Integer centerCol = getCurrentCol(centerX);
-
         //These returns null because it's out
         //System.out.println("Center row:column" + centerRow + " " + centerCol);
-        
         //MatrixCell centerCell = new MatrixCell(centerRow, centerCol);
         //centerCell.confineToValidCell(_coolMapObject);
-
         //VNode rowNode = _coolMapObject.getViewNodeRow(centerCell.row.intValue());
         //VNode colNode = _coolMapObject.getViewNodeColumn(centerCell.col.intValue());
         //if (rowNode == null || colNode == null) {
         //    return;
         //}
         //Rectangle viewport = _getViewportBounds();
-        
-        
-        
         //_moveMapTo((int) viewport.getCenterX() - colNode.getViewOffset() - colNode.getViewSizeInMap(_zoom.x) / 2, (int) viewport.getCenterY() - rowNode.getViewOffset() - rowNode.getViewSizeInMap(_zoom.y) / 2, false);
         _moveMapTo(newAnchorX, newAnchorY, false);
 
@@ -635,7 +644,6 @@ public final class CoolMapView<BASE, VIEW> {
             selectedRows.add(Range.closedOpen(0, _coolMapObject.getViewNumRows()));
         }
 
-
         ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
@@ -646,9 +654,9 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public void setSelectionsRow(Collection<Range<Integer>> selectedRows) {
-        
+
         System.out.println("Selected Rows here:" + selectedRows);
-        
+
         if (selectedRows == null || selectedRows.isEmpty()) {
             clearSelection();
             return;
@@ -659,14 +667,13 @@ public final class CoolMapView<BASE, VIEW> {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
 
-
         ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
                 newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
             }
         }
-        
+
         System.out.println("New selections:" + newSelections);
         setSelection(newSelections);
     }
@@ -887,7 +894,6 @@ public final class CoolMapView<BASE, VIEW> {
         _selectionLayer.updateViewArea();
         //_fireActiveCellChanged(oldCell, newCell);
 
-
     }
 
 //    private void _fireActiveCellChanged(MatrixCell oldCell, MatrixCell newCell){
@@ -1047,7 +1053,6 @@ public final class CoolMapView<BASE, VIEW> {
         _internalFrame.add(_canvas);
         _internalFrame.setVisible(true);
         _internalFrame.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
-
 
 //        _internalFrame.addInternalFrameListener(new InternalFrameAdapter() {
 //
@@ -1223,7 +1228,6 @@ public final class CoolMapView<BASE, VIEW> {
         //updateNodeDisplayParams();
         //initiaize
 
-
         _initUI();
         _initParameters();
         _initMapLayers();
@@ -1264,7 +1268,6 @@ public final class CoolMapView<BASE, VIEW> {
 
         //Fesible but not using this now
         //_addLayer(_realTimeLayer, stackCounter);
-
         _addLayer(_hilightLayer, stackCounter++);
         _addLayer(_selectionLayer, stackCounter++);
         _addLayer(_hoverLayer, stackCounter++);
@@ -1275,13 +1278,10 @@ public final class CoolMapView<BASE, VIEW> {
         _addLayer(_rowDrawer, stackCounter++);
 
 //        _addLayer(new RealTimeLayer(), stackCounter++);
-
 //        _rowDrawer.setEnabled(true);
-
 //        SampleColumnMap scm1 = new SampleColumnMap(_coolMapObject);
 //        scm1.setName("Sample Map 1");
 //        _colDrawer.addColumnMap(scm1);
-
 //        SampleColumnMap scm2 = new SampleColumnMap(_coolMapObject);
 //        scm2.setName("Sample Map 2");
 //        _colDrawer.addColumnMap(scm2);
@@ -1289,7 +1289,6 @@ public final class CoolMapView<BASE, VIEW> {
 //        SampleColumnMap scm3 = new SampleColumnMap(_coolMapObject);
 //        scm3.setName("Sample Map 3");
 //        _colDrawer.addColumnMap(scm3);
-
 //        _colDrawer.clearColumnMaps();
 //           
 //        scm1 = new SampleColumnMap(this);
@@ -1299,9 +1298,6 @@ public final class CoolMapView<BASE, VIEW> {
 //        scm2 = new SampleColumnMap(this);
 //        scm2.setName("Sample Map 2");
 //        _colDrawer.addColumnMap(scm2);
-
-
-
 //        _rowDrawer.addRowMap(new SampleRowMap(_coolMapObject));
 //        _rowDrawer.addRowMap(new SampleRowMap(_coolMapObject));
 //        _rowDrawer.addRowMap(new SampleRowMap(_coolMapObject));
@@ -1314,11 +1310,8 @@ public final class CoolMapView<BASE, VIEW> {
 //        srm = new SampleRowMap(_coolMapObject);
 //        srm.setName("SR2");
 //        _rowDrawer.addRowMap(srm);
-
-
         //Not useful.
 //        _addLayer(_activationIndicator, stackCounter++);
-
         _addLayer(_progressMask, stackCounter++);
         _canvas.setFocusable(true);
         _canvas.setRequestFocusEnabled(true);
@@ -1415,11 +1408,9 @@ public final class CoolMapView<BASE, VIEW> {
         int viewportWidth = _canvas.getWidth();
         int viewportHeight = _canvas.getHeight();
 
-
         if (viewportHeight == 0 || viewportWidth == 0) {
             return false;
         }
-
 
         if (_coolMapObject == null) {
             return false;
@@ -1497,7 +1488,6 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
 ////////////////////////////////////////////////////////////////////////////////
-
         if (_mapDimension.y >= -_subMapBufferSize && _mapDimension.y <= viewportHeight + _subMapBufferSize) {
             subMapIndexMin.row(0);
             boolean found = false;
@@ -1577,7 +1567,6 @@ public final class CoolMapView<BASE, VIEW> {
         //subMapDimension
         //subMapIndexMin
         //subMapIndexMax
-
         //System.out.println(subMapDimension + "-->" + _mapDimension);
         return true;
     }
@@ -1592,7 +1581,6 @@ public final class CoolMapView<BASE, VIEW> {
     private synchronized void _moveMapTo(float newX, float newY, boolean update) {
 
         //System.out.println("Move map to called");
-
         float oldX = _mapDimension.x;
         float oldY = _mapDimension.y;
         float diffX = newX - oldX;
@@ -1655,7 +1643,6 @@ public final class CoolMapView<BASE, VIEW> {
     private synchronized void _moveMapBy(float offsetX, float offsetY, boolean updateMap) {
 
 //        System.out.println("Move map by called");
-
         _mapDimension.x += offsetX;
         _mapDimension.y += offsetY;
         _subMapDimension.x += offsetX;
@@ -1720,7 +1707,6 @@ public final class CoolMapView<BASE, VIEW> {
                 || _subMapDimension.y > 0 && _subMapIndexMin.row > 0 //_submap y is insufficient
                 || _subMapDimension.x + _subMapDimension.width < _canvas.getWidth() && _subMapIndexMax.col < _coolMapObject.getViewNumColumns() //right is insufficient
                 || _subMapDimension.y + _subMapDimension.height < _canvas.getHeight() && _subMapIndexMax.row < _coolMapObject.getViewNumRows();
-
 
     }
 
@@ -1814,12 +1800,9 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
 
-
-
         if (forceUpdateAll == true) {
             _forceUpdateNeeded = true;
         }
-
 
         //The actual update 
         if (Thread.currentThread().isInterrupted()) {
@@ -1827,14 +1810,12 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
 
-
         if (_updateBufferWorker != null && _updateBufferWorker.isAlive()) {
             //System.out.println("Interrupted");
             //If it is alive, it will then be interruped. Only the last invocation is performed.
             //Other tasks will be submitted to executors later.
             _updateBufferWorker.interrupt();//Force it to return.
         }
-
 
         if (nodeRegions != null && !nodeRegions.isEmpty()) {
             _hilightLayer.setRegions(convertNodeRegionToViewRegion(nodeRegions));
@@ -1848,7 +1829,6 @@ public final class CoolMapView<BASE, VIEW> {
         /*
          * The update worker itself will redraw canvas when it's done
          */
-
 //        System.out.println("update overlay?" + forceUpdateOverlay);
         _updateBufferWorker = new UpdateBufferWorker(forceUpdateAll, forceUpdateOverlay);
 
@@ -1867,7 +1847,6 @@ public final class CoolMapView<BASE, VIEW> {
         /*
          * other computations may also be needed
          */
-
     }
 
     /**
@@ -1992,8 +1971,6 @@ public final class CoolMapView<BASE, VIEW> {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             }
 
-
-
             if (_coolMapObject != null && _coolMapObject.getViewNumRows() > 0 && _coolMapObject.getViewNumColumns() > 0) {
                 //Draw a frame/shadow around the rectangle, only if it's in view.
                 //System.out.println("Map Dimension:" + _mapDimension);
@@ -2009,7 +1986,6 @@ public final class CoolMapView<BASE, VIEW> {
 
                 }
             }
-
 
         }
     }
@@ -2046,22 +2022,18 @@ public final class CoolMapView<BASE, VIEW> {
         public synchronized void updateMapBuffers(MatrixCell subMapIndexMin, MatrixCell subMapIndexMax, Rectangle subMapDimension) throws Exception {
 
 //            System.out.println("Updating overlay... what?" + subMapIndexMin + " " + subMapIndexMax);
-
             if (!subMapIndexMin.isValidRange(_coolMapObject) || !subMapIndexMax.isValidRange(_coolMapObject)) {
                 _buffer = null;
                 return;
             }
 
 //            System.out.println("Updating overlay... what 2?");
-
             if (subMapDimension.width <= 0 || subMapDimension.height <= 0) {
                 _buffer = null;
                 return;
             }
 
 //            System.out.println("Updating overlay...");
-
-
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(subMapDimension.width, subMapDimension.height, Transparency.TRANSLUCENT);
             Graphics2D g2D = buffer.createGraphics();
 
@@ -2073,7 +2045,6 @@ public final class CoolMapView<BASE, VIEW> {
 
 //            g2D.setColor(Color.BLACK);
 //            g2D.clearRect(0, 0, getWidth(), getHeight());
-
             //render maplayer into buffer
             for (MapLayer mapLayer : _overLayers) {
 
@@ -2151,9 +2122,6 @@ public final class CoolMapView<BASE, VIEW> {
                 return;
             }
 
-
-
-
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(subMapDimension.width, subMapDimension.height);
             Graphics2D g2D = buffer.createGraphics();
 
@@ -2192,7 +2160,6 @@ public final class CoolMapView<BASE, VIEW> {
                 return;
             }
 
-
             //Only when it's not interrupted.
             _buffer = buffer;
 
@@ -2218,8 +2185,6 @@ public final class CoolMapView<BASE, VIEW> {
             return null;
         }
 
-
-
         Rectangle region = new Rectangle();
         if (a1.col < a2.col) {
             region.x = a1.col.intValue();
@@ -2237,7 +2202,6 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
         //System.out.println("generated region:" + region);
-
         return region;
     }
     private boolean _initialized = false;
@@ -2262,7 +2226,6 @@ public final class CoolMapView<BASE, VIEW> {
             } else {
                 updateCanvasIfNecessary();
             }
-
 
         }
 
@@ -2483,9 +2446,7 @@ public final class CoolMapView<BASE, VIEW> {
 //                g2D.setColor(UI.colorBlack2);
 //                g2D.fillRect(0, 0, getWidth(), getHeight());
 //            }
-
 //            g2D.drawImage(_gridMapBuffer, _subMapDimension.x, _subMapDimension.y, this);
-
             _paintGrid(g2D);
         }
 
@@ -2497,7 +2458,6 @@ public final class CoolMapView<BASE, VIEW> {
             if (_coolMapObject.getViewNumColumns() != 0 && _coolMapObject.getViewNumRows() != 0) {
 
                 if (_subMapIndexMin.isValidRange(_coolMapObject) && _subMapIndexMax.isValidRange(_coolMapObject)) {
-
 
                     int minX = (int) (_mapDimension.x - _handleLength);
                     if (minX < 0) {
@@ -2592,7 +2552,6 @@ public final class CoolMapView<BASE, VIEW> {
 //                _gridMapBuffer = _beforeDragMapImage;
 
                 //_beforeDragMapImage = _mapContainer.getBufferImage();
-
                 if (_dragStartCol != null && _dragStartRow != null) {
                     _dragStartX = screenX;
                     _dragStartColDisplaySize = _coolMapObject.getViewNodeColumn(_dragStartCol).getViewSizeInMap(_zoom.x);
@@ -2609,7 +2568,6 @@ public final class CoolMapView<BASE, VIEW> {
                     _dragStartColDisplaySize = null;
                     _dragStartY = screenY;
                     _dragStartRowDisplaySize = _coolMapObject.getViewNodeRow(_dragStartRow).getViewSizeInMap(_zoom.y);
-
 
                 } else {
                     _dragStartX = null;
@@ -2721,7 +2679,6 @@ public final class CoolMapView<BASE, VIEW> {
                 }
 
                 //System.out.println("GridMapBuffer:" + _gridMapBuffer);
-
                 BufferedImage templateImage = _beforeDragMapImage;
                 BufferedImage tempImage = null;
                 Point mouse = _getMouseXY();
@@ -2730,8 +2687,6 @@ public final class CoolMapView<BASE, VIEW> {
                 //No buffer here, simply return
                 //    return;
                 //}
-
-
                 if (_dragStartX != null) {
 
                     _dragDeltaX = mouse.x - _dragStartX;
@@ -2758,7 +2713,6 @@ public final class CoolMapView<BASE, VIEW> {
 
 //                            g2Dtemp.setColor(Color.BLUE);
 //                            g2Dtemp.fillRect(0, 0, tempImage.getWidth(), tempImage.getHeight());
-
                             int originalWidth = _dragStartColDisplaySize.intValue();
 
                             //This is the new 
@@ -2859,7 +2813,6 @@ public final class CoolMapView<BASE, VIEW> {
                         }
                     }
                 }//end of drag Y
-
 
                 //If interrupted, immediately return.
                 if (Thread.currentThread().isInterrupted()) {
@@ -3029,13 +2982,7 @@ public final class CoolMapView<BASE, VIEW> {
 //            _highlightLayer.setRegions(regions);
 //            _highlightLayer.highlight();
 
-
             if (SwingUtilities.isLeftMouseButton(me)) {
-
-
-
-
-
 
                 if (me.isShiftDown()) {
                     //System.out.println(_selectionAnchorCell);
@@ -3081,7 +3028,6 @@ public final class CoolMapView<BASE, VIEW> {
                     clearSelection();
                 }
             }
-
 
         }
 
@@ -3158,7 +3104,6 @@ public final class CoolMapView<BASE, VIEW> {
         public void mouseDragged(MouseEvent me) {
 
             //System.out.println("Dragged");
-
             setMouseXY(me.getX(), me.getY());
             if (_isDragging) {
                 int x = me.getX();
@@ -3221,7 +3166,6 @@ public final class CoolMapView<BASE, VIEW> {
             //all mapMap layers, and all row/column layers
             //System.out.println("Force to update!" + _force + " " + _isReRenderNeeded());
 
-
             if (_forceUpdateAll || _isReRenderNeeded() || _forceUpdateNeeded) {
                 _progressMask.fadeIn();
                 //do something to re-draw
@@ -3247,7 +3191,6 @@ public final class CoolMapView<BASE, VIEW> {
                     return;
                 }
 
-
                 //update all the necessary buffers using these parameters
                 if (Thread.currentThread().isInterrupted()) {
                     redrawCanvas();
@@ -3268,7 +3211,6 @@ public final class CoolMapView<BASE, VIEW> {
                     redrawCanvas();
                     return;
                 }
-
 
                 //update map container
                 try {
@@ -3386,6 +3328,11 @@ public final class CoolMapView<BASE, VIEW> {
 //        _forceHover = forceHover;
 //    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    private boolean paintHoverTip = true; //paint tip
+    private boolean paintLabelsTip = true; //paint labels tip
+    
+    
+    
     private class HoverLayer extends JPanel {
 
         private TargetHoverPan _panTarget = new TargetHoverPan();
@@ -3468,7 +3415,6 @@ public final class CoolMapView<BASE, VIEW> {
 
                 fadeIn(endCell);
 
-
             } else {
                 //Don't do anything
             }
@@ -3510,9 +3456,11 @@ public final class CoolMapView<BASE, VIEW> {
             //_panTarget.resetStartEnd();
         }
 
+        private final Font labelFont;
         public HoverLayer() {
             setOpaque(false);
             //_hoverColor = _defaultHoverColor;
+            labelFont = UI.fontPlain.deriveFont(labelFontSize);
         }
 
         @Override
@@ -3529,29 +3477,139 @@ public final class CoolMapView<BASE, VIEW> {
                 if (_opacity <= 0) {
                     return;
                 }
-                _paintCanvas(g2D);
+
+                final float shadowOpacity = _opacity * 0.7f;
+            //_hoverColor = UI.mixOpacity(_defaultHoverColor, _opacity);
+
+//          The hover rectangle should always be visible.  
+                g2D.setColor(UI.mixOpacity(_defaultHoverColor, _opacity));
+                g2D.drawRect(_hoverBounds.x, _hoverBounds.y, _hoverBounds.width, _hoverBounds.height);
+                g2D.setStroke(UI.stroke2);
+
+                g2D.setColor(UI.mixOpacity(_defaultHoverColor, shadowOpacity));
+                g2D.drawRoundRect(_hoverBounds.x - 1, _hoverBounds.y - 1, _hoverBounds.width + 2, _hoverBounds.height + 2, 2, 2);
+
+                
+                //
+                if(paintHoverTip)
+                    _paintHovertip(g2D);
+                
+                if(paintLabelsTip)
+                    _paintLabelsTip(g2D);
             }
         }
 
+        private float labelFontSize = 12f;
+        private int labelSize = 18;
+        private int labelMargin = 120;
+        private int labelTick = 100;
+        private void _paintLabelsTip(Graphics2D g2D){
+            try{
+                if(!_activeCell.isValidCell(_coolMapObject))
+                    return;
+                
+                int row = _activeCell.row.intValue();
+                int col = _activeCell.col.intValue();
+                
+                int fromRow = row - 5;
+                int toRow = row + 5;
+                
+                int fromCol = col - 5;
+                int toCol = col + 5;
+                
+                if(fromRow < 0 ) fromRow = 0;
+                if(fromCol < 0 ) fromCol = 0;
+                if(toRow >= _coolMapObject.getViewNumRows())
+                    toRow = _coolMapObject.getViewNumRows()-1;
+                if(toCol >= _coolMapObject.getViewNumColumns())
+                    toCol = _coolMapObject.getViewNumColumns()-1;
+                
+                //System.out.println(fromRow + " " + toRow + "========" + fromCol + " " + toCol);
+                
+//                VNode fromRowNode = _coolMapObject.getViewNodeRow(fromRow);
+//                VNode toRowNode = _coolMapObject.getViewNodeRow(toRow);
+//                VNode fromColNode = _coolMapObject.getViewNodeColumn(fromCol);
+//                VNode toColNode = _coolMapObject.getViewNodeColumn(toCol);
+                
+                //center
+                Point center = new Point(Math.round((int)_hoverBounds.getCenterX()), (int)Math.round(_hoverBounds.getCenterY()));
+                
+//                g2D.setColor(Color.RED);
+//                g2D.fillRect(center.x-5, center.y-5, 11, 11);
+                
+                //get the column
+                int rowLabelHeight = (toRow - fromRow + 1) * labelSize;
+                int rowLabelWidth = 5;
+                
+                g2D.setColor(Color.RED);
+                
+                int rowLabelTop = center.y - rowLabelHeight/2;
+                
+                
+                g2D.setFont(labelFont);
+                
+//                System.out.println(labelFont);
+                
+                //and also need to know the offset of those nodes
+                g2D.setStroke(UI.strokeDash1_5);
+                int rowX, rowY;
+                
+                
+                for(int i=fromRow; i<=toRow; i++){
+                    VNode node = _coolMapObject.getViewNodeRow(i);
+                    int nodeY = (int)(node.getViewOffset() + _mapDimension.y);
+                    g2D.setColor(_hoverTipBackgroundColor);
+                    rowX = center.x + labelTick;
+                    rowY = (int)(nodeY-2 + node.getViewSizeInMap(_zoom.y)/2);
+                    g2D.fillOval(rowX-2, rowY-2, 5, 5);
+                    
+                    String label = node.getViewLabel();
+                    int width = g2D.getFontMetrics().stringWidth(label);
+                    if(rowLabelWidth < width)
+                        rowLabelWidth = width;
+                    
+                    g2D.drawLine(rowX, rowY, center.x + labelMargin, rowLabelTop + (i - fromRow) * labelSize + labelSize/2);
+                    
+                }
+                
+                //g2D.drawRect(center.x + labelMargin, rowLabelTop, rowLabelWidth, rowLabelHeight);
+                g2D.setColor(_hoverTipBackgroundColor);
+                
+                rowLabelWidth += 20;
+                g2D.fillRoundRect(center.x + labelMargin, rowLabelTop, rowLabelWidth, rowLabelHeight,5,5);
+                g2D.setColor(UI.colorLightGreen0);
+                g2D.fillRoundRect(center.x + labelMargin, rowLabelTop + (row - fromRow) * labelSize, rowLabelWidth, labelSize, 5, 5);
+                //valid cell
+                
+                
+                
+                g2D.setColor(UI.colorBlack2);
+                for(int i=fromRow; i<=toRow; i++){
+                    
+                    VNode node = _coolMapObject.getViewNodeRow(i);
+                    g2D.drawString(node.getViewLabel(), center.x + labelMargin + 10, rowLabelTop + (i - fromRow) * labelSize + labelSize/2 + 4);
+                }
+                
+            }
+            catch(Exception e){
+                e.printStackTrace(); //debugging when error occurs
+            }
+        }
+        
+        
+        
         //This layer is always visible; but opacity can be different
-        private void _paintCanvas(Graphics2D g2D) {
-            
-            if(_coolMapObject == null){
+        private void _paintHovertip(Graphics2D g2D) {
+
+            if (_coolMapObject == null) {
                 return;
             }
             //update paint, paint grid
             //paint grid
-            final float shadowOpacity = _opacity * 0.7f;
-            //_hoverColor = UI.mixOpacity(_defaultHoverColor, _opacity);
-            g2D.setColor(UI.mixOpacity(_defaultHoverColor, _opacity));
-            g2D.drawRect(_hoverBounds.x, _hoverBounds.y, _hoverBounds.width, _hoverBounds.height);
-            g2D.setStroke(UI.stroke2);
-            g2D.setColor(UI.mixOpacity(_defaultHoverColor, shadowOpacity));
-            g2D.drawRoundRect(_hoverBounds.x - 1, _hoverBounds.y - 1, _hoverBounds.width + 2, _hoverBounds.height + 2, 2, 2);
+
 //            g2D.setStroke(UI.stroke3);
 //            g2D.setColor(UI.mixOpacity(_defaultHoverColor, shadowOpacity));
 //            g2D.drawRoundRect(_hoverBounds.x - 1, _hoverBounds.y - 1, _hoverBounds.width + 2, _hoverBounds.height + 2, 2, 2);
-
             //Paint hte hover layer
 //            if (_activeCell == null || !_activeCell.isValidCell()) {
 //                //Draw an empty one used for fading.
@@ -3559,11 +3617,9 @@ public final class CoolMapView<BASE, VIEW> {
 //                g2D.setComposite(translucent);
 //                g2D.drawImage(_mainToolTip, hoverX, HoverLayer, null);
 //            } else {
-
             if (_mainToolTip == null) {
                 return;
             }
-
 
             //Image is drawn here.
             Point mouse = _getMouseXY();
@@ -3585,14 +3641,12 @@ public final class CoolMapView<BASE, VIEW> {
 //                hoverY = _layerDrawerCol.getHeight() - _layerDrawerCol.getContainerHandleHeight();
 //            }
             //confine
-
             Rectangle jail = _getViewportBounds();
             if (!jail.contains(new Point(_hoverBounds.x, _hoverBounds.y))) {
 //                Rectangle canvas = getCanvasDimension();
 //                jail = new Rectangle(jail.width, 0, canvas.width - jail.width, canvas.height - jail.height);
                 return;
             }
-
 
             if (hoverX < jail.x) {
                 hoverX = jail.x;
@@ -3609,55 +3663,49 @@ public final class CoolMapView<BASE, VIEW> {
                 hoverY = jail.y + jail.height - hoverHeight;
             }
 
-
-
-
             if (_opacity < 1) {
                 Composite translucent = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity);
                 g2D.setComposite(translucent);
             }
+            
             g2D.drawImage(_mainToolTip, hoverX, hoverY, null);
 
 //            }
-            
-            
+            //This is the sub tip from the view renderer if any
             ViewRenderer renderer = _coolMapObject.getViewRenderer();
-            if(renderer!=null && _activeCell.isValidCell(_coolMapObject)){
+            if (renderer != null && _activeCell.isValidCell(_coolMapObject)) {
                 VNode rowNode = _coolMapObject.getViewNodeRow(_activeCell.getRow().intValue());
                 VNode colNode = _coolMapObject.getViewNodeColumn(_activeCell.getCol().intValue());
-                if(rowNode == null || colNode == null || rowNode.getViewOffset() == null || colNode.getViewOffset() == null){
+                if (rowNode == null || colNode == null || rowNode.getViewOffset() == null || colNode.getViewOffset() == null) {
                     return;
                 }
-                
-                float percentX = (mouse.x - (colNode.getViewOffset() + _mapDimension.x))/colNode.getViewSizeInMap(_zoom.x);
-                float percentY = (mouse.y - (rowNode.getViewOffset() + _mapDimension.y))/rowNode.getViewSizeInMap(_zoom.y);
-                
+
+                float percentX = (mouse.x - (colNode.getViewOffset() + _mapDimension.x)) / colNode.getViewSizeInMap(_zoom.x);
+                float percentY = (mouse.y - (rowNode.getViewOffset() + _mapDimension.y)) / rowNode.getViewSizeInMap(_zoom.y);
+
                 Image subTip = renderer.getSubTip(_activeCell, percentX, percentY, Math.round(colNode.getViewSizeInMap(_zoom.x)), Math.round(rowNode.getViewSizeInMap(_zoom.y)));
-                if(subTip == null){
+                if (subTip == null) {
                     return;
                 }
-                
+
                 int subTipWidth = subTip.getWidth(this);
                 int subTipHeight = subTip.getHeight(this);
-                
-                g2D.setColor(_hoverShadow);
-                g2D.fillRoundRect(hoverX + hoverWidth - subTipWidth - 15, hoverHeight + hoverY + 10, subTipWidth+16, subTipHeight+16, 8, 8);
-                
-                
-                if(_coolMapObject.canPass(_activeCell.row.intValue(), _activeCell.col.intValue())){
+
+                //Subtip hovershadow
+                //g2D.setColor(_hoverShadow);
+                //g2D.fillRoundRect(hoverX + hoverWidth - subTipWidth - 15, hoverHeight + hoverY + 10, subTipWidth + 16, subTipHeight + 16, 8, 8);
+
+                if (_coolMapObject.canPass(_activeCell.row.intValue(), _activeCell.col.intValue())) {
                     g2D.setColor(_hoverTipBackgroundColor);
-                }
-                else{
+                } else {
                     g2D.setColor(UI.colorRedWarning);
                 }
-                
-                
-                
-                g2D.fillRoundRect(hoverX + hoverWidth - subTipWidth - 19, hoverHeight + hoverY + 6, subTipWidth+16, subTipHeight+16, 8, 8);
-                
-                g2D.drawImage(subTip, hoverX+hoverWidth-subTipWidth - 11, hoverY + hoverHeight + 14, this);
+
+                g2D.fillRoundRect(hoverX + hoverWidth - subTipWidth - 19, hoverHeight + hoverY + 6, subTipWidth + 16, subTipHeight + 16, 8, 8);
+
+                g2D.drawImage(subTip, hoverX + hoverWidth - subTipWidth - 11, hoverY + hoverHeight + 14, this);
             }
-            
+
         }
 
         private void _updateMainToolTip(MatrixCell cell) {
@@ -3684,20 +3732,18 @@ public final class CoolMapView<BASE, VIEW> {
                 colLabel = colNode.getViewLabel();
             }
 
-
-
             g2D.setFont(_hoverLabelFont);
             int rowLabelWidth = 0;
             int colLabelWidth = 0;
-            
-            if(rowLabel == null){
+
+            if (rowLabel == null) {
                 rowLabel = "";
             }
-            
-            if(colLabel == null){
+
+            if (colLabel == null) {
                 colLabel = "";
             }
-            
+
             rowLabelWidth = g2D.getFontMetrics().stringWidth(rowLabel);
             colLabelWidth = g2D.getFontMetrics().stringWidth(colLabel);
             int labelDescent = g2D.getFontMetrics().getMaxDescent();
@@ -3725,16 +3771,12 @@ public final class CoolMapView<BASE, VIEW> {
                 tipWidth += 20;
             }
 
-
-
-
             int additionalWidth = tipWidth - 16 + 4;
             if (additionalWidth < 0) {
                 additionalWidth = 0;
             }
             int tipNameHeight = _tipNameFont.getSize();
             int tipFontDescent = g2D.getFontMetrics().getMaxDescent();
-
 
             g2D.setFont(_hoverValueFont);
             int toolTipWidth = 0;
@@ -3764,9 +3806,11 @@ public final class CoolMapView<BASE, VIEW> {
                 gI.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             }
 
-            gI.setColor(_hoverShadow);
-            gI.fillRoundRect(3, 3, hoverWidth - 3, hoverHeight - 3, 8, 8);
-
+            //### hover shadow
+            //Hovershadow - remove
+            //remove hover shadow
+//            gI.setColor(_hoverShadow);
+//            gI.fillRoundRect(3, 3, hoverWidth - 3, hoverHeight - 3, 8, 8);
 
 //          change color here
 //            active cell
@@ -3776,11 +3820,8 @@ public final class CoolMapView<BASE, VIEW> {
                 gI.setColor(UI.colorRedWarning);
             }
 
-
-
             gI.fillRoundRect(0, 0, hoverWidth - 3, hoverHeight - 3, 8, 8);
             gI.setFont(_hoverLabelFont);
-
 
             gI.drawImage(UI.getImageIcon("rowLabel").getImage(), 5 + additionalWidth, 6, null);
 
@@ -3793,7 +3834,6 @@ public final class CoolMapView<BASE, VIEW> {
                     gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
                 }
             }
-
 
             gI.setColor(_labelFontColor);
             gI.drawString(rowLabel, 25 + additionalWidth, 8 + labelFontHeight - labelDescent);
@@ -3815,19 +3855,13 @@ public final class CoolMapView<BASE, VIEW> {
 //                Composite translucent = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity);
 //                g2D.setComposite(translucent);
 
-
-
-
             gI.setStroke(UI.strokeDash1_5);
             gI.setColor(UI.colorGrey5);
             gI.drawLine(25 + additionalWidth, 23 + labelFontHeight * 2 - labelDescent * 2, hoverWidth - 10, 23 + labelFontHeight * 2 - labelDescent * 2);
 
-
             gI.setFont(_tipNameFont);
 
             //gI.fillRoundRect(5, 31 + tipNameHeight + 2 + labelFontHeight * 2 - tipFontDescent - labelDescent * 2, 25 + additionalWidth, , WIDTH, WIDTH);
-
-
             int tipAnchorX = 5;
             if (_coolMapObject.getBaseCMatrices().size() > 1) {
                 tipAnchorX += 20;
@@ -3838,13 +3872,11 @@ public final class CoolMapView<BASE, VIEW> {
             gI.setColor(_tipNameColor);
             gI.drawString(tipName, tipAnchorX, 31 + tipNameHeight + 2 + labelFontHeight * 2 - tipFontDescent - labelDescent * 2);
 
-
             gI.setFont(_hoverValueFont);
             gI.setColor(_valueFontColor);
             gI.drawString(toolTip, 25 + additionalWidth, 31 + valueFontHeight + labelFontHeight * 2 - valueDescent - labelDescent * 2);
 
             //test jlabel
-
 //          Use JLabel to write HTML will be a lot easier. Use Empty border to position; use html and preferred size            
 //            JLabel label = new JLabel("<html><strong>ABCDEFG</strong><br/><font color=#ff0000>DEF</color></html>");
 //            label.setSize(label.getPreferredSize());
@@ -3853,8 +3885,6 @@ public final class CoolMapView<BASE, VIEW> {
 //            label.setBorder(BorderFactory.createEmptyBorder(5,10,0,0));
 //            
 //            label.paint(gI);
-
-
             _mainToolTip = image;
         }
 
@@ -3997,11 +4027,9 @@ public final class CoolMapView<BASE, VIEW> {
                 pt1.y = (int) (_coolMapObject.getViewNodeRow(i).getViewOffset() + _mapDimension.y);
                 pt1.x = _getViewportBounds().width;
 
-
                 for (int j = _subMapIndexMin.col.intValue(); j < _subMapIndexMax.col; j++) {
                     pt2.x = (int) (_coolMapObject.getViewNodeColumn(j).getViewOffset() + _mapDimension.x);
                     pt2.y = _getViewportBounds().y;
-
 
                     Double v = (Double) _coolMapObject.getViewValue(i, j);
                     if (v >= 0.95) {
@@ -4016,6 +4044,9 @@ public final class CoolMapView<BASE, VIEW> {
 
         }
     }
+
+    private boolean _drawLabelsRowSelections = true;
+    private boolean _drawLabelsColumnSelections = true;
 
     private class SelectionLayer extends JPanel {
 
@@ -4066,7 +4097,6 @@ public final class CoolMapView<BASE, VIEW> {
 //            boundArea.intersect(_viewArea);            
             //Sometimes the viewArea becomes empty. Which should not be true
             //System.out.println(_viewArea.isEmpty());
-
             g2D.setColor(_selectionOutterColor);
             g2D.setStroke(UI.stroke3);
             g2D.draw(_viewArea);
@@ -4082,6 +4112,9 @@ public final class CoolMapView<BASE, VIEW> {
 
 //            if(bounds.width == 0 || bounds.height == 0){
 //                System.out.println("Bound is empty:" + _viewArea.isEmpty() + ":" + bounds);
+//            }
+//            if(_drawLabelsAlongSelections && _coolMapObject != null ){
+//                ArrayList<Range<Integer>> selectedRows = getSelectedRows()
 //            }
         }
     }
@@ -4239,7 +4272,6 @@ public final class CoolMapView<BASE, VIEW> {
 //                    _hoverLayer.setActiveCell(_activeCell);
                 }
 
-
             } else if (ke.isShiftDown()) {
 
                 move(_bigStep, ke.getKeyCode());
@@ -4363,10 +4395,8 @@ public final class CoolMapView<BASE, VIEW> {
             public void timingEvent(Animator source, double fraction) {
                 //System.out.println("moved");
 
-
                 _moveMapTo((int) (_startAnchor.x + (_endAnchor.x - _startAnchor.x) * fraction),
                         (int) (_startAnchor.y + (_endAnchor.y - _startAnchor.y) * fraction), false);
-
 
                 //due to the fact that the active row/cell not changed, but the map anchor has changed
                 _justifyView();
@@ -4406,8 +4436,6 @@ public final class CoolMapView<BASE, VIEW> {
             }
 
             //Don't want to refer to CoolMapMaster...
-
-
             if (_isActive) {
 
                 g.setColor(_bgColor);
@@ -4437,7 +4465,6 @@ public final class CoolMapView<BASE, VIEW> {
                 g.drawImage(UI.getImageIcon("funnel").getImage(), getWidth() - 24 - 72 - 1 + 3 + 2 + 4 + 4, 8 - 1, this);
             }
 
-
             _paintLinkIcons(g);
 
             _paintAggr(g);
@@ -4450,20 +4477,20 @@ public final class CoolMapView<BASE, VIEW> {
             if (_coolMapObject == null) {
                 return;
             }
-            
+
             ViewRenderer renderer = _coolMapObject.getViewRenderer();
-            if(renderer == null){
+            if (renderer == null) {
                 return;
             }
-            
+
             Image lgd = renderer.getLegend();
-            if(lgd == null){
+            if (lgd == null) {
                 return;
             }
-            
+
             g.setColor(_bgColor);
-            g.fillRoundRect(getWidth() - 8 - lgd.getWidth(this)-10, 29 + 24 + 24, lgd.getWidth(this)+10, lgd.getHeight(this)+10, 5, 5);
-            g.drawImage(lgd, getWidth() - 8 - lgd.getWidth(this)-5, 29 + 24 + 24+5, this);
+            g.fillRoundRect(getWidth() - 8 - lgd.getWidth(this) - 10, 29 + 24 + 24, lgd.getWidth(this) + 10, lgd.getHeight(this) + 10, 5, 5);
+            g.drawImage(lgd, getWidth() - 8 - lgd.getWidth(this) - 5, 29 + 24 + 24 + 5, this);
         }
 
         private void _paintAggr(Graphics2D g) {
@@ -4471,13 +4498,10 @@ public final class CoolMapView<BASE, VIEW> {
                 return;
             }
 
-
             CAggregator aggr = _coolMapObject.getAggregator();
             if (aggr == null) {
                 return;
             }
-
-
 
             String tip = aggr.getTipName();
             if (tip == null || tip.length() == 0) {
