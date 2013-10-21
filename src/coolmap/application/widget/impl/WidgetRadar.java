@@ -13,9 +13,11 @@ import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -45,6 +47,11 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     private final Point2D.Float mapAnchor = new Point2D.Float();
 
     private int margin = 10;
+    
+    
+    private void updatePercentage(){
+        
+    }
 
     public void fitView() {
         //need to compute the optimal percentage for the activecoolMap
@@ -131,7 +138,6 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             updateBufferedImage();
 
 //            _radarPanel.repaint();
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -178,30 +184,106 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     //The radar panel needs a custom painter
     private BufferedImage bufferedImage;
     private Thread workerThread;
-    private final Rectangle region = new Rectangle();
-    
-    private void updateRegion(){
-        CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-        if(obj == null){
-            return;
+    private Rectangle region = null;
+
+    private void updateRegion() {
+        try {
+
+            CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+            if (obj == null) {
+                return;
+            }
+
+            CoolMapView view = obj.getCoolMapView();
+            if (view == null) {
+                return;
+            }
+
+            //canvas
+            Rectangle canvas = view.getCanvasDimension();
+
+        //may cause the 
+//        System.out.println("");
+//        System.out.println(canvas.x + " " + (canvas.x + canvas.width));
+            
+            System.out.println("Map Anchor in listener:" + view.getMapAnchor());
+            System.out.println("======= ======");
+            //no problem in mapAnchor
+            
+            
+            //The bug:
+            //while searching, the subMapIndex not updated yet.
+            //The search was not a good one - the search should occur AFTER the update
+            
+            
+            int minCol = view.getCurrentColSearchAll(canvas.x);
+            int maxCol = view.getCurrentColSearchAll(canvas.x + canvas.width);
+
+        //after moving, the two functions returned same values
+            int minRow = view.getCurrentRowSearchAll(canvas.y);
+            int maxRow = view.getCurrentRowSearchAll(canvas.y + canvas.height);
+            
+//            there are problems with getCurrentRow and getCurrentCol
+//            can't figure it out!! fuck fuck 
+            
+            
+
+        //System.out.println(canvas);
+//        System.out.println("minCol: " + minCol + " maxCol: " + maxCol + " -- " + " minRow: " +  minRow + " maxRow: " + maxRow);
+//        System.out.println("");
+//        System.out.println("");
+        //use map mover
+            minCol = minCol < 0 ? 0 : minCol;
+            minRow = minRow < 0 ? 0 : minRow;
+
+            maxCol = maxCol >= obj.getViewNumColumns() ? obj.getViewNumColumns() - 1 : maxCol;
+            maxRow = maxRow >= obj.getViewNumRows() ? obj.getViewNumRows() - 1 : maxRow;
+
+//            System.out.println(minCol + "<" + maxCol + ":" + minRow + "<" + maxRow);
+            
+            //Then find the percentage
+            VNode minRowNode = obj.getViewNodeRow(minRow);
+            VNode minColNode = obj.getViewNodeColumn(minCol);
+            VNode maxRowNode = obj.getViewNodeRow(maxRow);
+            VNode maxColNode = obj.getViewNodeColumn(maxCol);
+
+            float mapWidth = view.getMapWidth();
+            float mapHeight = view.getMapHeight();
+
+            float r1 = minRowNode.getViewOffset() / mapHeight;
+            float r2 = maxRowNode.getViewOffset() / mapHeight;
+            float c1 = minColNode.getViewOffset() / mapWidth;
+            float c2 = maxColNode.getViewOffset() / mapWidth;
+
+            //Then get the actual
+//            if(bufferedImage!= null){
+//                int previewWidth = Math.round(mapWidth * percentage);
+//                int previewHeight = Math.round(mapHeight * percentage);
+//            }
+            
+            int previewWidth = bufferedImage.getWidth();
+            int previewHeight = bufferedImage.getHeight();
+            //region measurement still have issues
+            
+            //then I would know
+            region = new Rectangle();
+            region.width = Math.round(previewWidth * (c2 - c1));
+            region.height = Math.round(previewHeight * (r2 - r1));
+
+            //do do do
+            //relative to map anchor
+            region.x = Math.round(previewWidth * c1);
+            region.y = Math.round(previewHeight * r1);
+
+        } catch (Exception e) {
+            //do nothing
+            region = null;
         }
-        
-        CoolMapView view = obj.getCoolMapView();
-        if(view == null){
-            return;
-        }
-        
-        //canvas
-        Rectangle canvas = view.getCanvasDimension();
-        int minCol = view.getCurrentCol(canvas.x);
-        int maxCol = view.getCurrentCol(canvas.x + canvas.width);
-        int minRow = view.getCurrentRow(canvas.y);
-        int maxRow = view.getCurrentRow(canvas.y + canvas.height);
-        
-        
-        
+
+        _radarPanel.repaint();
+
     }
-    
+
     private void updateBufferedImage() {
         if (CoolMapMaster.getActiveCoolMapObject() == null || CoolMapMaster.getActiveCoolMapObject().getViewRenderer() == null) {
             return;
@@ -233,7 +315,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
 //            renderer.getRenderedRadarView(object, L_VIEWPORT, L_LEFTTOP);
             //redraw the buffered image
-            if(Thread.interrupted()){
+            if (Thread.interrupted()) {
                 return;
             }
             CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
@@ -269,32 +351,32 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             //percentage 
             zoomX = zoomX * percentage;
             zoomY = zoomY * percentage;
-            
+
             //Fork... the offsets are not adjusted ...
             //could be quite slow to generate preview
             //BufferedImage image = renderer.getRenderedMap(object, 0, object.getViewNumRows(), 0, object.getViewNumColumns(), zoomX, zoomY);
             BufferedImage image = null;
-            
-            if(Thread.interrupted()){
+
+            if (Thread.interrupted()) {
                 return;
             }
-            
+
             image = renderer.getRenderedFullMap(object, percentage);
-            
-            if(Thread.interrupted())
+
+            if (Thread.interrupted()) {
                 return;
-            
+            }
+
             bufferedImage = image;
-            _radarPanel.repaint();
+//            _radarPanel.repaint();
 
 //        } catch (InterruptedException e) {
 //            System.out.println("Update preview interrupted..");
 //        }
-            
             //a new method is needed then
-            
-        }
-        catch(Exception ex){
+            updateRegion();
+
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -307,7 +389,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     @Override
     public void mapAnchorMoved(CoolMapObject object) {
         //only needs to repaint
-        
+        System.out.println("map anchor moved in listener");
+        updateRegion();
     }
 
     @Override
@@ -319,6 +402,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     public void mapZoomChanged(CoolMapObject object) {
         System.out.println("Map zoom changed");
         //repaint
+        //fitView();
+        updateRegion();
     }
 
 //    @Override
@@ -392,6 +477,11 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             //still draws the image at the correct coordinate
             g2D.drawImage(bufferedImage, (int) mapAnchor.x, (int) mapAnchor.y, null);
 
+            if (region != null) {
+                g2D.setColor(Color.WHITE);
+                g2D.setStroke(UI.strokeDash1_5);
+                g2D.drawRect((int) (region.x + mapAnchor.x), (int) (region.y + mapAnchor.y), region.width, region.height);
+            }
         }
 
     }

@@ -145,7 +145,7 @@ public abstract class ViewRenderer<VIEW> {
 //    }
     
     
-    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) throws InterruptedException{
+    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage){
         if(data == null)
             return null;
         CoolMapView view = data.getCoolMapView();
@@ -200,7 +200,7 @@ public abstract class ViewRenderer<VIEW> {
 //                }
                 
                 if(Thread.interrupted())
-                    throw new InterruptedException("Render preview interrupted");
+                    return null;
             }
         }
         

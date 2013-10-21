@@ -939,14 +939,6 @@ public final class CoolMapView<BASE, VIEW> {
     private synchronized Point _getMouseXY() {
         return new Point(_cursor.x, _cursor.y);
     }
-
-    /**
-     * find the current Col using binary search -1 means left bound cols = right
-     * bound, null = undef
-     *
-     * @param screenX
-     * @return
-     */
     public Integer getCurrentCol(int screenX) {
         if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
             return null;
@@ -954,21 +946,37 @@ public final class CoolMapView<BASE, VIEW> {
 
         VNode midNode = null;
 
+        //problem mostlikely is that the search was from subIndex.. which are not changed
+        
+        //search from 
         int startIndex = _subMapIndexMin.col.intValue();
         int endIndex = _subMapIndexMax.col.intValue();
+        
+        //binary search, should be fast enough
+//        int startIndex = 0;
+//        int endIndex = _coolMapObject.getViewNumColumns();
+        
 
         VNode startNode = _coolMapObject.getViewNodeColumn(startIndex);
         VNode endNode = _coolMapObject.getViewNodeColumn(endIndex - 1);
+        
+        //System.out.println(startNode + " " + endNode);
+//        System.out.println("screenX" + screenX);
+//        System.out.println(startNode + "><" + endNode);
 
         if (startNode == null || endNode == null) {
             return null;
         }
 
+        
         if (startNode.getViewOffset() + _mapDimension.x > screenX) {
+//            System.out.println("first column" + "screenX: " + screenX + " " + _mapDimension.x + " " + (startNode.getViewOffset(_zoom.x) + _mapDimension.x));
             return -1;//the left most node
         }
 
         if (endNode.getViewOffset(_zoom.x) + _mapDimension.x <= screenX) {
+            
+//            System.out.println("last column" + "screenX: " + screenX + " " + _mapDimension.x + " " +  (endNode.getViewOffset(_zoom.x) + _mapDimension.x));            
             return _coolMapObject.getViewNumColumns();
         }
 
@@ -984,6 +992,88 @@ public final class CoolMapView<BASE, VIEW> {
             return endIndex - 1; //note it's -1
         }
 
+        
+        int midIndex = (startIndex + endIndex) / 2;
+
+        while (midIndex != startIndex) {
+            midNode = _coolMapObject.getViewNodeColumn(midIndex);
+            if (midNode.getViewOffset() + _mapDimension.x <= screenX && midNode.getViewOffset(_zoom.x) + _mapDimension.x > screenX) {
+                return midIndex;
+            }
+
+            if (screenX < midNode.getViewOffset() + _mapDimension.x) {
+                endIndex = midIndex;
+            }
+            if (screenX >= midNode.getViewOffset(_zoom.x) + _mapDimension.x) {
+                startIndex = midIndex;
+            }
+            midIndex = (startIndex + endIndex) / 2;
+        }
+        //Error, nothing can be found.
+        //Should not rech here.
+        return null;
+    }
+    /**
+     * find the current Col using binary search -1 means left bound cols = right
+     * bound, null = undef
+     *
+     * @param screenX
+     * @return
+     */
+    public Integer getCurrentColSearchAll(int screenX) {
+        if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
+            return null;
+        }
+
+        VNode midNode = null;
+
+        //problem mostlikely is that the search was from subIndex.. which are not changed
+        
+        //search from 
+//        int startIndex = _subMapIndexMin.col.intValue();
+//        int endIndex = _subMapIndexMax.col.intValue();
+        
+        //binary search, should be fast enough
+        int startIndex = 0;
+        int endIndex = _coolMapObject.getViewNumColumns();
+        
+
+        VNode startNode = _coolMapObject.getViewNodeColumn(startIndex);
+        VNode endNode = _coolMapObject.getViewNodeColumn(endIndex - 1);
+        
+        //System.out.println(startNode + " " + endNode);
+//        System.out.println("screenX" + screenX);
+//        System.out.println(startNode + "><" + endNode);
+
+        if (startNode == null || endNode == null) {
+            return null;
+        }
+
+        
+        if (startNode.getViewOffset() + _mapDimension.x > screenX) {
+//            System.out.println("first column" + "screenX: " + screenX + " " + _mapDimension.x + " " + (startNode.getViewOffset(_zoom.x) + _mapDimension.x));
+            return -1;//the left most node
+        }
+
+        if (endNode.getViewOffset(_zoom.x) + _mapDimension.x <= screenX) {
+            
+//            System.out.println("last column" + "screenX: " + screenX + " " + _mapDimension.x + " " +  (endNode.getViewOffset(_zoom.x) + _mapDimension.x));            
+            return _coolMapObject.getViewNumColumns();
+        }
+
+        //first?
+        if (startNode.getViewOffset() + _mapDimension.x <= screenX
+                && startNode.getViewOffset(_zoom.x) + _mapDimension.x > screenX) {
+            return startIndex;
+        }
+
+        //last?
+        if (endNode.getViewOffset() + _mapDimension.x <= screenX
+                && endNode.getViewOffset(_zoom.x) + _mapDimension.x > screenX) {
+            return endIndex - 1; //note it's -1
+        }
+
+        
         int midIndex = (startIndex + endIndex) / 2;
 
         while (midIndex != startIndex) {
@@ -1023,6 +1113,10 @@ public final class CoolMapView<BASE, VIEW> {
 
         int startIndex = _subMapIndexMin.row.intValue();
         int endIndex = _subMapIndexMax.row.intValue();
+        
+//        int startIndex = 0;
+//        int endIndex = _coolMapObject.getViewNumRows();
+        
 
         VNode startNode = _coolMapObject.getViewNodeRow(startIndex);
         VNode endNode = _coolMapObject.getViewNodeRow(endIndex - 1);
@@ -1072,6 +1166,68 @@ public final class CoolMapView<BASE, VIEW> {
         return null;
     }
 
+        public Integer getCurrentRowSearchAll(int screenY) {
+        if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
+            return null;
+        }
+
+        VNode midNode = null;
+
+//        int startIndex = _subMapIndexMin.row.intValue();
+//        int endIndex = _subMapIndexMax.row.intValue();
+        
+        int startIndex = 0;
+        int endIndex = _coolMapObject.getViewNumRows();
+        
+
+        VNode startNode = _coolMapObject.getViewNodeRow(startIndex);
+        VNode endNode = _coolMapObject.getViewNodeRow(endIndex - 1);
+
+        if (startNode == null || endNode == null) {
+            return null;
+        }
+
+        if (startNode.getViewOffset() + _mapDimension.y > screenY) {
+            return -1;//the left most node
+        }
+
+        if (endNode.getViewOffset(_zoom.y) + _mapDimension.y <= screenY) {
+            return _coolMapObject.getViewNumRows();
+        }
+
+        //first?
+        if (startNode.getViewOffset() + _mapDimension.y <= screenY
+                && startNode.getViewOffset(_zoom.y) + _mapDimension.y > screenY) {
+            return startIndex;
+        }
+
+        //last?
+        if (endNode.getViewOffset() + _mapDimension.y <= screenY
+                && endNode.getViewOffset(_zoom.y) + _mapDimension.y > screenY) {
+            return endIndex - 1; //note it's -1
+        }
+
+        int midIndex = (startIndex + endIndex) / 2;
+
+        while (midIndex != startIndex) {
+            midNode = _coolMapObject.getViewNodeRow(midIndex);
+            if (midNode.getViewOffset() + _mapDimension.y <= screenY && midNode.getViewOffset(_zoom.y) + _mapDimension.y > screenY) {
+                return midIndex;
+            }
+
+            if (screenY < midNode.getViewOffset() + _mapDimension.y) {
+                endIndex = midIndex;
+            }
+            if (screenY >= midNode.getViewOffset(_zoom.y) + _mapDimension.y) {
+                startIndex = midIndex;
+            }
+            midIndex = (startIndex + endIndex) / 2;
+        }
+        //Error, nothing can be found.
+        //Should not rech here.
+        return null;
+    }
+    
     public void activate() {
         _canvas.requestFocusInWindow();
     }
@@ -1621,12 +1777,14 @@ public final class CoolMapView<BASE, VIEW> {
         float diffX = newX - oldX;
         float diffY = newY - oldY;
 
+        
         _mapDimension.x = (int) newX;
         _mapDimension.y = (int) newY;
         _subMapDimension.x += diffX;
         _subMapDimension.y += diffY;
 
-        //Redraw if needed.
+        System.out.println("MapDimension Updated");
+//Redraw if needed.
         if (update) {
             updateCanvasIfNecessary();
             _fireViewAnchorMoved();
@@ -1688,8 +1846,11 @@ public final class CoolMapView<BASE, VIEW> {
         _mapDimension.y += offsetY;
         _subMapDimension.x += offsetX;
         _subMapDimension.y += offsetY;
-
+//        System.out.println("Map dimension updated in moveMapBy, and is definitely before mapAnchor fire event");
+        
         if (updateMap) {
+            
+            
             updateCanvasIfNecessary();
             _fireViewAnchorMoved();
         }
