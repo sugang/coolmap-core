@@ -365,6 +365,11 @@ public class CMainFrame extends JFrame {
     }
 //    public MenuItem findMenuItem(String parentPath){
 
+    public void addMenuSeparator(String parentPath){
+        addMenuItem(parentPath, new MenuItem(), false, false);
+    }
+    
+    
     //private MenuBar _menuBar = new MenuBar();
     public void addMenuItem(String parentPath, MenuItem item, boolean sepBefore, boolean sepAfter) {
         if (item == null) {
@@ -423,7 +428,13 @@ public class CMainFrame extends JFrame {
                 currentMenu.addSeparator();
             }
             //if (item instanceof MenuItem) {
+            
+            if(item.getLabel().equals("")){
+                currentMenu.addSeparator();
+            }
+            else{
                 currentMenu.add((MenuItem)item);
+            }
             //}
             
 //            else if(item instanceof JSeparator){

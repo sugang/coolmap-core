@@ -291,7 +291,7 @@ public class VNode {
     }
 
     /**
-     * returns the right bound
+     * returns the right bound offset of the node
      *
      * @param zoom
      * @return
@@ -302,10 +302,25 @@ public class VNode {
         }
         return getViewOffset() + getViewSizeInMap(zoom);
     }
+    
+    /**
+     * returns the center offset f the node
+     * @param zoom
+     * @return 
+     */
+    public Float getrViewOffsetCenter(float zoom){
+        if(getViewOffset() == null){
+            return null;
+        }
+        return getViewOffset() + getViewSizeInMap(zoom)/2;
+    }
+    
 
     public VNode getParentNode() {
         return _parentNode;
     }
+    
+    
 
     /**
      * lazy loading childnodes

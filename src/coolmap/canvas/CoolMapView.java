@@ -866,9 +866,9 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public synchronized void toggleLabeltip() {
-        if (paintLabelsTip){
+        if (paintLabelsTip) {
             paintLabelsTip = false;
-        } else{
+        } else {
             paintLabelsTip = true;
         }
         redrawCanvas();
@@ -3667,7 +3667,6 @@ public final class CoolMapView<BASE, VIEW> {
                     int height = g2D.getFontMetrics().stringWidth(label);
 
 //                    System.out.println(height);
-
                     if (columnLabelHeight < height) {
                         columnLabelHeight = height;
                     }
@@ -3689,20 +3688,19 @@ public final class CoolMapView<BASE, VIEW> {
                     VNode node = _coolMapObject.getViewNodeRow(i);
                     g2D.drawString(node.getViewLabel(), columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2 + 4, center.y - colLabelMargin - 10);
                 }
-                
+
                 //also need to paint the value
                 String value = _coolMapObject.getViewValueAsSnippet(row, col);
                 g2D.setFont(labelFontValue);
                 int stringWidth = g2D.getFontMetrics().stringWidth(value);
                 int vHeight = 25;
                 int vWidth = 20 + stringWidth;
-                
+
                 g2D.setColor(_hoverSubTipBackgroundColor);
-                g2D.fillRoundRect(center.x - vWidth/2, rowLabelTop + rowLabelHeight + 5, vWidth, vHeight, 5, 5);
-                
+                g2D.fillRoundRect(center.x - vWidth / 2, rowLabelTop + rowLabelHeight + 5, vWidth, vHeight, 5, 5);
+
                 g2D.setColor(UI.colorBlack2);
-                g2D.drawString(value, center.x - vWidth/2 + 10, rowLabelTop + rowLabelHeight + 23);
-                
+                g2D.drawString(value, center.x - vWidth / 2 + 10, rowLabelTop + rowLabelHeight + 23);
 
             } catch (Exception e) {
                 e.printStackTrace(); //debugging when error occurs
@@ -4154,8 +4152,14 @@ public final class CoolMapView<BASE, VIEW> {
         }
     }
 
-    private boolean _drawLabelsRowSelections = true;
-    private boolean _drawLabelsColumnSelections = true;
+    //private boolean _drawLabelsRowSelections = true;
+    //private boolean _drawLabelsColumnSelections = true;
+    private boolean _paintLabelAlongSelecctions = true;
+
+    public void togglePaintLabelAlongSelections() {
+        _paintLabelAlongSelecctions = !_paintLabelAlongSelecctions;
+        redrawCanvas();
+    }
 
     private class SelectionLayer extends JPanel {
 
@@ -4186,6 +4190,12 @@ public final class CoolMapView<BASE, VIEW> {
 
         public SelectionLayer() {
             setOpaque(false);
+            labelFont = UI.fontPlain.deriveFont(labelFontSize).deriveFont(Font.BOLD);
+            AffineTransform at = new AffineTransform();
+            at.rotate(-Math.PI / 2);
+            labelFontRotated = labelFont.deriveFont(at);
+            labelFontValue = UI.fontPlain.deriveFont(16f).deriveFont(Font.BOLD);
+            labelBackgroundColor = UI.mixOpacity(UI.colorGrey2, 0.8f);
         }
 
         @Override
@@ -4225,7 +4235,123 @@ public final class CoolMapView<BASE, VIEW> {
 //            if(_drawLabelsAlongSelections && _coolMapObject != null ){
 //                ArrayList<Range<Integer>> selectedRows = getSelectedRows()
 //            }
+            if (_paintLabelAlongSelecctions) {
+                _paintLabels(g2D);
+            }
         }
+
+        private float labelFontSize = 12f;
+        private int labelSize = 18;
+        private final Font labelFont;
+        private final Font labelFontRotated;
+        private final Font labelFontValue;
+        private Color labelBackgroundColor;
+
+        private void _paintLabels(Graphics2D g2D) {
+
+            try {
+                Rectangle selection = getSelectionsUnion();
+                int toCol = selection.x + selection.width - 1;
+                int fromCol = selection.x;
+                int fromRow = selection.y;
+                int toRow = selection.y + selection.height - 1;
+
+                int rowCount = selection.height;
+                int colCount = selection.width;
+
+                System.out.println(toCol + "  " + fromRow);
+
+                //draw right of toCol, and draw top of from Row
+                //similar to the idea of floating labels
+                //need to find the center firt, then everything else can be copied
+                int row = rowCount / 2 + fromRow;
+                int col = colCount / 2 + fromCol;
+
+                int centerY = _mapDimension.y + _coolMapObject.getViewNodeRow(row).getrViewOffsetCenter(_zoom.y).intValue();
+                int centerX = _mapDimension.x + _coolMapObject.getViewNodeColumn(col).getrViewOffsetCenter(_zoom.x).intValue();
+                
+                int rowLabelLeft = (int) ( _mapDimension.x + _coolMapObject.getViewNodeColumn(toCol).getViewOffset(_zoom.x) ) + 10;
+                int colLabelBottom = (int) (_mapDimension.y + _coolMapObject.getViewNodeRow(fromRow).getViewOffset() - 10 );
+                
+                
+                
+//                int rowLabelHeight = (rowCount) * labelSize;
+                //int rowLabelHeight = (rowCount) * _zoom.y;
+                
+                int rowLabelHeight = VNode.distanceInclusive(_coolMapObject.getViewNodeRow(fromRow), _coolMapObject.getViewNodeRow(toRow), _zoom.y);
+                int colLabelWidth = VNode.distanceInclusive(_coolMapObject.getViewNodeColumn(fromCol), _coolMapObject.getViewNodeColumn(toCol), _zoom.x);
+                
+                        
+                
+                int rowLabelWidth = 5;
+                int rowLabelTop = (int)( _mapDimension.y + _coolMapObject.getViewNodeRow(fromRow).getViewOffset());
+               
+                
+//                int colLabelWidth = (colCount) * labelSize;
+                int colLabelHeight = 5;
+                int colLabelLeft = (int)( _mapDimension.x + _coolMapObject.getViewNodeColumn(fromCol).getViewOffset());
+                
+                //now draw the labels, same pain as before
+                g2D.setFont(labelFont);
+                for(int i = fromRow; i<=toRow; i++){
+                    String value = _coolMapObject.getViewNodeRow(i).getViewLabel();
+                    int sWidth = g2D.getFontMetrics().stringWidth(value);
+                    if(sWidth > rowLabelWidth){
+                        rowLabelWidth = sWidth;
+                    }
+                }
+                
+                rowLabelWidth += 20;
+                
+                for(int i = fromCol; i<=toCol; i++){
+                    String value = _coolMapObject.getViewNodeColumn(i).getViewLabel();
+                    int sWidth = g2D.getFontMetrics().stringWidth(value);
+                    if(sWidth > colLabelHeight){
+                        colLabelHeight = sWidth;
+                    }
+                }
+                
+                colLabelHeight += 20;
+                
+                g2D.setColor(UI.colorBlack2);
+                
+                
+                
+                
+                
+                
+                
+                g2D.setColor(labelBackgroundColor);
+                
+                //Using similar approaches as hover is not a good idea... won't be able to read all labels anyway
+                //center to labels then
+                g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2D.fillRoundRect(rowLabelLeft, rowLabelTop, rowLabelWidth, rowLabelHeight,5,5);
+                g2D.fillRoundRect(colLabelLeft, colLabelBottom - colLabelHeight, colLabelWidth, colLabelHeight,5,5);
+
+                g2D.setColor(UI.colorBlack2);
+                
+//                color it!
+                int maxDescent = g2D.getFontMetrics().getMaxDescent();
+                for(int i = fromRow; i <= toRow; i++){
+                    VNode node = _coolMapObject.getViewNodeRow(i);
+                    g2D.drawString(node.getViewLabel(), rowLabelLeft + 10, node.getrViewOffsetCenter(_zoom.y) + _mapDimension.y + 6 - maxDescent);
+                }
+            
+                g2D.setFont(labelFontRotated);
+                for(int i = fromCol; i<= toCol; i++){
+                    VNode node = _coolMapObject.getViewNodeColumn(i);
+                    g2D.drawString(node.getViewLabel(), node.getrViewOffsetCenter(_zoom.x) + _mapDimension.x + 6 - maxDescent, colLabelBottom - 10);
+                }
+                
+                
+            
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
     /**

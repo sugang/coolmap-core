@@ -12,7 +12,10 @@ import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.utils.viewportActions.CascadeMaps;
 import coolmap.application.utils.viewportActions.TileMaps;
 import coolmap.application.utils.viewportActions.ToggleCanvasState;
+import coolmap.application.utils.viewportActions.ToggleColumnPanels;
 import coolmap.application.utils.viewportActions.ToggleLabeltip;
+import coolmap.application.utils.viewportActions.ToggleSelectionLabel;
+import coolmap.application.utils.viewportActions.ToggleSidePanelsRow;
 import coolmap.application.utils.viewportActions.ToggleTooltip;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
@@ -71,19 +74,34 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 //    }
     private void _initMainMenuItem() {
         CMainFrame frame = CoolMapMaster.getCMainFrame();
-        
+
         MenuItem item = new MenuItem("Toggle Canvas state", new MenuShortcut(KeyEvent.VK_1));
         frame.addMenuItem("View/Canvas config", item, false, false);
         item.addActionListener(new ToggleCanvasState());
-       
+
         item = new MenuItem("Toggle hover tooltip", new MenuShortcut(KeyEvent.VK_2));
         frame.addMenuItem("View/Canvas config", item, false, false);
         item.addActionListener(new ToggleTooltip());
-        
+
         item = new MenuItem("Toggle label tooltip", new MenuShortcut(KeyEvent.VK_3));
-        frame.addMenuItem("View/Canvas config", item, true, true);
+        frame.addMenuItem("View/Canvas config", item, false, false);
         item.addActionListener(new ToggleLabeltip());
-        
+
+        item = new MenuItem("Toggle selection tooltip", new MenuShortcut(KeyEvent.VK_4));
+        frame.addMenuItem("View/Canvas config", item, false, false);
+        item.addActionListener(new ToggleSelectionLabel());
+
+        MenuItem toggleRows = new MenuItem("Toggle row panels", new MenuShortcut(KeyEvent.VK_5));
+        toggleRows.addActionListener(new ToggleSidePanelsRow());
+        frame.addMenuItem("View/Canvas config", toggleRows, true, false);
+
+        MenuItem toggleColumns = new MenuItem("Toggle column panels", new MenuShortcut(KeyEvent.VK_6));
+        toggleColumns.addActionListener(new ToggleColumnPanels());
+        frame.addMenuItem("View/Canvas config", toggleColumns, false, false);
+
+        ////
+        frame.addMenuSeparator("View");
+
         item = new MenuItem("Tile", new MenuShortcut(KeyEvent.VK_OPEN_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
         item.addActionListener(new TileMaps());
@@ -91,46 +109,9 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         item = new MenuItem("Cascade", new MenuShortcut(KeyEvent.VK_CLOSE_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
         item.addActionListener(new CascadeMaps());
-        
-        
-        
-        
 
-        JMenuItem toggleRows = new JMenuItem("Toggle row panels");
-        JMenuItem toggleColumns = new JMenuItem("Toggle column panels");
-        addPopupMenuItem("View", toggleRows, false);
-        addPopupMenuItem("View", toggleColumns, false);
-        toggleRows.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                if (object != null) {
-                    CoolMapView view = object.getCoolMapView();
-                    if (view.isRowPanelsVisible()) {
-                        view.setRowPanelsVisible(false);
-                    } else {
-                        view.setRowPanelsVisible(true);
-                    }
-                }
-            }
-        });
-
-        toggleColumns.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                if (object != null) {
-                    CoolMapView view = object.getCoolMapView();
-                    if (view.isColumnPanelsVisible()) {
-                        view.setColumnPanelsVisible(false);
-                    } else {
-                        view.setColumnPanelsVisible(true);
-                    }
-                }
-            }
-        });
+        //addPopupMenuItem("View", toggleColumns, false);
+        //addPopupMenuItem("View", toggleRows, false);
     }
 
     public void addPopupMenuItem(String parentPath, JMenuItem item, boolean sepBefore) {
@@ -226,7 +207,7 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
     private JToolBar _zoomSubBar;
 
     private void _initToolbar() {
-        
+
         _toolBar.setFloatable(false);
 
         JButton button = new JButton(UI.getImageIcon("zoomIn"));
@@ -257,7 +238,6 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         });
         _toolBar.add(button);
 
-
         button = new JButton(UI.getImageIcon("emptyPage"));
         button.addActionListener(new ActionListener() {
 
@@ -273,17 +253,12 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         button.setToolTipText("Center selection");
         _toolBar.add(button);
 
-
-
-
-
         _gridMode = new JToggleButton(UI.getImageIcon("ruler"));
         _gridMode.setToolTipText("Enter/Exit grid mode, allows resizing of row/column nodes");
         _gridMode.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-
 
                 CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
@@ -360,7 +335,6 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 
         _zoomSubBar.addSeparator();
 
-
         button = new JButton(UI.getImageIcon("zoomInY"));
         button.addActionListener(new ActionListener() {
 
@@ -390,9 +364,6 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         });
         _zoomSubBar.add(button);
 
-
-
-
         button = new JButton(UI.getImageIcon("resetY"));
         button.addActionListener(new ActionListener() {
 
@@ -407,19 +378,8 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         });
         _zoomSubBar.add(button);
 
-
-
-
-
         _zoomSubBar.setBackground(UI.colorLightBlue0);
         _toolBar.add(_zoomSubBar);
-
-
-
-
-
-
-
 
 //        button = new JButton("Task");
 //        button.addActionListener(new ActionListener() {
@@ -476,19 +436,14 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 //            }
 //        });
 //        _toolBar.add(button);
-
-
-
-
     }
 
     public void cascadeWindows() {
         JInternalFrame[] frames = _desktop.getAllFrames();
-        if(frames == null || frames.length == 0){
+        if (frames == null || frames.length == 0) {
             return;
         }
-        
-        
+
         int x = 0;
         int y = 0;
         int width = _desktop.getWidth() / 2;
@@ -500,6 +455,7 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
                      * try to make maximized frames resizable this might be
                      * vetoed
                      */
+
                     frames[i].setMaximum(false);
                     frames[i].reshape(x, y, width, height);
 
@@ -520,7 +476,7 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 
     public void tileWindows() {
         JInternalFrame[] frames = _desktop.getAllFrames();
-        if(frames == null || frames.length == 0){
+        if (frames == null || frames.length == 0) {
             return;
         }
 
