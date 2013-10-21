@@ -17,8 +17,17 @@ public interface CViewListener {
     public void mapAnchorMoved(CoolMapObject object);
     public void activeCellChanged(CoolMapObject object, MatrixCell oldCell, MatrixCell newCell);
     public void mapZoomChanged(CoolMapObject object);
-    public void subSelectionRowChanged(CoolMapObject object);
-    public void subSelectionColumnChanged(CoolMapObject object);
+    public void gridChanged(CoolMapObject object);
+//    public void subSelectionRowChanged(CoolMapObject object);
+//    public void subSelectionColumnChanged(CoolMapObject object);
+    
+    
 //    public void rowNodeViewUpdated(CoolMapObject object);
 //    public void columNodeViewUpdated(CoolMapObject object);
+    
+    
+    //There should be a listener specifially for map buffer image redrawn
+    
+    
+    
 }

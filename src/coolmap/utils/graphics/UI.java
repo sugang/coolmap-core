@@ -4,7 +4,12 @@
  */
 package coolmap.utils.graphics;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -228,6 +233,7 @@ public class UI {
         _iconStash.put("funnel", new ImageIcon(UI.class.getResource("/resources/iconFunnel.png")));
         _iconStash.put("screen", new ImageIcon(UI.class.getResource("/resources/iconScreen.png")));
         _iconStash.put("emptyPage", new ImageIcon(UI.class.getResource("/resources/iconEmptyPage.png")));
+        _iconStash.put("compass", new ImageIcon(UI.class.getResource("/resources/iconCompass.png")));
     }
 
     public static Color mixOpacity(Color input, float opacity) {

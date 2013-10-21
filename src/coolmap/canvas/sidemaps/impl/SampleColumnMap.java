@@ -4,10 +4,9 @@
  */
 package coolmap.canvas.sidemaps.impl;
 
-import coolmap.canvas.sidemaps.ColumnMap;
-import coolmap.canvas.CoolMapView;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
+import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.graphics.UI;
@@ -120,5 +119,9 @@ public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewL
 
     @Override
     public void stateStorageUpdated(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 }

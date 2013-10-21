@@ -17,7 +17,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -374,6 +378,10 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 
     @Override
     public void mapAnchorMoved(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 
     private class HoverTarget implements TimingTarget {

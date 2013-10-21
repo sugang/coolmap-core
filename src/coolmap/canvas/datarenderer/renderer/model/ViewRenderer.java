@@ -4,19 +4,22 @@
  */
 package coolmap.canvas.datarenderer.renderer.model;
 
+import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.Tools;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.UUID;
-import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-import javax.swing.text.html.parser.DTD;
 
 /**
  *
@@ -129,6 +132,91 @@ public abstract class ViewRenderer<VIEW> {
 //    protected abstract void _renderCellAnnotationHD();
     protected abstract void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
+    
+    
+//    public synchronized BufferedImage getRenderedRadarView(CoolMapObject data, int imageWidth, int imageHeight) throws InterruptedException{
+//        //I can't possibly render a map that is overwhelmingly large
+//        //int fullImageWidth = data.getCoolMapView().getMapWidth();
+//        //int fullImageHeight = data.getCoolMapView().getMapHeight();
+//        
+//        
+//        
+//        return null;
+//    }
+    
+    
+    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) throws InterruptedException{
+        if(data == null)
+            return null;
+        CoolMapView view = data.getCoolMapView();
+        if(view == null)
+            return null;
+        float zoomX = view.getZoomX();
+        float zoomY = view.getZoomY();
+        
+        float mapWidth = view.getMapWidth()  * percentage;
+        float mapHeight = view.getMapHeight() * percentage;
+        
+        BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
+        
+        Graphics2D g2D = image.createGraphics();
+        g2D.setColor(Color.BLACK);
+        
+        g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
+        
+        //anchorage
+        float currentAnchorX = 0;
+        float currentAnchorY = 0;
+        float currentWidth = 0;
+        float currentHeight = 0;
+        
+//        Thread.sleep(1000);
+        
+        //then render
+        for(int i=0; i<data.getViewNumRows(); i++){
+            VNode rowNode = data.getViewNodeRow(i);
+            currentAnchorY = rowNode.getViewOffset() * percentage;
+            currentHeight = rowNode.getViewSizeInMap(zoomY) * percentage;
+            if(currentHeight < 1)
+                currentHeight = 1;
+            
+            for(int j=0; j<data.getViewNumColumns(); j++){
+                VNode colNode = data.getViewNodeColumn(j);
+                currentAnchorX = colNode.getViewOffset() * percentage;
+                currentWidth = colNode.getViewSizeInMap(zoomX) * percentage;
+                if(currentWidth < 1)
+                    currentWidth = 1;
+                
+                VIEW v = data.getViewValue(i, j);
+                
+                //use low definition mode
+                _renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));                
+//                try{
+//                    Thread.sleep(50);
+//                }
+//                
+//                catch(InterruptedException e){
+//                    throw e;
+//                }
+                
+                if(Thread.interrupted())
+                    throw new InterruptedException("Render preview interrupted");
+            }
+        }
+        
+
+        
+        if(Thread.interrupted())
+            return null;
+        
+        return image;
+    }
+    
+    
+    
+    
+    
+    
     public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
         if (data == null || data.getViewNumColumns() == 0 || data.getViewNumRows() == 0 || fromRow < 0 || fromRow > data.getViewNumRows() || fromCol < 0 || fromCol > data.getViewNumColumns()) {
             //System.out.println("Error occured");
@@ -346,6 +434,8 @@ public abstract class ViewRenderer<VIEW> {
                     
                     cellWidth = Math.round(colNode.getViewSizeInMap(__zoomX));
                     cellHeight = Math.round(rowNode.getViewSizeInMap(__zoomY));
+                    
+                    //System.out.println(cellWidth + " " + cellHeight);
 
                     //each cell can take a different size. Therefore need to 
                     if (!_modeOverride) {

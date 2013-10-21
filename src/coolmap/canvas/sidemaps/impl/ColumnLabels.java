@@ -5,7 +5,6 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
-import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.misc.ZoomControl;
@@ -18,7 +17,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Set;
@@ -280,10 +283,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     public void subSelectionRowChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-        System.out.println(object.getCoolMapView().getSubSelectedColumns());
-    }
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//        System.out.println(object.getCoolMapView().getSubSelectedColumns());
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {
@@ -291,6 +294,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     @Override
     public void viewFilterChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 
     private class HoverTarget implements TimingTarget {

@@ -107,4 +107,8 @@ public class ColumnValueTest extends ColumnMap {
     @Override
     public void subSelectionColumnChanged(CoolMapObject object) {
     }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
+    }
 }

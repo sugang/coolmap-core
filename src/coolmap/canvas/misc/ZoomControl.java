@@ -91,7 +91,8 @@ public class ZoomControl {
         //zoomLevels.add(0.5f);
         //minimal is 1px. maybe i will change this.
         //use previews then
-        
+        zoomLevels.add(0.25f);
+        zoomLevels.add(0.5f);
         
         zoomLevels.add(1f);//Single pixel.. may caue serious issues.
         zoomLevels.add(1.5f);
@@ -154,6 +155,8 @@ public class ZoomControl {
         currentZoom = zoomLevels.get(index);
         currentBoldFont = labelFontsBold.get(index);
         currentPlainFont = labelFonts.get(index);
+        
+        
 
     }
 

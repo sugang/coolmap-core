@@ -155,25 +155,25 @@ public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObject
         }
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-        if (!_isActiveObject(object)) {
-            return;
-        }
-        for (CViewListener lis : _viewListeners) {
-            lis.subSelectionRowChanged(object);
-        }
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//        if (!_isActiveObject(object)) {
+//            return;
+//        }
+//        for (CViewListener lis : _viewListeners) {
+//            lis.subSelectionRowChanged(object);
+//        }
+//    }
 
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-        if (!_isActiveObject(object)) {
-            return;
-        }
-        for (CViewListener lis : _viewListeners) {
-            lis.subSelectionColumnChanged(object);
-        }
-    }
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//        if (!_isActiveObject(object)) {
+//            return;
+//        }
+//        for (CViewListener lis : _viewListeners) {
+//            lis.subSelectionColumnChanged(object);
+//        }
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {
@@ -192,6 +192,17 @@ public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObject
         }
         for (CObjectListener lis : _objectListeners) {
             lis.viewFilterChanged(object);
+        }
+    }
+
+    //make sure only the active one's grid changed is fired
+    @Override
+    public void gridChanged(CoolMapObject object) {
+        if (!_isActiveObject(object)){
+            return;
+        }
+        for(CViewListener lis: _viewListeners){
+            lis.gridChanged(object);
         }
     }
 }

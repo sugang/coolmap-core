@@ -223,13 +223,13 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     @Override
     public void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject activeCoolMapObject) {
@@ -242,5 +242,9 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
     @Override
     public void viewFilterChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 }

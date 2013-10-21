@@ -4,25 +4,37 @@
  */
 package coolmap.canvas.sidemaps.impl;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Range;
-import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -100,6 +112,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     @Override
     public void stateStorageUpdated(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 
     private class LinetypeChangedListener implements ActionListener {

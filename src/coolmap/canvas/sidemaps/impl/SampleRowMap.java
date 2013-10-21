@@ -4,7 +4,6 @@
  */
 package coolmap.canvas.sidemaps.impl;
 
-import coolmap.canvas.CoolMapView;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
@@ -120,5 +119,9 @@ public class SampleRowMap extends RowMap<Object, Object> implements CViewListene
 
     @Override
     public void viewFilterChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void gridChanged(CoolMapObject object) {
     }
 }

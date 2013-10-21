@@ -283,10 +283,14 @@ public class VNode {
     }
 
     public float getViewSizeInMap(float zoom) {
+        //Here's the issue: zoom size does not allow to be smaller than 1
+        //control here
         float size = zoom * _displayMultiplier;
-        if (size < 1) {
-            size = 1;
-        }
+        
+//        if (size < 1) {
+//            size = 1;
+//        }
+        
         return size;
     }
 
@@ -538,6 +542,8 @@ public class VNode {
 
     /**
      * distance in pixels, including the width of both nodes
+     * however, the zoom parameter only returns the - we don't know the viewOffset @ which the nodes are actually set
+     * so if use a zoom different than the zoom when the nodes are set, tehre
      *
      * @param v1
      * @param v2

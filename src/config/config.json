@@ -12,7 +12,8 @@
                     "coolmap.application.widget.impl.WidgetCMatrix",
                     "coolmap.application.widget.impl.WidgetCOntology",
                     "coolmap.application.widget.impl.WidgetViewRenderer",
-                    "coolmap.application.widget.impl.WidgetDataMatrix"
+                    "coolmap.application.widget.impl.WidgetDataMatrix",
+                    "coolmap.application.widget.impl.WidgetRadar"
                  ],
         "config": {
             "coolmap.application.widget.impl.WidgetViewRenderer":
