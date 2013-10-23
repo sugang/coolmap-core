@@ -7,7 +7,6 @@ package coolmap.canvas.viewmaps;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.graphics.UI;
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
@@ -18,6 +17,8 @@ public class FilterLayer implements MapLayer<Object, Object> {
 
     @Override
     public void render(Graphics2D g2D, CoolMapObject<Object, Object> coolMapObject, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int width, int height) throws Exception {
+        
+//        System.err.println("Filter layer rendered");
         
         VNode anchorRowNode = coolMapObject.getViewNodeRow(fromRow);
         VNode anchorColNode = coolMapObject.getViewNodeColumn(fromCol);

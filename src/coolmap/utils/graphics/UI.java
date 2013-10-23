@@ -52,6 +52,7 @@ public class UI {
     public static Color colorLightGreen1 = new Color(161, 217, 155, 200);
     public static Color colorLightGreen2 = new Color(49, 163, 84);
     public static Color colorLightGreen5 = new Color(173, 221, 142);
+    public static Color colorLightGreen6 = new Color(247,252,185);
     public static Color colorLightBlue0 = new Color(158, 202, 225);
     public static Color colorLightBlue1 = new Color(50, 130, 190);
     public static Color colorDarkGreen1 = new Color(77, 172, 38);

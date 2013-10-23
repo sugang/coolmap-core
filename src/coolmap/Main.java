@@ -12,6 +12,7 @@ import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.DoubleToNetwork;
+import coolmap.data.annotation.PointAnnotation;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -119,6 +120,11 @@ public class Main {
             onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
             CoolMapMaster.setActiveCoolMapObject(object);
+            
+            //try to add some annotations
+            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(0), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
+            object.getAnnotationStorage().addAnnotation(annotation);
+            
             
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

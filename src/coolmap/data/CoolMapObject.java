@@ -8,36 +8,42 @@ import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.datarenderer.renderer.impl.DoubleToBoxPlot;
-import coolmap.data.aggregator.impl.DoubleDoubleMax;
-import coolmap.data.aggregator.model.CAggregator;
-import coolmap.utils.TableCache;
-import coolmap.data.cmatrix.impl.DoubleCMatrix;
-import coolmap.data.cmatrix.model.CMatrix;
-import coolmap.data.cmatrixview.model.VMatrix;
-import coolmap.data.cmatrixview.model.VNode;
-import coolmap.data.contology.model.COntology;
-import coolmap.data.contology.utils.COntologyUtils;
-import coolmap.data.snippet.SnippetConverter;
 import coolmap.canvas.datarenderer.renderer.model.AnnotationRenderer;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
 import coolmap.canvas.sidemaps.impl.RowTree;
-import coolmap.data.state.StateSnapshot;
+import coolmap.data.aggregator.impl.DoubleDoubleMax;
+import coolmap.data.aggregator.model.CAggregator;
+import coolmap.data.annotation.AnnotationStorage;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
+import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.data.cmatrixview.model.VMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.SortTracker;
 import coolmap.data.cmatrixview.utils.VNodeColumnSorter;
 import coolmap.data.cmatrixview.utils.VNodeRowSorter;
+import coolmap.data.contology.model.COntology;
+import coolmap.data.contology.utils.COntologyUtils;
 import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.data.filter.CombinationFilter;
 import coolmap.data.filter.ViewFilter;
 import coolmap.data.listeners.CObjectListener;
+import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
+import coolmap.data.state.StateSnapshot;
 import coolmap.data.state.StateStorage;
+import coolmap.utils.TableCache;
 import coolmap.utils.Tools;
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -68,6 +74,18 @@ public final class CoolMapObject<BASE, VIEW> {
     private StateStorage _stateStorage;
     private final CombinationFilter _masterFilter;
 
+    private final AnnotationStorage annotationStorage = new AnnotationStorage();
+    
+    public AnnotationStorage getAnnotationStorage(){
+        return annotationStorage;
+    }
+    
+    
+    
+    
+    
+    
+    
     public void addViewFilter(ViewFilter filter) {
         if (filter != null && filter.canFilter(getViewClass())) {
             _masterFilter.addFilter(filter);

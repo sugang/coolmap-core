@@ -18,6 +18,7 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.canvas.viewmaps.CoolMapLayer;
 import coolmap.canvas.viewmaps.FilterLayer;
 import coolmap.canvas.viewmaps.MapLayer;
+import coolmap.canvas.viewmaps.PointAnnotationLayer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrixview.model.VNode;
@@ -1529,15 +1530,20 @@ public final class CoolMapView<BASE, VIEW> {
      */
     private FilterLayer _maskLayer;
     private CoolMapLayer _coolMapLayer;
+    private PointAnnotationLayer _pAnnotationLayer;
 
     private void _initMapLayers() {
 
         //This is the default render layer
         _coolMapLayer = new CoolMapLayer(_coolMapObject);
         _maskLayer = new FilterLayer();
+        _pAnnotationLayer = new PointAnnotationLayer(_coolMapObject);
 
         addMapLayer(_coolMapLayer);
         addOverlayer(_maskLayer);
+        
+        //doesn't seem to be working at all
+        addOverlayer(_pAnnotationLayer);
     }
 
     private void _postInit() {
@@ -2342,8 +2348,11 @@ public final class CoolMapView<BASE, VIEW> {
 //            g2D.setColor(Color.BLACK);
 //            g2D.clearRect(0, 0, getWidth(), getHeight());
             //render maplayer into buffer
+            
+            System.out.println("Number of overlayer:" +_overLayers.size());
             for (MapLayer mapLayer : _overLayers) {
 
+                
                 //change to selections
                 //The only difference here is that only selection will be updated.
                 mapLayer.render(g2D, _coolMapObject, subMapIndexMin.row.intValue(), subMapIndexMax.row.intValue(), subMapIndexMin.col.intValue(), subMapIndexMax.col.intValue(), _zoom.x, _zoom.y, _subMapDimension.width, _subMapDimension.height);
