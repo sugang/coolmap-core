@@ -391,8 +391,7 @@ public final class CoolMapView<BASE, VIEW> {
         }
         Set<Rectangle> viewRegions = convertNodeRegionToViewRegion(Collections.singleton(nodeRegion));
 
-        System.out.println("View Region:" + viewRegions);
-
+//        System.out.println("View Region:" + viewRegions);
         if (viewRegions.isEmpty()) {
             return;
         }
@@ -406,6 +405,115 @@ public final class CoolMapView<BASE, VIEW> {
             _hoverLayer.setActiveCell(_activeCell);
         } catch (Exception e) {
         }
+    }
+
+    public void centerToPercentage(float colPercent, float rowPercent) {
+        try {
+            //need to find these nodes
+            
+            
+            
+            VNode colNode = _findColNode(colPercent);
+            VNode rowNode = _findRowNode(rowPercent);
+//            System.out.println(colNode + "->" + colNode.getViewIndex());
+//            System.out.println(rowNode + "->" + rowNode.getViewIndex());
+            
+            Rectangle nodeRegion = new Rectangle(colNode.getViewIndex().intValue(), rowNode.getViewIndex().intValue(), 1, 1);
+            centerToRegion(nodeRegion);
+
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    //same function for rowNode
+    /**
+     * returrn the column node at the relative percentage of the map
+     * @param colPercentage
+     * @return
+     * @throws Exception 
+     */
+    private VNode _findColNode(float colPercentage) throws Exception {
+        if (colPercentage <= 0) {
+            return _coolMapObject.getViewNodeColumn(0);
+        }
+        if (colPercentage >= 1) {
+            return _coolMapObject.getViewNodeColumn(_coolMapObject.getViewNumColumns() - 1);
+        }
+
+        VNode startNode = _coolMapObject.getViewNodeColumn(0);
+        VNode endNode = _coolMapObject.getViewNodeColumn(_coolMapObject.getViewNumColumns() - 1);
+        VNode currentNode;
+
+        while (startNode.getViewIndex() != null && endNode.getViewIndex() != null
+                && startNode.getViewIndex() < endNode.getViewIndex()) {
+
+            currentNode = _coolMapObject.getViewNodeColumn(
+                    Math.round(
+                            (startNode.getViewIndex() + endNode.getViewIndex()) / 2)
+            );
+
+            float currentPerStart = currentNode.getViewOffset() / _mapDimension.width;
+            float currentPerEnd = currentNode.getViewOffset(_zoom.x) / _mapDimension.width;
+
+            if (colPercentage < currentPerStart) {
+                //search left
+                endNode = currentNode;
+                continue;
+            }
+            if (colPercentage >= currentPerEnd) {
+                startNode = currentNode;
+                continue;
+            }
+                return currentNode;
+            
+        }
+
+        throw new Exception("Searching for percentage col node failed possibly due to error");
+    }
+
+    /**
+     * return the row node at the relative percentage of the map
+     * @param rowPercentage
+     * @return
+     * @throws Exception 
+     */
+    private VNode _findRowNode(float rowPercentage) throws Exception {
+        if (rowPercentage <= 0) {
+            return _coolMapObject.getViewNodeRow(0);
+        }
+        if (rowPercentage >= 1) {
+            return _coolMapObject.getViewNodeRow(_coolMapObject.getViewNumRows() - 1);
+        }
+
+        VNode startNode = _coolMapObject.getViewNodeRow(0);
+        VNode endNode = _coolMapObject.getViewNodeRow(_coolMapObject.getViewNumRows() - 1);
+        VNode currentNode;
+
+        while (startNode.getViewIndex() != null && endNode.getViewIndex() != null
+                && startNode.getViewIndex() < endNode.getViewIndex()) {
+
+            currentNode = _coolMapObject.getViewNodeRow(
+                    Math.round(
+                            (startNode.getViewIndex() + endNode.getViewIndex()) / 2)
+            );
+
+            float currentPerStart = currentNode.getViewOffset() / _mapDimension.height;
+            float currentPerEnd = currentNode.getViewOffset(_zoom.x) / _mapDimension.height;
+            
+            if (rowPercentage < currentPerStart){
+                endNode = currentNode;
+                continue;
+            }
+            if (rowPercentage >= currentPerEnd){
+                startNode = currentNode;
+                continue;
+            }
+
+            return currentNode;
+        }
+        throw new Exception("Searching for percentage row node failed possibly due to error");
     }
 
     /**
@@ -724,7 +832,6 @@ public final class CoolMapView<BASE, VIEW> {
 //    public Set<String> getSubSelectedColumns() {
 //        return new HashSet<String>(_subSelectedColumnNodeNames);
 //    }
-
     /**
      * get the anchoring point of the map all otehr node anchors are mapAnchor +
      * viewoffset
@@ -939,6 +1046,7 @@ public final class CoolMapView<BASE, VIEW> {
     private synchronized Point _getMouseXY() {
         return new Point(_cursor.x, _cursor.y);
     }
+
     public Integer getCurrentCol(int screenX) {
         if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
             return null;
@@ -947,35 +1055,30 @@ public final class CoolMapView<BASE, VIEW> {
         VNode midNode = null;
 
         //problem mostlikely is that the search was from subIndex.. which are not changed
-        
         //search from 
         int startIndex = _subMapIndexMin.col.intValue();
         int endIndex = _subMapIndexMax.col.intValue();
-        
+
         //binary search, should be fast enough
 //        int startIndex = 0;
 //        int endIndex = _coolMapObject.getViewNumColumns();
-        
-
         VNode startNode = _coolMapObject.getViewNodeColumn(startIndex);
         VNode endNode = _coolMapObject.getViewNodeColumn(endIndex - 1);
-        
+
         //System.out.println(startNode + " " + endNode);
 //        System.out.println("screenX" + screenX);
 //        System.out.println(startNode + "><" + endNode);
-
         if (startNode == null || endNode == null) {
             return null;
         }
 
-        
         if (startNode.getViewOffset() + _mapDimension.x > screenX) {
 //            System.out.println("first column" + "screenX: " + screenX + " " + _mapDimension.x + " " + (startNode.getViewOffset(_zoom.x) + _mapDimension.x));
             return -1;//the left most node
         }
 
         if (endNode.getViewOffset(_zoom.x) + _mapDimension.x <= screenX) {
-            
+
 //            System.out.println("last column" + "screenX: " + screenX + " " + _mapDimension.x + " " +  (endNode.getViewOffset(_zoom.x) + _mapDimension.x));            
             return _coolMapObject.getViewNumColumns();
         }
@@ -992,7 +1095,6 @@ public final class CoolMapView<BASE, VIEW> {
             return endIndex - 1; //note it's -1
         }
 
-        
         int midIndex = (startIndex + endIndex) / 2;
 
         while (midIndex != startIndex) {
@@ -1013,6 +1115,7 @@ public final class CoolMapView<BASE, VIEW> {
         //Should not rech here.
         return null;
     }
+
     /**
      * find the current Col using binary search -1 means left bound cols = right
      * bound, null = undef
@@ -1028,35 +1131,30 @@ public final class CoolMapView<BASE, VIEW> {
         VNode midNode = null;
 
         //problem mostlikely is that the search was from subIndex.. which are not changed
-        
         //search from 
 //        int startIndex = _subMapIndexMin.col.intValue();
 //        int endIndex = _subMapIndexMax.col.intValue();
-        
         //binary search, should be fast enough
         int startIndex = 0;
         int endIndex = _coolMapObject.getViewNumColumns();
-        
 
         VNode startNode = _coolMapObject.getViewNodeColumn(startIndex);
         VNode endNode = _coolMapObject.getViewNodeColumn(endIndex - 1);
-        
+
         //System.out.println(startNode + " " + endNode);
 //        System.out.println("screenX" + screenX);
 //        System.out.println(startNode + "><" + endNode);
-
         if (startNode == null || endNode == null) {
             return null;
         }
 
-        
         if (startNode.getViewOffset() + _mapDimension.x > screenX) {
 //            System.out.println("first column" + "screenX: " + screenX + " " + _mapDimension.x + " " + (startNode.getViewOffset(_zoom.x) + _mapDimension.x));
             return -1;//the left most node
         }
 
         if (endNode.getViewOffset(_zoom.x) + _mapDimension.x <= screenX) {
-            
+
 //            System.out.println("last column" + "screenX: " + screenX + " " + _mapDimension.x + " " +  (endNode.getViewOffset(_zoom.x) + _mapDimension.x));            
             return _coolMapObject.getViewNumColumns();
         }
@@ -1073,7 +1171,6 @@ public final class CoolMapView<BASE, VIEW> {
             return endIndex - 1; //note it's -1
         }
 
-        
         int midIndex = (startIndex + endIndex) / 2;
 
         while (midIndex != startIndex) {
@@ -1113,11 +1210,9 @@ public final class CoolMapView<BASE, VIEW> {
 
         int startIndex = _subMapIndexMin.row.intValue();
         int endIndex = _subMapIndexMax.row.intValue();
-        
+
 //        int startIndex = 0;
 //        int endIndex = _coolMapObject.getViewNumRows();
-        
-
         VNode startNode = _coolMapObject.getViewNodeRow(startIndex);
         VNode endNode = _coolMapObject.getViewNodeRow(endIndex - 1);
 
@@ -1166,7 +1261,7 @@ public final class CoolMapView<BASE, VIEW> {
         return null;
     }
 
-        public Integer getCurrentRowSearchAll(int screenY) {
+    public Integer getCurrentRowSearchAll(int screenY) {
         if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
             return null;
         }
@@ -1175,10 +1270,8 @@ public final class CoolMapView<BASE, VIEW> {
 
 //        int startIndex = _subMapIndexMin.row.intValue();
 //        int endIndex = _subMapIndexMax.row.intValue();
-        
         int startIndex = 0;
         int endIndex = _coolMapObject.getViewNumRows();
-        
 
         VNode startNode = _coolMapObject.getViewNodeRow(startIndex);
         VNode endNode = _coolMapObject.getViewNodeRow(endIndex - 1);
@@ -1227,7 +1320,7 @@ public final class CoolMapView<BASE, VIEW> {
         //Should not rech here.
         return null;
     }
-    
+
     public void activate() {
         _canvas.requestFocusInWindow();
     }
@@ -1777,7 +1870,6 @@ public final class CoolMapView<BASE, VIEW> {
         float diffX = newX - oldX;
         float diffY = newY - oldY;
 
-        
         _mapDimension.x = (int) newX;
         _mapDimension.y = (int) newY;
         _subMapDimension.x += diffX;
@@ -1847,10 +1939,9 @@ public final class CoolMapView<BASE, VIEW> {
         _subMapDimension.x += offsetX;
         _subMapDimension.y += offsetY;
 //        System.out.println("Map dimension updated in moveMapBy, and is definitely before mapAnchor fire event");
-        
+
         if (updateMap) {
-            
-            
+
             updateCanvasIfNecessary();
             _fireViewAnchorMoved();
         }

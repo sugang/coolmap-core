@@ -25,6 +25,9 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JButton;
@@ -47,10 +50,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     private final Point2D.Float mapAnchor = new Point2D.Float();
 
     private int margin = 10;
-    
-    
-    private void updatePercentage(){
-        
+
+    private void updatePercentage() {
+
     }
 
     public void fitView() {
@@ -162,7 +164,10 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false);
 
-        JButton button = new JButton("Fit");
+        
+        
+        JButton button = new JButton(UI.getImageIcon("expand3"));
+        button.setToolTipText("Fit preview to current window");
         button.addActionListener(new ActionListener() {
 
             @Override
@@ -205,34 +210,27 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         //may cause the 
 //        System.out.println("");
 //        System.out.println(canvas.x + " " + (canvas.x + canvas.width));
-            
-            System.out.println("Map Anchor in listener:" + view.getMapAnchor());
-            System.out.println("======= ======");
+//            System.out.println("Map Anchor in listener:" + view.getMapAnchor());
+//            System.out.println("======= ======");
             //no problem in mapAnchor
-            
-            
+
             //The bug:
             //while searching, the subMapIndex not updated yet.
             //The search was not a good one - the search should occur AFTER the update
-            
-            
             int minCol = view.getCurrentColSearchAll(canvas.x);
             int maxCol = view.getCurrentColSearchAll(canvas.x + canvas.width);
 
-        //after moving, the two functions returned same values
+            //after moving, the two functions returned same values
             int minRow = view.getCurrentRowSearchAll(canvas.y);
             int maxRow = view.getCurrentRowSearchAll(canvas.y + canvas.height);
-            
+
 //            there are problems with getCurrentRow and getCurrentCol
 //            can't figure it out!! fuck fuck 
-            
-            
-
         //System.out.println(canvas);
 //        System.out.println("minCol: " + minCol + " maxCol: " + maxCol + " -- " + " minRow: " +  minRow + " maxRow: " + maxRow);
 //        System.out.println("");
 //        System.out.println("");
-        //use map mover
+            //use map mover
             minCol = minCol < 0 ? 0 : minCol;
             minRow = minRow < 0 ? 0 : minRow;
 
@@ -240,7 +238,6 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             maxRow = maxRow >= obj.getViewNumRows() ? obj.getViewNumRows() - 1 : maxRow;
 
 //            System.out.println(minCol + "<" + maxCol + ":" + minRow + "<" + maxRow);
-            
             //Then find the percentage
             VNode minRowNode = obj.getViewNodeRow(minRow);
             VNode minColNode = obj.getViewNodeColumn(minCol);
@@ -260,11 +257,10 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //                int previewWidth = Math.round(mapWidth * percentage);
 //                int previewHeight = Math.round(mapHeight * percentage);
 //            }
-            
             int previewWidth = bufferedImage.getWidth();
             int previewHeight = bufferedImage.getHeight();
             //region measurement still have issues
-            
+
             //then I would know
             region = new Rectangle();
             region.width = Math.round(previewWidth * (c2 - c1));
@@ -389,7 +385,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     @Override
     public void mapAnchorMoved(CoolMapObject object) {
         //only needs to repaint
-        System.out.println("map anchor moved in listener");
+//        System.out.println("map anchor moved in listener");
         updateRegion();
     }
 
@@ -400,7 +396,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     @Override
     public void mapZoomChanged(CoolMapObject object) {
-        System.out.println("Map zoom changed");
+//        System.out.println("Map zoom changed");
         //repaint
         //fitView();
         updateRegion();
@@ -465,6 +461,12 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     }
 
     private class RadarPanel extends JPanel {
+        
+        public RadarPanel(){
+            MouseTracker tracker = new MouseTracker();                    
+            addMouseListener(tracker);
+            addMouseMotionListener(tracker);
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -475,7 +477,14 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             g2D.fillRect(0, 0, this.getWidth(), this.getHeight());
 
             //still draws the image at the correct coordinate
-            g2D.drawImage(bufferedImage, (int) mapAnchor.x, (int) mapAnchor.y, null);
+            g2D.setColor(UI.colorBlack4);
+            g2D.setStroke(UI.stroke8);
+
+            //
+            if (bufferedImage != null) {
+                g2D.drawRoundRect((int) mapAnchor.x, (int) mapAnchor.y, bufferedImage.getWidth(), bufferedImage.getHeight(), 5, 5);
+                g2D.drawImage(bufferedImage, (int) mapAnchor.x, (int) mapAnchor.y, null);
+            }
 
             if (region != null) {
                 g2D.setColor(Color.WHITE);
@@ -484,6 +493,66 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             }
         }
 
+    }
+    
+    /**
+     * Mouse Tracker
+     */
+    private class MouseTracker implements MouseListener, MouseMotionListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+//            System.out.println("Mouse clicked");
+            //jump to a region
+            
+            if(CoolMapMaster.getActiveCoolMapObject() == null  || bufferedImage == null)
+                return;
+            
+            float xPercentage =  (e.getX() - mapAnchor.x)/bufferedImage.getWidth() ;
+            float yPercentage =  (e.getY() - mapAnchor.y)/bufferedImage.getHeight() ;
+            
+            //System.out.println(xPercentage + "--" + xPercentage);
+            
+            //the distance from the anchor
+            //need to determine the location
+            
+            
+            xPercentage  = xPercentage < 0 ? 0 : xPercentage;
+            xPercentage = xPercentage > 1 ? 1 : xPercentage;
+            yPercentage = yPercentage < 0 ? 0 : yPercentage;
+            yPercentage = yPercentage > 1 ? 1 : yPercentage;
+            
+            CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+            obj.getCoolMapView().centerToPercentage(xPercentage, yPercentage);
+            
+            
+            
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+        }
+        
     }
 
 }
