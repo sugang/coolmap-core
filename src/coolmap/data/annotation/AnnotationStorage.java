@@ -80,5 +80,18 @@ public class AnnotationStorage {
 
         return pointAnnotationStorage.get(rowKey, columnKey);
     }
+    
+    
+    /**
+     * key = nodeName + ontologyID
+     * @param rowKey
+     * @param colKey
+     * @return 
+     */
+    public PointAnnotation getAnnotation(String rowKey, String colKey){
+        
+        
+        return pointAnnotationStorage.get(rowKey, colKey);
+    }
 
 }
