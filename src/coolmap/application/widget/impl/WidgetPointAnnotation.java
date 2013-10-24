@@ -7,6 +7,7 @@ package coolmap.application.widget.impl;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.utils.Messenger;
 import coolmap.application.widget.Widget;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
@@ -17,12 +18,21 @@ import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
@@ -36,6 +46,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
     private JToolBar _toolBar = new JToolBar();
     private PointAnnotationEditor _editor = new PointAnnotationEditor();
     private PointAnnotationBrowser _browser = new PointAnnotationBrowser();
+    
 
     /**
      * please note that when base matrix changes, all
@@ -60,8 +71,12 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
         private JLabel _textColorLabel;
         private JLabel _fontColorLabel;
         private JTextArea _annotationField;
+        private JLabel _informationLabel = new JLabel();
         
-        
+        private VNode currentRowNode;
+        private VNode currentColNode;
+        private PointAnnotation currentAnnotation;
+        private CoolMapObject currentObject;
         
         
         public PointAnnotationEditor(){
@@ -72,25 +87,109 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
             toolBar.setFloatable(false);
             setLayout(new BorderLayout());
             add(new JScrollPane(_annotationField), BorderLayout.CENTER);
-            add(toolBar, BorderLayout.NORTH);
-            JButton button = new JButton("Text color");
-            toolBar.add(button);
-            toolBar.add(_textColorLabel);
+            add(toolBar, BorderLayout.SOUTH);
             
-            button = new JButton("Label color");
+//  worry about these later on            
+//            JButton button = new JButton("Text color");
+//            toolBar.add(button);
+//            toolBar.add(_textColorLabel);
+//            button.addActionListener(new ActionListener() {
+//
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    
+//                }
+//            });
+//            
+//            button = new JButton("Label color");
+//            toolBar.add(button);
+//            toolBar.add(_fontColorLabel);
+            
+            JButton button = new JButton("Save");
             toolBar.add(button);
-            toolBar.add(_fontColorLabel);
+            button.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //save to current PA
+                    if(currentObject != null && currentRowNode != null && currentColNode != null){
+                        
+                        if(currentAnnotation != null){
+                            //update the current one.
+                            //must 
+                            currentAnnotation.setAnnotation(_annotationField.getText());
+                            currentObject.getCoolMapView().updateCanvasEnforceOverlay();
+                            
+                            //the current annotation exited
+                            //no need to update
+                        }
+                        else{
+                            
+                            PointAnnotation annotation = new PointAnnotation(currentRowNode, currentColNode, _annotationField.getText());
+                            currentObject.getAnnotationStorage().addAnnotation(annotation);
+                            currentObject.getCoolMapView().updateCanvasEnforceOverlay();
+                            //new one added, update
+                            _browser.updateListModel();
+                        }
+                    }
+                    
+                }
+            });
+            
+            button = new JButton("Delete");
+            toolBar.add(button);
+            button.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //delete the current one
+                    if(currentObject != null && currentRowNode != null && currentColNode != null && currentAnnotation != null){
+                        
+                        currentObject.getAnnotationStorage().removeAnnotation(currentRowNode, currentColNode);
+                        currentAnnotation = null;
+                        currentObject.getCoolMapView().updateCanvasEnforceOverlay();
+                        _browser.updateListModel();
+                    }
+                    
+                    
+                }
+            });
+            
+            
+            
+            add(_informationLabel, BorderLayout.NORTH);
+            _informationLabel.setFont(UI.fontMono.deriveFont(12f));
+            _informationLabel.setBorder(BorderFactory.createEmptyBorder(3, 10, 3, 10));
+            _annotationField.setBorder(BorderFactory.createEmptyBorder(3,10,3,10));
         }
         
         
-        public void updateActiveAnnotation(PointAnnotation pa){
+        public void updateActiveAnnotation(CoolMapObject object, VNode rowNode, VNode colNode, PointAnnotation pa){
+            currentRowNode = rowNode;
+            currentColNode = colNode;
+            currentAnnotation = pa;
+            currentObject = object;
+            
+            String rowLabel = ""; 
+            if(rowNode != null){
+                rowLabel = rowNode.getViewLabel();
+            }
+            
+            String colLabel = "";
+            if(colNode != null){
+                colLabel = colNode.getViewLabel();
+            }
+            
+            _informationLabel.setText( "<html> Row: <strong>" + rowLabel + "</strong><br/> Col: <strong>" + colLabel + "</strong></html>" );
+            
+            
             if(pa == null){
                 _textColorLabel.setBackground(null);
                 _fontColorLabel.setBackground(null);
                 _annotationField.setText("");
             }
             else{
-                
+//                _informationLabel.setText(TOOL_TIP_TEXT_KEY);
                 _annotationField.setText(pa.getAnnotation());
             }
         }
@@ -98,6 +197,34 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
     }
 
     private class PointAnnotationBrowser extends JPanel {
+        
+        //private JList<PointAnnotation> annotations;
+        private JTable annotationTable;
+        
+        
+        public PointAnnotationBrowser(){
+            //annotations = new JList(new DefaultListModel<PointAnnotation>());
+            annotationTable = new JTable();
+            
+            setLayout(new BorderLayout());
+            add(new JScrollPane(annotationTable), BorderLayout.CENTER);
+        }
+        
+        public void updateListModel(){
+            //annotations.
+            try{
+//                ArrayList<PointAnnotation> listAnnotations = CoolMapMaster.getActiveCoolMapObject().getAnnotationStorage().getAnnotations();
+//                Collections.sort(listAnnotations);
+//                DefaultListModel<PointAnnotation> model = new DefaultListModel<>();
+//                for(PointAnnotation an : listAnnotations){
+//                    model.addElement(an);
+//                }
+//                annotations.setModel(model);
+            }
+            catch(Exception e){
+//                annotations.setModel(new DefaultListModel<PointAnnotation>());
+            }
+        }
 
     }
 
@@ -116,6 +243,8 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
     @Override
     public void baseMatrixChanged(CoolMapObject object) {
         //when this changes, it should be notified.
+        //
+        Messenger.showWarningMessage("Base matrices are changed. The annotated values may have also changed.", "Data changed");
     }
 
     @Override
@@ -132,13 +261,41 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
     @Override
     public void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject activeCoolMapObject) {
-        _editor.updateActiveAnnotation(null);
+        //_editor.updateActiveAnnotation(null);
+        _browser.updateListModel();
+        
+        if(activeCoolMapObject == null){
+            _editor.updateActiveAnnotation(activeCoolMapObject, null, null, null);
+            
+        }
+        else{
+            Set<Rectangle> selections = activeCoolMapObject.getCoolMapView().getSelections();
+            if(selections.size() == 1){
+                Rectangle sel = (Rectangle)selections.toArray()[0];
+                if(sel.width > 1 || sel.height > 1){
+                    _editor.updateActiveAnnotation(activeCoolMapObject, null, null, null);
+                    return;
+                }
+                else{
+                    VNode rowNode = activeCoolMapObject.getViewNodeRow(sel.y);
+                    VNode colNode = activeCoolMapObject.getViewNodeColumn(sel.x);
+                    
+//                    System.out.println(rowNode + " " + colNode);
+                    
+                    PointAnnotation pa = activeCoolMapObject.getAnnotationStorage().getAnnotation(rowNode, colNode);
+                    
+//                    System.out.println(pa);
+                    _editor.updateActiveAnnotation(activeCoolMapObject, rowNode, colNode, pa);
+                }
+            }
+        }
+        
     }
 
     @Override
     public void selectionChanged(CoolMapObject object) {
         //selection changed
-        System.out.println("Selection changed?");
+//        System.out.println("Selection changed?");
         
         
         try {
@@ -146,6 +303,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
             if(selections.size() == 1){
                 Rectangle sel = (Rectangle)selections.toArray()[0];
                 if(sel.width > 1 || sel.height > 1){
+                    _editor.updateActiveAnnotation(object, null, null, null);
                     return;
                 }
                 else{
@@ -157,14 +315,14 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                     PointAnnotation pa = object.getAnnotationStorage().getAnnotation(rowNode, colNode);
                     
 //                    System.out.println(pa);
-                    _editor.updateActiveAnnotation(pa);
+                    _editor.updateActiveAnnotation(object, rowNode, colNode, pa);
                 }
             }
             
             
             
         } catch (Exception e) {
-            
+            _editor.updateActiveAnnotation(null, null, null, null);
         }
     }
 

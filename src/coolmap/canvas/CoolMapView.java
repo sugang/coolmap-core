@@ -165,6 +165,15 @@ public final class CoolMapView<BASE, VIEW> {
 //    public void removeViewActiveCellChangedListener(CViewActiveCellChangedListener viewActiveCellChangedListener) {
 //        _viewActiveCellChangedListeners.remove(viewActiveCellChangedListener);
 //    }
+    private boolean drawAnnotation = true;
+    
+    public synchronized void togglePaintAnnotation(){
+        drawAnnotation = !drawAnnotation;
+        _pAnnotationLayer.setRender(drawAnnotation);
+        updateCanvasEnforceOverlay();
+    }
+    
+    
     public void setRowPanelsVisible(boolean visible) {
         _rowDrawer.setVisible(visible);
     }
@@ -2349,7 +2358,7 @@ public final class CoolMapView<BASE, VIEW> {
 //            g2D.clearRect(0, 0, getWidth(), getHeight());
             //render maplayer into buffer
             
-            System.out.println("Number of overlayer:" +_overLayers.size());
+//            System.out.println("Number of overlayer:" +_overLayers.size());
             for (MapLayer mapLayer : _overLayers) {
 
                 

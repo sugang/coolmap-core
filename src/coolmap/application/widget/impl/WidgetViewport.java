@@ -11,6 +11,7 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.utils.viewportActions.CascadeMaps;
 import coolmap.application.utils.viewportActions.TileMaps;
+import coolmap.application.utils.viewportActions.ToggleAnnotation;
 import coolmap.application.utils.viewportActions.ToggleCanvasState;
 import coolmap.application.utils.viewportActions.ToggleColumnPanels;
 import coolmap.application.utils.viewportActions.ToggleLabeltip;
@@ -90,12 +91,16 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         item = new MenuItem("Toggle selection tooltip", new MenuShortcut(KeyEvent.VK_4));
         frame.addMenuItem("View/Canvas config", item, false, false);
         item.addActionListener(new ToggleSelectionLabel());
+        
+        item = new MenuItem("Toggle annotation tooltip", new MenuShortcut(KeyEvent.VK_5));
+        frame.addMenuItem("View/Canvas config", item, false, false);
+        item.addActionListener(new ToggleAnnotation());
 
-        MenuItem toggleRows = new MenuItem("Toggle row panels", new MenuShortcut(KeyEvent.VK_5));
+        MenuItem toggleRows = new MenuItem("Toggle row panels", new MenuShortcut(KeyEvent.VK_6));
         toggleRows.addActionListener(new ToggleSidePanelsRow());
         frame.addMenuItem("View/Canvas config", toggleRows, true, false);
 
-        MenuItem toggleColumns = new MenuItem("Toggle column panels", new MenuShortcut(KeyEvent.VK_6));
+        MenuItem toggleColumns = new MenuItem("Toggle column panels", new MenuShortcut(KeyEvent.VK_7));
         toggleColumns.addActionListener(new ToggleColumnPanels());
         frame.addMenuItem("View/Canvas config", toggleColumns, false, false);
 
