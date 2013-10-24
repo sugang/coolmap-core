@@ -10,7 +10,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  *
@@ -102,8 +101,33 @@ public class Tools {
     public static String randomID() {
 
         //return UUID.randomUUID().toString();
-        return DigestUtils.md5Hex(UUID.randomUUID().toString());
+        //Probably better way to generate anID
+        //The current Unique IDs are way too long
+        UUID u = UUID.randomUUID();
+
+        //return DigestUtils.md5Hex(UUID.randomUUID().toString());
+        
+        //a shorter UUID
+        return toIDString(u.getMostSignificantBits()) + toIDString(u.getLeastSignificantBits()); //This UUID is only 20 key long
     }
+
+    private static String toIDString(long i) {
+        char[] buf = new char[32];
+        int z = 64; // 1 << 6;
+        int cp = 32;
+        long b = z - 1;
+        do {
+            buf[--cp] = DIGITS66[(int) (i & b)];
+            i >>>= 6;
+        } while (i != 0);
+        return new String(buf, cp, (32 - cp));
+    }
+
+    private final static char[] DIGITS66 = {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        '-', '.', '_', '~'
+    };
 
     public static String removeFileExtension(String s) {
 
