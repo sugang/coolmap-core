@@ -46,17 +46,15 @@ public abstract class ViewRenderer<VIEW> {
     private int _globalMode = SD;
     private boolean _modeOverride = false;
     private CoolMapObject _coolMapObject;
-    
-    
-    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight){
+
+    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
         //System.out.println(activeCell + " " + percentX + " " + PercentY + " " + cellWidth + " " + cellHeight);
         return null;
     }
-    
-    public Image getLegend(){
+
+    public Image getLegend() {
         return null;
     }
-    
 
     public ViewRenderer() {
         _coolMapObject = null;
@@ -90,14 +88,14 @@ public abstract class ViewRenderer<VIEW> {
 
         return label;
     }
-    
+
     private String _description = "No description";
-    
-    public String getDescription(){
+
+    public String getDescription() {
         return _description;
     }
-    
-    public void setDescription(String description){
+
+    public void setDescription(String description) {
         _description = description;
     }
 
@@ -132,8 +130,6 @@ public abstract class ViewRenderer<VIEW> {
 //    protected abstract void _renderCellAnnotationHD();
     protected abstract void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
-    
-    
 //    public synchronized BufferedImage getRenderedRadarView(CoolMapObject data, int imageWidth, int imageHeight) throws InterruptedException{
 //        //I can't possibly render a map that is overwhelmingly large
 //        //int fullImageWidth = data.getCoolMapView().getMapWidth();
@@ -143,54 +139,55 @@ public abstract class ViewRenderer<VIEW> {
 //        
 //        return null;
 //    }
-    
-    
-    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage){
-        if(data == null)
+    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
+        if (data == null) {
             return null;
+        }
         CoolMapView view = data.getCoolMapView();
-        if(view == null)
+        if (view == null) {
             return null;
+        }
         float zoomX = view.getZoomX();
         float zoomY = view.getZoomY();
-        
-        float mapWidth = view.getMapWidth()  * percentage;
+
+        float mapWidth = view.getMapWidth() * percentage;
         float mapHeight = view.getMapHeight() * percentage;
-        
+
         BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
-        
+
         Graphics2D g2D = image.createGraphics();
         g2D.setColor(Color.BLACK);
-        
+
         g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
-        
+
         //anchorage
         float currentAnchorX = 0;
         float currentAnchorY = 0;
         float currentWidth = 0;
         float currentHeight = 0;
-        
+
 //        Thread.sleep(1000);
-        
         //then render
-        for(int i=0; i<data.getViewNumRows(); i++){
+        for (int i = 0; i < data.getViewNumRows(); i++) {
             VNode rowNode = data.getViewNodeRow(i);
             currentAnchorY = rowNode.getViewOffset() * percentage;
             currentHeight = rowNode.getViewSizeInMap(zoomY) * percentage;
-            if(currentHeight < 1)
+            if (currentHeight < 1) {
                 currentHeight = 1;
-            
-            for(int j=0; j<data.getViewNumColumns(); j++){
+            }
+
+            for (int j = 0; j < data.getViewNumColumns(); j++) {
                 VNode colNode = data.getViewNodeColumn(j);
                 currentAnchorX = colNode.getViewOffset() * percentage;
                 currentWidth = colNode.getViewSizeInMap(zoomX) * percentage;
-                if(currentWidth < 1)
+                if (currentWidth < 1) {
                     currentWidth = 1;
-                
+                }
+
                 VIEW v = data.getViewValue(i, j);
-                
+
                 //use low definition mode
-                _renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));                
+                _renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
 //                try{
 //                    Thread.sleep(50);
 //                }
@@ -198,25 +195,20 @@ public abstract class ViewRenderer<VIEW> {
 //                catch(InterruptedException e){
 //                    throw e;
 //                }
-                
-                if(Thread.interrupted())
+
+                if (Thread.interrupted()) {
                     return null;
+                }
             }
         }
-        
 
-        
-        if(Thread.interrupted())
+        if (Thread.interrupted()) {
             return null;
-        
+        }
+
         return image;
     }
-    
-    
-    
-    
-    
-    
+
     public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
         if (data == null || data.getViewNumColumns() == 0 || data.getViewNumRows() == 0 || fromRow < 0 || fromRow > data.getViewNumRows() || fromCol < 0 || fromCol > data.getViewNumColumns()) {
             //System.out.println("Error occured");
@@ -225,11 +217,9 @@ public abstract class ViewRenderer<VIEW> {
         } else {
 
             //System.out.println((int)zoomX);
-
             if (!canRender(data.getViewClass())) {
                 return null;
             };
-
 
             //
             if (data.getViewNumColumns() > _multiThreadThreshold
@@ -242,7 +232,6 @@ public abstract class ViewRenderer<VIEW> {
             }
 
 //            _threadNum = 1;
-
             //do something before render
             _preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
 
@@ -255,13 +244,10 @@ public abstract class ViewRenderer<VIEW> {
             VNode cMin = data.getViewNodeColumn(fromCol);
             VNode cMax = data.getViewNodeColumn(toCol - 1);
 
-
-
             int imageWidth = (int) (cMax.getViewOffset() - cMin.getViewOffset() + cMax.getViewSizeInMap(zoomX));
             int imageHeight = (int) (rMax.getViewOffset() - rMin.getViewOffset() + rMax.getViewSizeInMap(zoomY));
 
 //            System.out.println(imageWidth + " " + imageHeight);
-
             //This is the bottom map, no need to be transparent.
             BufferedImage viewMap = _graphicsConfiguration.createCompatibleImage(imageWidth, imageHeight, Transparency.OPAQUE);
 
@@ -294,9 +280,6 @@ public abstract class ViewRenderer<VIEW> {
                     if (j == _threadNum - 1) {
                         matrixToCol = toCol;
                     }
-
-
-
 
                     subImageAnchorX = (int) (data.getViewNodeColumn(matrixFromCol).getViewOffset() - data.getViewNodeColumn(fromCol).getViewOffset());
                     subImageAnchorY = (int) (data.getViewNodeRow(matrixFromRow).getViewOffset() - data.getViewNodeRow(fromRow).getViewOffset());
@@ -381,17 +364,13 @@ public abstract class ViewRenderer<VIEW> {
 
 //            System.out.println("Rendering Column:" + __matrixFromCol + " " + __matrixToCol);
 //            System.out.println("Rendering Row:" + __matrixFromRow + " " + __matrixToRow);
-
-
             //int subMapWidth = (int) (colEndNode.getViewOffset() - colStartNode.getViewOffset() + colEndNode.getViewSize(__zoomX));
             //int subMapHeight = (int) (rowEndNode.getViewOffset() - rowStartNode.getViewOffset() + rowEndNode.getViewSize(__zoomY));
             //System.out.println("zoomX:" + __zoomX);
-
             int subMapWidth = VNode.distanceInclusive(colStartNode, colEndNode, __zoomX);
             int subMapHeight = VNode.distanceInclusive(rowStartNode, rowEndNode, __zoomY);
 
             //System.out.println(subMapWidth + " " + subMapHeight);
-
             final BufferedImage subMap = _graphicsConfiguration.createCompatibleImage(subMapWidth, subMapHeight, Transparency.OPAQUE);
 
             Graphics2D g2D = subMap.createGraphics();
@@ -413,74 +392,67 @@ public abstract class ViewRenderer<VIEW> {
             VNode colNode;
             VIEW value;
 
-
             for (int i = 0; i < __matrixToRow - __matrixFromRow; i++) {
                 for (int j = 0; j < __matrixToCol - __matrixFromCol; j++) {
 
+                    try {
+                        rowNode = __data.getViewNodeRow(i + __matrixFromRow);
+                        colNode = __data.getViewNodeColumn(j + __matrixFromCol);
 
+                        value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
 
+                        anchorX = Math.round(colNode.getViewOffset() - offsetX);
 
-                    rowNode = __data.getViewNodeRow(i + __matrixFromRow);
-                    colNode = __data.getViewNodeColumn(j + __matrixFromCol);
+                        //sometimes error here.
+                        anchorY = Math.round(rowNode.getViewOffset() - offsetY);
 
-                    value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
+                        cellWidth = Math.round(colNode.getViewSizeInMap(__zoomX));
+                        cellHeight = Math.round(rowNode.getViewSizeInMap(__zoomY));
 
-                    anchorX = Math.round(colNode.getViewOffset() - offsetX);
-                    
-                    //sometimes error here.
-                    anchorY = Math.round(rowNode.getViewOffset() - offsetY);
-                    
-                    
-                    
-                    cellWidth = Math.round(colNode.getViewSizeInMap(__zoomX));
-                    cellHeight = Math.round(rowNode.getViewSizeInMap(__zoomY));
-                    
                     //System.out.println(cellWidth + " " + cellHeight);
-
-                    //each cell can take a different size. Therefore need to 
-                    if (!_modeOverride) {
-                        if (cellWidth <= _ldThreshold || cellHeight <= _ldThreshold) {
-                            __mode = LD;
-                        } else if (cellWidth >= _hdThreshold || cellHeight > +_hdThreshold) {
-                            __mode = HD;
+                        //each cell can take a different size. Therefore need to 
+                        if (!_modeOverride) {
+                            if (cellWidth <= _ldThreshold || cellHeight <= _ldThreshold) {
+                                __mode = LD;
+                            } else if (cellWidth >= _hdThreshold || cellHeight > +_hdThreshold) {
+                                __mode = HD;
+                            } else {
+                                __mode = SD;
+                            }
                         } else {
-                            __mode = SD;
+                            __mode = _globalMode;
                         }
-                    } else {
-                        __mode = _globalMode;
-                    }
 
-                    //make sure drawing don't go to other cells
-                    if (Thread.currentThread().isInterrupted()) {
+                        //make sure drawing don't go to other cells
+                        if (Thread.currentThread().isInterrupted()) {
                         //throw new InterruptedException();
-                        //simply stop rendering
-                        //System.out.println("Interrupted?");
-                        //Immediately return
-                        return;
-                    }
-
+                            //simply stop rendering
+                            //System.out.println("Interrupted?");
+                            //Immediately return
+                            return;
+                        }
 
 //                    System.out.println(cellWidth + " " + cellHeight);
 //                    g2D.setClip((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
 //                    System.out.println("Render SD row:" + i + " col:" + j);
+                        switch (__mode) {
+                            case LD:
+                                _renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                break;
+                            case SD:
 
+                                _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                break;
+                            case HD:
+                                _renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                break;
+                            default:
+                                _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                        }
 
-
-                    switch (__mode) {
-                        case LD:
-                            _renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                            break;
-                        case SD:
-
-                            _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                            break;
-                        case HD:
-                            _renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                            break;
-                        default:
-                            _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                    } catch (Exception e) {
+                        System.err.println("View render exception.. Not serious should be repaired by itself");
                     }
-
 
                 }//end of inner loop
             }//end of outter loop

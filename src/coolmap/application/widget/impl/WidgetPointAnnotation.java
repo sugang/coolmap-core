@@ -17,10 +17,12 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -32,9 +34,16 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -144,9 +153,9 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                         currentObject.getAnnotationStorage().removeAnnotation(currentRowNode, currentColNode);
                         currentAnnotation = null;
                         _annotationField.setText("");
-                        
+
                         currentObject.getCoolMapView().updateCanvasEnforceOverlay();
-                        
+
                         _browser.updateListModel();
                     }
 
@@ -196,6 +205,31 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
         private JTextField filterField;
         private BrowserTableListener listener = new BrowserTableListener();
 
+        private void _filterTable() {
+            String text = filterField.getText();
+            if (text == null || text.length() == 0) {
+                filterField.setBackground(Color.WHITE);
+                if (annotationTable.getRowSorter() == null) {
+                    return;
+                }
+
+                ((TableRowSorter) annotationTable.getRowSorter()).setRowFilter(null);
+            } else {
+                try {
+                    filterField.setBackground(Color.WHITE);
+                    ((TableRowSorter) annotationTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                } catch (Exception e) {
+                    filterField.setBackground(UI.colorRedWarning);
+
+                    if (annotationTable.getRowSorter() == null) {
+                        return;
+                    }
+                    ((TableRowSorter) annotationTable.getRowSorter()).setRowFilter(null);
+
+                }
+            }
+        }
+
         public PointAnnotationBrowser() {
             //annotations = new JList(new DefaultListModel<PointAnnotation>());
             annotationTable = new JTable();
@@ -210,6 +244,125 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
             add(toolBar, BorderLayout.NORTH);
             filterField = new JTextField();
             toolBar.add(filterField);
+            
+            filterField.getDocument().addDocumentListener(new DocumentListener() {
+
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    _filterTable();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    _filterTable();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                }
+            });
+            
+            
+
+            annotationTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+
+                    if (!e.getValueIsAdjusting()) {
+
+                        System.out.println("Selection changed");
+//                        int firstIndex = e.getFirstIndex();
+//                        int lastIndex = e.getLastIndex();
+//                        System.out.println(firstIndex + " " + lastIndex);
+                        int rows[] = annotationTable.getSelectedRows();
+                        if (rows == null || rows.length == 0 || rows.length > 1) {
+                            return;
+                        }
+
+                        int row = rows[0];
+
+//                        if (firstIndex == lastIndex && firstIndex > 0) {
+                        //make sure only one row is selected
+                        int modelIndex = annotationTable.convertRowIndexToModel(row);
+                        TableModel model = annotationTable.getModel();
+                        String rowLabel = model.getValueAt(modelIndex, 0).toString();
+                        String colLabel = model.getValueAt(modelIndex, 1).toString();
+                        String rowOntologyID = null;
+                        String colOntologyID = null;
+
+                        try {
+                            rowOntologyID = model.getValueAt(modelIndex, 3).toString();
+                        } catch (Exception ex) {
+
+                        }
+                        try {
+                            colOntologyID = model.getValueAt(modelIndex, 4).toString();
+                        } catch (Exception ex) {
+
+                        }
+
+                        rowLabel = rowLabel.replaceAll(" || .*$", "");
+                        colLabel = colLabel.replaceAll(" || .*$", "");
+
+                        System.out.println(rowLabel + " " + colLabel);
+
+//                        }
+                        //now need to get active nodes
+                        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                        if (object != null) {
+                            //then jmp
+                            List<VNode> rowNodes = object.getViewNodesRow(rowLabel);
+                            List<VNode> colNodes = object.getViewNodesColumn(colLabel);
+
+                            //select only by name then, -> if it's a leaf node then no problem
+                            VNode rowNodeToSelect = null;
+                            VNode colNodeToSelect = null;
+
+                            if (rowNodes == null || rowNodes.isEmpty() || colNodes == null || colNodes.isEmpty()) {
+                                return;
+                            }
+
+                            for (VNode node : rowNodes) {
+                                if (node.getName().equals(rowLabel)) {
+
+                                    if (node.isSingleNode() || node.getCOntology().getID().equals(rowOntologyID)) {
+                                        rowNodeToSelect = node;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (rowNodeToSelect == null) {
+                                return;
+                            }
+
+                            for (VNode node : colNodes) {
+                                if (node.getName().equals(colLabel)) {
+                                    if (node.isSingleNode() || node.getCOntology().getID().equals(colOntologyID)) {
+                                        colNodeToSelect = node;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (colNodeToSelect == null) {
+                                return;
+                            }
+
+                            System.out.println("Map to center to: " + rowNodeToSelect + " " + colNodeToSelect);
+
+                            try {
+                                Rectangle r = new Rectangle(colNodeToSelect.getViewIndex().intValue(), rowNodeToSelect.getViewIndex().intValue(), 1, 1);
+                                object.getCoolMapView().centerToRegion(r);
+                            } catch (Exception ex) {
+
+                            }
+                        }
+
+                    }
+
+                }
+            });
 
         }
 
@@ -285,7 +438,6 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
                         System.out.println(rowKey + " " + colKey + " " + newAnnotation);
 
-                        
                         rowKey = rowKey.replaceAll(" || .*$", "");
                         colKey = colKey.replaceAll(" || .*$", "");
 
@@ -298,10 +450,10 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
                         //
                         PointAnnotation pa = CoolMapMaster.getActiveCoolMapObject().getAnnotationStorage().getAnnotation(rowKey, colKey);
-                        
+
                         //This one must exist! must not be null!
                         pa.setAnnotation(newAnnotation);
-                        
+
                         //
                         CoolMapMaster.getActiveCoolMapObject().getCoolMapView().updateCanvasEnforceOverlay();
                     }
@@ -370,8 +522,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 //                    System.out.println(pa);
                     _editor.updateActiveAnnotation(activeCoolMapObject, rowNode, colNode, pa);
                 }
-            }
-            else{
+            } else {
                 _editor.updateActiveAnnotation(oldObject, null, null, null);
             }
         }
@@ -400,6 +551,8 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 //                    System.out.println(pa);
                     _editor.updateActiveAnnotation(object, rowNode, colNode, pa);
                 }
+            } else {
+                _editor.updateActiveAnnotation(object, null, null, null);
             }
 
         } catch (Exception e) {

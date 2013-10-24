@@ -28,28 +28,27 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
     private int margin = 10;
     private Color labelBackgroundColor;
     private Color shadowColor;
-    
+
     private boolean render = true;
-    
-    public void setRender(boolean r){
+
+    public void setRender(boolean r) {
         render = r;
     }
-    
-    
+
     public PointAnnotationLayer(CoolMapObject object) {
         _object = object;
         labelFont = UI.fontPlain.deriveFont(fontSize).deriveFont(Font.BOLD);
         labelBackgroundColor = UI.colorGrey2;
         shadowColor = UI.mixOpacity(UI.colorBlack2, 0.5f);
     }
-    
 
     @Override
     public void render(Graphics2D g2D, CoolMapObject<Object, Object> coolMapObject, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int width, int height) throws Exception {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        if(!render)
+        if (!render) {
             return;
-        
+        }
+
 //        System.err.println("\n\n annotation layer rendered ");
 //        g2D.setColor(Color.RED);
 //        g2D.fillRect(0, 0, width, height);
@@ -99,7 +98,12 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
                     COntology o = node.getCOntology();
 //                    if( o == null && colNodeOntoID != null){}
 ////                        continue;
-//                    else 
+//                    else
+                    if (colNodeOntoID == null) {
+                        colNodesInView.add(node);
+                        continue;
+                    }
+
                     if (o == null && colNodeOntoID == null || o != null && o.getID().equals(colNodeOntoID)) {
                         colNodesInView.add(node);
                     }
@@ -110,6 +114,12 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
             for (VNode node : rowNodes) {
                 if (node.getViewIndex() != null && node.getViewIndex() >= fromRow && node.getViewIndex() < toRow) {
                     COntology o = node.getCOntology();
+
+                    //fix that nodes will show up correctly after assigning cluster trees
+                    if (rowNodeOntoID == null) {
+                        rowNodesInView.add(node);
+                        continue;
+                    }
 
                     if (o == null && rowNodeOntoID == null || o != null && o.getID().equals(rowNodeOntoID)) {
                         rowNodesInView.add(node);
@@ -135,7 +145,7 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
 //                    g2D.setColor(Color.BLUE);
                     g2D.setColor(UI.colorLightGreen6);
                     g2D.setStroke(UI.stroke2);
-                    g2D.drawRoundRect(anchorX, anchorY, cellWidth, cellHeight, 2, 2);
+                    g2D.drawRoundRect(anchorX, anchorY, cellWidth, cellHeight, 2, 2); //This is the grid
 
                     //g2D.setColor(Color.WHITE);
                     //TextLayout layout = new TextLayout(pa.getAnnotation(), labelFont, g2D.getFontRenderContext());
@@ -144,9 +154,6 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
                     if (annotation == null || annotation.length() == 0) {
                         continue;
                     }
-
-                    g2D.setStroke(UI.strokeDash1_5);
-                    g2D.drawLine(anchorX + cellWidth + 1, anchorY + cellHeight + 1, anchorX + cellWidth + 5, anchorY + cellHeight + 5);
 
                     String[] lines = annotation.split("\n", -1);
                     int labelWidth = 0;
@@ -160,16 +167,38 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
                     labelWidth += margin * 2;
                     int labelHeight = (int) (lines.length * fontSize + margin * 2);
 
+                    int tipAnchorX = anchorX + cellWidth + 5;
+                    int tipAnchorY = anchorY + cellHeight + 5;
+                    int tipWidth = labelWidth;
+                    int tipHeight = labelHeight;
+
+                    //make sure it's not out of bounds..
+                    if (tipAnchorX + tipWidth > width) {
+                        //out of bounds, draw to the left
+                        tipAnchorX = anchorX - tipWidth - 5;
+                    }
+
+                    if (tipAnchorY + tipHeight > height) {
+                        tipAnchorY = anchorY - tipHeight - 5;
+                    }
+                    
+                    System.out.println(fromRow + " " + toRow + " " + fromCol + " " + toCol + " " + zoomX + " " + zoomY + " " + width + " " + height);
+//                    System.out.println(tipAnchorX + " " + tipAnchorY + " " + tipWidth + " " + tipHeight + " " + width + " " + height);
+//                    System.out.println();
+
+                    g2D.setStroke(UI.strokeDash1_5);
+                    g2D.drawLine(anchorX + cellWidth + 1, anchorY + cellHeight + 1, anchorX + cellWidth + 5, anchorY + cellHeight + 5);
+
                     g2D.setColor(shadowColor);
-                    g2D.fillRoundRect(anchorX + cellWidth + 5 + 3, anchorY + cellHeight + 5 + 3, labelWidth, labelHeight, 5, 5);
+                    g2D.fillRoundRect(tipAnchorX + 3, tipAnchorY + 3, labelWidth, labelHeight, 5, 5);
 
                     g2D.setColor(pa.getBackgroundColor());
-                    g2D.fillRoundRect(anchorX + cellWidth + 5, anchorY + cellHeight + 5, labelWidth, labelHeight, 5, 5);
+                    g2D.fillRoundRect(tipAnchorX, tipAnchorY, tipWidth, tipHeight, 5, 5);
 
                     int offset = (int) fontSize;
                     g2D.setColor(pa.getFontColor());
                     for (String line : lines) {
-                        g2D.drawString(line, anchorX + cellWidth + 5 + margin, anchorY + cellHeight + offset + margin + 2);
+                        g2D.drawString(line, tipAnchorX + margin, tipAnchorY + offset + margin - 3);
                         offset += fontSize;
                     }
 

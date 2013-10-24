@@ -1867,6 +1867,10 @@ public final class CoolMapView<BASE, VIEW> {
         //subMapIndexMin
         //subMapIndexMax
         //System.out.println(subMapDimension + "-->" + _mapDimension);
+        
+        //now, here the submapdimension is correct actually
+        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
+        
         return true;
     }
 
@@ -2345,6 +2349,9 @@ public final class CoolMapView<BASE, VIEW> {
             }
 
 //            System.out.println("Updating overlay...");
+            
+            System.out.println("In overlay container:" + subMapDimension);
+            
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(subMapDimension.width, subMapDimension.height, Transparency.TRANSLUCENT);
             Graphics2D g2D = buffer.createGraphics();
 
@@ -2364,7 +2371,7 @@ public final class CoolMapView<BASE, VIEW> {
                 
                 //change to selections
                 //The only difference here is that only selection will be updated.
-                mapLayer.render(g2D, _coolMapObject, subMapIndexMin.row.intValue(), subMapIndexMax.row.intValue(), subMapIndexMin.col.intValue(), subMapIndexMax.col.intValue(), _zoom.x, _zoom.y, _subMapDimension.width, _subMapDimension.height);
+                mapLayer.render(g2D, _coolMapObject, subMapIndexMin.row.intValue(), subMapIndexMax.row.intValue(), subMapIndexMin.col.intValue(), subMapIndexMax.col.intValue(), _zoom.x, _zoom.y, subMapDimension.width, subMapDimension.height);
 
                 if (Thread.currentThread().isInterrupted()) {
                     return;
@@ -3566,6 +3573,12 @@ public final class CoolMapView<BASE, VIEW> {
                     return;
                 }
 
+//                should use the new parameters?
+                boolean success = _computeSubMapParams(subMapIndexMin, subMapIndexMax, subMapDimension);
+                
+//                should be success -> however, this was done in the enforce all i think, as it's a MOVE.
+                System.out.println("Force update overlay called. ");
+                
                 _overlayContainer.updateMapBuffers(_subMapIndexMin, _subMapIndexMax, _subMapDimension);
 
                 _progressMask.fadeOut();

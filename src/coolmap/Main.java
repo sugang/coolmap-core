@@ -122,7 +122,7 @@ public class Main {
             CoolMapMaster.setActiveCoolMapObject(object);
             
             //try to add some annotations
-            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(0), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
+            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
             object.getAnnotationStorage().addAnnotation(annotation);
             
             
