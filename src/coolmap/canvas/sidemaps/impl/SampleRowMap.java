@@ -20,13 +20,13 @@ import javax.swing.JComponent;
  */
 public class SampleRowMap extends RowMap<Object, Object> implements CViewListener {
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     public SampleRowMap(CoolMapObject object) {
         super(object);

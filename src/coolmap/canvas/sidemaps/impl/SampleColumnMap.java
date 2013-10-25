@@ -24,13 +24,13 @@ public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewL
     public void viewFilterChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     public SampleColumnMap(CoolMapObject object) {
         super(object);

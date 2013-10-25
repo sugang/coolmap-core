@@ -419,13 +419,13 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     ;
     
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     @Override
     protected void prepareRender(Graphics2D g2D) {

@@ -11,7 +11,15 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
@@ -345,10 +353,10 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
     }
 
     ;
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    ;
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    ;
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 }

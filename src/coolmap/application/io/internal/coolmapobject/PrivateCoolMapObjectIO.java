@@ -11,7 +11,7 @@ import coolmap.application.io.exceptions.IOExceptionMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
-import coolmap.data.state.StateSnapshot;
+import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.io.*;

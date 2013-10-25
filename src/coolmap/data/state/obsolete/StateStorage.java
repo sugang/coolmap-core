@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.data.state;
+package coolmap.data.state.obsolete;
 
 import coolmap.data.CoolMapObject;
 import java.util.ArrayDeque;

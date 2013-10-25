@@ -151,15 +151,15 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
     public void viewFilterChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-//        System.out.println("SubSelected Row changed");
-//        System.out.println(object.getCoolMapView().getSubSelectedRows());
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+////        System.out.println("SubSelected Row changed");
+////        System.out.println(object.getCoolMapView().getSubSelectedRows());
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     @Override
     public void stateStorageUpdated(CoolMapObject object) {

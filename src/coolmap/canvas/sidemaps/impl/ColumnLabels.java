@@ -279,9 +279,9 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     public void stateStorageUpdated(CoolMapObject object) {
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
 
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {

@@ -2,14 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.data.state;
+package coolmap.data.state.obsolete;
 
 import com.google.common.collect.Range;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -28,6 +32,8 @@ public class StateSnapshot {
     public final HashMap<String, VNode> _newNodeHash = new HashMap<String, VNode>();
     public String _name;
     public final long _timeStamp;
+    
+    //terms
     public static final String CAPTURE = "Capture";
     public static final String ROWSHIFT = "Row shift";
     public static final String ROWREMOVE = "Row remove";
@@ -35,12 +41,19 @@ public class StateSnapshot {
     public static final String ROWCOLLAPSE = "Row collapse";
     public static final String ROWINSERT = "Row insert";
     public static final String ROWREPLACE = "Row replace";
+    public static final String ROWINSERT_AND_EXPAND = "Row insert and expand";
+    
     public static final String COLUMNSHIFT = "Column shift";
     public static final String COLUMNREMOVE = "Column remove";
     public static final String COLUMNEXPAND = "Column expand";
     public static final String COLUMNCOLLAPSE = "Column collapse";
     public static final String COLUMNINSERT = "Column insert";
     public static final String COLUMNREPLACE = "Column replace";
+    public static final String COLUMNINSERT_AND_EXPAND = "Column insert and expand";
+    
+    
+    
+    
     public static final String STATESET = "Set state";
     public static final String UNDOLEADER = "Undo leader";
     public static final String FILE_RESTORE = "File restore";
@@ -48,6 +61,8 @@ public class StateSnapshot {
 //    public List<Rectangle> getSelections(){
 //        return new ArrayList<Rectangle>(_selections);
 //    }
+    
+    //this is row selections or column selections
     public List<Range<Integer>> getSelections() {
         return new ArrayList<Range<Integer>>(_selections);
     }
@@ -165,7 +180,7 @@ public class StateSnapshot {
         }
 
         //new baseNodes
-        System.out.println("BASE NODES:" + baseNodes);
+//        System.out.println("BASE NODES:" + baseNodes);
         for (VNode node : baseNodes) {
             if (node == null) {
                 continue;

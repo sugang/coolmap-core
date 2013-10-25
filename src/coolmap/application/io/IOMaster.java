@@ -26,7 +26,7 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
-import coolmap.data.state.StateSnapshot;
+import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.Tools;
 import java.awt.Color;
 import java.awt.MenuItem;

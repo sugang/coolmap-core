@@ -4,8 +4,7 @@
  */
 package coolmap.module;
 
-import coolmap.module.impl.StateModule;
-import coolmap.module.impl.ClusterModule;
+import coolmap.module.impl.state.StateModule2;
 import java.util.HashMap;
 
 /**
@@ -16,16 +15,16 @@ public class ModuleMaster{
 
     private ModuleMaster() {
     }
-    private static HashMap<String, Module1> _coolMapModules = new HashMap<String, Module1>();
+    private static HashMap<String, Module> _coolMapModules = new HashMap<String, Module>();
 
-    public static void addModule(Module1 module) {
+    public static void addModule(Module module) {
         if (module == null) {
             return;
         }
         _coolMapModules.put(module.getClass().getName(), module);
     }
 
-    public static Module1 getModule(String className) {
+    public static Module getModule(String className) {
         if (className != null) {
             //System.out.println("Getting: " + className);
             return _coolMapModules.get(className);
@@ -34,8 +33,12 @@ public class ModuleMaster{
         }
     }
 
-    public static void initialize() {        
-        addModule(new ClusterModule());
-        addModule(new StateModule());
+    public static void initialize() {
+        //This part will be controlled by JSON
+        
+        
+        //addModule(new ClusterModule());
+        //addModule(new StateModule());
+        addModule(new StateModule2());
     }
 }

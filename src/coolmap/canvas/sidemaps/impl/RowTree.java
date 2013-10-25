@@ -549,13 +549,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         return (leftOffset + rightOffset) / 2;
     }
 
-    @Override
-    public void subSelectionRowChanged(CoolMapObject object) {
-    }
-
-    @Override
-    public void subSelectionColumnChanged(CoolMapObject object) {
-    }
+//    @Override
+//    public void subSelectionRowChanged(CoolMapObject object) {
+//    }
+//
+//    @Override
+//    public void subSelectionColumnChanged(CoolMapObject object) {
+//    }
 
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
         List<VNode> treeNodes = object.getViewTreeNodesRow();

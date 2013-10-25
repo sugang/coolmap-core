@@ -17,7 +17,7 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.listeners.CObjectListener;
-import coolmap.data.state.StateSnapshot;
+import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;

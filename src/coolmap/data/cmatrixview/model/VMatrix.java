@@ -4,7 +4,7 @@
  */
 package coolmap.data.cmatrixview.model;
 
-import coolmap.data.state.StateSnapshot;
+import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;

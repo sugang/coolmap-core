@@ -5,7 +5,7 @@
 package coolmap.module.impl;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.module.Module1;
+import coolmap.module.Module;
 import coolmap.utils.cluster.HCluster;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.common.Similarity;
@@ -17,7 +17,7 @@ import java.awt.event.ActionListener;
  *
  * @author gangsu
  */
-public class ClusterModule extends Module1 {
+public class ClusterModule extends Module {
 
     public ClusterModule() {
 

@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.module.impl;
+package coolmap.module.impl.state;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.data.CoolMapObject;
 import coolmap.data.listeners.CObjectListener;
-import coolmap.data.state.StateStorage;
-import coolmap.module.Module1;
+import coolmap.data.state.obsolete.StateStorage;
+import coolmap.module.Module;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
@@ -20,7 +20,7 @@ import java.awt.event.KeyEvent;
  *
  * @author gangsu
  */
-public class StateModule extends Module1 implements ActiveCoolMapChangedListener, CObjectListener {
+public class StateModule extends Module implements ActiveCoolMapChangedListener, CObjectListener {
 
     private MenuItem _undoOperation;
     private MenuItem _redoOperation;
@@ -70,6 +70,7 @@ public class StateModule extends Module1 implements ActiveCoolMapChangedListener
     }
 
     private void _updateMenuItems(CoolMapObject activeCoolMapObject) {
+        
         _undoOperation.setEnabled(false);
         _redoOperation.setEnabled(false);
         _undoOperation.setLabel("Undo");
