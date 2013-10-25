@@ -32,8 +32,8 @@ import coolmap.data.filter.ViewFilter;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
+import coolmap.data.state.CoolMapState;
 import coolmap.data.state.obsolete.StateSnapshot;
-import coolmap.data.state.obsolete.StateStorage;
 import coolmap.utils.TableCache;
 import coolmap.utils.Tools;
 import java.awt.Color;
@@ -71,7 +71,7 @@ public final class CoolMapObject<BASE, VIEW> {
     protected AnnotationRenderer<BASE, VIEW> _annotationRenderer = null;
     protected SnippetConverter<VIEW> _snippetConverter = null;
     private HashSet<CObjectListener> _coolMapDataListeners = new HashSet<CObjectListener>();
-    private StateStorage _stateStorage;
+//    private StateStorage _stateStorage;
     private final CombinationFilter _masterFilter;
 
     private final AnnotationStorage annotationStorage = new AnnotationStorage();
@@ -97,10 +97,10 @@ public final class CoolMapObject<BASE, VIEW> {
 //        _masterFilter.clearFilters();
 //        notifyFilterUpdated();
 //    }
-    public void clearStateStorage() {
-        _stateStorage.clear();
-        notifyStateStorageUpdated();
-    }
+//    public void clearStateStorage() {
+//        _stateStorage.clear();
+//        notifyStateStorageUpdated();
+//    }
 
     public void removeViewFilter(ViewFilter filter) {
         if (filter != null && _masterFilter.getCurrFilters().contains(filter)) {
@@ -179,9 +179,9 @@ public final class CoolMapObject<BASE, VIEW> {
 //            StateSnapshot snapshot = new StateSnapshot(this, direction);
 //        }
 //    }
-    public StateStorage getStateStorage() {
-        return _stateStorage;
-    }
+//    public StateStorage getStateStorage() {
+//        return _stateStorage;
+//    }
 
     public void addCObjectDataListener(CObjectListener lis) {
         _coolMapDataListeners.add(lis);
@@ -304,7 +304,7 @@ public final class CoolMapObject<BASE, VIEW> {
             _ID = ID;
         }
 
-        _stateStorage = new StateStorage();
+//        _stateStorage = new StateStorage();
         _masterFilter = new CombinationFilter(this);
 
 //        if (baseMatrix != null) {
@@ -503,7 +503,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void insertRowNodes(int index, List<VNode> nodes) {
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWINSERT);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         nodes.removeAll(Collections.singletonList(null));
@@ -518,7 +518,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void replaceRowNodes(List<VNode> nodes) {
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWREPLACE);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         //This is only used here
@@ -536,7 +536,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
     public void replaceColumnNodes(List<VNode> nodes) {
         StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNREPLACE);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         _vMatrix.removeActiveColNodes();
@@ -553,7 +553,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void insertColumnNodes(int index, List<VNode> nodes) {
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNINSERT);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         nodes.removeAll(Collections.singletonList(null));
@@ -897,7 +897,7 @@ public final class CoolMapObject<BASE, VIEW> {
         try {
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNSHIFT);
-            getStateStorage().addState(snapshot);
+//            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             int[][] ranges = new int[selectedColumns.size()][2];
@@ -935,7 +935,7 @@ public final class CoolMapObject<BASE, VIEW> {
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
-            view.setSelection(newSelections);
+            view.setSelections(newSelections);
 
             //make this call last. It must not be interrupted.
             if (getCoolMapView() != null) {
@@ -998,7 +998,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
         try {
             StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWSHIFT);
-            getStateStorage().addState(snapshot);
+//            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             int[][] ranges = new int[selectedRows.size()][2];
@@ -1039,7 +1039,7 @@ public final class CoolMapObject<BASE, VIEW> {
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
-            view.setSelection(newSelections);
+            view.setSelections(newSelections);
 
             //make this call last. It must not be interrupted.
             if (getCoolMapView() != null) {
@@ -1145,7 +1145,7 @@ public final class CoolMapObject<BASE, VIEW> {
         if (node != null && getCoolMapView() != null && !node.isExpanded()) {
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNEXPAND);
-            getStateStorage().addState(snapshot);
+//            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
 
@@ -1193,7 +1193,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNEXPAND);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
 //        for (VNode node : nodes) {
@@ -1217,7 +1217,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWEXPAND);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
 //        for (VNode node : nodes) {
@@ -1248,7 +1248,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
 //            System.out.println("Trying to expand" + node + node.isExpanded());
             StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWEXPAND);
-            getStateStorage().addState(snapshot);
+//            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
 
@@ -1292,7 +1292,7 @@ public final class CoolMapObject<BASE, VIEW> {
         if (node != null && getCoolMapView() != null && node.isExpanded()) {
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNCOLLAPSE);
-            getStateStorage().addState(snapshot);
+//            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             _vMatrix.collapseTreeColNode(node);
@@ -1325,7 +1325,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNCOLLAPSE);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         _vMatrix.collapseTreeColNodes(nodes);
@@ -1347,7 +1347,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWCOLLAPSE);
-        getStateStorage().addState(snapshot);
+//        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
         _vMatrix.collapseTreeRowNodes(nodes);
@@ -1393,7 +1393,6 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNCOLLAPSE);
-        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
 //        find the first level parents
@@ -1442,7 +1441,6 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWCOLLAPSE);
-        getStateStorage().addState(snapshot);
         notifyStateStorageUpdated();
 
 //        find the first level parents
@@ -1489,7 +1487,6 @@ public final class CoolMapObject<BASE, VIEW> {
         if (node != null && getCoolMapView() != null && node.isExpanded()) {
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWCOLLAPSE);
-            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             _vMatrix.collapseTreeRowNode(node);
@@ -1524,7 +1521,6 @@ public final class CoolMapObject<BASE, VIEW> {
 
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWEXPAND);
-            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
@@ -1555,46 +1551,45 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public void undo() {
-
-//        if (!getStateStorage().hasUndos()) {
-//            return;
-//        }
+//    public void undo() {
 //
-//        StateSnapshot snapshot = getStateStorage().getLastUndo();
-////        if (!getStateStorage().hasRedos()) {
-////            //first redo, add it back
-////            StateSnapshot currentSnapshot = new StateSnapshot(this, snapshot.getDirection());
-////            getStateStorage().addRedo(currentSnapshot);
-//        }
-//        getStateStorage().undo();
-//        _restoreSnapshot(snapshot);
-//        StateSnapshot snapshot = getStateStorage().undo();
-//        if (snapshot != null) {
-//            _restoreSnapshot(snapshot);
-//            notifyStateStorageUpdated();
-//        }
-        getStateStorage().lastState(this);
-    }
+////        if (!getStateStorage().hasUndos()) {
+////            return;
+////        }
+////
+////        StateSnapshot snapshot = getStateStorage().getLastUndo();
+//////        if (!getStateStorage().hasRedos()) {
+//////            //first redo, add it back
+//////            StateSnapshot currentSnapshot = new StateSnapshot(this, snapshot.getDirection());
+//////            getStateStorage().addRedo(currentSnapshot);
+////        }
+////        getStateStorage().undo();
+////        _restoreSnapshot(snapshot);
+////        StateSnapshot snapshot = getStateStorage().undo();
+////        if (snapshot != null) {
+////            _restoreSnapshot(snapshot);
+////            notifyStateStorageUpdated();
+////        }
+//        getStateStorage().lastState(this);
+//    }
 
-    public void redo() {
-//        StateSnapshot snapshot = getStateStorage().redo();
-//        if (snapshot != null) {
-//            _restoreSnapshot(snapshot);
-//        }
-//        StateSnapshot snapshot = getStateStorage().redo();
-//        if (snapshot != null) {
-//            _restoreSnapshot(snapshot);
-//            notifyStateStorageUpdated();
-//        }
-        getStateStorage().nextState(this);
-    }
+//    public void redo() {
+////        StateSnapshot snapshot = getStateStorage().redo();
+////        if (snapshot != null) {
+////            _restoreSnapshot(snapshot);
+////        }
+////        StateSnapshot snapshot = getStateStorage().redo();
+////        if (snapshot != null) {
+////            _restoreSnapshot(snapshot);
+////            notifyStateStorageUpdated();
+////        }
+//        getStateStorage().nextState(this);
+//    }
 
     public synchronized boolean expandColumnNodeToBottom(VNode node) {
         if (node != null && getCoolMapView() != null && !node.isExpanded()) {
 
             StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNEXPAND);
-            getStateStorage().addState(snapshot);
             notifyStateStorageUpdated();
 
             List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
@@ -1744,34 +1739,84 @@ public final class CoolMapObject<BASE, VIEW> {
 //    public Filter<VIEW> getViewFilter() {
 //        return _viewFilter;
 //    }
-    public void restoreSnapshot(StateSnapshot snapshot, boolean trackState) {
+//    public void restoreSnapshot(StateSnapshot snapshot, boolean trackState) {
+//
+//        if (snapshot == null) {
+//            return;
+//        } else {
+//            _vMatrix.restoreState(snapshot.duplicate());
+//            _sortTracker.clearSortedRow();
+//            _sortTracker.clearSortedColumn();
+//            getCoolMapView().updateNodeDisplayParams();
+//            getCoolMapView().clearSelection();
+//            if (snapshot.getDirection() == COntology.ROW) {
+//                getCoolMapView().setSelectionsRow(snapshot.getSelections());
+//            } else {
+//                getCoolMapView().setSelectionsColumn(snapshot.getSelections());
+//            }
+//            getCoolMapView().updateCanvasEnforceAll();
+//
+//            if (snapshot.getDirection() == COntology.ROW) {
+//                notifyRowsChanged();
+//            } else if (snapshot.getDirection() == COntology.COLUMN) {
+//                notifyColumnsChanged();
+//            }
+//
+//            if (trackState) {
+//                _stateStorage.addState(snapshot);
+//            }
+//        }
+//    }
+    
 
-        if (snapshot == null) {
+    /**
+     * The state can be restored from a previously saved
+     * This state also must contain
+     * @param state 
+     */
+    public void restoreState(CoolMapState state){
+        if(state == null){
             return;
-        } else {
-            _vMatrix.restoreState(snapshot.duplicate());
+        }
+        else{
+            _vMatrix.restoreState(state);
             _sortTracker.clearSortedRow();
             _sortTracker.clearSortedColumn();
             getCoolMapView().updateNodeDisplayParams();
-            getCoolMapView().clearSelection();
-            if (snapshot.getDirection() == COntology.ROW) {
-                getCoolMapView().setSelectionsRow(snapshot.getSelections());
-            } else {
-                getCoolMapView().setSelectionsColumn(snapshot.getSelections());
+            
+         
+//            if(state.loggedRows()){
+//                
+//            }
+//            if(state.loggedColumns()){
+//                
+//            }
+            
+            //change selection if it was previously recorded?
+            
+            
+            if(state.loggedSelections()){
+                getCoolMapView().clearSelection(); //This line may be redundant
+                getCoolMapView().setSelections(state.getSelections()); //also 
             }
+            
             getCoolMapView().updateCanvasEnforceAll();
-
-            if (snapshot.getDirection() == COntology.ROW) {
+            
+            //notify downstream listeners
+            if(state.loggedRows()){
                 notifyRowsChanged();
-            } else if (snapshot.getDirection() == COntology.COLUMN) {
+            }
+            if(state.loggedColumns()){
                 notifyColumnsChanged();
             }
-
-            if (trackState) {
-                _stateStorage.addState(snapshot);
-            }
+            
         }
+        
+        
+        
     }
+    
+    
 //    public void setSnapshot(StateSnapshot snapshot) {
 //
 //
@@ -1786,7 +1831,6 @@ public final class CoolMapObject<BASE, VIEW> {
         _vMatrix.destroy();
         _coolMapDataListeners.clear();
         _cMatrices.clear();
-        _stateStorage.clear();
 //        _viewFilter = null;
         _masterFilter.clearFilters();
         _viewRenderer = null;

@@ -4,20 +4,30 @@
  */
 package coolmap.canvas.datarenderer.renderer.impl;
 
-import coolmap.application.CoolMapMaster;
+import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.LinearGradientPaint;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -81,10 +91,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
 //        _minValue = 0;
 //        _maxValue = 500;
 
-
-
-
-
         _gradient.reset();
         _gradient.addColor(_minColor, 0.0);
         _gradient.addColor(_mediumColor, 0.5);
@@ -97,16 +103,16 @@ public class DoubleToColor extends ViewRenderer<Double> {
 //        _gradient.addColor(new Color(252, 146, 114), 0.24);
 //        _gradient.addColor(new Color(251, 106, 74), 0.5);
 //        _gradient.addColor(new Color(222, 45, 38), 1.0);
-
-
-
-
         _colors = _gradient.generateGradient(CImageGradient.InterType.Linear);
     }
 
     @Override
     public boolean canRender(Class<?> viewClass) {
-        return Double.class.isAssignableFrom(viewClass);
+        try {
+            return Double.class.isAssignableFrom(viewClass);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -138,8 +144,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
                 Color c = _colors[index];
                 //System.out.println(c);
 
-
-
                 g2D.setColor(c);
                 g2D.drawLine(Math.round(anchorX), Math.round(anchorY), Math.round(anchorX), Math.round(anchorY));
             }
@@ -164,13 +168,9 @@ public class DoubleToColor extends ViewRenderer<Double> {
 //        _gradient.addColor(new Color(252, 146, 114), 0.24);
 //        _gradient.addColor(new Color(251, 106, 74), 0.5);
 //        _gradient.addColor(new Color(222, 45, 38), 1.0);
-
-
 //        LinearGradientPaint paint = new LinearGradientPaint(0, 0, width, 0, new float[]{0f, 0.14f, 0.141f, 0.239f, 0.24f, 0.5f, 1f}, new Color[]{new Color(44, 127, 184), new Color(127, 205, 187), new Color(189, 189, 189),         
 //        new Color(189, 189, 189), new Color(252, 146, 114),new Color(251, 106, 74), new Color(222, 45, 38)
 //        });
-
-
         g.setPaint(paint);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
         g.setColor(UI.colorGrey1);
@@ -195,11 +195,7 @@ public class DoubleToColor extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
-
-
         if (v == null || v.isNaN()) {
             //System.out.println(v);
         } else {
@@ -221,16 +217,7 @@ public class DoubleToColor extends ViewRenderer<Double> {
             }
         }
 
-
-
-
-
-
-
-
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);
-
-
         //g2D.fillRect(20, 20, 100, 100);
     }
 
@@ -347,7 +334,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
         _lowColorLabel.setOpaque(true);
         _lowColorLabel.setBackground(_minColor);
 
-
         c.gridx = 0;
         c.gridy++;
         panel.add(new JLabel("Middle"), c);
@@ -358,8 +344,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
         panel.add(_mediumColorLabel, c);
         _mediumColorLabel.setBackground(_mediumColor);
         _mediumColorLabel.setOpaque(true);
-
-
 
         c.gridx = 0;
         c.gridy++;
@@ -425,7 +409,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
             }
         });
 
-
         _mediumColorLabel.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -461,7 +444,6 @@ public class DoubleToColor extends ViewRenderer<Double> {
                 }
             }
         });
-
 
         return panel;
     }

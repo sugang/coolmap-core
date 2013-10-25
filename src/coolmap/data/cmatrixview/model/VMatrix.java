@@ -4,15 +4,21 @@
  */
 package coolmap.data.cmatrixview.model;
 
-import coolmap.data.state.obsolete.StateSnapshot;
+import com.google.common.collect.HashMultimap;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
-import java.util.*;
-import com.google.common.collect.HashMultimap;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * no need to have a name; an ID is enough. It's simply a view
@@ -200,9 +206,6 @@ public class VMatrix<BASE, VIEW> {
 //            System.out.println(nodes);
 //            remove 
 
-
-
-
             LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes);
             colNodes.removeAll(nodes);
 
@@ -364,7 +367,6 @@ public class VMatrix<BASE, VIEW> {
             List<VNode> childNodes = node.getChildNodes();
 
             //System.out.println(childNodes);
-
             if (childNodes == null || childNodes.isEmpty()) {
                 return;
             }
@@ -385,7 +387,6 @@ public class VMatrix<BASE, VIEW> {
                 List<VNode> childNodes = node.getChildNodes();
 
                 //System.out.println(childNodes);
-
                 if (childNodes == null || childNodes.isEmpty()) {
                     return;
                 }
@@ -423,7 +424,6 @@ public class VMatrix<BASE, VIEW> {
         }
 
         //collapse to minimal index
-
 //        int index = _activeColNodes.size();
 //        for (VNode baseNode : nodesToBeRemovedFromBase) {
 //            if (baseNode.getViewIndex() < index) {
@@ -647,8 +647,6 @@ public class VMatrix<BASE, VIEW> {
         VNode colNode = getActiveColNode(col);
 
         //System.out.println(rowNode + " " + colNode);
-
-
         //index condition
         if (rowNode == null || colNode == null) {
             return null;
@@ -672,7 +670,6 @@ public class VMatrix<BASE, VIEW> {
 
             //System.out.println(baseRow + " " + baseCol);
             //System.out.println(baseRow + " " + baseCol);
-
             if (baseRow == null || baseCol == null || baseRow < 0 || baseRow >= mx.getNumRows() || baseCol < 0 || baseCol >= mx.getNumColumns()) {
                 return null;
             }
@@ -680,7 +677,6 @@ public class VMatrix<BASE, VIEW> {
             if (matrices.size() == 1) {
                 //System.out.println("Size == 1");
                 //System.out.println(aggr.getAggregation(mx.getValue(baseRow, baseCol)));
-
 
                 return aggr.getAggregation(mx.getValue(baseRow, baseCol), matricesCopy, baseRow, baseCol);
             } else {
@@ -693,11 +689,9 @@ public class VMatrix<BASE, VIEW> {
                 return aggr.getAggregation(values, matricesCopy, Collections.singletonList(baseRow), Collections.singletonList(baseCol));
             }
 
-
             //return aggr.getAggregation(baseRow, baseCol, matrices);
         } else if (rowNode.isSingleNode() && colNode.isGroupNode()) {
             //col is a group
-
 
             Integer baseRow = mx.getIndexOfRowName(rowNode.getName());
             Integer[] baseColumnIndices = colNode.getBaseIndicesFromCOntology(mx, COntology.COLUMN);
@@ -715,8 +709,6 @@ public class VMatrix<BASE, VIEW> {
 //            if (rowNode.getName().equals("APC4")) {
 //                System.out.println("Row node is single and column node is group");
 //            }
-
-
             return aggr.getAggregation(values, matricesCopy, Collections.singletonList(baseRow), Arrays.asList(baseColumnIndices));
 
             //return aggr.getAggregation(baseRow, colIndices, matrices);
@@ -726,7 +718,6 @@ public class VMatrix<BASE, VIEW> {
             Integer[] baseRowIndices = rowNode.getBaseIndicesFromCOntology(mx, COntology.ROW);
 
             //System.out.println(Arrays.toString(baseRowIndices));
-
             if (baseRowIndices == null || baseCol == null || baseRowIndices.length == 0 || baseCol < 0) {
                 return null;
             }
@@ -743,12 +734,10 @@ public class VMatrix<BASE, VIEW> {
 
             //both are groups
             //System.out.println("Both are groups: index of RN0" + mx.getIndexOfColName("RN0"));
-
             Integer[] baseRowIndices = rowNode.getBaseIndicesFromCOntology(mx, COntology.ROW);
             Integer[] baseColIndices = colNode.getBaseIndicesFromCOntology(mx, COntology.COLUMN);
 
             //System.out.println(Arrays.toString(baseRowIndices) + ":" + Arrays.toString(baseColIndices));
-
             if (baseColIndices == null || baseRowIndices == null || baseColIndices.length == 0 || baseRowIndices.length == 0) {
                 return null;
             }
@@ -762,11 +751,7 @@ public class VMatrix<BASE, VIEW> {
                 }
             }
 
-
-
             return aggr.getAggregation(values, matricesCopy, Arrays.asList(baseRowIndices), Arrays.asList(baseColIndices));
-
-
 
             //return aggr.getAggregation(baseColIndices, baseRowIndices, matrices);
         }
@@ -970,14 +955,12 @@ public class VMatrix<BASE, VIEW> {
 //                System.out.print(node.getViewIndex() + " ");
 //            }
 //            System.out.println();
-
             Collections.sort(childNodesInView, new VNodeIndexComparator());
 
 //            for (VNode node : childNodesInView) {
 //                System.out.print(node.getViewIndex() + " ");
 //            }
 //            System.out.println();
-
             return childNodesInView;
         }
     }
@@ -1009,7 +992,6 @@ public class VMatrix<BASE, VIEW> {
 //        }
 //
 //        System.out.println("Target:" + target);
-
         VNode[] nodes = new VNode[_activeColNodes.size()];
         _activeColNodes.toArray(nodes);
         _activeColNodes.clear();
@@ -1057,7 +1039,6 @@ public class VMatrix<BASE, VIEW> {
             for (int i = ranges[ranges.length - 1][1]; i < input.length; i++) {
                 result[cursor++] = input[i];
             }
-
 
         } //shift to right most
         /////////////////////////////////////////////////
@@ -1114,7 +1095,6 @@ public class VMatrix<BASE, VIEW> {
 
 //            System.out.println(Arrays.toString(firstHalf));
 //            System.out.println(Arrays.toString(secondHalf));
-
             //need to create new ranges as well.
             //find where the cutoff point is
             int cutIndex = -1;
@@ -1378,25 +1358,49 @@ public class VMatrix<BASE, VIEW> {
 //        _activeColNodes.clear();
 //        _activeColNodesInTree.clear();
 //    }
-    public void restoreState(StateSnapshot snapshot) {
-        if (snapshot == null) {
+//    public void restoreState(StateSnapshot snapshot) {
+//        if (snapshot == null) {
+//            return;
+//        }
+//        if (snapshot.getDirection() == COntology.COLUMN) {
+//            _activeColNodes.clear();
+//            _activeColNodesInTree.clear();
+//            _activeColNodes.addAll(snapshot.getViewNodesInBase());
+//            _activeColNodesInTree.addAll(snapshot.getViewNodesInTree());
+//            _updateActiveColNodeViewIndices();
+//            _updateActiveColNodeHeights();
+//
+//        } else if (snapshot.getDirection() == COntology.ROW) {
+//            _activeRowNodes.clear();
+//            _activeRowNodesInTree.clear();
+//            _activeRowNodes.addAll(snapshot.getViewNodesInBase());
+//            _activeRowNodesInTree.addAll(snapshot.getViewNodesInTree());
+//            _updateActiveRowNodeViewIndices();
+//            _updateActiveRowNodeHeights();
+//        }
+//    }
+    public void restoreState(CoolMapState state) {
+        if (state == null) {
             return;
         }
-        if (snapshot.getDirection() == COntology.COLUMN) {
+
+        if (state.loggedColumns()) {
             _activeColNodes.clear();
             _activeColNodesInTree.clear();
-            _activeColNodes.addAll(snapshot.getViewNodesInBase());
-            _activeColNodesInTree.addAll(snapshot.getViewNodesInTree());
+            _activeColNodes.addAll(state.getColumnBaseNodes());
+            _activeColNodesInTree.addAll(state.getColumnTreeNodes());
             _updateActiveColNodeViewIndices();
             _updateActiveColNodeHeights();
-
-        } else if (snapshot.getDirection() == COntology.ROW) {
+        }
+        if (state.loggedRows()) {
             _activeRowNodes.clear();
             _activeRowNodesInTree.clear();
-            _activeRowNodes.addAll(snapshot.getViewNodesInBase());
-            _activeRowNodesInTree.addAll(snapshot.getViewNodesInTree());
+            _activeRowNodes.addAll(state.getRowBaseNodes());
+            _activeRowNodesInTree.addAll(state.getRowTreeNodes());
             _updateActiveRowNodeViewIndices();
             _updateActiveRowNodeHeights();
         }
+        
+
     }
 }

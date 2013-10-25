@@ -298,8 +298,8 @@ public class IOMaster {
 //                        System.out.println(columnSnapshot.getBaseNodes());
 //                        System.out.println(columnSnapshot.getTreeNodes());
 
-                        object.restoreSnapshot(rowSnapshot, false);
-                        object.restoreSnapshot(columnSnapshot, false);
+//                        object.restoreSnapshot(rowSnapshot, false);
+//                        object.restoreSnapshot(columnSnapshot, false);
 
                         object.getCoolMapView().setZoomLevels(zoomX, zoomY);
                         object.getCoolMapView().moveMapTo(mX, mY);
@@ -414,7 +414,7 @@ public class IOMaster {
                         CoolMapMaster.addNewBaseMatrix(matrix);
                         CoolMapMaster.addNewCoolMapObject(object);
 
-                        object.clearStateStorage();
+//                        object.clearStateStorage(); //why this is needed is not clear
 
 
                     } catch (Exception e) {

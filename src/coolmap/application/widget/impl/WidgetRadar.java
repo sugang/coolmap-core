@@ -224,6 +224,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             int minRow = view.getCurrentRowSearchAll(canvas.y);
             int maxRow = view.getCurrentRowSearchAll(canvas.y + canvas.height);
 
+            float zoomX = obj.getCoolMapView().getZoomX();
+            float zoomY = obj.getCoolMapView().getZoomY();
 //            there are problems with getCurrentRow and getCurrentCol
 //            can't figure it out!! fuck fuck 
         //System.out.println(canvas);
@@ -248,9 +250,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             float mapHeight = view.getMapHeight();
 
             float r1 = minRowNode.getViewOffset() / mapHeight;
-            float r2 = maxRowNode.getViewOffset() / mapHeight;
+            float r2 = maxRowNode.getViewOffset(zoomY) / mapHeight;
             float c1 = minColNode.getViewOffset() / mapWidth;
-            float c2 = maxColNode.getViewOffset() / mapWidth;
+            float c2 = maxColNode.getViewOffset(zoomX) / mapWidth;
 
             //Then get the actual
 //            if(bufferedImage!= null){

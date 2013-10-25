@@ -12,7 +12,6 @@ import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.DoubleToNetwork;
-import coolmap.data.annotation.PointAnnotation;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -85,30 +84,54 @@ public class Main {
         try {
             CoolMapObject object;
             COntology onto;
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
-            
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
+
             //import sample
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
-            
+
             object = new CoolMapObject();
             object.addBaseCMatrix(matrix);
-            
+
+//            Add base nodes ===================================================
+//            ArrayList<VNode> nodes = new ArrayList<VNode>();
+//            for (Object label : matrix.getRowLabelsAsList()) {
+//                nodes.add(new VNode(label.toString()));
+//            }
+//            object.insertRowNodes(nodes);
+//            
+//            nodes.clear();
+//            for (Object label : matrix.getColLabelsAsList()) {
+//                nodes.add(new VNode(label.toString()));
+//            }
+//            object.insertColumnNodes(nodes);
+            //need ontology nodes
+////////////////////////////////////////////////////////////////////////////////
+            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
+            CoolMapMaster.addNewCOntology(onto);
+
             ArrayList<VNode> nodes = new ArrayList<VNode>();
-            for (Object label : matrix.getRowLabelsAsList()) {
-                nodes.add(new VNode(label.toString()));
-            }
+            nodes.add(new VNode("RG0", onto));
+            nodes.add(new VNode("RG1", onto));
+            nodes.add(new VNode("RG2", onto));
+            nodes.add(new VNode("RGG0", onto));
             object.insertRowNodes(nodes);
-            
+
             nodes.clear();
-            for (Object label : matrix.getColLabelsAsList()) {
-                nodes.add(new VNode(label.toString()));
-            }
+            nodes.add(new VNode("CG0", onto));
+            nodes.add(new VNode("CG1", onto));
+            nodes.add(new VNode("CG2", onto));
+            nodes.add(new VNode("CG3", onto));
+            nodes.add(new VNode("CG4", onto));
+            nodes.add(new VNode("CG5", onto));
+            nodes.add(new VNode("CGG0", onto));
+            nodes.add(new VNode("CGG1", onto));
+
             object.insertColumnNodes(nodes);
-            
+
             object.setAggregator(new DoubleDoubleMean());
             object.setViewRenderer(new DoubleToColor());
-            
+
             object.setSnippetConverter(SnippetMaster.getConverter("D13"));
             object.getCoolMapView().addRowMap(new RowLabels(object));
             object.getCoolMapView().addRowMap(new RowTree(object));
@@ -116,16 +139,13 @@ public class Main {
             object.getCoolMapView().addColumnMap(new ColumnTree(object));
             CoolMapMaster.addNewBaseMatrix(matrix);
             CoolMapMaster.addNewCoolMapObject(object);
-            
-            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
-            CoolMapMaster.addNewCOntology(onto);
+
             CoolMapMaster.setActiveCoolMapObject(object);
-            
+
+            //No need for point nanotation for now
             //try to add some annotations
-            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
-            object.getAnnotationStorage().addAnnotation(annotation);
-            
-            
+//            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
+//            object.getAnnotationStorage().addAnnotation(annotation);
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }

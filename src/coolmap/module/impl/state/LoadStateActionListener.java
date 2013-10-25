@@ -8,7 +8,6 @@ package coolmap.module.impl.state;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.data.CoolMapObject;
-import coolmap.data.state.CoolMapState;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,24 +15,16 @@ import java.awt.event.ActionListener;
  *
  * @author sugang
  */
-public class SaveStateActionListener implements ActionListener{
+public class LoadStateActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        //Capture the current state (everything)
+        //Restore a certain state
         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
         if(object == null)
             return;
         
-        
-        System.out.println("");
-//        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-        CoolMapState state = CoolMapState.createState("Capture", object, null);
-        System.out.println("Captured state::");
-        System.out.println(state);
-        System.out.println("");
-        
-        StateStorage.quickSave(object);
+        StateStorage.quickLoad(object);
         
     }
     

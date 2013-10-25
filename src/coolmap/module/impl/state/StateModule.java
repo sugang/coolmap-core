@@ -1,96 +1,59 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package coolmap.module.impl.state;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.data.CoolMapObject;
 import coolmap.data.listeners.CObjectListener;
-import coolmap.data.state.obsolete.StateStorage;
 import coolmap.module.Module;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 /**
  *
- * @author gangsu
+ * @author sugang
  */
-public class StateModule extends Module implements ActiveCoolMapChangedListener, CObjectListener {
-
-    private MenuItem _undoOperation;
-    private MenuItem _redoOperation;
-
-    public StateModule() {
+public class StateModule extends Module implements ActiveCoolMapChangedListener, CObjectListener{
+    
+    private final MenuItem _undoOperation;
+    private final MenuItem _redoOperation;
+    private final MenuItem _saveStateOperation;
+    private final MenuItem _loadStateOperation; //Need to insert a full capture before this operation
+    
+    
+    
+    public StateModule(){
+        
         _undoOperation = new MenuItem("Undo", new MenuShortcut(KeyEvent.VK_Z));
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false, false);
-        _undoOperation.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                
-                System.out.println("Undo fired");
-                
-                if (obj != null) {
-                    obj.undo();
-                }
-                
-                _updateMenuItems(obj);
-            }
-        });
-
         _redoOperation = new MenuItem("Redo", new MenuShortcut(KeyEvent.VK_Y));
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false, false);
-        _redoOperation.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                if (obj != null) {
-                    obj.redo();
-                }
-                
-                _updateMenuItems(obj);
-            }
-        });
-
+        
+        
+        _saveStateOperation = new MenuItem("Quick save", new MenuShortcut(KeyEvent.VK_M));
+        _loadStateOperation = new MenuItem("Quick load", new MenuShortcut(KeyEvent.VK_L));
+        
+        
+        _saveStateOperation.addActionListener(new SaveStateActionListener());
+        _loadStateOperation.addActionListener(new LoadStateActionListener());
+        
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false, true);
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _saveStateOperation, false, false);
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _loadStateOperation, false, false);
+        
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCObjectListener(this);
-        
     }
+    
 
     @Override
     public void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject activeCoolMapObject) {
-        _updateMenuItems(activeCoolMapObject);
-    }
-
-    private void _updateMenuItems(CoolMapObject activeCoolMapObject) {
-        
-        _undoOperation.setEnabled(false);
-        _redoOperation.setEnabled(false);
-        _undoOperation.setLabel("Undo");
-        _redoOperation.setLabel("Redo");
-        if (activeCoolMapObject == null) {
-            return;
-        }
-
-
-        StateStorage storage = activeCoolMapObject.getStateStorage();
-        if (storage.hasUndos()) {
-            _undoOperation.setEnabled(true);
-            _undoOperation.setLabel("Undo" + " " + activeCoolMapObject.getStateStorage().getLastState().getName());
-        }
-
-        if (storage.hasRedos()) {
-            _redoOperation.setEnabled(true);
-            _redoOperation.setLabel("Redo");
-        }
-
+        System.out.println("Active CoolMap changed -> in StateModule");
     }
 
     @Override
@@ -111,10 +74,7 @@ public class StateModule extends Module implements ActiveCoolMapChangedListener,
 
     @Override
     public void stateStorageUpdated(CoolMapObject object) {
-        System.out.println("State storage detected in the state widget");
-        if(object != null && object == CoolMapMaster.getActiveCoolMapObject()){
-            _updateMenuItems(object);
-        }
+        System.out.println("State storage updated -> in StateModule");
     }
 
     @Override
@@ -124,4 +84,5 @@ public class StateModule extends Module implements ActiveCoolMapChangedListener,
     @Override
     public void viewFilterChanged(CoolMapObject object) {
     }
+    
 }

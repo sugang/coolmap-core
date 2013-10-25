@@ -584,7 +584,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                         newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                     }
                 }
-                view.setSelection(newSelections);
+                view.setSelections(newSelections);
                 //does not change anchor col
             }
         }
@@ -628,7 +628,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
-            view.setSelection(newSelections);
+            view.setSelections(newSelections);
         }
     }
 
@@ -643,7 +643,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         for (Range<Integer> range : selectedColumns) {
             newSelections.add(new Rectangle(range.lowerEndpoint(), targetRow, range.upperEndpoint() - range.lowerEndpoint(), 1));
         }
-        view.setSelection(newSelections);
+        view.setSelections(newSelections);
         _anchorRow = targetRow;
     }
 

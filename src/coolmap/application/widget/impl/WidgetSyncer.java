@@ -567,7 +567,8 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                     }
 
                     //start here
-                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
+//                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
+                    
                     if (_selectionRow.isSelected()) {
                         otherObject.getCoolMapView().setSelectionsRow(object.getCoolMapView().getSelectedRows());
                     }
@@ -602,7 +603,8 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                     }
 
                     //start here
-                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
+//                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
+                    
                     if (_selectionColumn.isSelected()) {
                         otherObject.getCoolMapView().setSelectionsColumn(object.getCoolMapView().getSelectedColumns());
                     }

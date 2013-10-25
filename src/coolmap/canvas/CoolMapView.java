@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.JComponent;
@@ -776,7 +775,7 @@ public final class CoolMapView<BASE, VIEW> {
                 newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
             }
         }
-        setSelection(newSelections);
+        setSelections(newSelections);
     }
 
     public void setSelectionsRow(Collection<Range<Integer>> selectedRows) {
@@ -801,7 +800,7 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
         System.out.println("New selections:" + newSelections);
-        setSelection(newSelections);
+        setSelections(newSelections);
     }
 
     /**
@@ -886,7 +885,7 @@ public final class CoolMapView<BASE, VIEW> {
         }
     }
 
-    public synchronized void addSelection(List<Rectangle> selections) {
+    public synchronized void addSelection(Collection<Rectangle> selections) {
         if (selections == null) {
             return;
         } else {
@@ -909,6 +908,7 @@ public final class CoolMapView<BASE, VIEW> {
     /**
      * set the current cell as the active cell.
      *
+     * @param selection
      * @param row
      * @param col
      */
@@ -921,7 +921,7 @@ public final class CoolMapView<BASE, VIEW> {
         addSelection(selection);
     }
 
-    public void setSelection(List<Rectangle> selections) {
+    public void setSelections(Collection<Rectangle> selections) {
         _selections.clear();
         addSelection(selections);
     }

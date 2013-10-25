@@ -7,22 +7,20 @@ package coolmap.data.state.obsolete;
 import coolmap.data.CoolMapObject;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
-import javax.sql.rowset.spi.SyncResolver;
 
 /**
  *
  * @author gangsu
  */
-public class StateStorage {
+public class StateStorageOld {
 
     private final ArrayDeque<StateSnapshot> _undoQueue = new ArrayDeque<StateSnapshot>();
     private final ArrayDeque<StateSnapshot> _redoQueue = new ArrayDeque<StateSnapshot>();
     private static int _stateCap = 10;
     //private boolean _lastActionRedo = false;
 
-    public StateStorage() {
+    public StateStorageOld() {
     }
 
     public static void setStateCap(int cap) {
@@ -78,7 +76,7 @@ public class StateStorage {
         _redoQueue.add(lastState);
         _undoQueue.pollLast();
 
-        object.restoreSnapshot(lastState, false);
+//        object.restoreSnapshot(lastState, false);
         object.notifyStateStorageUpdated();
 
 //        System.out.println("UNDO:=========================");
@@ -107,7 +105,7 @@ public class StateStorage {
             restoreToState = _redoQueue.getLast();
         }
 
-        object.restoreSnapshot(restoreToState, false);
+//        object.restoreSnapshot(restoreToState, false);
         object.notifyStateStorageUpdated();
 
 //        System.out.println("REDO:=========================");

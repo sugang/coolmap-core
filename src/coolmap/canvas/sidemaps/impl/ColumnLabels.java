@@ -624,7 +624,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
-            view.setSelection(newSelections);
+            view.setSelections(newSelections);
         }
     }
 
@@ -640,7 +640,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             newSelections.add(new Rectangle(targetCol, range.lowerEndpoint(), 1, range.upperEndpoint() - range.lowerEndpoint()));
         }
 
-        view.setSelection(newSelections);
+        view.setSelections(newSelections);
         _anchorCol = targetCol;
     }
 
@@ -711,7 +711,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                         newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                     }
                 }
-                view.setSelection(newSelections);
+                view.setSelections(newSelections);
                 //does not change anchor col
             }
         }
