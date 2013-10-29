@@ -299,7 +299,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
 
 
 
-                List<CoolMapObject> objs = CoolMapMaster.getActiveCoolMapObjects();
+                List<CoolMapObject> objs = CoolMapMaster.getCoolMapObjects();
                 if (objs != null && !objs.isEmpty()) {
 
                     for (Object m : cmatrices) {

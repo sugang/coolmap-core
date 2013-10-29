@@ -448,7 +448,7 @@ public class CMainFrame extends JFrame {
 
     }
 
-    public MenuItem findMenuItem(String parentPath) {
+    public MenuItem findMenu(String parentPath) {
 
         if (parentPath.startsWith("/")) {
 

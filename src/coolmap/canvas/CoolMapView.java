@@ -5,6 +5,7 @@
 package coolmap.canvas;
 
 import com.google.common.collect.Range;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.ColDrawer;
@@ -22,6 +23,7 @@ import coolmap.canvas.viewmaps.PointAnnotationLayer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.RangeComparator;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
@@ -566,10 +568,10 @@ public final class CoolMapView<BASE, VIEW> {
         _fireViewAnchorMoved();
     }
 
-    public void zoomIn(boolean zoomX, boolean zoomY) {
+    public boolean zoomIn(boolean zoomX, boolean zoomY) {
         //figure out the center row/column
         if (_coolMapObject == null || !_coolMapObject.isViewValid() || zoomX == false && zoomY == false) {
-            return;
+            return false;
         }
 
         Rectangle viewport = _getViewportBounds();
@@ -583,6 +585,9 @@ public final class CoolMapView<BASE, VIEW> {
         MatrixCell centerCell = new MatrixCell(centerRow, centerCol);
         centerCell.confineToValidCell(_coolMapObject);
 
+        //Just need to decode certain things
+        
+        
         if (zoomX) {
             _zoom.x = _zoomControlX.getNextZoom();
         }
@@ -596,7 +601,7 @@ public final class CoolMapView<BASE, VIEW> {
         VNode rowNode = _coolMapObject.getViewNodeRow(centerCell.row.intValue());
         VNode colNode = _coolMapObject.getViewNodeColumn(centerCell.col.intValue());
         if (rowNode == null || colNode == null) {
-            return;
+            return false;
         }
         //center rowNode, colNode to centerX and centerY
         //but don't update canvas
@@ -605,6 +610,7 @@ public final class CoolMapView<BASE, VIEW> {
         updateCanvasEnforceAll();
 
         _fireViewZoomChanged();
+        return true;
     }
 
     public void setZoomLevels(float zoomX, float zoomY) {
@@ -1869,7 +1875,7 @@ public final class CoolMapView<BASE, VIEW> {
         //System.out.println(subMapDimension + "-->" + _mapDimension);
         
         //now, here the submapdimension is correct actually
-        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
+//        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
         
         return true;
     }
@@ -1894,7 +1900,7 @@ public final class CoolMapView<BASE, VIEW> {
         _subMapDimension.x += diffX;
         _subMapDimension.y += diffY;
 
-        System.out.println("MapDimension Updated");
+//        System.out.println("MapDimension Updated");
 //Redraw if needed.
         if (update) {
             updateCanvasIfNecessary();
@@ -2350,7 +2356,7 @@ public final class CoolMapView<BASE, VIEW> {
 
 //            System.out.println("Updating overlay...");
             
-            System.out.println("In overlay container:" + subMapDimension);
+//            System.out.println("In overlay container:" + subMapDimension);
             
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(subMapDimension.width, subMapDimension.height, Transparency.TRANSLUCENT);
             Graphics2D g2D = buffer.createGraphics();
@@ -3316,14 +3322,28 @@ public final class CoolMapView<BASE, VIEW> {
                         MatrixCell endCell = new MatrixCell(_activeCell.row, _activeCell.col);
                         Rectangle region = _generateNodeRegion(_selectionAnchorCell, endCell);
                         //System.out.println(region);
+                        
+                        
+                        
+                        StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                         setSelection(region);
+                        
+                        //
+                        //
+                        
+                        
                     } else {
                         //simply treat as a regular
                         if (_activeCell.isValidCell(_coolMapObject)) {
+                            
+                            //Add a state before applying setSelection
+                            StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
+                            
                             setSelection(new Rectangle(_activeCell.col.intValue(), _activeCell.row.intValue(), 1, 1));
                             _selectionAnchorCell.col(_activeCell.col.intValue());
                             _selectionAnchorCell.row(_activeCell.row.intValue());
                         } else {
+                            StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                             clearSelection();
                             _selectionAnchorCell.row(null);
                             _selectionAnchorCell.col(null);
@@ -3333,24 +3353,28 @@ public final class CoolMapView<BASE, VIEW> {
                 }
 
                 if (me.isControlDown()) {
+                    StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                     clearSelection();
                     return;
                 }
 
                 if (_activeCell.isValidCell(_coolMapObject)) {
+                    StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                     setSelection(new Rectangle(_activeCell.col.intValue(), _activeCell.row.intValue(), 1, 1));
                     _selectionAnchorCell.col(_activeCell.col.intValue());
                     _selectionAnchorCell.row(_activeCell.row.intValue());
                 } else {
+                    StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                     clearSelection();
                     _selectionAnchorCell.row(null);
                     _selectionAnchorCell.col(null);
                     return;
                 }
 
-                if (me.getClickCount() > 1) {
-                    clearSelection();
-                }
+//                
+//                if (me.getClickCount() > 1) {
+//                    clearSelection();
+//                }
             }
 
         }

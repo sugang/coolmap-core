@@ -5,11 +5,15 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
+import coolmap.canvas.actions.CollapseRowNodesUpAction;
+import coolmap.canvas.actions.ExpandRowNodesDownAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -103,7 +107,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             System.out.println(range);
         }
 
-
         getCoolMapView().setSelectionsRow(selectedRows);
 
     }
@@ -141,8 +144,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             }
         });
 
-
-
         JMenu linetype = new JMenu("Line type");
 
         _expandOne = new JMenuItem("Expand one level");
@@ -175,28 +176,26 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         });
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
-        _expandOneAll = new JMenuItem("Expand all one level");
+
+        _expandOneAll = new JMenuItem(new ExpandRowNodesDownAction(getCoolMapObject().getID()));
         _popupMenu.add(_expandOneAll);
-        _expandOneAll.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                getCoolMapObject().expandRowNodesOneLayer();
-            }
-        });
-        
-        _collapseOneAll = new JMenuItem("Collapse all one level");
+//        _expandOneAll.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                getCoolMapObject().expandRowNodesOneLayer();
+//            }
+//        });
+        _collapseOneAll = new JMenuItem(new CollapseRowNodesUpAction(getCoolMapObject().getID()));
         _popupMenu.add(_collapseOneAll);
-        _collapseOneAll.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCoolMapObject().collapseRowNodesOneLayer();
-            }
-        });
-        
-        
-
+//        _collapseOneAll.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                getCoolMapObject().collapseRowNodesOneLayer();
+//            }
+//        });
 
         _colorTree = new JMenuItem("Color subtree");
         _popupMenu.addSeparator();
@@ -286,7 +285,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 item.setSelected(true);
             }
         }
-
 
         ////
         _popupMenu.addPopupMenuListener(new PopupMenuListener() {
@@ -556,14 +554,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
-
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
         List<VNode> treeNodes = object.getViewTreeNodesRow();
 
         //Attn: minor bug may exist here. Null pointer exception?
-
         int anchorY = getCoolMapObject().getViewNodeRow(fromRow).getViewOffset().intValue();
-
 
         Color nodeColor;
         int childX;
@@ -617,7 +612,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //                    System.out.println(parentX + " " + parentY + " " + childX + " " + childY);
                     _renderLine(g2D, parentX, parentY, childX, childY, zoomY);
 
-
                 }
             }
 
@@ -643,18 +637,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 g2D.fillRect(parentX - _ballInnerRadius, parentY - _ballInnerRadius, _ballInnerRadius * 2, _ballInnerRadius * 2);
             }
 
-
-
         }
 
-
-
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
-
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
     private void _renderLine(Graphics2D g2D, int px, int py, int cx, int cy, float zoomX) {
         g2D.setColor(UI.colorGrey5);
 
@@ -717,7 +706,20 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     }
                     if (me.getClickCount() > 1) {
                         //getCoolMapObject().toggleColumnNode(node);
-                        getCoolMapObject().toggleRowNode(node);
+                        String operationName = "";
+                        if (node.isExpanded()) {
+                            operationName = "Collapse row '" + node.getViewLabel() + "'";
+                        } else {
+                            operationName = "Expand row '" + node.getViewLabel() + "' to bottom";
+                        }
+
+                        CoolMapState state = CoolMapState.createStateRows(operationName, getCoolMapObject(), null);
+
+                        boolean success = getCoolMapObject().toggleRowNode(node);
+                        
+                        if(success){
+                            StateStorageMaster.addState(state);
+                        }
                     }
                 }
 
@@ -844,7 +846,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
                         continue;
                     }
-
 
                     int nodeX = (int) Math.round((_baseWidth + node.getViewHeightInTree() * _heightMultiple));
                     if (Math.abs(nodeX - screenX) > _ballOutterRadius) {

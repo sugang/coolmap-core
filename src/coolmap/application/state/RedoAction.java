@@ -4,24 +4,21 @@
  * and open the template in the editor.
  */
 
-package coolmap.application.utils.viewportActions;
+package coolmap.application.state;
 
 import coolmap.application.CoolMapMaster;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class CascadeMaps implements ActionListener{
+public class RedoAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            CoolMapMaster.getViewport().cascadeWindows();
-        } catch (Exception ex) {
-        }
+        StateStorageMaster.redo(CoolMapMaster.getActiveCoolMapObject());
     }
     
 }

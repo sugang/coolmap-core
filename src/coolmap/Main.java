@@ -17,7 +17,6 @@ import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetMaster;
-import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.Config;
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,9 +40,6 @@ import rcaller.RCode;
  * @author gangsu
  */
 public class Main {
-
-    public static StateSnapshot snapshotRow;
-    public static StateSnapshot snapshotColumn;
 
     public static void main(String args[]) {
 
@@ -72,6 +68,9 @@ public class Main {
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
                 loadSampleCoolMapProject();
+                
+                
+//                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
             }
         });
 

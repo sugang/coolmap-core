@@ -6,6 +6,7 @@ package coolmap.application;
 
 import coolmap.application.io.IOMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
 import coolmap.application.utils.CreaterMaster;
 import coolmap.application.utils.DataMaster;
@@ -103,9 +104,21 @@ public final class CoolMapMaster {
         return _activeCoolMapObjectListenerTunnel;
     }
 
-    public static List<CoolMapObject> getActiveCoolMapObjects() {
+    public static List<CoolMapObject> getCoolMapObjects() {
         return new ArrayList<CoolMapObject>(_coolMapObjects);
     }
+    
+    public static CoolMapObject getCoolMapObjectByID(String ID){
+        for(CoolMapObject object : _coolMapObjects){
+            if(object.getID().equals(ID)){
+                return object;
+            }
+        }
+        return null;
+    }
+    
+    
+    
 
     /**
      * initialize the neceesary elements
@@ -125,6 +138,7 @@ public final class CoolMapMaster {
         ServiceMaster.initialize();
         IOMaster.initialize();
         CreaterMaster.initialize();
+        StateStorageMaster.initialize();
 
         //new session
         CoolMapMaster.newSession("");
@@ -151,6 +165,7 @@ public final class CoolMapMaster {
         for (ActiveCoolMapChangedListener lis : _activeCoolMapChangedListeners) {
             lis.activeCoolMapChanged(newObject, _activeCoolMapObject);
         }
+        
     }
 
     public static CMainFrame getCMainFrame() {
@@ -287,6 +302,7 @@ public final class CoolMapMaster {
     public static void destroyCoolMapObject(CoolMapObject object) {
         _coolMapObjects.remove(object);
         DataMaster.fireCoolMapObjectToBeDestroyed(object);
+        StateStorageMaster.clearStates(object);
         object.destroy();
 
     }

@@ -11,11 +11,18 @@ import coolmap.application.io.exceptions.IOExceptionMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
-import coolmap.data.state.obsolete.StateSnapshot;
-import coolmap.utils.graphics.UI;
+import coolmap.data.state.CoolMapState;
 import java.awt.Color;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -77,7 +84,7 @@ public class PrivateCoolMapObjectIO {
         return node;
     }
 
-    public StateSnapshot getSnapshot(File entryFolder, int direction) throws Exception {
+    public CoolMapState getSnapshot(File entryFolder, int direction) throws Exception {
 
         if (entryFolder != null
                 && entryFolder.isDirectory()) {
@@ -187,8 +194,9 @@ public class PrivateCoolMapObjectIO {
                 }
             }
 
-            return new StateSnapshot(baseNodes, treeNodes, direction);
+            //return new StateSnapshot(baseNodes, treeNodes, direction);
 
+            return null; //To be fixed later
         } else {
             IOExceptionMaster.newEntryFolderException(entryFolder);
             return null;
@@ -243,14 +251,19 @@ public class PrivateCoolMapObjectIO {
 
         if (entryFolder != null && entryFolder.isDirectory()) {
 
-            StateSnapshot rowState = new StateSnapshot(object, COntology.ROW, StateSnapshot.FILE_RESTORE);
-            StateSnapshot columnState = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.FILE_RESTORE);
+//            StateSnapshot rowState = new StateSnapshot(object, COntology.ROW, StateSnapshot.FILE_RESTORE);
+//            StateSnapshot columnState = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.FILE_RESTORE);
+            
+            //widget parameters will be generated from the widget master for the current object
+            //as well as renderer, filter, etc.
+            
+            CoolMapState state = CoolMapState.createState("State to be saved", object, null);
 
             //row tree
             File file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_TREE_ROW);
             file.createNewFile();
 //            System.out.println(rowState.getNodesTreeInJSON().toString(2));
-            JSONObject outputObject = _convertVNodeTreeToJSON(rowState.getTreeNodes());
+            JSONObject outputObject = _convertVNodeTreeToJSON(state.getRowTreeNodes());
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             outputObject.write(writer);
             writer.flush();
@@ -262,7 +275,7 @@ public class PrivateCoolMapObjectIO {
             file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_NODE_ROWBASE);
             file.createNewFile();
 //            System.out.println(rowState.getBaseNodesInJSON().toString(2));
-            JSONArray outputArray = _convertVNodesToJSON(rowState.getBaseNodes());
+            JSONArray outputArray = _convertVNodesToJSON(state.getRowBaseNodes());
             writer = new BufferedWriter(new FileWriter(file));
             outputArray.write(writer);
             writer.flush();
@@ -274,7 +287,7 @@ public class PrivateCoolMapObjectIO {
             file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_NODE_ROWTREE);
             file.createNewFile();
 //            System.out.println(rowState.getTreeNodesInJSON().toString(2));
-            outputArray = _convertVNodesToJSON(rowState.getTreeNodes());
+            outputArray = _convertVNodesToJSON(state.getRowTreeNodes());
             writer = new BufferedWriter(new FileWriter(file));
             outputArray.write(writer);
             writer.flush();
@@ -286,7 +299,7 @@ public class PrivateCoolMapObjectIO {
             file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_TREE_COLUMN);
             file.createNewFile();
 //            System.out.println(columnState.getNodesTreeInJSON().toString(2));
-            outputObject = _convertVNodeTreeToJSON(columnState.getTreeNodes());
+            outputObject = _convertVNodeTreeToJSON(state.getColumnTreeNodes());
             writer = new BufferedWriter(new FileWriter(file));
             outputObject.write(writer);
             writer.flush();
@@ -298,7 +311,7 @@ public class PrivateCoolMapObjectIO {
             file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_NODE_COLUMNBASE);
             file.createNewFile();
 //            System.out.println(columnState.getBaseNodesInJSON().toString(2));
-            outputArray = _convertVNodesToJSON(columnState.getBaseNodes());
+            outputArray = _convertVNodesToJSON(state.getColumnBaseNodes());
             writer = new BufferedWriter(new FileWriter(file));
             outputArray.write(writer);
             writer.flush();
@@ -311,7 +324,7 @@ public class PrivateCoolMapObjectIO {
             file = new File(entryFolder + File.separator + IOTerm.FILE_STATESNAPSHOT_NODE_COLUMNTREE);
             file.createNewFile();
 //            System.out.println(columnState.getTreeNodesInJSON().toString(2));
-            outputArray = _convertVNodesToJSON(columnState.getTreeNodes());
+            outputArray = _convertVNodesToJSON(state.getColumnTreeNodes());
             writer = new BufferedWriter(new FileWriter(file));
             outputArray.write(writer);
             writer.flush();

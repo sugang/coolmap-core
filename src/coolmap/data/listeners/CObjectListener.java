@@ -23,7 +23,7 @@ public interface CObjectListener {
     
     public void baseMatrixChanged(CoolMapObject object);
     
-    public void stateStorageUpdated(CoolMapObject object);
+//    public void stateStorageUpdated(CoolMapObject object);
     
     public void viewRendererChanged(CoolMapObject object);
     

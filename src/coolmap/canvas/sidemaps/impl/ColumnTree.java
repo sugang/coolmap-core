@@ -5,11 +5,15 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
+import coolmap.canvas.actions.CollapseColumnNodesUpAction;
+import coolmap.canvas.actions.ExpandColumnNodesDownAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -110,9 +114,9 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void gridChanged(CoolMapObject object) {
@@ -228,12 +232,13 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
             @Override
             public void actionPerformed(ActionEvent ae) {
+                //Deal with this later
                 getCoolMapObject().expandColumnNode(_activeNode);
             }
         });
         _popupMenu.add(_expandOne);
 
-        _expandToAll = new JMenuItem("Expand selected to bottom");
+        _expandToAll = new JMenuItem("Expand to leaf");
         _expandToAll.addActionListener(new ActionListener() {
 
             @Override
@@ -253,25 +258,32 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         });
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
-        _expandOneAll = new JMenuItem("Expand all one level"); //, UI.getImageIcon("plusSmall")
+        
+        
+        _expandOneAll = new JMenuItem(new ExpandColumnNodesDownAction(getCoolMapObject().getID()));
+        
+        //_expandOneAll = new JMenuItem("Expand all one level"); //, UI.getImageIcon("plusSmall")
         _popupMenu.add(_expandOneAll);
-        _expandOneAll.addActionListener(new ActionListener() {
+        
+//        _expandOneAll.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                
+//                getCoolMapObject().expandColumnNodesOneLayer();
+//            }
+//        });
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                getCoolMapObject().expandColumnNodesOneLayer();
-            }
-        });
-
-        _collapseOneAll = new JMenuItem("Collapse all one level"); //UI.getImageIcon("minusSmall")
+        _collapseOneAll = new JMenuItem(new CollapseColumnNodesUpAction(getCoolMapObject().getID())); //UI.getImageIcon("minusSmall")
         _popupMenu.add(_collapseOneAll);
-        _collapseOneAll.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                getCoolMapObject().collapseColumnNodesOneLayer();
-            }
-        });
+        
+//        _collapseOneAll.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                getCoolMapObject().collapseColumnNodesOneLayer();
+//            }
+//        });
 
 
 
@@ -804,7 +816,24 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         _selectedNodes.add(node);
                     }
                     if (me.getClickCount() > 1) {
-                        getCoolMapObject().toggleColumnNode(node);
+                        
+                        String operationName = "";
+                        if(node.isExpanded()){
+                            operationName = "Collapse column '" + node.getViewLabel() + "'";
+                        }
+                        else{
+                            operationName = "Expand column '" + node.getViewLabel() + "' to bottom"; 
+                        }
+                        
+                        CoolMapState state = CoolMapState.createStateColumns(operationName, getCoolMapObject(), null);
+                        
+                        
+                        boolean success = getCoolMapObject().toggleColumnNode(node);
+                        
+                        if(success){
+                            StateStorageMaster.addState(state);
+                        }
+                        
                     }
                 }
 
@@ -814,6 +843,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         }
     }
+    
     private Point _selectionStartPoint;
     private Point _selectionEndPoint;
     private boolean _isSelecting = false;

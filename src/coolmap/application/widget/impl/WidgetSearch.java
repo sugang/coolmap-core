@@ -6,10 +6,8 @@ package coolmap.application.widget.impl;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.widget.Widget;
 import coolmap.data.CoolMapObject;
-import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.listeners.CObjectListener;
@@ -18,7 +16,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import javax.swing.*;
@@ -26,7 +23,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.plaf.basic.BasicListUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -240,9 +236,9 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
     public void baseMatrixChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     private void _updateList() {
 

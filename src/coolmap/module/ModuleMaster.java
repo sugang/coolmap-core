@@ -4,7 +4,6 @@
  */
 package coolmap.module;
 
-import coolmap.module.impl.state.StateModule;
 import java.util.HashMap;
 
 /**
@@ -39,6 +38,5 @@ public class ModuleMaster{
         
         //addModule(new ClusterModule());
         //addModule(new StateModule());
-        addModule(new StateModule());
     }
 }

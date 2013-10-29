@@ -46,9 +46,9 @@ public class ColumnValueTest extends ColumnMap {
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void justifyView() {

@@ -4,19 +4,19 @@
  * and open the template in the editor.
  */
 
-package coolmap.module.impl.state;
+package coolmap.application.state;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class SaveStateActionListener implements ActionListener{
+public class SaveStateAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -33,7 +33,7 @@ public class SaveStateActionListener implements ActionListener{
         System.out.println(state);
         System.out.println("");
         
-        StateStorage.quickSave(object);
+        StateStorageMaster.quickSave(object);
         
     }
     

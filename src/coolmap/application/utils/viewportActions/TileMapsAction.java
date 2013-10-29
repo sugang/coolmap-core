@@ -8,13 +8,13 @@ package coolmap.application.utils.viewportActions;
 
 import coolmap.application.CoolMapMaster;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class TileMaps implements ActionListener{
+public class TileMapsAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {

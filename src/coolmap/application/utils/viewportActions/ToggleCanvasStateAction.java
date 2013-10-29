@@ -11,13 +11,13 @@ import com.javadocking.dockable.action.DefaultDockableStateAction;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class ToggleCanvasState implements ActionListener{
+public class ToggleCanvasStateAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {

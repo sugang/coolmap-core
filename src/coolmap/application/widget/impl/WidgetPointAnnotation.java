@@ -485,9 +485,9 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
         Messenger.showWarningMessage("Base matrices are changed. The annotated values may have also changed.", "Data changed");
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {

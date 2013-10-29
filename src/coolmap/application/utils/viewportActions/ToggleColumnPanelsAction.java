@@ -10,30 +10,25 @@ import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.data.CoolMapObject;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class ToggleSidePanelsRow implements ActionListener{
+public class ToggleColumnPanelsAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try{
-            CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
                     CoolMapView view = object.getCoolMapView();
-                    if (view.isRowPanelsVisible()) {
-                        view.setRowPanelsVisible(false);
+                    if (view.isColumnPanelsVisible()) {
+                        view.setColumnPanelsVisible(false);
                     } else {
-                        view.setRowPanelsVisible(true);
+                        view.setColumnPanelsVisible(true);
                     }
                 }
-        }
-        catch(Exception ex){
-            
-        }
     }
     
 }

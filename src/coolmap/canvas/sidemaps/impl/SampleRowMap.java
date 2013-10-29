@@ -113,9 +113,9 @@ public class SampleRowMap extends RowMap<Object, Object> implements CViewListene
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void viewFilterChanged(CoolMapObject object) {

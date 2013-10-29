@@ -202,9 +202,9 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
         _updateData();
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void selectionChanged(CoolMapObject object) {

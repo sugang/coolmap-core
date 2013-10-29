@@ -26,7 +26,6 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
-import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.Tools;
 import java.awt.Color;
 import java.awt.MenuItem;
@@ -290,8 +289,9 @@ public class IOMaster {
                         //System.out.println(object.getBaseCMatrices());
                         File entryFolder = new File(coolmapObjectDirectory + File.separator + id);
                         PrivateCoolMapObjectIO io = new PrivateCoolMapObjectIO();
-                        StateSnapshot rowSnapshot = io.getSnapshot(entryFolder, COntology.ROW);
-                        StateSnapshot columnSnapshot = io.getSnapshot(entryFolder, COntology.COLUMN);
+                        
+//                        StateSnapshot rowSnapshot = io.getSnapshot(entryFolder, COntology.ROW);
+//                        StateSnapshot columnSnapshot = io.getSnapshot(entryFolder, COntology.COLUMN);
 
 //                        System.out.println(rowSnapshot.getBaseNodes());
 //                        System.out.println(rowSnapshot.getTreeNodes());
@@ -705,7 +705,7 @@ public class IOMaster {
                         //under each object
                         JSONObject jcoolMapObjects = new JSONObject();
                         projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT, jcoolMapObjects);
-                        List<CoolMapObject> objects = CoolMapMaster.getActiveCoolMapObjects();
+                        List<CoolMapObject> objects = CoolMapMaster.getCoolMapObjects();
                         for (CoolMapObject object : objects) {
                             JSONObject jobject = new JSONObject();
                             jcoolMapObjects.put(object.getID(), jobject);
@@ -793,7 +793,7 @@ public class IOMaster {
                         //write coolmapobjects
                         File coolmapfolder = new File(rootDirectory.getAbsolutePath() + File.separator + IOTerm.DIR_CoolMapObject);
                         coolmapfolder.mkdir();
-                        objects = CoolMapMaster.getActiveCoolMapObjects();
+                        objects = CoolMapMaster.getCoolMapObjects();
                         PrivateCoolMapObjectIO objIO = new PrivateCoolMapObjectIO();
                         for (CoolMapObject object : objects) {
                             String ID = object.getID();

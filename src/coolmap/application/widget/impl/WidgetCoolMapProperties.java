@@ -6,11 +6,9 @@ package coolmap.application.widget.impl;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.widget.Widget;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
-import coolmap.data.contology.model.COntology;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
@@ -270,9 +268,9 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
         _updateBaseCMatrixList();
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {

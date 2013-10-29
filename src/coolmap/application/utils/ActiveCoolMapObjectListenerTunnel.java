@@ -145,15 +145,15 @@ public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObject
         }
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-        if (!_isActiveObject(object)) {
-            return;
-        }
-        for (CObjectListener lis : _objectListeners) {
-            lis.stateStorageUpdated(object);
-        }
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//        if (!_isActiveObject(object)) {
+//            return;
+//        }
+//        for (CObjectListener lis : _objectListeners) {
+//            lis.stateStorageUpdated(object);
+//        }
+//    }
 
 //    @Override
 //    public void subSelectionRowChanged(CoolMapObject object) {

@@ -22,7 +22,7 @@ import org.json.JSONObject;
  */
 public class CoolMapState {
 
-    private final CoolMapObject _object;
+    private final String _objectID;
     private final ArrayList<VNode> _rowBaseNodes;
     private final ArrayList<VNode> _colBaseNodes;
     private final ArrayList<VNode> _rowTreeNodes;
@@ -37,12 +37,20 @@ public class CoolMapState {
     private final boolean _logSelections;
     private final JSONObject _configurations; //Not mutable! the _configurations can be changed theoretically
     private final String _operationName;
-    
+
     private final long _createdTime;
 
     //Stores a config string that can be used to restore other widget states -> the widgets can also log an Undo
     //private final HashMap<String, VNode> _newRowNodeHash = new HashMap<>();
     //private final HashMap<String, VNode> _newColNodeHash = new HashMap<>();
+    /**
+     *
+     * @return the id of the associated CoolMapObject
+     */
+    public String getCoolMapObjectID() {
+        return _objectID;
+    }
+
     public boolean loggedRows() {
         return _logRowNodes;
     }
@@ -71,7 +79,7 @@ public class CoolMapState {
 
     private CoolMapState(CoolMapState oldState) {
         //pass object
-        _object = oldState._object;
+        _objectID = oldState._objectID;
         _logRowNodes = oldState._logRowNodes;
         _logColNodes = oldState._logColNodes;
         _logSelections = oldState._logSelections;
@@ -197,24 +205,23 @@ public class CoolMapState {
         } else {
             _configurations = new JSONObject(oldState._configurations);
         }
-        
+
         _createdTime = oldState._createdTime;
     }
 
     private CoolMapState(String operationName, CoolMapObject object, boolean logRowNodes, boolean logColNodes, boolean logSelections, JSONObject otherConfig) {
-        _object = object;
+        _objectID = object.getID();
         _logRowNodes = logRowNodes;
         _logColNodes = logColNodes;
         _logSelections = logSelections;
-        
+
         //
-        if(operationName != null){
+        if (operationName != null) {
             _operationName = operationName;
-        }
-        else{
+        } else {
             _operationName = "Unnamed Actions";
-        }        
-        
+        }
+
         //log rowNodes
         if (logRowNodes) {
             _rowBaseNodes = new ArrayList<>();
@@ -339,7 +346,7 @@ public class CoolMapState {
 
         //save configurations
         _configurations = otherConfig;
-        
+
         _createdTime = System.currentTimeMillis();
     }
 
@@ -373,6 +380,54 @@ public class CoolMapState {
         return new CoolMapState(this);
     }
 
+    /**
+     * create a coolmapstate from a coolmapobject, jusing parameters from
+     * another state
+     *
+     * @param operationName
+     * @param object
+     * @param state
+     * @return
+     */
+    public static CoolMapState createFromStateConfig(String operationName, CoolMapObject object, CoolMapState state) {
+        if (object == null || state == null) {
+            return null;
+        } else {
+            boolean loggedRow = state.loggedRows();
+            boolean loggedColumns = state.loggedColumns();
+            boolean loggedSelections = state.loggedSelections();
+            JSONObject config = state.getConfig();
+
+            //need to capture certain things, this function will need to be extended on the fly;
+            //the widget part can be extended
+            //
+            
+            JSONObject newConfig = null;
+            try {
+                newConfig = new JSONObject(config.toString());
+            } catch (Exception e) {
+                newConfig = null;
+            }
+            
+            //need to override values
+            try {
+                if(newConfig.has("zoom")){
+                    System.err.println("zoom was recorded");
+                    //
+                    HashMap zooms = new HashMap();
+                    zooms.put("zoomIndexX", object.getCoolMapView().getZoomControlX().getCurrentZoomIndex());
+                    zooms.put("zoomIndexY", object.getCoolMapView().getZoomControlY().getCurrentZoomIndex());
+                    
+                    newConfig.put("zoom", zooms);
+                }
+            } catch (Exception e) {
+
+            }
+
+            return new CoolMapState(operationName, object, loggedRow, loggedColumns, loggedSelections, newConfig);
+        }
+    }
+
     public List<Range<Integer>> getSelectionsRow() {
         if (_logSelections) {
             return new ArrayList<Range<Integer>>(_rowSelections);
@@ -399,58 +454,56 @@ public class CoolMapState {
 
     //Row tree nodes
     public ArrayList<VNode> getRowTreeNodes() {
-        if( _logRowNodes){
+        if (_logRowNodes) {
             return new ArrayList<VNode>(_rowTreeNodes);
-        }
-        else{
+        } else {
             return null;
         }
     }
 
     //row base nodes
     public ArrayList<VNode> getRowBaseNodes() {
-        if( _logRowNodes){
+        if (_logRowNodes) {
             return new ArrayList<VNode>(_rowBaseNodes);
-        }
-        else{
+        } else {
             return null;
         }
     }
-    
+
     //Col tree nodes
-    public ArrayList<VNode> getColumnTreeNodes(){
-        if( _logColNodes){
+    public ArrayList<VNode> getColumnTreeNodes() {
+        if (_logColNodes) {
             return new ArrayList<VNode>(_colTreeNodes);
-        }
-        else{
+        } else {
             return null;
         }
     }
-    
+
     //col base nodes
-    public ArrayList<VNode> getColumnBaseNodes(){
-        if( _logColNodes){
+    public ArrayList<VNode> getColumnBaseNodes() {
+        if (_logColNodes) {
             return new ArrayList<VNode>(_colBaseNodes);
-        }
-        else{
+        } else {
             return null;
         }
     }
-    
+
     /**
      * ITS =>
-     * @return 
+     *
+     * @return
      */
     @Override
-    public String toString(){
-        return  "Operation Name: " + _operationName + "\n" + "Rows-base: " + _rowBaseNodes + "\n" + "Rows-tree: " + _rowTreeNodes + "\n" + "Cols-base: " + _colBaseNodes + "\n" + "Cols-tree: " + _colTreeNodes + "\n" + "Selections: " + _selections + "\n" + "Row selections: " + _rowSelections + "\n" + "Col selections: " + _colSelections + "\n" + "+Options: " + _configurations; 
+    public String toString() {
+        return "Operation Name: " + _operationName + "\n" + "Rows-base: " + _rowBaseNodes + "\n" + "Rows-tree: " + _rowTreeNodes + "\n" + "Cols-base: " + _colBaseNodes + "\n" + "Cols-tree: " + _colTreeNodes + "\n" + "Selections: " + _selections + "\n" + "Row selections: " + _rowSelections + "\n" + "Col selections: " + _colSelections + "\n" + "+Options: " + _configurations;
     }
-    
+
     /**
      * returns the name of this operation
-     * @return 
+     *
+     * @return
      */
-    public String getOperationName(){
+    public String getOperationName() {
         return _operationName;
     }
 

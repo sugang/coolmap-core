@@ -17,7 +17,6 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.listeners.CObjectListener;
-import coolmap.data.state.obsolete.StateSnapshot;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -556,7 +555,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                 }
             }
 
-            StateSnapshot snapshot = new StateSnapshot(object, COntology.ROW, StateSnapshot.STATESET);
+//            StateSnapshot snapshot = new StateSnapshot(object, COntology.ROW, StateSnapshot.STATESET);
 
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
@@ -592,7 +591,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                 }
             }
 
-            StateSnapshot snapshot = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.STATESET);
+//            StateSnapshot snapshot = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.STATESET);
 
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
@@ -674,16 +673,16 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
     private void _updateList() {
         DefaultListModel model = new DefaultListModel();
-        for (CoolMapObject object : CoolMapMaster.getActiveCoolMapObjects()) {
+        for (CoolMapObject object : CoolMapMaster.getCoolMapObjects()) {
             model.addElement(new CheckListItem(object));
         }
         _list.setModel(model);
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-        //do nothing
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//        //do nothing
+//    }
 
     @Override
     public void contologyAdded(COntology ontology) {

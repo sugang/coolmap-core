@@ -5,12 +5,14 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.misc.ZoomControl;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -275,9 +277,9 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
 //    @Override
 //    public void subSelectionRowChanged(CoolMapObject object) {
@@ -749,7 +751,16 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             if (endCol != null) {
                 //System.out.println("Drag column to:" + endCol);
                 if (_startCol != null && _startCol.intValue() != endCol.intValue()) {
+                    ArrayList<Range<Integer>> columns = getCoolMapView().getSelectedColumns();
+                    if(columns == null || columns.isEmpty())
+                        return;
+                    
+                    CoolMapState state = CoolMapState.createStateColumns("Shift columns", getCoolMapObject(), null);
                     getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol.intValue());
+                    
+                    StateStorageMaster.addState(state);
+                    
+                    
                 } else {
                     _targetCol = null;
                 }

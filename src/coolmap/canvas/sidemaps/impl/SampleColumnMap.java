@@ -117,9 +117,9 @@ public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewL
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void gridChanged(CoolMapObject object) {

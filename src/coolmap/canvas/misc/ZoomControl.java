@@ -77,6 +77,23 @@ public class ZoomControl {
         return currentZoom;
     }
 
+    public boolean isLowestZoom(){
+        if(currentZoomIndex == 0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    
+    public boolean isHighestZoom(){
+        if(currentZoomIndex >= zoomLevels.size()-1){
+            return true;
+        }
+        return false;
+    }
+    
+    
     public float getPreviousZoom() {
         if ((currentZoomIndex - 1) >= 0) {
             currentZoomIndex--;

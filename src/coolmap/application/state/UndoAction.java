@@ -4,26 +4,21 @@
  * and open the template in the editor.
  */
 
-package coolmap.application.utils.viewportActions;
+package coolmap.application.state;
 
 import coolmap.application.CoolMapMaster;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class ToggleLabeltip implements ActionListener{
+public class UndoAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try{
-            CoolMapMaster.getActiveCoolMapObject().getCoolMapView().toggleLabeltip();
-        }
-        catch(Exception ex){
-            
-        }
+        StateStorageMaster.undo(CoolMapMaster.getActiveCoolMapObject());
     }
     
 }

@@ -5,12 +5,14 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.misc.ZoomControl;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -161,9 +163,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//    }
 
     @Override
     public void mapZoomChanged(CoolMapObject object) {
@@ -693,7 +695,15 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                 //System.out.println("Drag row to:" + endRow);
                 //getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol.intValue());
                 if (_startRow != null && _startRow.intValue() != endRow.intValue()) {
+                    
+                    ArrayList<Range<Integer>> rows = getCoolMapObject().getCoolMapView().getSelectedRows();
+                    if(rows == null || rows.isEmpty()){
+                        return;
+                    }
+                    
+                    CoolMapState state = CoolMapState.createStateRows("Shift rows", getCoolMapObject(), null);
                     getCoolMapObject().multiShiftRows(getCoolMapView().getSelectedRows(), endRow.intValue());
+                    StateStorageMaster.addState(state);
                 }
             }
             _dragStart = false;

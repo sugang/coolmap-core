@@ -427,7 +427,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     @Override
     public void columnsChanged(CoolMapObject object) {
-        System.out.println("Active cols changed");
+//        System.out.println("Active cols changed");
         //update image
         updateBufferedImage();
     }
@@ -439,10 +439,10 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         updateBufferedImage();
     }
 
-    @Override
-    public void stateStorageUpdated(CoolMapObject object) {
-        //do nothing
-    }
+//    @Override
+//    public void stateStorageUpdated(CoolMapObject object) {
+//        //do nothing
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {

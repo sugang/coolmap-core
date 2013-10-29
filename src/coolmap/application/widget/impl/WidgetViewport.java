@@ -4,23 +4,23 @@
  */
 package coolmap.application.widget.impl;
 
-import com.javadocking.dockable.DockableState;
-import com.javadocking.dockable.action.DefaultDockableStateAction;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.utils.viewportActions.CascadeMaps;
-import coolmap.application.utils.viewportActions.TileMaps;
-import coolmap.application.utils.viewportActions.ToggleAnnotation;
-import coolmap.application.utils.viewportActions.ToggleCanvasState;
-import coolmap.application.utils.viewportActions.ToggleColumnPanels;
-import coolmap.application.utils.viewportActions.ToggleLabeltip;
-import coolmap.application.utils.viewportActions.ToggleSelectionLabel;
-import coolmap.application.utils.viewportActions.ToggleSidePanelsRow;
-import coolmap.application.utils.viewportActions.ToggleTooltip;
+import coolmap.application.utils.viewportActions.CascadeMapsAction;
+import coolmap.application.utils.viewportActions.CenterSelectionAction;
+import coolmap.application.utils.viewportActions.TileMapsAction;
+import coolmap.application.utils.viewportActions.ToggleAnnotationAction;
+import coolmap.application.utils.viewportActions.ToggleCanvasStateAction;
+import coolmap.application.utils.viewportActions.ToggleColumnPanelsAction;
+import coolmap.application.utils.viewportActions.ToggleLabeltipAction;
+import coolmap.application.utils.viewportActions.ToggleSelectionLabelAction;
+import coolmap.application.utils.viewportActions.ToggleSidePanelsRowAction;
+import coolmap.application.utils.viewportActions.ToggleTooltipAction;
+import coolmap.application.utils.viewportActions.ZoomInAction;
+import coolmap.application.utils.viewportActions.ZoomOutAction;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
-import coolmap.canvas.CoolMapView;
 import coolmap.data.CoolMapObject;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
@@ -76,32 +76,46 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
     private void _initMainMenuItem() {
         CMainFrame frame = CoolMapMaster.getCMainFrame();
 
-        MenuItem item = new MenuItem("Toggle Canvas state", new MenuShortcut(KeyEvent.VK_1));
+        MenuItem item;
+
+        item = new MenuItem("Zoom in", new MenuShortcut(KeyEvent.VK_PLUS));
+        frame.addMenuItem("View", item, false, false);
+        item.addActionListener(new ZoomInAction());
+
+        item = new MenuItem("Zoom out", new MenuShortcut(KeyEvent.VK_MINUS));
+        frame.addMenuItem("View", item, false, false);
+        item.addActionListener(new ZoomOutAction());
+
+        item = new MenuItem("Center selection", new MenuShortcut(KeyEvent.VK_BACK_SPACE));
+        frame.addMenuItem("View", item, false, true);
+        item.addActionListener(new CenterSelectionAction());
+
+        item = new MenuItem("Toggle Canvas state", new MenuShortcut(KeyEvent.VK_1));
         frame.addMenuItem("View/Canvas config", item, false, false);
-        item.addActionListener(new ToggleCanvasState());
+        item.addActionListener(new ToggleCanvasStateAction());
 
         item = new MenuItem("Toggle hover tooltip", new MenuShortcut(KeyEvent.VK_2));
         frame.addMenuItem("View/Canvas config", item, false, false);
-        item.addActionListener(new ToggleTooltip());
+        item.addActionListener(new ToggleTooltipAction());
 
         item = new MenuItem("Toggle label tooltip", new MenuShortcut(KeyEvent.VK_3));
         frame.addMenuItem("View/Canvas config", item, false, false);
-        item.addActionListener(new ToggleLabeltip());
+        item.addActionListener(new ToggleLabeltipAction());
 
         item = new MenuItem("Toggle selection tooltip", new MenuShortcut(KeyEvent.VK_4));
         frame.addMenuItem("View/Canvas config", item, false, false);
-        item.addActionListener(new ToggleSelectionLabel());
-        
+        item.addActionListener(new ToggleSelectionLabelAction());
+
         item = new MenuItem("Toggle annotation tooltip", new MenuShortcut(KeyEvent.VK_5));
         frame.addMenuItem("View/Canvas config", item, false, false);
-        item.addActionListener(new ToggleAnnotation());
+        item.addActionListener(new ToggleAnnotationAction());
 
         MenuItem toggleRows = new MenuItem("Toggle row panels", new MenuShortcut(KeyEvent.VK_6));
-        toggleRows.addActionListener(new ToggleSidePanelsRow());
+        toggleRows.addActionListener(new ToggleSidePanelsRowAction());
         frame.addMenuItem("View/Canvas config", toggleRows, true, false);
 
         MenuItem toggleColumns = new MenuItem("Toggle column panels", new MenuShortcut(KeyEvent.VK_7));
-        toggleColumns.addActionListener(new ToggleColumnPanels());
+        toggleColumns.addActionListener(new ToggleColumnPanelsAction());
         frame.addMenuItem("View/Canvas config", toggleColumns, false, false);
 
         ////
@@ -109,11 +123,11 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
 
         item = new MenuItem("Tile", new MenuShortcut(KeyEvent.VK_OPEN_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
-        item.addActionListener(new TileMaps());
+        item.addActionListener(new TileMapsAction());
 
         item = new MenuItem("Cascade", new MenuShortcut(KeyEvent.VK_CLOSE_BRACKET));
         frame.addMenuItem("View/Arrange Maps", item, false, false);
-        item.addActionListener(new CascadeMaps());
+        item.addActionListener(new CascadeMapsAction());
 
         //addPopupMenuItem("View", toggleColumns, false);
         //addPopupMenuItem("View", toggleRows, false);
@@ -214,50 +228,48 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
     private void _initToolbar() {
 
         _toolBar.setFloatable(false);
+        JButton button;
 
-        JButton button = new JButton(UI.getImageIcon("zoomIn"));
-        button.addActionListener(new ActionListener() {
+//        JButton button = new JButton(UI.getImageIcon("zoomIn"));
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                
+//            }
+//        });
+//        _toolBar.add(button);
+        _toolBar.add(new ZoomInAction());
+        _toolBar.add(new ZoomOutAction());
+        _toolBar.add(new CenterSelectionAction());
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                if (object != null) {
-
-                    object.getCoolMapView().zoomIn(true, true);
-                }
-            }
-        });
-        _toolBar.add(button);
-
-        button = new JButton(UI.getImageIcon("zoomOut"));
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                if (object != null) {
-
-                    object.getCoolMapView().zoomOut(true, true);
-                }
-            }
-        });
-        _toolBar.add(button);
-
-        button = new JButton(UI.getImageIcon("emptyPage"));
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                if (object != null) {
-
-                    object.getCoolMapView().centerToSelections();
-                }
-            }
-        });
-        button.setToolTipText("Center selection");
-        _toolBar.add(button);
-
+//        button = new JButton(UI.getImageIcon("zoomOut"));
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+//                if (object != null) {
+//
+//                    object.getCoolMapView().zoomOut(true, true);
+//                }
+//            }
+//        });
+//        _toolBar.add(button);
+//        button = new JButton(UI.getImageIcon("emptyPage"));
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+//                if (object != null) {
+//
+//                    object.getCoolMapView().centerToSelections();
+//                }
+//            }
+//        });
+//        button.setToolTipText("Center selection");
+//        _toolBar.add(button);
         _gridMode = new JToggleButton(UI.getImageIcon("ruler"));
         _gridMode.setToolTipText("Enter/Exit grid mode, allows resizing of row/column nodes");
         _gridMode.addActionListener(new ActionListener() {

@@ -47,7 +47,7 @@ public class CreaterMaster {
 
     private static void _initNewFromSelection() {
         CMainFrame frame = CoolMapMaster.getCMainFrame();
-        Menu menu = (Menu) frame.findMenuItem("Edit/Create New");
+        Menu menu = (Menu) frame.findMenu("Edit/Create New");
 
         System.out.println("Menu:" + menu);
 

@@ -3,28 +3,27 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package coolmap.application.utils.viewportActions;
 
-import com.javadocking.dockable.DockableState;
-import com.javadocking.dockable.action.DefaultDockableStateAction;
 import coolmap.application.CoolMapMaster;
-import coolmap.application.widget.impl.WidgetViewport;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.AbstractAction;
 
 /**
  *
  * @author sugang
  */
-public class ToggleAnnotation implements ActionListener {
+public class ToggleTooltipAction extends AbstractAction{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            CoolMapMaster.getActiveCoolMapObject().getCoolMapView().togglePaintAnnotation();
-        } catch (Exception ex) {
-
+        try{
+            CoolMapMaster.getActiveCoolMapObject().getCoolMapView().toggleTooltip();
+        }
+        catch(Exception ex){
+            
         }
     }
-
+    
 }
