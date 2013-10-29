@@ -13,8 +13,14 @@ import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
@@ -68,11 +74,11 @@ public final class COntology {
         //COntologyUtils.printOntology(ontology);
         
         
-        System.out.println("Before validation");
+        //System.out.println("Before validation");
         
         ontology.validate();
         
-        System.out.println("After validation");
+        //System.out.println("After validation");
     }
 
     public void destroy() {

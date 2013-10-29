@@ -6,6 +6,7 @@
 package coolmap.application.state;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.utils.DataMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import java.awt.MenuItem;
@@ -27,15 +28,12 @@ public class StateStorageMaster {
     private static final MenuItem _loadStateOperation = new MenuItem("Quick load state", new MenuShortcut(KeyEvent.VK_L));
     private static final StateStorageMasterListeners _listeners = new StateStorageMasterListeners();
     public static HashMap<String, CoolMapState> _quickStore = new HashMap<String, CoolMapState>();
+    private static final AdditionalStateTrackers _additionalTrackers = new AdditionalStateTrackers();
 //temporary methods for testing
     //Quick save and quick load
     //also save renderer, ... etc., but that will be worried about later on.
-//    
-//
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//    The following are for quick save and quick restore a view and these are indpendent from uno, redo
-    //
+    
     public static void initialize() {
         _saveStateOperation.addActionListener(new SaveStateAction());
         _loadStateOperation.addActionListener(new LoadStateAction());
@@ -49,7 +47,7 @@ public class StateStorageMaster {
         //Use this as a proxy to listen to various state changes
         //It's quite awakward but I can keep the master design like this
         CoolMapMaster.addActiveCoolMapChangedListener(_listeners);
-        
+        DataMaster.addDataStorageListener(_additionalTrackers);
     }
 
     //

@@ -4,7 +4,9 @@
  */
 package coolmap.module;
 
+import coolmap.utils.Config;
 import java.util.HashMap;
+import org.json.JSONArray;
 
 /**
  *
@@ -38,5 +40,25 @@ public class ModuleMaster{
         
         //addModule(new ClusterModule());
         //addModule(new StateModule());
+        if(Config.isInitialized()){
+            System.out.println("!!! Config file loading successful, loading modules based on config file definitions");
+            
+            try{
+                JSONArray modulesToLoad = Config.getJSONConfig().getJSONObject("module").getJSONArray("load");
+                for(int i=0; i<modulesToLoad.length(); i++){
+                    try{
+                        String className = modulesToLoad.getString(i);
+                        Module module = (Module)(Class.forName(className).newInstance());
+                        addModule(module); //
+                    }
+                    catch(Exception e){
+                        System.err.println("Initializing '" + modulesToLoad.optString(i) + "' error");
+                    }
+                }
+            }
+            catch(Exception e){
+                System.err.println("Module config error. No modules were initialized");
+            }
+        }
     }
 }

@@ -56,7 +56,7 @@ public class WidgetMaster {
 
             System.out.println("!!! Config file loading successful, loading widgets based on config file definitions");
             try {
-                JSONArray widgetsToLoad = Config.getJSONConfig().getJSONObject("module").getJSONArray("load");
+                JSONArray widgetsToLoad = Config.getJSONConfig().getJSONObject("widget").getJSONArray("load");
                 String[] widgetsNames = new String[widgetsToLoad.length()];
                 for(int i=0; i<widgetsToLoad.length(); i++){
                     widgetsNames[i] = widgetsToLoad.getString(i);
@@ -69,12 +69,12 @@ public class WidgetMaster {
                     try {
                         //System.out.println(widgetsToLoad.getString(i));
                         String widgetClassName = widgetsName;
-                        System.out.println(widgetClassName);
+                        //System.out.println(widgetClassName);
                         Widget widget = (Widget) (Class.forName(widgetClassName).newInstance());
                         try {
                             String preferredLocation = Config.getJSONConfig().getJSONObject("module").getJSONObject("config").getJSONObject(widgetClassName).getString("preferred-location");
 
-                            System.out.println("PreferredLocation:" + widgetClassName + " preferredLocation" + preferredLocation);
+                            //System.out.println("PreferredLocation:" + widgetClassName + " preferredLocation" + preferredLocation);
 
                             if (preferredLocation != null) {
                                 //System.out.println(widgetClassName + " preferredLocation" + preferredLocation);
@@ -128,7 +128,7 @@ public class WidgetMaster {
                 });
                 
                 for(Widget widget : widgets){
-                    addWidget(widget);
+                    addWidget(widget); //add to loaded widgets
                 }
                 
                 

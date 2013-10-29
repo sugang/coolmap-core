@@ -8,9 +8,7 @@ import coolmap.application.io.IOMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
-import coolmap.application.utils.CreaterMaster;
 import coolmap.application.utils.DataMaster;
-import coolmap.application.utils.ServiceMaster;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
@@ -20,7 +18,6 @@ import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
-import coolmap.data.snippet.SnippetMaster;
 import coolmap.module.ModuleMaster;
 import coolmap.utils.Config;
 import coolmap.utils.Tools;
@@ -132,14 +129,21 @@ public final class CoolMapMaster {
         
         UI.initialize();
         Tools.initialize();
-        SnippetMaster.initialize();
-        ModuleMaster.initialize();
-        WidgetMaster.initialize();
-        ServiceMaster.initialize();
         IOMaster.initialize();
-        CreaterMaster.initialize();
+        WidgetMaster.initialize();
+        ModuleMaster.initialize();
         StateStorageMaster.initialize();
-
+        
+//        SnippetMaster.initialize();
+        
+       
+//        ServiceMaster.initialize();
+        
+        //
+        
+//        CreaterMaster.initialize(); //Creater should be defined as a module
+        
+        
         //new session
         CoolMapMaster.newSession("");
 

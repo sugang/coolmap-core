@@ -6,11 +6,14 @@
 package coolmap.application.utils.viewportActions;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.data.CoolMapObject;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.UI;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.json.JSONObject;
 
 /**
  *
@@ -31,5 +34,18 @@ public class ZoomOutAction extends AbstractAction {
 
             object.getCoolMapView().zoomOut(true, true);
         }
+        
+        if(object.getCoolMapView().getZoomControlX().isLowestZoom() && object.getCoolMapView().getZoomControlY().isLowestZoom()){
+            return;
+        }
+        else{
+            CoolMapState zoomState = CoolMapState.createStateConfigs("Zoom out", object, new JSONObject());
+            boolean success = object.getCoolMapView().zoomOut(true, true);
+            if(success){
+                StateStorageMaster.addState(zoomState);
+            }
+        }
+        
+        
     }
 }

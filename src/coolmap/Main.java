@@ -83,50 +83,54 @@ public class Main {
         try {
             CoolMapObject object;
             COntology onto;
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
-
+            //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
+            //CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
             //import sample
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
+            
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/0correlation.txt"));
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();
             object.addBaseCMatrix(matrix);
 
 //            Add base nodes ===================================================
-//            ArrayList<VNode> nodes = new ArrayList<VNode>();
-//            for (Object label : matrix.getRowLabelsAsList()) {
-//                nodes.add(new VNode(label.toString()));
-//            }
-//            object.insertRowNodes(nodes);
-//            
-//            nodes.clear();
-//            for (Object label : matrix.getColLabelsAsList()) {
-//                nodes.add(new VNode(label.toString()));
-//            }
-//            object.insertColumnNodes(nodes);
+            ArrayList<VNode> nodes = new ArrayList<VNode>();
+            for (Object label : matrix.getRowLabelsAsList()) {
+                nodes.add(new VNode(label.toString()));
+            }
+            object.insertRowNodes(nodes);
+            
+            nodes.clear();
+            for (Object label : matrix.getColLabelsAsList()) {
+                nodes.add(new VNode(label.toString()));
+            }
+            object.insertColumnNodes(nodes);
+            
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
-            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
-            CoolMapMaster.addNewCOntology(onto);
-
-            ArrayList<VNode> nodes = new ArrayList<VNode>();
-            nodes.add(new VNode("RG0", onto));
-            nodes.add(new VNode("RG1", onto));
-            nodes.add(new VNode("RG2", onto));
-            nodes.add(new VNode("RGG0", onto));
-            object.insertRowNodes(nodes);
-
-            nodes.clear();
-            nodes.add(new VNode("CG0", onto));
-            nodes.add(new VNode("CG1", onto));
-            nodes.add(new VNode("CG2", onto));
-            nodes.add(new VNode("CG3", onto));
-            nodes.add(new VNode("CG4", onto));
-            nodes.add(new VNode("CG5", onto));
-            nodes.add(new VNode("CGG0", onto));
-            nodes.add(new VNode("CGG1", onto));
-
-            object.insertColumnNodes(nodes);
+//            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
+//            CoolMapMaster.addNewCOntology(onto);
+//
+//            ArrayList<VNode> nodes = new ArrayList<VNode>();
+//            nodes.add(new VNode("RG0", onto));
+//            nodes.add(new VNode("RG1", onto));
+//            nodes.add(new VNode("RG2", onto));
+//            nodes.add(new VNode("RGG0", onto));
+//            object.insertRowNodes(nodes);
+//
+//            nodes.clear();
+//            nodes.add(new VNode("CG0", onto));
+//            nodes.add(new VNode("CG1", onto));
+//            nodes.add(new VNode("CG2", onto));
+//            nodes.add(new VNode("CG3", onto));
+//            nodes.add(new VNode("CG4", onto));
+//            nodes.add(new VNode("CG5", onto));
+//            nodes.add(new VNode("CGG0", onto));
+//            nodes.add(new VNode("CGG1", onto));
+//
+//            object.insertColumnNodes(nodes);
+            
 
             object.setAggregator(new DoubleDoubleMean());
             object.setViewRenderer(new DoubleToColor());
@@ -145,6 +149,7 @@ public class Main {
             //try to add some annotations
 //            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
 //            object.getAnnotationStorage().addAnnotation(annotation);
+//            CoolMapMaster.getCMainFrame().showBusyDialog(true);
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }

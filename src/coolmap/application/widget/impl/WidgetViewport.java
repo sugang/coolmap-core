@@ -49,6 +49,7 @@ import javax.swing.event.InternalFrameEvent;
 public class WidgetViewport extends Widget implements ActiveCoolMapChangedListener {
 
     private JDesktopPane _desktop = new JDesktopPane();
+    
     private JToolBar _toolBar = new JToolBar();
     private int frameMargin = 20;
     private final JPopupMenu _popupMenu = new JPopupMenu();
@@ -64,7 +65,14 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         _initMainMenuItem();
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
+        getContentPane().setBackground(UI.colorBlack3);
+        
     }
+    
+    public void setEnabled(boolean enabled){
+        _desktop.setVisible(enabled);
+    }
+    
 
 //    public void setSessionName(String name){
 //        if(name == null || name.length() == 0){

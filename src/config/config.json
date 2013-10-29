@@ -3,7 +3,7 @@
     "R": {"R-Path": "usr/bin/R", "RScript-Path": "/usr/bin/Rscript"},
     "plugin": {"directory": "plugin"},
     "workspace": {"directory": "workspace"},
-    "module": {
+    "widget": {
         "load": [
                     "coolmap.application.widget.impl.WidgetViewport", 
                     "coolmap.application.widget.impl.WidgetAggregator", 
@@ -22,6 +22,12 @@
                         "load": ["DoubleToColor", "DoubleToBar"],
                         "preferred-location":"left-bottom"
                     }
+        }
+    },
+    "module": {
+        "load": ["coolmap.module.impl.ClusterModule"],
+        "config": {
+            
         }
     }
 }

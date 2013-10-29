@@ -4,12 +4,10 @@
  */
 package coolmap.utils.cluster;
 
-import cern.colt.function.Double27Function;
 import coolmap.application.CoolMapMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
-import coolmap.data.contology.utils.COntologyUtils;
 import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.utils.Tools;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
@@ -159,15 +157,19 @@ public class HCluster {
         }
 
         System.out.println("+++ check point +++");
-        System.out.println(ontology.getRootNamesOrdered());
+//        System.out.println(ontology.getRootNamesOrdered());
 
-
+//        Why this step go it dead completely?
+        System.out.println("attempt to replace nodes:");
         object.replaceRowNodes(ontology.getRootNodesOrdered());
-
         //It can not be expanded for weird reason
+         System.out.println("attempt to expand nodes:");
+        
+        //This is when problem occurs 
         object.expandRowNodeToBottom(object.getViewNodeRow(0));
 
-        System.out.println("+++++++++++++++++++++++Ended Successfully");
+        System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");
+        
     }
 
     public synchronized static void hclustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {

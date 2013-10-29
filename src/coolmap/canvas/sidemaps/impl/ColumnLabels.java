@@ -138,7 +138,16 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                             }
                         }
                     }//end iteration
-                    obj.removeViewNodesColumn(nodesToBeRemoved);
+                    
+                    try{
+                        CoolMapState state = CoolMapState.createStateColumns("Remove columns", obj, null);
+                        obj.removeViewNodesColumn(nodesToBeRemoved);
+                        StateStorageMaster.addState(state);
+                    }
+                    
+                    catch(Exception e){
+                        System.err.println("Error removing columns");
+                    }
                 }
             }
         });
@@ -582,9 +591,11 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             _newSingleSelection(obj, targetCol);
         }
 
-        if (me.getClickCount() > 1) {
-            view.clearSelection();
-        }
+//        if (me.getClickCount() > 1) {
+//            CoolMapState state = CoolMapState.createStateSelections("Clear selection", obj, null);
+//            view.clearSelection();
+//            StateStorageMaster.addState(state);
+//        }
 
     }
 
@@ -626,7 +637,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
+            
+            CoolMapState state = CoolMapState.createStateSelections("Select columns", obj, null);
             view.setSelections(newSelections);
+            StateStorageMaster.addState(state);
         }
     }
 
@@ -642,7 +656,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             newSelections.add(new Rectangle(targetCol, range.lowerEndpoint(), 1, range.upperEndpoint() - range.lowerEndpoint()));
         }
 
+        CoolMapState state = CoolMapState.createStateSelections("Select column", obj, null);
         view.setSelections(newSelections);
+        StateStorageMaster.addState(state);
+        
         _anchorCol = targetCol;
     }
 
@@ -659,7 +676,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             newSelections.add(new Rectangle(targetCol, range.lowerEndpoint(), 1, range.upperEndpoint() - range.lowerEndpoint()));
         }
 
+        CoolMapState state = CoolMapState.createStateSelections("Add selected column", obj, null);
         view.addSelection(newSelections);
+        StateStorageMaster.addState(state);
+        
         _anchorCol = targetCol;
     }
 
@@ -713,7 +733,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                         newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                     }
                 }
+                
+                CoolMapState state = CoolMapState.createStateSelections("Remove selected column", obj, null);
                 view.setSelections(newSelections);
+                StateStorageMaster.addState(state);
                 //does not change anchor col
             }
         }

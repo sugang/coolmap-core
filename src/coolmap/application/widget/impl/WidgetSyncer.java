@@ -582,7 +582,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             return;
         }
 
-        System.out.println("Columns changed");
+//        System.out.println("Columns changed");
         if (_columnLayout.isSelected()) {
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);

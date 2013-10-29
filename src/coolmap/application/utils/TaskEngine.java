@@ -5,12 +5,7 @@
 package coolmap.application.utils;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayDeque;
-import javax.swing.*;
 
 /**
  *
@@ -20,13 +15,18 @@ public class TaskEngine {
 
     private Thread _workerThread = null;
     private Thread _monitorThread = null;
-    private JDialog _progressDialog;
     private String _taskName;
-    private TaskPanel _taskPanel;
     private final ArrayDeque<LongTask> _tasks = new ArrayDeque<LongTask>();
+    private static TaskEngine _taskEngine;
 
-    public TaskEngine() {
-        _initUI();
+    public static TaskEngine getInstance() {
+        if (_taskEngine == null) {
+            _taskEngine = new TaskEngine();
+        }
+        return _taskEngine;
+    }
+
+    private TaskEngine() {
     }
 
     public synchronized void submitTask(LongTask task) {
@@ -36,6 +36,7 @@ public class TaskEngine {
         submitTask(task, task.getName());
     }
 
+    //can add task to the queue
     private synchronized void submitTask(LongTask task, String name) {
         _tasks.add(task);
 
@@ -44,38 +45,6 @@ public class TaskEngine {
         } else {
             _nextTask();
         }
-    }
-
-    private void _initUI() {
-        _progressDialog = new JDialog(CoolMapMaster.getCMainFrame(), "Executing Task", true);
-
-        _taskPanel = new TaskPanel();
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(_taskPanel, BorderLayout.CENTER);
-        JButton button = new JButton("Cancel");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                if (_workerThread != null && _workerThread.isAlive()) {
-                    _workerThread.interrupt();
-                    _monitorThread.interrupt();
-                } else {
-                    _progressDialog.setVisible(false);
-                }
-            }
-        });
-
-        panel.add(button, BorderLayout.SOUTH);
-        _progressDialog.setContentPane(panel);
-//        _progressDialog.setPreferredSize(new Dimension(400,300));
-        _progressDialog.setSize(new Dimension(250, 140));
-        _progressDialog.setAlwaysOnTop(true);
-        _progressDialog.setUndecorated(true);
-        //_progressDialog.setVisible(true);
-        _progressDialog.setLocationRelativeTo(CoolMapMaster.getCMainFrame());
-
     }
 
     public void destroy() {
@@ -88,30 +57,27 @@ public class TaskEngine {
         TaskEngine exe = new TaskEngine();
     }
 
-    public void showModularScreen() {
-        _progressDialog.setVisible(true);
-        _progressDialog.pack();
+//    public void showModularScreen() {
+//        CoolMapMaster.getCMainFrame().showBusyDialog(true);
+//    }
+
+
+    public synchronized void cancelcurrentTask() {
+        if (_workerThread != null && _workerThread.isAlive()) {
+            _workerThread.interrupt();
+            _nextTask();
+        } else {
+            CoolMapMaster.getCMainFrame().hideBusyDialog();
+        }
     }
 
-    private class TaskPanel extends JPanel {
-
-        private Image blockloader = UI.blockLoader;
-        private Font font = UI.fontPlain.deriveFont(11f).deriveFont(Font.BOLD);
-
-        public TaskPanel() {
-        }
-
-        @Override
-        protected void paintComponent(Graphics grphcs) {
-            super.paintComponent(grphcs);
-            grphcs.drawImage(blockloader, getWidth() / 2 - blockloader.getWidth(this) / 2, getHeight() / 2 - blockloader.getHeight(this) / 2 - 10, this);
-            Graphics2D g = (Graphics2D) grphcs.create();
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setFont(font);
-
-            int width = g.getFontMetrics().stringWidth("Running: " + _taskName);
-            g.setColor(UI.colorBlack3);
-            g.drawString("Running: " + _taskName, getWidth() / 2 - width / 2, 100);
+    public synchronized void cancelAll() {
+        if (_workerThread != null && _workerThread.isAlive()) {
+            _workerThread.interrupt();
+            _monitorThread.interrupt();
+            _tasks.clear(); //Just clear -> they should not be started yet
+        } else {
+            CoolMapMaster.getCMainFrame().hideBusyDialog();
         }
     }
 
@@ -129,22 +95,22 @@ public class TaskEngine {
             try {
                 Thread.sleep(500);
                 if (_workerThread != null && _workerThread.isAlive()) {
-                    _progressDialog.setVisible(true);
+                    CoolMapMaster.getCMainFrame().showBusyDialog(_taskName);
                     while (!Thread.currentThread().isInterrupted()) {
 
                         if (_workerThread == null || !_workerThread.isAlive() || _workerThread.isInterrupted()) {
                             Thread.currentThread().interrupt();
                         } else {
-                            _progressDialog.setVisible(true);
+                            CoolMapMaster.getCMainFrame().showBusyDialog(_taskName);
                         }
 
                         Thread.sleep(200);
                     }
-                    _progressDialog.setVisible(false);
+                    CoolMapMaster.getCMainFrame().hideBusyDialog();
                 }
 
             } catch (InterruptedException e) {
-                _progressDialog.setVisible(false);
+                CoolMapMaster.getCMainFrame().hideBusyDialog();
             }
         }
     }
@@ -167,46 +133,6 @@ public class TaskEngine {
             }
 
             _nextTask();
-
-
-
-//            try {
-//                if (_monitorThread != null && _monitorThread.isAlive()) {
-//                    _monitorThread.interrupt();
-//                    throw new InterruptedException();
-//                }
-//            } catch (InterruptedException e) {
-//                //Thread is interrupted
-//                System.out.println("Worker interrupted");
-//                //cancel all other tasks
-////                for(LongTask longTask : _tasks){
-////                    
-////                }
-//                _tasks.clear();
-//            } catch (Exception e) {
-//                //any other error may have occured. Just mute it or pass it on?
-//                e.printStackTrace();
-//            } finally {
-//                if (_task != null) {
-//                    _tasks.remove(_task);
-//                }
-//                ////////////////////////
-//                LongTask nextTask = _tasks.pollFirst();
-//                if (nextTask) {
-//                                System.out.println("Worker thread started");
-//            _workerThread = new WorkerThread(task);
-//            _workerThread.start();
-//
-//            if (name == null || name.length() == 0) {
-//                name = "task";
-//            }
-//
-//            _taskName = name;
-//
-//            _monitorThread = new MonitorThread();
-//            _monitorThread.start();
-//                }
-//            }
 
         }
     }

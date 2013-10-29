@@ -137,7 +137,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                             }
                         }
                     }//end iteration
+                    CoolMapState state = CoolMapState.createStateRows("Remove rows", obj, null);
                     obj.removeViewNodesRow(nodesToBeRemoved);
+                    StateStorageMaster.addState(state);
                 }
             }
         });
@@ -531,9 +533,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
             _newSingleSelection(obj, targetRow);
         }
 
-        if (me.getClickCount() > 1) {
-            view.clearSelection();
-        }
+//        if (me.getClickCount() > 1) {
+//            view.clearSelection();
+//        }
     }
 
     private void _removeSingleSelection(CoolMapObject obj, int targetRow) {
@@ -586,8 +588,10 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                         newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                     }
                 }
+                CoolMapState state = CoolMapState.createStateRows("Remove selected row", obj, null);
                 view.setSelections(newSelections);
-                //does not change anchor col
+                StateStorageMaster.addState(state);
+//does not change anchor col
             }
         }
     }
@@ -630,7 +634,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
+            CoolMapState state = CoolMapState.createStateRows("Select rows", obj, null);
             view.setSelections(newSelections);
+            StateStorageMaster.addState(state);
         }
     }
 
@@ -645,7 +651,10 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         for (Range<Integer> range : selectedColumns) {
             newSelections.add(new Rectangle(range.lowerEndpoint(), targetRow, range.upperEndpoint() - range.lowerEndpoint(), 1));
         }
+        CoolMapState state = CoolMapState.createStateRows("Select row", obj, null);
         view.setSelections(newSelections);
+        StateStorageMaster.addState(state);
+        
         _anchorRow = targetRow;
     }
 
@@ -660,7 +669,10 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         for (Range<Integer> range : selectedColumns) {
             newSelections.add(new Rectangle(range.lowerEndpoint(), targetRow, range.upperEndpoint() - range.lowerEndpoint(), 1));
         }
+        CoolMapState state = CoolMapState.createStateRows("Add selected row", obj, null);
         view.addSelection(newSelections);
+        StateStorageMaster.addState(state);
+        
         _anchorRow = targetRow;
     }
     private boolean _dragStart = false;

@@ -16,11 +16,13 @@ import com.javadocking.model.codec.DockModelPropertiesDecoder;
 import com.javadocking.model.codec.DockModelPropertiesEncoder;
 import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.SingleMaximizer;
+import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.utils.Config;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -39,7 +41,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
@@ -66,12 +67,52 @@ public class CMainFrame extends JFrame {
     private SingleMaximizer maximizer = null;
     private FloatExternalizer externalizer = null;
 
+    private TaskDialog busyWindow;
+    
+//    private GlassPane glassPane = new GlassPane();
+
     public CMainFrame() {
         _initFrame();
         _initListeners();
         _initMenuBar();
         _initDockableFrame();
+        
+        //The UI was not yet initialized at this moment; the CMainFrame needs to be static initalized
+//        busyWindow = new TaskDialog();
+//        setGlassPane(glassPane);
+        
+        
     }
+
+    public void showBusyDialog(String titleString){
+        //lazy initalization
+        if(busyWindow == null){
+            busyWindow = new TaskDialog();
+        }
+        
+        if(titleString == null){
+            titleString = "";
+        }
+        
+//        glassPane.updateBackgroundImage();
+        
+        busyWindow.setLabel(titleString);
+        busyWindow.setVisible(true);
+        //busyWindow.pack();
+        
+//        glassPane.setVisible(true);
+        CoolMapMaster.getViewport().setEnabled(false);
+        
+    }
+    
+    
+    
+    public void hideBusyDialog(){
+        busyWindow.setVisible(false);
+//        glassPane.setVisible(false);
+        CoolMapMaster.getViewport().setEnabled(true);
+    }
+
 
     public void saveWorkspace(String fileUrlString) {
 
@@ -365,11 +406,10 @@ public class CMainFrame extends JFrame {
     }
 //    public MenuItem findMenuItem(String parentPath){
 
-    public void addMenuSeparator(String parentPath){
+    public void addMenuSeparator(String parentPath) {
         addMenuItem(parentPath, new MenuItem(), false, false);
     }
-    
-    
+
     //private MenuBar _menuBar = new MenuBar();
     public void addMenuItem(String parentPath, MenuItem item, boolean sepBefore, boolean sepAfter) {
         if (item == null) {
@@ -428,19 +468,17 @@ public class CMainFrame extends JFrame {
                 currentMenu.addSeparator();
             }
             //if (item instanceof MenuItem) {
-            
-            if(item.getLabel().equals("")){
+
+            if (item.getLabel().equals("")) {
                 currentMenu.addSeparator();
-            }
-            else{
-                currentMenu.add((MenuItem)item);
+            } else {
+                currentMenu.add((MenuItem) item);
             }
             //}
-            
+
 //            else if(item instanceof JSeparator){
 //                currentMenu.addSeparator();
 //            }
-
             if (sepAfter) {
                 currentMenu.addSeparator();
             }
@@ -547,5 +585,33 @@ public class CMainFrame extends JFrame {
             System.out.println("CoolMap Application will be closed.");
             System.exit(0);
         }
+    }
+    
+    private class GlassPane extends JPanel{
+
+        public GlassPane(){
+            setOpaque(false);
+        }
+        
+//        private BufferedImage _background;
+        
+//        public void updateBackgroundImage(){
+//            
+//            _background = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+//            Graphics2D g2D = _background.createGraphics();
+//            CMainFrame.this.paintComponents(g2D);
+//            g2D.dispose();
+//        }
+        
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g); //To change body of generated methods, choose Tools | Templates.
+//            Graphics2D g2D = (Graphics2D)g;
+//            g2D.drawImage(_background, 0, 0, this);
+            
+        }
+        
+        
     }
 }

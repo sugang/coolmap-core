@@ -661,9 +661,9 @@ public final class CoolMapView<BASE, VIEW> {
 
     }
 
-    public void zoomOut(boolean zoomX, boolean zoomY) {
+    public boolean zoomOut(boolean zoomX, boolean zoomY) {
         if (_coolMapObject == null || !_coolMapObject.isViewValid() || zoomX == false && zoomY == false) {
-            return;
+            return false;
         }
 
         Rectangle viewport = _getViewportBounds();
@@ -694,7 +694,7 @@ public final class CoolMapView<BASE, VIEW> {
         VNode rowNode = _coolMapObject.getViewNodeRow(centerCell.row.intValue());
         VNode colNode = _coolMapObject.getViewNodeColumn(centerCell.col.intValue());
         if (rowNode == null || colNode == null) {
-            return;
+            return false;
         }
         //center rowNode, colNode to centerX and centerY
         //but don't update canvas
@@ -704,6 +704,7 @@ public final class CoolMapView<BASE, VIEW> {
         updateCanvasEnforceAll();
 
         _fireViewZoomChanged();
+        return true;
     }
 
     public void setSelectionsColumnIndices(Collection<Integer> selectedIndices) {
@@ -786,7 +787,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     public void setSelectionsRow(Collection<Range<Integer>> selectedRows) {
 
-        System.out.println("Selected Rows here:" + selectedRows);
+//        System.out.println("Selected Rows here:" + selectedRows);
 
         if (selectedRows == null || selectedRows.isEmpty()) {
             clearSelection();
@@ -805,7 +806,7 @@ public final class CoolMapView<BASE, VIEW> {
             }
         }
 
-        System.out.println("New selections:" + newSelections);
+//        System.out.println("New selections:" + newSelections);
         setSelections(newSelections);
     }
 
@@ -4020,7 +4021,7 @@ public final class CoolMapView<BASE, VIEW> {
                 g2D.setFont(labelFontRotated);
                 for (int i = fromCol; i <= toCol; i++) {
 
-                    VNode node = _coolMapObject.getViewNodeRow(i);
+                    VNode node = _coolMapObject.getViewNodeColumn(i);
                     g2D.drawString(node.getViewLabel(), columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2 + 4, center.y - colLabelMargin - 10);
                 }
 

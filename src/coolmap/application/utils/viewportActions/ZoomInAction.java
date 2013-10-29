@@ -12,7 +12,6 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.UI;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.json.JSONObject;
@@ -40,23 +39,25 @@ public class ZoomInAction extends AbstractAction{
                         return;
                     }
                     else{
-                        int zoomIndexX = object.getCoolMapView().getZoomControlX().getCurrentZoomIndex();
-                        int zoomIndexY = object.getCoolMapView().getZoomControlY().getCurrentZoomIndex();
-                        HashMap<String, Object> values = new HashMap<String, Object>();
-                        values.put("zoomIndexX", zoomIndexX);
-                        values.put("zoomIndexY", zoomIndexY);
                         
-                        HashMap<String, Object> keyVal = new HashMap<>();
-                        keyVal.put("zoom", values);
+                        
+//                        int zoomIndexX = object.getCoolMapView().getZoomControlX().getCurrentZoomIndex();
+//                        int zoomIndexY = object.getCoolMapView().getZoomControlY().getCurrentZoomIndex();
+//                        HashMap<String, Object> values = new HashMap<String, Object>();
+//                        values.put("zoomIndexX", zoomIndexX);
+//                        values.put("zoomIndexY", zoomIndexY);
+//                        
+//                        HashMap<String, Object> keyVal = new HashMap<>();
+//                        keyVal.put("zoom", values);
                         
                         //two levels down
-                        CoolMapState zoomState = CoolMapState.createStateConfigs("Zoom in", object, new JSONObject(keyVal));
-         
+                        //All needs to be done is to create a state, and save it, then create a listenr that actually does the trick
+                        CoolMapState zoomState = CoolMapState.createStateConfigs("Zoom in", object, new JSONObject());         
                         boolean success = object.getCoolMapView().zoomIn(true, true);
-                        
                         if(success){
                             StateStorageMaster.addState(zoomState);
                         }
+                        
                     }
                     
                 }

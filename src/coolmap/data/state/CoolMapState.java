@@ -63,18 +63,19 @@ public class CoolMapState {
         return _logSelections;
     }
 
+    //There must be ways to access and change config data
     public JSONObject getConfig() {
-        if (_configurations == null) {
-            return null;
-        } else {
-            try {
-                return new JSONObject(_configurations.toString());
-            } catch (Exception e) {
-                System.err.println("JSON confg in CoolMapState duplication error. A null config was returned instead");
-                return null;
-            }
-        }
-
+//        if (_configurations == null) {
+//            return null;
+//        } else {
+//            try {
+//                return new JSONObject(_configurations.toString());
+//            } catch (Exception e) {
+//                System.err.println("JSON confg in CoolMapState duplication error. A null config was returned instead");
+//                return null;
+//            }
+//        }
+        return _configurations;
     }
 
     private CoolMapState(CoolMapState oldState) {
@@ -345,9 +346,16 @@ public class CoolMapState {
         }
 
         //save configurations
-        _configurations = otherConfig;
+        if(otherConfig != null){
+            _configurations = otherConfig;
+        }
+        else{
+            _configurations = new JSONObject();
+        }
 
         _createdTime = System.currentTimeMillis();
+        
+        //The state was created.
     }
 
     /**
@@ -357,26 +365,44 @@ public class CoolMapState {
      * @return
      */
     public static CoolMapState createState(String operationName, CoolMapObject object, JSONObject config) {
-        return new CoolMapState(operationName, object, true, true, true, config);
+        CoolMapState state =  new CoolMapState(operationName, object, true, true, true, config);
+        object.notifyStateToBeSaved(state);
+        return state;
     }
 
     public static CoolMapState createStateRows(String operationName, CoolMapObject object, JSONObject config) {
-        return new CoolMapState(operationName, object, true, false, true, config);
+        CoolMapState state = new CoolMapState(operationName, object, true, false, true, config);
+        object.notifyStateToBeSaved(state);
+        
+        return state;
     }
 
     public static CoolMapState createStateColumns(String operationName, CoolMapObject object, JSONObject config) {
-        return new CoolMapState(operationName, object, false, true, true, config);
+        CoolMapState state = new CoolMapState(operationName, object, false, true, true, config);
+        object.notifyStateToBeSaved(state);
+        return state;
     }
 
     public static CoolMapState createStateSelections(String operationName, CoolMapObject object, JSONObject config) {
-        return new CoolMapState(operationName, object, false, false, true, config);
+        CoolMapState state = new CoolMapState(operationName, object, false, false, true, config);
+        object.notifyStateToBeSaved(state);
+        return state;
     }
 
     public static CoolMapState createStateConfigs(String operationName, CoolMapObject object, JSONObject config) {
-        return new CoolMapState(operationName, object, false, false, false, config); //Commands are stored in the JSON config file
+        CoolMapState state = new CoolMapState(operationName, object, false, false, false, config); //Commands are stored in the JSON config file
+        object.notifyStateToBeSaved(state);
+        return state;
+    }
+    
+    public static CoolMapState createStateConfigs(String operationName, CoolMapObject object){
+        CoolMapState state = new CoolMapState(operationName, object, false, false, false, new JSONObject());
+        object.notifyStateToBeSaved(state);
+        return state;
     }
 
     public CoolMapState duplicate() {
+        //No need to notify change in duplicates
         return new CoolMapState(this);
     }
 
@@ -386,18 +412,19 @@ public class CoolMapState {
      *
      * @param operationName
      * @param object
-     * @param state
+     * @param stateWithConfig
      * @return
      */
-    public static CoolMapState createFromStateConfig(String operationName, CoolMapObject object, CoolMapState state) {
-        if (object == null || state == null) {
+    public static CoolMapState createFromStateConfig(String operationName, CoolMapObject object, CoolMapState stateWithConfig) {
+        if (object == null || stateWithConfig == null) {
             return null;
         } else {
-            boolean loggedRow = state.loggedRows();
-            boolean loggedColumns = state.loggedColumns();
-            boolean loggedSelections = state.loggedSelections();
-            JSONObject config = state.getConfig();
+            boolean loggedRow = stateWithConfig.loggedRows();
+            boolean loggedColumns = stateWithConfig.loggedColumns();
+            boolean loggedSelections = stateWithConfig.loggedSelections();
+            JSONObject config = stateWithConfig.getConfig();
 
+            
             //need to capture certain things, this function will need to be extended on the fly;
             //the widget part can be extended
             //
@@ -410,21 +437,29 @@ public class CoolMapState {
             }
             
             //need to override values
-            try {
-                if(newConfig.has("zoom")){
-                    System.err.println("zoom was recorded");
-                    //
-                    HashMap zooms = new HashMap();
-                    zooms.put("zoomIndexX", object.getCoolMapView().getZoomControlX().getCurrentZoomIndex());
-                    zooms.put("zoomIndexY", object.getCoolMapView().getZoomControlY().getCurrentZoomIndex());
-                    
-                    newConfig.put("zoom", zooms);
-                }
-            } catch (Exception e) {
-
-            }
-
-            return new CoolMapState(operationName, object, loggedRow, loggedColumns, loggedSelections, newConfig);
+//            try {
+//                if(newConfig.has("zoom")){
+//                    System.err.println("zoom was recorded");
+//                    //
+//                    HashMap zooms = new HashMap();
+//                    zooms.put("zoomIndexX", object.getCoolMapView().getZoomControlX().getCurrentZoomIndex());
+//                    zooms.put("zoomIndexY", object.getCoolMapView().getZoomControlY().getCurrentZoomIndex());
+//                    
+//                    newConfig.put("zoom", zooms);
+//                }
+//            } catch (Exception e) {
+//
+//            }
+            //Also here 
+            
+            CoolMapState newState = new CoolMapState(operationName, object, loggedRow, loggedColumns, loggedSelections, newConfig);
+            
+            //This must be called here - but anyways, 
+            //because state restore happens on CoolMapObject, but state creation happens on CoolMapState - this is why it's quite awkward
+            object.notifyStateToBeSaved(newState);
+            
+            
+            return newState;
         }
     }
 

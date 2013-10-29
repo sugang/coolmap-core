@@ -32,9 +32,8 @@ import coolmap.data.filter.ViewFilter;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.data.snippet.SnippetMaster;
-import coolmap.data.state.CObjectStateRestoreListener;
+import coolmap.data.state.CObjectStateStoreListener;
 import coolmap.data.state.CoolMapState;
-import coolmap.data.state.misc.ZoomTracker;
 import coolmap.utils.TableCache;
 import coolmap.utils.Tools;
 import java.awt.Color;
@@ -72,7 +71,7 @@ public final class CoolMapObject<BASE, VIEW> {
     protected AnnotationRenderer<BASE, VIEW> _annotationRenderer = null;
     protected SnippetConverter<VIEW> _snippetConverter = null;
     private final HashSet<CObjectListener> _coolMapDataListeners = new HashSet<CObjectListener>();
-    private final HashSet<CObjectStateRestoreListener> _cObjectStateRestoreListeners = new HashSet<CObjectStateRestoreListener>();
+    private final HashSet<CObjectStateStoreListener> _cObjectStateRestoreListeners = new HashSet<CObjectStateStoreListener>();
     
 //    private StateStorage _stateStorage;
     private final CombinationFilter _masterFilter;
@@ -194,11 +193,11 @@ public final class CoolMapObject<BASE, VIEW> {
         _coolMapDataListeners.remove(lis);
     }
     
-    public void addCObjectStateRestoreListener(CObjectStateRestoreListener lis){
+    public void addCObjectStateRestoreListener(CObjectStateStoreListener lis){
         _cObjectStateRestoreListeners.add(lis);
     }
     
-    public void removeCObjectStateRestoreListener(CObjectStateRestoreListener lis){
+    public void removeCObjectStateRestoreListener(CObjectStateStoreListener lis){
         _cObjectStateRestoreListeners.remove(lis);
     }
 
@@ -324,7 +323,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //            setBaseMatrix(baseMatrix);
 //            setName(baseMatrix.getName());
 //        }
-        addCObjectStateRestoreListener(new ZoomTracker(this));
+//        addCObjectStateRestoreListener(new ZoomTracker(this));
         
     }
 
@@ -896,9 +895,15 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
     
-    private void _notifyStateRestored(CoolMapState stateToRestore){
-        for(CObjectStateRestoreListener lis : _cObjectStateRestoreListeners){
-            lis.stateToBeRestored(stateToRestore);
+    public void notifyStateRestored(CoolMapState stateToRestore){
+        for(CObjectStateStoreListener lis : _cObjectStateRestoreListeners){
+            lis.stateToBeRestored(this, stateToRestore);
+        }
+    }
+    
+    public void notifyStateToBeSaved(CoolMapState stateToSave){
+        for(CObjectStateStoreListener lis : _cObjectStateRestoreListeners){
+            lis.stateToBeSaved(this, stateToSave);
         }
     }
     
@@ -1542,11 +1547,12 @@ public final class CoolMapObject<BASE, VIEW> {
     public synchronized boolean expandRowNodeToBottom(VNode node) {
         if (node != null && getCoolMapView() != null && !node.isExpanded()) {
 
-            System.out.println("\n\nAttempting to expand:" + node + " " + node.getCOntology() + "\n\n");
+//            System.out.println("\n\nAttempting to expand:" + node + " " + node.getCOntology() + "\n\n");
 
 
 //            StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWEXPAND);
 //            notifyStateStorageUpdated();
+            System.out.println("Error occurs in this function: expand row nodes to bottom:" + node);
 
             List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
             getCoolMapView().updateNodeDisplayParams();
@@ -1837,7 +1843,7 @@ public final class CoolMapObject<BASE, VIEW> {
             }
             
             //also need to parse JSON -> save to other operations
-            _notifyStateRestored(state);
+            notifyStateRestored(state);
             
             getCoolMapView().updateCanvasEnforceAll();
             
@@ -1861,6 +1867,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
         _vMatrix.destroy();
         _coolMapDataListeners.clear();
+        _cObjectStateRestoreListeners.clear();
         _cMatrices.clear();
 //        _viewFilter = null;
         _masterFilter.clearFilters();
