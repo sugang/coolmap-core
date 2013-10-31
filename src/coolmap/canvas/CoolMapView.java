@@ -167,14 +167,13 @@ public final class CoolMapView<BASE, VIEW> {
 //        _viewActiveCellChangedListeners.remove(viewActiveCellChangedListener);
 //    }
     private boolean drawAnnotation = true;
-    
-    public synchronized void togglePaintAnnotation(){
+
+    public synchronized void togglePaintAnnotation() {
         drawAnnotation = !drawAnnotation;
         _pAnnotationLayer.setRender(drawAnnotation);
         updateCanvasEnforceOverlay();
     }
-    
-    
+
     public void setRowPanelsVisible(boolean visible) {
         _rowDrawer.setVisible(visible);
     }
@@ -212,10 +211,12 @@ public final class CoolMapView<BASE, VIEW> {
     private void _fireViewSelectionChanged() {
         //update the selected rows and regions.
         _updateColRowRanges();
+        System.out.println("successfully updated col row ranges");
 
 //        for (CViewSelectionChangedListener vs : _viewSelectionChangedListeners) {
 //            vs.selectionChanged(_coolMapObject);
 //        }
+//        certain view listener broke down ====== here
         for (CViewListener listener : _viewListeners) {
             listener.selectionChanged(_coolMapObject);
         }
@@ -421,14 +422,12 @@ public final class CoolMapView<BASE, VIEW> {
     public void centerToPercentage(float colPercent, float rowPercent) {
         try {
             //need to find these nodes
-            
-            
-            
+
             VNode colNode = _findColNode(colPercent);
             VNode rowNode = _findRowNode(rowPercent);
 //            System.out.println(colNode + "->" + colNode.getViewIndex());
 //            System.out.println(rowNode + "->" + rowNode.getViewIndex());
-            
+
             Rectangle nodeRegion = new Rectangle(colNode.getViewIndex().intValue(), rowNode.getViewIndex().intValue(), 1, 1);
             centerToRegion(nodeRegion);
 
@@ -441,9 +440,10 @@ public final class CoolMapView<BASE, VIEW> {
     //same function for rowNode
     /**
      * returrn the column node at the relative percentage of the map
+     *
      * @param colPercentage
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private VNode _findColNode(float colPercentage) throws Exception {
         if (colPercentage <= 0) {
@@ -477,8 +477,8 @@ public final class CoolMapView<BASE, VIEW> {
                 startNode = currentNode;
                 continue;
             }
-                return currentNode;
-            
+            return currentNode;
+
         }
 
         throw new Exception("Searching for percentage col node failed possibly due to error");
@@ -486,9 +486,10 @@ public final class CoolMapView<BASE, VIEW> {
 
     /**
      * return the row node at the relative percentage of the map
+     *
      * @param rowPercentage
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private VNode _findRowNode(float rowPercentage) throws Exception {
         if (rowPercentage <= 0) {
@@ -512,12 +513,12 @@ public final class CoolMapView<BASE, VIEW> {
 
             float currentPerStart = currentNode.getViewOffset() / _mapDimension.height;
             float currentPerEnd = currentNode.getViewOffset(_zoom.x) / _mapDimension.height;
-            
-            if (rowPercentage < currentPerStart){
+
+            if (rowPercentage < currentPerStart) {
                 endNode = currentNode;
                 continue;
             }
-            if (rowPercentage >= currentPerEnd){
+            if (rowPercentage >= currentPerEnd) {
                 startNode = currentNode;
                 continue;
             }
@@ -586,8 +587,6 @@ public final class CoolMapView<BASE, VIEW> {
         centerCell.confineToValidCell(_coolMapObject);
 
         //Just need to decode certain things
-        
-        
         if (zoomX) {
             _zoom.x = _zoomControlX.getNextZoom();
         }
@@ -788,16 +787,19 @@ public final class CoolMapView<BASE, VIEW> {
     public void setSelectionsRow(Collection<Range<Integer>> selectedRows) {
 
 //        System.out.println("Selected Rows here:" + selectedRows);
-
         if (selectedRows == null || selectedRows.isEmpty()) {
             clearSelection();
             return;
         }
 
+        
         ArrayList<Range<Integer>> selectedColumns = getSelectedColumns();
         if (selectedColumns.isEmpty()) {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
+        
+        System.out.println("Selected columns:" + selectedColumns);
+        System.out.println("Selected rows:" + selectedRows);
 
         ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
@@ -807,6 +809,8 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
 //        System.out.println("New selections:" + newSelections);
+        System.out.println("New selections" + newSelections);
+        
         setSelections(newSelections);
     }
 
@@ -901,7 +905,12 @@ public final class CoolMapView<BASE, VIEW> {
                     _selections.add(selection);
                 }
             }
+            
+             System.out.println("selections added");
+             
+             //This guy got issues!
             _fireViewSelectionChanged();
+            System.out.println("To update view area:..");
             _selectionLayer.updateViewArea();
         }
     }
@@ -1014,20 +1023,32 @@ public final class CoolMapView<BASE, VIEW> {
         redrawCanvas();
     }
 
+    public void updateActiveCell() {
+//        System.err.println("Active cell updated");
+        //Does not actually work
+        setMouseXY(_cursor.x, _cursor.y);
+//        if(!_activeCell.isValidCell(_coolMapObject)){
+//            _hoverLayer.setVisible(false);
+//        }
+    }
+
     public synchronized void setMouseXY(int x, int y) {
         _cursor.x = x;
         _cursor.y = y;
+
         //The x,y will be updated here as well.
+        //
+//        System.out.println("find current rows and columns:");
         Integer activeCol = getCurrentCol(_cursor.x);
         Integer activeRow = getCurrentRow(_cursor.y);
+//        System.out.println("end of locating them");
 
-        //check out the old active cell.
-        //change to the new cell.
+        //System.out.println(activeCol + "======" + activeRow); //active row and active col both contain values
         MatrixCell newCell = new MatrixCell(activeRow, activeCol);
-        //System.out.println("New Cell:" + newCell + " Active Cell:" + _activeCell);
-        //System.out.println(newCell.equals(_activeCell));        
-        if (!newCell.equals(_activeCell)) {
+//        System.out.println("Cursor: " + _cursor + "  " + "New cell to be: " + newCell);
 
+        if (!newCell.equals(_activeCell)) {
+//            System.out.println("Setting active cell");
             setActiveCell(_activeCell, newCell);
 
         }
@@ -1039,19 +1060,35 @@ public final class CoolMapView<BASE, VIEW> {
 //        setMouseXY(_hoverLayer._hoverBounds.x, _hoverLayer._hoverBounds.y);
 //    }
     public synchronized void setActiveCell(MatrixCell oldCell, MatrixCell newCell) {
+
+        //System.out.println(oldCell + " =:= " + newCell);
         if (oldCell == null) {
             oldCell = new MatrixCell();
         }
         if (newCell == null) {
             newCell = new MatrixCell();
+            //_hoverLayer.setVisible(false);
         }
 
-        _hoverLayer.gridMovedTo(_activeCell, newCell);
+//        System.out.println("\n\n Part begins    ");
+//        System.out.println("1) oldcell: " + oldCell + "====>" + " newCell:" + newCell);
+        //why values in oldCell and new cell was changed?
+        _hoverLayer.gridMovedTo(oldCell.duplicate(), newCell.duplicate()); //in this case grid was not moved or updated
+        _fireViewActiveCellChanged(oldCell.duplicate(), newCell.duplicate()); //I guess is the column labels actually changed 
 
-        _fireViewActiveCellChanged(_activeCell, newCell);
+//        if(!newCell.isValidCell(_coolMapObject)){
+//            _hoverLayer.setVisible(false);
+//        }
+//        else{
+//            _hoverLayer.setVisible(true);
+//        }
+        //The active cell's value should be set
+//        System.out.println("2) old Active cell set value from:" + oldCell + " ====> to new cell:" + newCell);
         _activeCell.setValueTo(newCell);
+//        System.out.println("3) new Active cell set value to after assignment:" + _activeCell);
         _selectionLayer.updateViewArea();
         //_fireActiveCellChanged(oldCell, newCell);
+//        System.out.println("======    \n\n");
 
     }
 
@@ -1066,6 +1103,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     public Integer getCurrentCol(int screenX) {
         if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
+//            System.err.println("submap ranges faulty");
             return null;
         }
 
@@ -1130,6 +1168,8 @@ public final class CoolMapView<BASE, VIEW> {
         }
         //Error, nothing can be found.
         //Should not rech here.
+        System.err.println("Funny... nothing was found=============================================================");
+
         return null;
     }
 
@@ -1141,6 +1181,7 @@ public final class CoolMapView<BASE, VIEW> {
      * @return
      */
     public Integer getCurrentColSearchAll(int screenX) {
+        //calling these functions are dangerous as the parameters may not have updated yet.
         if (_coolMapObject == null || !_subMapIndexMin.isValidRange(_coolMapObject) || !_subMapIndexMax.isValidRange(_coolMapObject)) {
             return null;
         }
@@ -1557,7 +1598,7 @@ public final class CoolMapView<BASE, VIEW> {
 
         addMapLayer(_coolMapLayer);
         addOverlayer(_maskLayer);
-        
+
         //doesn't seem to be working at all
         addOverlayer(_pAnnotationLayer);
     }
@@ -1874,10 +1915,8 @@ public final class CoolMapView<BASE, VIEW> {
         //subMapIndexMin
         //subMapIndexMax
         //System.out.println(subMapDimension + "-->" + _mapDimension);
-        
         //now, here the submapdimension is correct actually
 //        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
-        
         return true;
     }
 
@@ -2356,9 +2395,7 @@ public final class CoolMapView<BASE, VIEW> {
             }
 
 //            System.out.println("Updating overlay...");
-            
 //            System.out.println("In overlay container:" + subMapDimension);
-            
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(subMapDimension.width, subMapDimension.height, Transparency.TRANSLUCENT);
             Graphics2D g2D = buffer.createGraphics();
 
@@ -2371,11 +2408,9 @@ public final class CoolMapView<BASE, VIEW> {
 //            g2D.setColor(Color.BLACK);
 //            g2D.clearRect(0, 0, getWidth(), getHeight());
             //render maplayer into buffer
-            
 //            System.out.println("Number of overlayer:" +_overLayers.size());
             for (MapLayer mapLayer : _overLayers) {
 
-                
                 //change to selections
                 //The only difference here is that only selection will be updated.
                 mapLayer.render(g2D, _coolMapObject, subMapIndexMin.row.intValue(), subMapIndexMax.row.intValue(), subMapIndexMin.col.intValue(), subMapIndexMax.col.intValue(), _zoom.x, _zoom.y, subMapDimension.width, subMapDimension.height);
@@ -3323,23 +3358,19 @@ public final class CoolMapView<BASE, VIEW> {
                         MatrixCell endCell = new MatrixCell(_activeCell.row, _activeCell.col);
                         Rectangle region = _generateNodeRegion(_selectionAnchorCell, endCell);
                         //System.out.println(region);
-                        
-                        
-                        
+
                         StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                         setSelection(region);
-                        
+
                         //
                         //
-                        
-                        
                     } else {
                         //simply treat as a regular
                         if (_activeCell.isValidCell(_coolMapObject)) {
-                            
+
                             //Add a state before applying setSelection
                             StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
-                            
+
                             setSelection(new Rectangle(_activeCell.col.intValue(), _activeCell.row.intValue(), 1, 1));
                             _selectionAnchorCell.col(_activeCell.col.intValue());
                             _selectionAnchorCell.row(_activeCell.row.intValue());
@@ -3582,6 +3613,7 @@ public final class CoolMapView<BASE, VIEW> {
 
                 _assignSubMapParams(subMapIndexMin, subMapIndexMax, subMapDimension);
 
+                //This should be called after assignment
                 //System.out.println("Updated params:" + _subMapIndexMin + "--" + _subMapIndexMax + "--" + _subMapDimension);
                 //Also it's possible to only repaint a certain region
                 _progressMask.fadeOut();
@@ -3600,13 +3632,18 @@ public final class CoolMapView<BASE, VIEW> {
 
 //                should use the new parameters?
                 boolean success = _computeSubMapParams(subMapIndexMin, subMapIndexMax, subMapDimension);
-                
+
 //                should be success -> however, this was done in the enforce all i think, as it's a MOVE.
                 System.out.println("Force update overlay called. ");
-                
+
                 _overlayContainer.updateMapBuffers(_subMapIndexMin, _subMapIndexMax, _subMapDimension);
 
                 _progressMask.fadeOut();
+            }
+
+            updateActiveCell();
+            if (!_activeCell.isValidCell(_coolMapObject) && _hoverLayer.isVisible()) {
+                _hoverLayer.fadeOut();
             }
             redrawCanvas();
 
@@ -3721,13 +3758,16 @@ public final class CoolMapView<BASE, VIEW> {
                 if (_panAnimator.isRunning()) {
                     _panAnimator.cancel();//set cell immediately.
                 }
-
-                VNode colNode = _coolMapObject.getViewNodeColumn(cell.col.intValue());
-                VNode rowNode = _coolMapObject.getViewNodeRow(cell.row.intValue());
-                _hoverBounds.x = (int) (colNode.getViewOffset() + _mapDimension.x);
-                _hoverBounds.y = (int) (rowNode.getViewOffset() + _mapDimension.y);
-                _hoverBounds.width = (int) colNode.getViewSizeInMap(_zoom.x);
-                _hoverBounds.height = (int) rowNode.getViewSizeInMap(_zoom.y);
+                try {
+                    VNode colNode = _coolMapObject.getViewNodeColumn(cell.col.intValue());
+                    VNode rowNode = _coolMapObject.getViewNodeRow(cell.row.intValue());
+                    _hoverBounds.x = (int) (colNode.getViewOffset() + _mapDimension.x);
+                    _hoverBounds.y = (int) (rowNode.getViewOffset() + _mapDimension.y);
+                    _hoverBounds.width = (int) colNode.getViewSizeInMap(_zoom.x);
+                    _hoverBounds.height = (int) rowNode.getViewSizeInMap(_zoom.y);
+                } catch (Exception e) {
+                    System.out.println("Set active cell error.........");
+                }
             }
 
         }
@@ -3738,6 +3778,7 @@ public final class CoolMapView<BASE, VIEW> {
             //System.out.println(startCell + " " + destinationCell);
             //System.out.println(startCell + " " + endCell);
             //setActiveCell(endCell);//make endcell the active cell
+            //That's why it does not move! as it's null!
 
             if (startCell == null || endCell == null) {
                 return;

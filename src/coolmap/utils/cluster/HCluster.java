@@ -160,12 +160,12 @@ public class HCluster {
 //        System.out.println(ontology.getRootNamesOrdered());
 
 //        Why this step go it dead completely?
-        System.out.println("attempt to replace nodes:");
+//        System.out.println("attempt to replace nodes:");
         object.replaceRowNodes(ontology.getRootNodesOrdered());
         //It can not be expanded for weird reason
-         System.out.println("attempt to expand nodes:");
+//         System.out.println("attempt to expand nodes:");
         
-        //This is when problem occurs 
+        //This is when problem occurs right here!
         object.expandRowNodeToBottom(object.getViewNodeRow(0));
 
         System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");

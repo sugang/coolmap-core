@@ -44,8 +44,11 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
         _container.setLayout(new BorderLayout());
         _container.add(new JScrollPane(_dataTable));
         //_rowCellRenderer.setBackground(UI.colorGrey2);
+        
+        _dataTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer());
     }
 
+    //This is where it was broken!
     private void _updateData() {
         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
         if (object == null) {
@@ -59,6 +62,8 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
                 _dataTable.setModel(new DefaultTableModel());
                 return;
             }
+            
+            System.out.println("Selection in data matrix widget" + selection);
 
             Object[][] actualView = new Object[selection.height + 1][selection.width + 1];
 
@@ -82,101 +87,66 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
             }
             colNames[0] = "Data";
 
+            System.out.println("Finished loading actual view");
+            
             DefaultTableModel tableModel = new DefaultTableModel(actualView, colNames);
             _dataTable.setModel(tableModel);
 
-            _dataTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-
-                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean isSelected, boolean bln1, int i, int i1) {
-                    JLabel label = (JLabel) super.getTableCellRendererComponent(jtable, o, isSelected, bln1, i, i1);
-                    if (isSelected) {
-                        return label;
-                    }
-
-
-                    if (o != null) {
-                        if (o instanceof VNode) {
-                            VNode node = (VNode) o;
-                            if (node.isGroupNode()) {
-                                if (node.getViewColor() != null) {
-                                    label.setBackground(node.getViewColor());
-                                } else if (node.getCOntology() != null && node.getCOntology().getViewColor() != null) {
-                                    label.setBackground(node.getCOntology().getViewColor());
-                                } else {
-                                    label.setBackground(UI.colorGrey2);
-                                }
-                            } else {
-                                label.setBackground(null);
-                            }
-                        } else {
-                            label.setBackground(null);
-                        }
-                    } else {
-                        label.setBackground(null);
-                    }
-
-
-                    return label;
-                }
-            });
+            System.out.println("End of setting table model");
+            
+            //This guy got an issue
+            //issue is here, still don't know why
+//            _dataTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+//
+//                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean isSelected, boolean bln1, int i, int i1) {
+////                    try{
+////                    JLabel label = (JLabel) super.getTableCellRendererComponent(jtable, o, isSelected, bln1, i, i1);
+////                    if (isSelected) {
+////                        return label;
+////                    }
+////
+////
+////                    if (o != null) {
+////                        if (o instanceof VNode) {
+////                            VNode node = (VNode) o;
+////                            if (node.isGroupNode()) {
+////                                if (node.getViewColor() != null) {
+////                                    label.setBackground(node.getViewColor());
+////                                } else if (node.getCOntology() != null && node.getCOntology().getViewColor() != null) {
+////                                    label.setBackground(node.getCOntology().getViewColor());
+////                                } else {
+////                                    label.setBackground(UI.colorGrey2);
+////                                }
+////                            } else {
+////                                label.setBackground(null);
+////                            }
+////                        } else {
+////                            label.setBackground(null);
+////                        }
+////                    } else {
+////                        label.setBackground(null);
+////                    }
+////
+////
+////                    return label;
+////                    }
+////                    catch(Exception e){
+////                        return super.getTableCellRendererComponent(jtable, o, isSelected, bln1, i1, i1);
+////                    }
+//                    
+//                    
+//                    return super.getTableCellRendererComponent(jtable, o, isSelected, bln1, i1, i1);
+//                }
+//            });
+            
+            
+            
+            System.out.println("End of setting table renderer");
 
             _dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             _dataTable.getTableHeader().setReorderingAllowed(false);
 
-
-
-//            _dataTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer(){
-//
-//                @Override
-//                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean isSelected, boolean bln1, int i, int i1) {
-//                   
-//                    
-//                    
-//                    JLabel label = (JLabel)  super.getTableCellRendererComponent(jtable, o, isSelected, bln1, i, i1);
-//                    if(isSelected){
-//                        return label;
-//                    }
-//                    VNode node  = (VNode) o;
-//                    if(node.getViewColor() != null){
-//                        label.setBackground(node.getViewColor());
-//                    }
-//                    else if(node.getCOntology() != null && node.getCOntology().getViewColor() != null){
-//                        label.setBackground(node.getCOntology().getViewColor());
-//                    }
-//                    else{
-//                        label.setBackground(UI.colorGrey2);
-//                    }
-//          
-//                    return label;
-//                }
-//                
-//            });
-
-//            _dataTable.getTableHeader().setDefaultRenderer(new DefaultTableCellHeaderRenderer(){
-//
-//                @Override
-//                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean bln, boolean bln1, int i, int i1) {
-//                    
-//                    //System.out.println(o.getClass());
-//                    JLabel label = (JLabel)super.getTableCellRendererComponent(jtable, o, bln, bln1, i, i1);
-//                    if(o != null && o instanceof VNode){
-//                        VNode colNode = (VNode) o;
-//                        if(colNode.getViewColor() != null){
-//                            label.setBackground(colNode.getViewColor());
-//                        }
-//                        else if(colNode.getCOntology() != null && colNode.getCOntology().getViewColor() != null){
-//                            label.setBackground(colNode.getCOntology().getViewColor());
-//                        }
-//                        else{
-//                            label.setBackground(null);
-//                        }
-//                    }
-//                    return label;
-//                }
-//            
-//                
-//            });
-
+            System.out.println("End of updating data table");
 
         }
 

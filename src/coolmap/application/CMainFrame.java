@@ -21,14 +21,23 @@ import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.utils.Config;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.RadialGradientPaint;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -68,51 +77,56 @@ public class CMainFrame extends JFrame {
     private FloatExternalizer externalizer = null;
 
     private TaskDialog busyWindow;
-    
-//    private GlassPane glassPane = new GlassPane();
 
+    private final GlassPane _glassPane = new GlassPane();
+
+//    private GlassPane glassPane = new GlassPane();
     public CMainFrame() {
         _initFrame();
         _initListeners();
         _initMenuBar();
         _initDockableFrame();
-        
+
         //The UI was not yet initialized at this moment; the CMainFrame needs to be static initalized
 //        busyWindow = new TaskDialog();
 //        setGlassPane(glassPane);
-        
-        
+        setGlassPane(_glassPane);
     }
 
-    public void showBusyDialog(String titleString){
+    public void showBusyDialog(String titleString) {
+        //Why sometimes it turns into black?
+//        _glassPane.updateBackgroundImage();
+
+        _glassPane.setVisible(true);
+
         //lazy initalization
-        if(busyWindow == null){
+        if (busyWindow == null) {
             busyWindow = new TaskDialog();
         }
-        
-        if(titleString == null){
+
+        if (titleString == null) {
             titleString = "";
         }
-        
+
 //        glassPane.updateBackgroundImage();
-        
         busyWindow.setLabel(titleString);
         busyWindow.setVisible(true);
         //busyWindow.pack();
-        
+
 //        glassPane.setVisible(true);
-        CoolMapMaster.getViewport().setEnabled(false);
-        
-    }
-    
-    
-    
-    public void hideBusyDialog(){
-        busyWindow.setVisible(false);
-//        glassPane.setVisible(false);
-        CoolMapMaster.getViewport().setEnabled(true);
+//        CoolMapMaster.getViewport().setEnabled(false);
+//        doLayout();
     }
 
+    public void hideBusyDialog() {
+        if (busyWindow != null && busyWindow.isVisible()) {
+            busyWindow.setVisible(false);
+        }
+//        glassPane.setVisible(false);
+//        CoolMapMaster.getViewport().setEnabled(true);
+        _glassPane.setVisible(false);
+
+    }
 
     public void saveWorkspace(String fileUrlString) {
 
@@ -586,32 +600,93 @@ public class CMainFrame extends JFrame {
             System.exit(0);
         }
     }
-    
-    private class GlassPane extends JPanel{
 
-        public GlassPane(){
+    /////////////////////////////////////////////////////////////////////////////////////
+    private class GlassPane extends JPanel implements MouseListener, MouseMotionListener {
+
+        private BufferedImage _background;
+        private Color c1 = new Color(0,0,0,150);
+        private Color c2 = new Color(0,0,0,220);
+
+        public GlassPane() {
             setOpaque(false);
+            addMouseListener(this);
+            addMouseMotionListener(this);
         }
-        
+
 //        private BufferedImage _background;
-        
-//        public void updateBackgroundImage(){
+//        public void updateBackgroundImage() {
+//
+//            _background = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
+//            BufferedImage backgrondBlur = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(getWidth(), getHeight());
 //            
-//            _background = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+//            
 //            Graphics2D g2D = _background.createGraphics();
-//            CMainFrame.this.paintComponents(g2D);
+//
+//            //why it captured the JDialog instead of the underneath...?
+//            CMainFrame.this.getContentPane().paint(g2D);
+//
 //            g2D.dispose();
+//
+//            float data[] = {0.0625f, 0.125f, 0.0625f, 0.125f, 0.25f, 0.125f,
+//                0.0625f, 0.125f, 0.0625f};
+//            Kernel kernel = new Kernel(3, 3, data);
+//            ConvolveOp convolve = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP,
+//                    null);
+//            convolve.filter(_background, backgrondBlur);
+//            
+//            
+//            _background = backgrondBlur;
 //        }
-        
-        
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g); //To change body of generated methods, choose Tools | Templates.
-//            Graphics2D g2D = (Graphics2D)g;
+            Graphics2D g2D = (Graphics2D) g;
+
 //            g2D.drawImage(_background, 0, 0, this);
+            int width = getWidth();
+            int height = getHeight();
+            
+            int radius = width>height?width/2:height/2;
+            
+            RadialGradientPaint paint = new RadialGradientPaint(width/2, height/2, radius, new float[]{0f, 1f}, new Color[]{
+                c1,c2
+            });
+            g2D.setPaint(paint);
+            g2D.fillRect(0, 0, getWidth(), getHeight());//
+            
+            
             
         }
-        
-        
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+        }
+
     }
 }

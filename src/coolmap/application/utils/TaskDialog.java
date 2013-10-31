@@ -32,7 +32,7 @@ public class TaskDialog extends JDialog {
     }
     
     public TaskDialog() {
-        super(CoolMapMaster.getCMainFrame(), "Executing Task", false);
+        super(CoolMapMaster.getCMainFrame(), "Executing Task", false); //setting a modal window can cause a lot of issues
         _taskPanel = new TaskPanel();
                 JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());

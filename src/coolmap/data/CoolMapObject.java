@@ -876,12 +876,16 @@ public final class CoolMapObject<BASE, VIEW> {
 //    }
 
     public void notifyRowsChanged() {
+        //should update 
+//        getCoolMapView().updateActiveCell();
         for (CObjectListener lis : _coolMapDataListeners) {
             lis.rowsChanged(this);
         }
     }
 
     public void notifyColumnsChanged() {
+        //should update 
+//        getCoolMapView().updateActiveCell();
         for (CObjectListener lis : _coolMapDataListeners) {
             lis.columnsChanged(this);
         }
@@ -1552,10 +1556,17 @@ public final class CoolMapObject<BASE, VIEW> {
 
 //            StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWEXPAND);
 //            notifyStateStorageUpdated();
-            System.out.println("Error occurs in this function: expand row nodes to bottom:" + node);
+//            System.out.println("Error occurs in this function: expand row nodes to bottom:" + node);
 
             List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
+            
+//            System.out.println("childNodes:" + childNodes + ":child nodes are here");
+            
+            
             getCoolMapView().updateNodeDisplayParams();
+            
+//            System.out.println("Display params updated");
+            
             if (childNodes == null || childNodes.isEmpty()) {
                 getCoolMapView().clearSelection();
             } else {
@@ -1563,11 +1574,20 @@ public final class CoolMapObject<BASE, VIEW> {
                 VNode lastNode = childNodes.get(childNodes.size() - 1);
                 Float i1 = firstNode.getViewIndex();
                 Float i2 = lastNode.getViewIndex();
+                
+//                System.out.println("Nodes:" + firstNode + " " + lastNode);
+                
                 if (i1 == null || i2 == null) {
                     getCoolMapView().clearSelection();
                 } else {
-                    Range<Integer> rowSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
-                    getCoolMapView().setSelectionsRow(Collections.singletonList(rowSelection));
+//                    Range<Integer> rowSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
+                    
+//                    System.out.println("Row selection:" + i1 + " " + i2);
+                    
+                    //This line got error: 
+//                    getCoolMapView().setSelectionsRow(Collections.singletonList(rowSelection));
+                    
+//                    System.out.println("Complete row selection");
                 }
             }
             _sortTracker.clearSortedColumn();
@@ -1576,6 +1596,8 @@ public final class CoolMapObject<BASE, VIEW> {
 //            List<VNode> childNodesInView = getViewNodesRow(node);
             //System.out.println(childNodesInView);
             notifyRowsChanged();
+            
+//            System.out.println("===Expand row nodes were done completely=== never finished");
             return true;
         } else {
             return false;
@@ -1624,6 +1646,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //            notifyStateStorageUpdated();
 
             List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
+            
             getCoolMapView().updateNodeDisplayParams();
             if (childNodes == null || childNodes.isEmpty()) {
                 getCoolMapView().clearSelection();
@@ -1635,8 +1658,8 @@ public final class CoolMapObject<BASE, VIEW> {
                 if (i1 == null || i2 == null) {
                     getCoolMapView().clearSelection();
                 } else {
-                    Range<Integer> columnSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
-                    getCoolMapView().setSelectionsColumn(Collections.singletonList(columnSelection));
+//                    Range<Integer> columnSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
+//                    getCoolMapView().setSelectionsColumn(Collections.singletonList(columnSelection));
                 }
             }
             _sortTracker.clearSortedRow();

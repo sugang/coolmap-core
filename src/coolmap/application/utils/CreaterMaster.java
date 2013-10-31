@@ -96,8 +96,8 @@ public class CreaterMaster {
                     }
                 }
 
-                System.out.println("Row nodes:" + rowNodes);
-                System.out.println("Col nodes:" + colNodes);
+//                System.out.println("Row nodes:" + rowNodes);
+//                System.out.println("Col nodes:" + colNodes);
 
                 //row nodes, col nodes
                 CoolMapObject newObject = new CoolMapObject();

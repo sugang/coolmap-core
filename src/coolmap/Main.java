@@ -88,7 +88,7 @@ public class Main {
             //import sample
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
             
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/0correlation.txt"));
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();

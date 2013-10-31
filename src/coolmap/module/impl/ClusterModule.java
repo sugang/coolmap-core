@@ -32,7 +32,7 @@ public class ClusterModule extends Module {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 //HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-                TaskEngine.getInstance().submitTask(new LongTask("Cluster rows") {
+                TaskEngine.getInstance().submitTask(new LongTask("H - Cluster rows") {
 
                     @Override
                     public void run() {
@@ -71,6 +71,20 @@ public class ClusterModule extends Module {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 //HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
+                TaskEngine.getInstance().submitTask(new LongTask("H - Cluster columns") {
+
+                    @Override
+                    public void run() {
+
+                        //To change body of generated methods, choose Tools | Templates.
+                        try {
+//                            Thread.sleep(3000);
+                            HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
 

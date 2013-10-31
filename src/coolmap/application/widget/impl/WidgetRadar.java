@@ -420,7 +420,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     @Override
     public void rowsChanged(CoolMapObject object) {
-        System.out.println("Active rows changed");
+//        System.out.println("Active rows changed");
         //update image
         updateBufferedImage();
     }
