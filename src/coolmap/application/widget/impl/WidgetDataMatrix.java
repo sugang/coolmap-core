@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -439,6 +440,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
 //        private final HashMap<Integer, Class> columnClassMap = new HashMap<Integer, Class>();
         private boolean columnDragging = false;
+        private DecimalFormat format = new DecimalFormat("#.###");
 
         public DataTable() {
             
@@ -457,6 +459,11 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                     JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); //To change body of generated methods, choose Tools | Templates.
 
+                    if(Double.class.isAssignableFrom(value.getClass())){
+                        label.setText(format.format(value));
+                    }
+                    
+                    
                     if (!isSelected) {
                         int modelIndex = table.convertColumnIndexToModel(column);
 

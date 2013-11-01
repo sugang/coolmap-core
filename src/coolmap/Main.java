@@ -16,6 +16,7 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.snippet.DoubleSnippet1_3;
 import coolmap.data.snippet.SnippetMaster;
 import coolmap.utils.Config;
 import java.io.BufferedReader;
@@ -92,6 +93,8 @@ public class Main {
 
             object = new CoolMapObject();
             object.addBaseCMatrix(matrix);
+            
+            
 
 //            Add base nodes ===================================================
             ArrayList<VNode> nodes = new ArrayList<VNode>();
@@ -134,8 +137,9 @@ public class Main {
 
             object.setAggregator(new DoubleDoubleMean());
             object.setViewRenderer(new DoubleToColor());
+            object.setSnippetConverter(new DoubleSnippet1_3());
 
-            object.setSnippetConverter(SnippetMaster.getConverter("D13"));
+//            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//
             object.getCoolMapView().addRowMap(new RowLabels(object));
             object.getCoolMapView().addRowMap(new RowTree(object));
             object.getCoolMapView().addColumnMap(new ColumnLabels(object));

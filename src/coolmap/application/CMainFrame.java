@@ -565,8 +565,8 @@ public class CMainFrame extends JFrame {
         addMenuItem("", new Menu("File"), false, false);
         addMenuItem("", new Menu("Edit"), false, false);
         addMenuItem("", new Menu("View"), false, false);
-        addMenuItem("", new Menu("Analysis"), false, false);
-        addMenuItem("", new Menu("About"), false, false);
+//        addMenuItem("", new Menu("Analysis"), false, false);
+//        addMenuItem("", new Menu("About"), false, false);
     }
 
     private void _initFrame() {

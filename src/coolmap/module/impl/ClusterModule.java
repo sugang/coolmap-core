@@ -4,6 +4,7 @@
  */
 package coolmap.module.impl;
 
+import cern.colt.Arrays;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
@@ -12,10 +13,9 @@ import coolmap.utils.cluster.HCluster;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.common.Similarity;
 import java.awt.MenuItem;
-import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JPanel;
 
 /**
  *
@@ -23,70 +23,86 @@ import java.awt.event.KeyEvent;
  */
 public class ClusterModule extends Module {
 
-    public ClusterModule() {
+    private class HClusterRowAction extends AbstractAction {
 
-        MenuItem item = new MenuItem("H-Cluster Row", new MenuShortcut(KeyEvent.VK_R));
-        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false, false);
-        item.addActionListener(new ActionListener() {
+        public HClusterRowAction() {
+            super("Cluster Row");
+        }
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                //HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-                TaskEngine.getInstance().submitTask(new LongTask("H - Cluster rows") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("H - Cluster rows") {
 
-                    @Override
-                    public void run() {
-                        try {
+                @Override
+                public void run() {
+                    try {
 //                            Thread.sleep(3000);
-                            HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                });
-//
-//                TaskEngine.getInstance().submitTask(new LongTask("Cluster columns") {
-//
-//                    @Override
-//                    public void run() {
-//                        try{
-//                        Thread.sleep(3000);
-//                        HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-//                        return;
-//                        }
-//                        catch(Exception e){
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                });
-            }
+                }
+            });
+        }
 
-        });
+    }
+
+    private class HClusterColumnAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("H - Cluster columns") {
+
+                @Override
+                public void run() {
+
+                    //To change body of generated methods, choose Tools | Templates.
+                    HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
+                }
+            });
+        }
+    }
+    
+    private class HClusterConfig extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
+        }
+        
+    }
+    
+    private class HClustPanel extends JPanel {
+        
+        HierarchicalAgglomerativeClustering.ClusterLinkage linkage;
+        Similarity.SimType simType;
+        Object[] linkages = HierarchicalAgglomerativeClustering.ClusterLinkage.values();
+        Object[] simTypes = Similarity.SimType.values();
+        
+        
+        
+        
+    }
+    
+    
+    
+    
+
+    private void initHClust() {
+        MenuItem item = new MenuItem("H-Cluster Row");
+        CoolMapMaster.getCMainFrame().addMenuItem("Cluster/Hierarchical", item, false, false);
+        item.addActionListener(new HClusterRowAction());
 
         item = new MenuItem("H-Cluster Column");
-        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false, false);
-        item.addActionListener(new ActionListener() {
+        CoolMapMaster.getCMainFrame().addMenuItem("Cluster/Hierarchical", item, false, false);
+        item.addActionListener(new HClusterColumnAction());
+        
+        System.out.println(Arrays.toString(Similarity.SimType.values()));
+        
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                //HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-                TaskEngine.getInstance().submitTask(new LongTask("H - Cluster columns") {
+    }
 
-                    @Override
-                    public void run() {
-
-                        //To change body of generated methods, choose Tools | Templates.
-                        try {
-//                            Thread.sleep(3000);
-                            HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
+    public ClusterModule() {
 
 //        item = new MenuItem("KMeans");
 //        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false);
@@ -97,5 +113,7 @@ public class ClusterModule extends Module {
 //                KMeans.kMeansClusterRow(CoolMapMaster.getActiveCoolMapObject(), 5);
 //            }
 //        });
+        
+        initHClust();
     }
 }
