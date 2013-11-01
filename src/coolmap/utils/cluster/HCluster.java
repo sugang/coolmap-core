@@ -151,7 +151,7 @@ public class HCluster {
         System.out.println("+++" + previousOntologies + "+++");
 
         //this merge ontology part got trouble
-
+        //requires some more work here
         for (COntology prevOnto : previousOntologies) {
             prevOnto.mergeCOntologyTo(ontology);
         }

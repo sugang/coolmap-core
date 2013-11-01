@@ -523,6 +523,8 @@ public class VNode {
 
     public String toString() {
         //return _name + "," + _cOntology;
+        //return getViewLabel();
+        //return getName();
         return getViewLabel();
     }
 

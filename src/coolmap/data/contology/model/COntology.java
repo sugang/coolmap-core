@@ -42,6 +42,11 @@ public final class COntology {
     private HashBasedTable<String, String, COntologyEdgeAttributeImpl> _edgeAttrTable = HashBasedTable.create();
     private Color _viewColor = null;
     private Class _ontologyAttributeClass = COntologyEdgeAttributeImpl.class;
+    
+    private HashBasedTable<String, String, Object> _nodeAttrTable = HashBasedTable.create();
+    
+    
+    
 //    public Class getEdgetAttributeClass(){
 //        return _ontologyAttributeClass;
 //    }
@@ -53,6 +58,35 @@ public final class COntology {
 //    }
     private boolean _isDestroyed = false;
 
+    public ArrayList<String> getAttributeHeadersSorted(){
+        
+       try{ 
+       ArrayList<String> columns = new ArrayList<String>(_nodeAttrTable.columnKeySet());
+       Collections.sort(columns);
+       return columns;
+       }
+       catch(Exception e){
+           return new ArrayList<String>();
+       }
+    }
+    
+    public Set<String> getAttributeHeadersSet(){
+        try{
+        return new HashSet<String>(_nodeAttrTable.columnKeySet());
+        }
+        catch(Exception e){
+            return new HashSet<>();
+        }
+    }
+    
+    //worry about attribute classes later.
+    public void addAttribute(String node, String attributeName, Object value){
+        _nodeAttrTable.put(node, attributeName, value);
+    }
+    
+    public void clearAttributes(){
+        _nodeAttrTable.clear();
+    }
 //    merge them
     /**
      * used only temporarily! also need method to merge only at a certain level

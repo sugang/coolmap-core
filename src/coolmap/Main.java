@@ -68,8 +68,7 @@ public class Main {
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
                 loadSampleCoolMapProject();
-                
-                
+
 //                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
             }
         });
@@ -87,7 +86,7 @@ public class Main {
             //CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
             //import sample
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
-            
+
             CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
@@ -100,13 +99,13 @@ public class Main {
                 nodes.add(new VNode(label.toString()));
             }
             object.insertRowNodes(nodes);
-            
+
             nodes.clear();
             for (Object label : matrix.getColLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
             object.insertColumnNodes(nodes);
-            
+
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
 //            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
@@ -130,7 +129,8 @@ public class Main {
 //            nodes.add(new VNode("CGG1", onto));
 //
 //            object.insertColumnNodes(nodes);
-            
+            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+            CoolMapMaster.addNewCOntology(onto);
 
             object.setAggregator(new DoubleDoubleMean());
             object.setViewRenderer(new DoubleToColor());

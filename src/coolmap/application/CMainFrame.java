@@ -23,14 +23,14 @@ import coolmap.utils.Config;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GradientPaint;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.RadialGradientPaint;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -97,6 +97,7 @@ public class CMainFrame extends JFrame {
         //Why sometimes it turns into black?
 //        _glassPane.updateBackgroundImage();
 
+        _glassPane.setBusy(true);
         _glassPane.setVisible(true);
 
         //lazy initalization
@@ -124,7 +125,9 @@ public class CMainFrame extends JFrame {
         }
 //        glassPane.setVisible(false);
 //        CoolMapMaster.getViewport().setEnabled(true);
+
         _glassPane.setVisible(false);
+        _glassPane.setBusy(false);
 
     }
 
@@ -605,13 +608,22 @@ public class CMainFrame extends JFrame {
     private class GlassPane extends JPanel implements MouseListener, MouseMotionListener {
 
         private BufferedImage _background;
-        private Color c1 = new Color(0,0,0,150);
-        private Color c2 = new Color(0,0,0,220);
+        private Color c1 = new Color(0, 0, 0, 150);
+        private Color c2 = new Color(0, 0, 0, 220);
+        private Color c3 = new Color(255, 255, 255, 50);
+        private Color c4 = new Color(255, 255, 255, 120);
+
+        private boolean busy;
+        private Font labelFont = new Font("plain", Font.BOLD, 24);
 
         public GlassPane() {
             setOpaque(false);
             addMouseListener(this);
             addMouseMotionListener(this);
+        }
+
+        public void setBusy(boolean b) {
+            busy = b;
         }
 
 //        private BufferedImage _background;
@@ -638,26 +650,55 @@ public class CMainFrame extends JFrame {
 //            
 //            _background = backgrondBlur;
 //        }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g); //To change body of generated methods, choose Tools | Templates.
-            Graphics2D g2D = (Graphics2D) g;
+
+            if (busy) {
+                Graphics2D g2D = (Graphics2D) g;
 
 //            g2D.drawImage(_background, 0, 0, this);
-            int width = getWidth();
-            int height = getHeight();
-            
-            int radius = width>height?width/2:height/2;
-            
-            RadialGradientPaint paint = new RadialGradientPaint(width/2, height/2, radius, new float[]{0f, 1f}, new Color[]{
-                c1,c2
-            });
-            g2D.setPaint(paint);
-            g2D.fillRect(0, 0, getWidth(), getHeight());//
-            
-            
-            
+                int width = getWidth();
+                int height = getHeight();
+
+                int radius = width > height ? width / 2 : height / 2;
+
+                RadialGradientPaint paint = new RadialGradientPaint(width / 2, height / 2, radius, new float[]{0f, 1f}, new Color[]{
+                    c1, c2
+                });
+                g2D.setPaint(paint);
+                g2D.fillRect(0, 0, getWidth(), getHeight());//
+
+            } else {
+                Graphics2D g2D = (Graphics2D) g;
+
+//            g2D.drawImage(_background, 0, 0, this);
+                int width = getWidth();
+                int height = getHeight();
+
+                int radius = width > height ? width / 2 : height / 2;
+
+                RadialGradientPaint paint = new RadialGradientPaint(width / 2, height / 2, radius, new float[]{0f, 1f}, new Color[]{
+                    c3, c4
+                });
+                g2D.setPaint(paint);
+                g2D.fillRect(0, 0, getWidth(), getHeight());//
+                
+                g2D.setFont(labelFont);
+                
+                g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                String msg = "Rearrange Widgets";
+                
+                
+                int strW = g2D.getFontMetrics().stringWidth(msg);
+                
+                g2D.setColor(new Color(50,50,50));
+                g2D.fillRoundRect(getWidth()/2 - strW/2 - 20, getHeight()/2 - 18, strW + 40, 40, 10, 10);
+                
+                g2D.setColor(Color.WHITE);
+                g2D.drawString(msg, getWidth()/2 - strW/2, getHeight()/2 + 12);
+            }
+
         }
 
         @Override

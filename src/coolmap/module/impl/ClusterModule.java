@@ -37,7 +37,7 @@ public class ClusterModule extends Module {
                     @Override
                     public void run() {
                         try {
-                            Thread.sleep(3000);
+//                            Thread.sleep(3000);
                             HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
                         } catch (Exception e) {
                             e.printStackTrace();

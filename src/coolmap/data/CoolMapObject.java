@@ -1566,9 +1566,9 @@ public final class CoolMapObject<BASE, VIEW> {
             getCoolMapView().updateNodeDisplayParams();
             
 //            System.out.println("Display params updated");
-            
+            getCoolMapView().clearSelection();
             if (childNodes == null || childNodes.isEmpty()) {
-                getCoolMapView().clearSelection();
+                
             } else {
                 VNode firstNode = childNodes.get(0);
                 VNode lastNode = childNodes.get(childNodes.size() - 1);
@@ -1648,8 +1648,10 @@ public final class CoolMapObject<BASE, VIEW> {
             List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
             
             getCoolMapView().updateNodeDisplayParams();
+            getCoolMapView().clearSelection();
+            
             if (childNodes == null || childNodes.isEmpty()) {
-                getCoolMapView().clearSelection();
+                
             } else {
                 VNode firstNode = childNodes.get(0);
                 VNode lastNode = childNodes.get(childNodes.size() - 1);

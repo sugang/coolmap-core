@@ -26,7 +26,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +86,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             _ontologyTable.scrollRectToVisible(new Rectangle(_ontologyTable.getCellRect(viewRow, 0, true)));
         }
         
+        
+        
     }
     
     private JPopupMenu configPopupMenu = new JPopupMenu();
@@ -107,6 +108,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         splitPane.setDividerLocation(350);
         getContentPane().add(splitPane, BorderLayout.CENTER);
 
+        
+        
+        
 //        System.out.println("Table updated...");
         _ontologyTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             
@@ -134,6 +138,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         
         _ontologyTable.setRowSelectionAllowed(true);
         _ontologyTable.setColumnSelectionAllowed(false);
+        
         
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false);
@@ -175,6 +180,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
         
         _ontologyTable.setComponentPopupMenu(_popupMenu);
+        
+        
         JMenuItem item = new JMenuItem("Add selected nodes to View rows");
         _popupMenu.add(item);
         item.addActionListener(new ActionListener() {
@@ -309,57 +316,107 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         DefaultTableModel model = _getOntologyAsTableModel(ontology);
         _ontologyTable.setModel(model);
         
-        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(1, new Comparator<Integer>() {
-            
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                if (o1 < o2) {
-                    return -1;
-                }
-                if (o1 == o2) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
+//        _ontologyTable.removeColumn(_ontologyTable.getColumn("ChildCount"));
         
-        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(3, new Comparator<Integer>() {
-            
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                if (o1 < o2) {
-                    return -1;
-                }
-                if (o1 == o2) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
+        //Throws an execption
+        //System.out.println("Column exists?" + _ontologyTable.getColumn("ChildCount"));
         
-        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(4, new Comparator<Integer>() {
-            
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                if (o1 < o2) {
-                    return -1;
-                }
-                if (o1 == o2) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
+        //So this actually works.
+//        System.out.println("Child count after remvoal:" + _ontologyTable.getModel().getValueAt(0, 1));
+        
+//        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(1, new Comparator<Integer>() {
+//            
+//            @Override
+//            public int compare(Integer o1, Integer o2) {
+//                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//                if (o1 < o2) {
+//                    return -1;
+//                }
+//                if (o1 == o2) {
+//                    return 0;
+//                } else {
+//                    return 1;
+//                }
+//            }
+//        });
+//        
+////        ((TableRowSorter) _ontologyTable.getRowSorter()).setCom
+//        
+//        
+//        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(3, new Comparator<Integer>() {
+//            
+//            @Override
+//            public int compare(Integer o1, Integer o2) {
+//                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//                if (o1 < o2) {
+//                    return -1;
+//                }
+//                if (o1 == o2) {
+//                    return 0;
+//                } else {
+//                    return 1;
+//                }
+//            }
+//        });
+//        
+//        ((TableRowSorter) _ontologyTable.getRowSorter()).setComparator(5, new Comparator<Integer>() {
+//            
+//            @Override
+//            public int compare(Integer o1, Integer o2) {
+//                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//                if (o1 < o2) {
+//                    return -1;
+//                }
+//                if (o1 == o2) {
+//                    return 0;
+//                } else {
+//                    return 1;
+//                }
+//            }
+//        });
     }
     
+    private class OntologyTableModel extends DefaultTableModel {
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            if(columnIndex == 1 || columnIndex == 3 || columnIndex == 5){
+                return Integer.class;
+            }
+            else{
+                return Object.class;
+            }
+        }
+
+        public OntologyTableModel(Object[][] data, String[] headers) {
+            super(data, headers);
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            //return super.isCellEditable(row, column); //To change body of generated methods, choose Tools | Templates.
+            return false;
+        }
+        
+        
+        
+        
+    }
+    
+
+    private static final String NODE_NAME = "Node Name";
+    private static final String CHILD_COUNT = "Child Count";
+    private static final String PARENT_COUNT = "Parent Count";
+    private static final String CHILD_NODES = "Child Nodes";
+    private static final String PARENT_NODES = "Parent Nodes";
+    private static final String DEPTH = "Depth";
+    
+    
     private DefaultTableModel _getOntologyAsTableModel(COntology ontology) {
+        //Shows how rows 
         nodeToTableRowHash.clear();
+        
+        
         HashSet<String> nodes = new HashSet<String>();
         nodes.addAll(ontology.getAllNodesWithChildren());
         nodes.addAll(ontology.getAllNodesWithParents());
@@ -367,7 +424,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         sortedNodes.addAll(nodes);
         Collections.sort(sortedNodes);
         
-        String[] headers = new String[]{"Node Name", "ChildCount", "ChildNodes", "ParentCount", "ParentNodes", "Depth"};
+        String[] headers = new String[]{NODE_NAME,CHILD_COUNT, CHILD_NODES, PARENT_COUNT, PARENT_NODES, DEPTH};
         Object[][] data = new Object[nodes.size()][6];
         for (int i = 0; i < data.length; i++) {
             String node = sortedNodes.get(i);
@@ -376,20 +433,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             
             data[i][0] = node;
             data[i][1] = child == null ? 0 : child.size();
-            data[i][2] = child == null ? "" : Arrays.toString(child.toArray());
+            data[i][2] = (child == null || child.isEmpty()) ? "" : Arrays.toString(child.toArray());
             data[i][3] = parent == null ? 0 : parent.size();
-            data[i][4] = parent == null ? "" : Arrays.toString(parent.toArray());
+            data[i][4] = (parent == null || parent.isEmpty()) ? "" : Arrays.toString(parent.toArray());
             data[i][5] = ontology.getMinimalDepthFromLeaves(node);
             nodeToTableRowHash.put(node, i);
         }
         
-        DefaultTableModel model = new DefaultTableModel(data, headers) {
-            
-            @Override
-            public boolean isCellEditable(int row, int col) {
-                return false;
-            }
-        };
+        OntologyTableModel model = new OntologyTableModel(data, headers);
 
         //Also needs to create a hash for nodes
         return model;
