@@ -520,7 +520,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //        notifyStateStorageUpdated();
 
         nodes.removeAll(Collections.singletonList(null));
-        _vMatrix.insertActiveRowNodes(index, nodes);
+        _vMatrix.insertActiveRowNodes(index, nodes, null);
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
         //No update yet
@@ -528,17 +528,17 @@ public final class CoolMapObject<BASE, VIEW> {
         notifyRowsChanged();
     }
 
-    public void replaceRowNodes(List<VNode> nodes) {
-
-//        StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWREPLACE);
-//        getStateStorage().addState(snapshot);
-//        notifyStateStorageUpdated();
+    /**
+     * This method is only used to remove nodes, but the treenodes are kept
+     * @param nodes 
+     */
+    public void replaceRowNodes(List<VNode> nodes, List<VNode> treeNodes) {
 
         //This is only used here
-        _vMatrix.removeActiveRowNodes();
-
+        _vMatrix.removeActiveRowNodes(); //treenodes are also removed
         nodes.removeAll(Collections.singletonList(null));
-        _vMatrix.insertActiveRowNodes(0, nodes);
+        _vMatrix.insertActiveRowNodes(0, nodes, treeNodes);
+
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
         //No update yet
@@ -547,14 +547,14 @@ public final class CoolMapObject<BASE, VIEW> {
 
     }
 
-    public void replaceColumnNodes(List<VNode> nodes) {
+    public void replaceColumnNodes(List<VNode> nodes, List<VNode> treeNodes) {
 //        StateSnapshot snapshot = new StateSnapshot(this, COntology.COLUMN, StateSnapshot.COLUMNREPLACE);
 //        getStateStorage().addState(snapshot);
 //        notifyStateStorageUpdated();
 
         _vMatrix.removeActiveColNodes();
         nodes.removeAll(Collections.singletonList(null));
-        _vMatrix.insertActiveColNodes(0, nodes);
+        _vMatrix.insertActiveColNodes(0, nodes, treeNodes);
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedRow();
         //No update yet
@@ -570,7 +570,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //        notifyStateStorageUpdated();
 
         nodes.removeAll(Collections.singletonList(null));
-        _vMatrix.insertActiveColNodes(index, nodes);
+        _vMatrix.insertActiveColNodes(index, nodes, null);
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedRow();
         //No update yet

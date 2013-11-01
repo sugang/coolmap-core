@@ -94,6 +94,10 @@ public class VMatrix<BASE, VIEW> {
     //Make view more flexible - values can be obtained from a collection of matrices!
     //Do need a unique hash for the combination of IDs
     public synchronized void insertActiveRowNodes(int index, List<VNode> nodes) {
+        insertActiveRowNodes(index, nodes, null);
+    }
+
+    public synchronized void insertActiveRowNodes(int index, List<VNode> nodes, List<VNode> treeNodes) {
         if (index < 0) {
             index = 0;
         } else if (index > _activeRowNodes.size()) {
@@ -102,6 +106,10 @@ public class VMatrix<BASE, VIEW> {
         //reset the indices
         if (nodes != null && !nodes.isEmpty()) {
             _activeRowNodes.addAll(index, nodes);
+
+            if (treeNodes != null) {
+                _activeRowNodesInTree.addAll(treeNodes);
+            }
             _updateActiveRowNodeViewIndices();
         }
         //reset the 
@@ -111,6 +119,10 @@ public class VMatrix<BASE, VIEW> {
     }
 
     public synchronized void insertActiveColNodes(int index, List<VNode> nodes) {
+        insertActiveColNodes(index, nodes, null);
+    }
+
+    public synchronized void insertActiveColNodes(int index, List<VNode> nodes, List<VNode> treeNodes) {
         if (index < 0) {
             index = 0;
         } else if (index > _activeColNodes.size()) {
@@ -119,6 +131,9 @@ public class VMatrix<BASE, VIEW> {
         //reset the indices
         if (nodes != null && !nodes.isEmpty()) {
             _activeColNodes.addAll(index, nodes);
+            if (treeNodes != null) {
+                _activeColNodesInTree.addAll(treeNodes);
+            }
             _updateActiveColNodeViewIndices();
         }
         //reset the 
@@ -161,18 +176,16 @@ public class VMatrix<BASE, VIEW> {
         _updateActiveRowNodeViewIndices();
     }
 
-    public synchronized void insertActiveColNodes(VNode... nodes) {
-        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
-        nodesToBeAdded.addAll(Arrays.asList(nodes));
-        insertActiveColNodes(0, nodesToBeAdded);
-    }
-
-    public synchronized void insertActiveRowNodes(VNode... nodes) {
-        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
-        nodesToBeAdded.addAll(Arrays.asList(nodes));
-        insertActiveRowNodes(0, nodesToBeAdded);
-    }
-
+//    public synchronized void insertActiveColNodes(VNode... nodes) {
+//        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
+//        nodesToBeAdded.addAll(Arrays.asList(nodes));
+//        insertActiveColNodes(0, nodesToBeAdded);
+//    }
+//    public synchronized void insertActiveRowNodes(VNode... nodes) {
+//        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
+//        nodesToBeAdded.addAll(Arrays.asList(nodes));
+//        insertActiveRowNodes(0, nodesToBeAdded);
+//    }
 //    public synchronized void removeActiveRowNodes(Set<Integer> index) {
 //        ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
 //        for (Integer i : index) {
@@ -575,7 +588,7 @@ public class VMatrix<BASE, VIEW> {
         nodesToRemove.add(_activeColNodes.get(index));
 
         //first insert at the corresponding index.
-        insertActiveColNodes(index, nodesToAdd);
+        insertActiveColNodes(index, nodesToAdd, null);
         removeActiveColNodes(new HashSet<VNode>(nodesToRemove));
     }
 
@@ -583,7 +596,7 @@ public class VMatrix<BASE, VIEW> {
         if (nodesToRemove == null || nodesToRemove.isEmpty() || nodesToAdd == null || nodesToAdd.isEmpty() || index < 0 || index >= _activeColNodes.size()) {
             return;
         }
-        insertActiveColNodes(index, nodesToAdd);
+        insertActiveColNodes(index, nodesToAdd, null);
         removeActiveColNodes(new HashSet<VNode>(nodesToRemove));
     }
 
@@ -591,7 +604,7 @@ public class VMatrix<BASE, VIEW> {
         if (nodesToRemove == null || nodesToRemove.isEmpty() || nodesToAdd == null || nodesToAdd.isEmpty() || index < 0 || index >= _activeRowNodes.size()) {
             return;
         }
-        insertActiveRowNodes(index, nodesToAdd);
+        insertActiveRowNodes(index, nodesToAdd, null);
         removeActiveRowNodes(new HashSet<VNode>(nodesToRemove));
     }
 
@@ -609,7 +622,7 @@ public class VMatrix<BASE, VIEW> {
         nodesToRemove.add(_activeRowNodes.get(index));
 
         //first insert at the corresponding index.
-        insertActiveRowNodes(index, nodesToAdd);
+        insertActiveRowNodes(index, nodesToAdd, null);
         removeActiveRowNodes(new HashSet<VNode>(nodesToRemove));
     }
 
@@ -1400,7 +1413,6 @@ public class VMatrix<BASE, VIEW> {
             _updateActiveRowNodeViewIndices();
             _updateActiveRowNodeHeights();
         }
-        
 
     }
 }

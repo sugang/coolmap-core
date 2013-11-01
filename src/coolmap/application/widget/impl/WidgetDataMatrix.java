@@ -11,27 +11,38 @@ import coolmap.application.widget.Widget;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import temp.RowHeader;
 
 /**
  *
@@ -44,6 +55,67 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //    private DefaultTableCellRenderer _rowCellRenderer = new DefaultTableCellRenderer();
     private CoolMapObject _activeObject;
 
+    private JScrollPane scrollPane;
+    private JTable rowHeader;
+    
+    
+    //built in actions will not be used elsewhere
+    private class CenterSelectionAction extends AbstractAction{
+
+        public CenterSelectionAction(){
+            super("Center selected cells in canvas", UI.getImageIcon("anchor"));
+            putValue(AbstractAction.SHORT_DESCRIPTION, "Center selected cells in view");
+        }
+        
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (_activeObject == null) {
+                return;
+            }
+
+            int[] cols = _dataTable.getSelectedColumns();
+            int[] rows = _dataTable.getSelectedRows();
+
+            if (cols.length == 0 || rows.length == 0) {
+                return;
+            }
+
+            Arrays.sort(cols);
+            Arrays.sort(rows);
+
+            Rectangle sel = new Rectangle();
+            sel.x = cols[0] - 1;
+            sel.y = rows[0];
+
+            sel.width = cols[cols.length - 1] - cols[0] + 1;
+            sel.height = rows[rows.length - 1] - rows[0] + 1;
+
+            _activeObject.getCoolMapView().setSelection(sel);
+            _activeObject.getCoolMapView().centerToSelections();
+        }
+        
+        
+        
+    }
+    
+    private class CopyToClipboardAction extends AbstractAction{
+
+        public CopyToClipboardAction(){
+            super("Copy to clipboard", null);
+        }
+        
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
+        
+    }
+    
+    
+    
+    
+
     public WidgetDataMatrix() {
         super("Data Matrix", W_DATA, L_DATAPORT, UI.getImageIcon("grid"), null);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCObjectListener(this);
@@ -55,9 +127,88 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(_container);
         _container.setLayout(new BorderLayout());
-        _container.add(new JScrollPane(_dataTable));
-        //_rowCellRenderer.setBackground(UI.colorGrey2);
+        
+        JPopupMenu menu = new JPopupMenu();
+        _dataTable.setComponentPopupMenu(menu);
+        
+        menu.add(new CenterSelectionAction());
+        
+        menu.addSeparator();
+        
+        menu.add(new CopyToClipboardAction());
+        
+        
+        
+        
+//        JToolBar toolBar = new JToolBar();
+//        toolBar.setFloatable(false);
+//        _container.add(toolBar, BorderLayout.NORTH);
+//        
+//        JButton button = new JButton(UI.getImageIcon("anchor"));
+//        toolBar.add(button);
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                
+//                if(_activeObject == null){
+//                    return;
+//                }
+//                
+//                int[] cols = _dataTable.getSelectedColumns();
+//                int[] rows = _dataTable.getSelectedRows();
+//                
+//                if(cols.length == 0 || rows.length == 0){
+//                    return;
+//                }
+//                
+//                Arrays.sort(cols);
+//                Arrays.sort(rows);
+//                
+//                Rectangle sel = new Rectangle();
+//                sel.x = cols[0]-1;
+//                sel.y = rows[0];
+//                
+//                sel.width = cols[cols.length-1] - cols[0]+1;
+//                sel.height = rows[rows.length-1] - rows[0]+1;
+//                
+//                _activeObject.getCoolMapView().setSelection(sel);
+//                _activeObject.getCoolMapView().centerToSelections();
+//                
+//            }
+//        });
+        
+        
+        
 
+        scrollPane = new JScrollPane(_dataTable);
+        rowHeader = new RowHeader(_dataTable);
+        scrollPane.setRowHeaderView(rowHeader);
+        scrollPane.setCorner(ScrollPaneConstants.UPPER_LEFT_CORNER, rowHeader.getTableHeader());
+
+        scrollPane.getViewport().addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//                System.out.println("Scroll changed");
+                Rectangle firstCellRectangle = _dataTable.getCellRect(0, 0, true);
+                int viewPosition = firstCellRectangle.x + firstCellRectangle.width - scrollPane.getViewport().getViewPosition().x;
+
+                if (viewPosition < 0) {
+//                    scrollPane.setRowHeaderView(rowHeader);
+                    rowHeader.setEnabled(true);
+                } else {
+//                    scrollPane.setRowHeaderView(null);
+                    rowHeader.setEnabled(false);
+                }
+            }
+        });
+
+        _container.add(scrollPane);
+
+        //_container.add(new JScrollPane(new RowNumberTable(_dataTable)));
+        //_rowCellRenderer.setBackground(UI.colorGrey2);
         //_dataTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer());
     }
 
@@ -144,7 +295,43 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
         }
 
         _dataTable.setModel(model);
+
+        //Remove
+//        _dataTable.getColumnModel().removeColumn(_dataTable.getColumn("Row Nodes"));
+        //add
+        
+        
+        _dataTable.getRowSorter().addRowSorterListener(new RowSorterListener() {
+
+            @Override
+            public void sorterChanged(RowSorterEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (e.getType() == RowSorterEvent.Type.SORTED) {
+                    System.out.println("sort changed");
+                    
+                    rowHeader.repaint();
+                    
+                    //replace nodes
+                    if(_activeObject == null)
+                        return;
+                    List treeNodes = _activeObject.getViewTreeNodesRow();
+                    ArrayList<VNode> nodes = new ArrayList<VNode>();
+                    
+                    for(int i=0; i<_dataTable.getRowCount();i++){
+                        nodes.add((VNode)_dataTable.getValueAt(i, 0));
+                    }
+                    //System.out.println(nodes);
+                    _sorterTrigger = true;
+                    _activeObject.replaceRowNodes(nodes, treeNodes);
+                    
+                    
+                }
+
+            }
+        });
     }
+    
+    private boolean _sorterTrigger = false;
 
     private Thread _workerThread;
 
@@ -254,6 +441,11 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
         private boolean columnDragging = false;
 
         public DataTable() {
+            
+
+            
+            
+            
             setAutoCreateRowSorter(true);
             setRowSelectionAllowed(true);
             setColumnSelectionAllowed(true);
@@ -279,6 +471,9 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
                 }
 
             });
+            
+            
+            
 
             getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 
@@ -367,13 +562,12 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //            }
 //            
 //            System.out.println(columnNodes);
-            fromIndex = fromIndex-1;
-            toIndex = toIndex-1;
-            
-            if(toIndex > fromIndex){
-                toIndex = toIndex+1;
+            fromIndex = fromIndex - 1;
+            toIndex = toIndex - 1;
+
+            if (toIndex > fromIndex) {
+                toIndex = toIndex + 1;
             }
-            
 
 //            System.out.println(fromIndex + " " + toIndex);
             if (_activeObject == null) {
@@ -500,7 +694,19 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
     @Override
     public void rowsChanged(CoolMapObject object) {
-        _updateData();
+        
+        if(_activeObject == null || _activeObject != object){
+            return;
+        }
+        
+        System.out.println("Was row change because of sort?" + _sorterTrigger);
+        
+        if(_sorterTrigger){
+            _sorterTrigger = false;
+        }
+        else{
+            _updateData();
+        }
     }
 
     @Override
@@ -511,7 +717,9 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
     @Override
     public void baseMatrixChanged(CoolMapObject object) {
-        _updateData();
+        if (_activeObject != null && _activeObject == object) {
+            _updateData();
+        }
     }
 
 //    @Override
@@ -519,7 +727,32 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //    }
     @Override
     public void selectionChanged(CoolMapObject object) {
-        _updateData();
+//        _updateData();
+        //But instead, select
+        if (_activeObject != null && _activeObject == object) {
+            Rectangle selection = _activeObject.getCoolMapView().getSelectionsUnion();
+
+            if (selection == null || selection.isEmpty()) {
+                
+                _dataTable.clearSelection();
+                return;
+            } else {
+//                _dataTable.getSelectionModel().
+
+                System.err.println("Selection:" + selection);
+
+                _dataTable.setColumnSelectionInterval(selection.x + 1, selection.x + selection.width);
+                _dataTable.setRowSelectionInterval(selection.y, selection.y + selection.height - 1);
+
+//                _dataTable.getCellRect(W_DATA, W_DATA, true)
+                Rectangle rect = _dataTable.getCellRect((selection.y * 2 + selection.height) / 2, (selection.x * 2 + selection.width) / 2, true);
+                rect.x += 100;
+
+                _dataTable.scrollRectToVisible(rect);
+
+            }
+        }
+
     }
 
     @Override

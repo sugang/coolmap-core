@@ -161,7 +161,7 @@ public class HCluster {
 
 //        Why this step go it dead completely?
 //        System.out.println("attempt to replace nodes:");
-        object.replaceRowNodes(ontology.getRootNodesOrdered());
+        object.replaceRowNodes(ontology.getRootNodesOrdered(), null);
         //It can not be expanded for weird reason
 //         System.out.println("attempt to expand nodes:");
         
@@ -295,7 +295,7 @@ public class HCluster {
             prevOnto.mergeCOntologyTo(ontology);
         }
 
-        object.replaceColumnNodes(ontology.getRootNodesOrdered());
+        object.replaceColumnNodes(ontology.getRootNodesOrdered(), null);
         object.expandColumnNodeToBottom(object.getViewNodeColumn(0));
     }
 }
