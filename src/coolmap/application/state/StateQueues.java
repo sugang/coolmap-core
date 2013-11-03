@@ -19,7 +19,7 @@ public class StateQueues {
     private final ArrayDeque<CoolMapState> _undoQueue = new ArrayDeque<CoolMapState>();
     private final ArrayDeque<CoolMapState> _redoQueue = new ArrayDeque<CoolMapState>();
     private CoolMapState _currentState = null;
-    private final static int _stateCap = 10;
+    private final static int _stateCap = 20;
     private final String coolMapObjectID;
 
     public StateQueues(String id) {

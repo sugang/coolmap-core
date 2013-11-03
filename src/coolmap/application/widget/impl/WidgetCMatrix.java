@@ -250,13 +250,13 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                 for (int i = 0; i < m0.getNumRows(); i++) {
                     nodes.add(new VNode(m0.getRowLabel(i)));
                 }
-                object.insertRowNodes(0, nodes);
+                object.insertRowNodes(0, nodes, false);
 
                 nodes.clear();
                 for (int i = 0; i < m0.getNumColumns(); i++) {
                     nodes.add(new VNode(m0.getColLabel(i)));
                 }
-                object.insertColumnNodes(0, nodes);
+                object.insertColumnNodes(0, nodes, false);
 
                 //need a dialog
 

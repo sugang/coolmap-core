@@ -211,7 +211,7 @@ public final class CoolMapView<BASE, VIEW> {
     private void _fireViewSelectionChanged() {
         //update the selected rows and regions.
         _updateColRowRanges();
-        System.out.println("successfully updated col row ranges");
+//        System.out.println("successfully updated col row ranges");
 
 //        for (CViewSelectionChangedListener vs : _viewSelectionChangedListeners) {
 //            vs.selectionChanged(_coolMapObject);
@@ -252,6 +252,7 @@ public final class CoolMapView<BASE, VIEW> {
     private void _updateColRowRanges() {
         _selectedRows.clear();
         _selectedColumns.clear();
+//        System.out.println("Col Row ranges updated");
 
         Set<Rectangle> selections = getSelections();
         if (selections == null || selections.isEmpty()) {
@@ -906,11 +907,11 @@ public final class CoolMapView<BASE, VIEW> {
                 }
             }
             
-             System.out.println("selections added");
+//             System.out.println("selections added");
              
              //This guy got issues!
             _fireViewSelectionChanged();
-            System.out.println("To update view area:..");
+//            System.out.println("To update view area:..");
             _selectionLayer.updateViewArea();
         }
     }

@@ -54,7 +54,7 @@ public class KMeans {
         
         ontology.validate();
         List<VNode> rootNodes = ontology.getRootNodesOrdered();
-        object.insertRowNodes(0, rootNodes);
+        object.insertRowNodes(0, rootNodes, false);
         
         for(VNode node : rootNodes){
             node.colorTree(UI.randomColor());

@@ -21,6 +21,8 @@ import coolmap.application.utils.viewportActions.ZoomInAction;
 import coolmap.application.utils.viewportActions.ZoomOutAction;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
+import coolmap.canvas.actions.PasteColumnNodesAction;
+import coolmap.canvas.actions.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
@@ -46,10 +48,10 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author gangsu
  */
-public class WidgetViewport extends Widget implements ActiveCoolMapChangedListener {
+public final class WidgetViewport extends Widget implements ActiveCoolMapChangedListener {
 
     private JDesktopPane _desktop = new JDesktopPane();
-    
+
     private JToolBar _toolBar = new JToolBar();
     private int frameMargin = 20;
     private final JPopupMenu _popupMenu = new JPopupMenu();
@@ -66,13 +68,22 @@ public class WidgetViewport extends Widget implements ActiveCoolMapChangedListen
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
         getContentPane().setBackground(UI.colorBlack3);
+
+        JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
+        addPopupMenuItem("Paste nodes", pasteItem, false);
+        pasteItem.addActionListener(new PasteColumnNodesAction());
         
+        pasteItem = new JMenuItem("To Row", UI.getImageIcon("insertColumn"));
+        addPopupMenuItem("Paste nodes", pasteItem, false);
+        pasteItem.addActionListener(new PasteRowNodesAction());
+        
+        
+
     }
-    
-    public void setEnabled(boolean enabled){
+
+    public void setEnabled(boolean enabled) {
         _desktop.setVisible(enabled);
     }
-    
 
 //    public void setSessionName(String name){
 //        if(name == null || name.length() == 0){

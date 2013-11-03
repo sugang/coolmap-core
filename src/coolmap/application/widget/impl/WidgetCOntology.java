@@ -307,7 +307,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             newNodes.add(new VNode(n, ontology));
         }
 
-        obj.insertRowNodes(0, newNodes);
+        obj.insertRowNodes(0, newNodes, true);
     }
 
     private void _insertNodesToColumn() {
@@ -339,7 +339,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             newNodes.add(new VNode(n, ontology));
         }
 
-        obj.insertColumnNodes(0, newNodes);
+        obj.insertColumnNodes(0, newNodes, true);
 
     }
 

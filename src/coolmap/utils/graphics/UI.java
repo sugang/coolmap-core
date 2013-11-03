@@ -236,6 +236,7 @@ public class UI {
         _iconStash.put("emptyPage", new ImageIcon(UI.class.getResource("/resources/iconEmptyPage.png")));
         _iconStash.put("compass", new ImageIcon(UI.class.getResource("/resources/iconCompass.png")));
         _iconStash.put("expand3", new ImageIcon(UI.class.getResource("/resources/iconThreearrows.png")));
+        _iconStash.put("duplicate", new ImageIcon(UI.class.getResource("/resources/iconDuplicate.png")));
     }
 
     public static Color mixOpacity(Color input, float opacity) {
