@@ -5,7 +5,11 @@
 package coolmap.data.contology.utils;
 
 import coolmap.data.contology.model.COntology;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -117,6 +121,17 @@ public class COntologyUtils {
 
         return ontology;
     }
+    
+    public static COntology createSampleLoopOntology(){
+        COntology ontology = new COntology("Loop", null);
+        
+        
+        return ontology;
+    }
+    
+    
+    
+    
 
     public static synchronized void printOntology(COntology ontology) {
         HashSet<String> roots = ontology.getRootNames();

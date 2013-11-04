@@ -225,6 +225,8 @@ public class UI {
         _iconStash.put("keyboard", new ImageIcon(UI.class.getResource("/resources/iconKeyboard.png")));
         _iconStash.put("lock", new ImageIcon(UI.class.getResource("/resources/iconLock.png")));
         _iconStash.put("gear", new ImageIcon(UI.class.getResource("/resources/iconGear.png")));
+        _iconStash.put("gearBig", new ImageIcon(UI.class.getResource("/resources/iconGearBig.png")));
+        _iconStash.put("gearSmall", new ImageIcon(UI.class.getResource("/resources/iconGearSmall.png")));
         _iconStash.put("zoomInX", new ImageIcon(UI.class.getResource("/resources/iconZoomInX.png")));
         _iconStash.put("zoomInY", new ImageIcon(UI.class.getResource("/resources/iconZoomInY.png")));
         _iconStash.put("zoomOutX", new ImageIcon(UI.class.getResource("/resources/iconZoomOutX.png")));

@@ -4,6 +4,7 @@
  */
 package coolmap.utils.cluster;
 
+import com.google.common.collect.HashMultimap;
 import coolmap.application.CoolMapMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
@@ -17,7 +18,6 @@ import edu.ucla.sspace.matrix.ArrayMatrix;
 import edu.ucla.sspace.util.HashMultiMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,15 +25,15 @@ import java.util.Set;
  *
  * @author gangsu This will be another library outside of core.
  */
-public class HCluster {
+public class Cluster {
 
-    public synchronized static void hclustRow(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
+    public synchronized static void hClustRow(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
 
         if (object == null || !object.isViewValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return;
         }
 
-        System.out.println("Clustering started");
+        System.out.println("Clustering started:" + linkage + " " + simType);
 
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumRows(), object.getViewNumColumns());
         for (int i = 0; i < object.getViewNumRows(); i++) {
@@ -76,7 +76,6 @@ public class HCluster {
 
         //System.out.println("Min sim:" + minSimilarity + " " + "Max sim" + maxSimilarity);
 //        double range = maxSimilarity - minSimilarity;
-
         //Build a map
         HashMap<Integer, Object> trackMapping = new HashMap<Integer, Object>();
         for (Integer i = 0; i < merges.size() + 1; i++) {
@@ -98,10 +97,8 @@ public class HCluster {
         }
 
         //now you have a parent child mappin
-
         COntology ontology = new COntology("Hclust:" + ID, "Result from h-clust row", ID);
         ArrayList<String[]> pairs = new ArrayList<String[]>();
-
 
         String childNode, parentNode;
         for (String parent : parentChildMapping.keySet()) {
@@ -123,11 +120,7 @@ public class HCluster {
 
         //COntologyUtils.printOntology(ontology);
         //List<String> roots = ontology.getRootNamesOrdered();
-
-
         //also copy the originals?
-
-
         if (Thread.interrupted()) {
             System.out.println("Clustering Aborted");
             return;
@@ -136,24 +129,19 @@ public class HCluster {
         System.out.println("Clustering Ended Successfully");
         CoolMapMaster.addNewCOntology(ontology);
 
-        HashSet<COntology> previousOntologies = new HashSet<COntology>();
-
-
+        //HashSet<COntology> previousOntologies = new HashSet<COntology>();
+        HashMultimap<COntology, String> map = HashMultimap.create();
 
         for (VNode node : object.getViewNodesRow()) {
             if (node.getCOntology() != null) {
-                //for now just copy everything?
-                //ontology.mergeCOntologyTo(node.getCOntology());
-                previousOntologies.add(node.getCOntology());
+                map.put(node.getCOntology(), node.getName());
             }
         }
 
-        System.out.println("+++" + previousOntologies + "+++");
-
-        //this merge ontology part got trouble
-        //requires some more work here
-        for (COntology prevOnto : previousOntologies) {
-            prevOnto.mergeCOntologyTo(ontology);
+        for (COntology otherOntology : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntology);
+            System.out.println("Terms to merge:" + termsToMerge);
+            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
         System.out.println("+++ check point +++");
@@ -164,21 +152,21 @@ public class HCluster {
         object.replaceRowNodes(ontology.getRootNodesOrdered(), null);
         //It can not be expanded for weird reason
 //         System.out.println("attempt to expand nodes:");
-        
+
         //This is when problem occurs right here!
         object.expandRowNodeToBottom(object.getViewNodeRow(0));
 
         System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");
-        
+
     }
 
-    public synchronized static void hclustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
+    public synchronized static void hClustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
 
         if (object == null || !object.isViewValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return;
         }
 
-        //System.out.println("Clustering started");
+        System.out.println("Clustering started:" + linkage + " " + simType);
 
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumColumns(), object.getViewNumRows());
         for (int i = 0; i < object.getViewNumRows(); i++) {
@@ -221,7 +209,6 @@ public class HCluster {
 
         //System.out.println("Min sim:" + minSimilarity + " " + "Max sim" + maxSimilarity);
 //        double range = maxSimilarity - minSimilarity;
-
         //Build a map
         HashMap<Integer, Object> trackMapping = new HashMap<Integer, Object>();
         for (Integer i = 0; i < merges.size() + 1; i++) {
@@ -246,7 +233,6 @@ public class HCluster {
         COntology ontology = new COntology("Hclust:" + Tools.randomID(), "Result from h-clust column", ID);
         ArrayList<String[]> pairs = new ArrayList<String[]>();
 
-
         String childNode, parentNode;
         for (String parent : parentChildMapping.keySet()) {
             Set children = parentChildMapping.get(parent);
@@ -267,10 +253,7 @@ public class HCluster {
 
         //COntologyUtils.printOntology(ontology);
         //List<String> roots = ontology.getRootNamesOrdered();
-
         //also copy the originals?
-
-
         if (Thread.interrupted()) {
             System.out.println("Clustering Aborted");
             return;
@@ -279,20 +262,35 @@ public class HCluster {
         System.out.println("Clustering Ended Successfully");
         CoolMapMaster.addNewCOntology(ontology);
 
-        HashSet<COntology> previousOntologies = new HashSet<COntology>();
-
+//        
+//        HashSet<COntology> previousOntologies = new HashSet<COntology>();
+//
+//
+//        for (VNode node : object.getViewNodesColumn()) {
+//            if (node.getCOntology() != null) {
+//                //for now just copy everything?
+//                //ontology.mergeCOntologyTo(node.getCOntology());
+//                previousOntologies.add(node.getCOntology());
+//            }
+//        }
+//
+//        //The ontology merge still causes issues
+//        for (COntology prevOnto : previousOntologies) {
+////            prevOnto.mergeCOntologyTo(ontology);
+//        }
+//        Node merge -> ensure nodes can be expanded correctly
+        HashMultimap<COntology, String> map = HashMultimap.create();
 
         for (VNode node : object.getViewNodesColumn()) {
             if (node.getCOntology() != null) {
-                //for now just copy everything?
-                //ontology.mergeCOntologyTo(node.getCOntology());
-                previousOntologies.add(node.getCOntology());
+                map.put(node.getCOntology(), node.getName());
             }
         }
 
-        //The ontology merge still causes issues
-        for (COntology prevOnto : previousOntologies) {
-            prevOnto.mergeCOntologyTo(ontology);
+        for (COntology otherOntology : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntology);
+            System.out.println("Terms to merge:" + termsToMerge);
+            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
         object.replaceColumnNodes(ontology.getRootNodesOrdered(), null);

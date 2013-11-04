@@ -46,7 +46,6 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import temp.RowHeader;
 
 /**
@@ -478,7 +477,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                     JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); //To change body of generated methods, choose Tools | Templates.
 
-                    if (Double.class.isAssignableFrom(value.getClass())) {
+                    if (value != null && Double.class.isAssignableFrom(value.getClass())) {
                         label.setText(format.format(value));
                     }
 
@@ -634,24 +633,24 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //                return super.getColumnClass(column); //To change body of generated methods, choose Tools | Templates.
 //            }
 //        }
-        @Override
-        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-
-//            Component rendererCp = super.prepareRenderer(renderer, row, column); //To change body of generated methods, choose Tools | Templates.
+//        @Override
+//        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 //
-//            if (column == 0) {
-//                //row labels
-//                //but however - > 
-//                rendererCp.setBackground(UI.colorLightGreen0);
-//            }
-//            else {
-//                
-//                rendererCp.setBackground(UI.colorWhite);
-//            }
-//
-//            return rendererCp;
-            return super.prepareRenderer(renderer, row, column);
-        }
+////            Component rendererCp = super.prepareRenderer(renderer, row, column); //To change body of generated methods, choose Tools | Templates.
+////
+////            if (column == 0) {
+////                //row labels
+////                //but however - > 
+////                rendererCp.setBackground(UI.colorLightGreen0);
+////            }
+////            else {
+////                
+////                rendererCp.setBackground(UI.colorWhite);
+////            }
+////
+////            return rendererCp;
+//            return super.prepareRenderer(renderer, row, column);
+//        }
 
     }
 

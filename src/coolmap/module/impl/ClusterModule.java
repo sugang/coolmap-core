@@ -4,7 +4,7 @@
  */
 package coolmap.module.impl;
 
-import cern.colt.Arrays;
+//import cern.colt.Arrays;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.LongTask;
@@ -12,12 +12,20 @@ import coolmap.application.utils.TaskEngine;
 import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import coolmap.module.Module;
-import coolmap.utils.cluster.HCluster;
+import coolmap.utils.cluster.Cluster;
+import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.common.Similarity;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.Comparator;
 import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -26,11 +34,6 @@ import javax.swing.JPanel;
  * @author gangsu
  */
 public class ClusterModule extends Module {
-    
-    private HierarchicalAgglomerativeClustering.ClusterLinkage hClusterLinkage = HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE;
-    private Similarity.SimType hClusterSimType = Similarity.SimType.PEARSON_CORRELATION;
-    
-    
 
     private class HClusterRowAction extends AbstractAction {
 
@@ -52,7 +55,7 @@ public class ClusterModule extends Module {
                         }
 
                         CoolMapState state = CoolMapState.createStateRows("H-Cluster rows", obj, null);
-                        HCluster.hclustRow(obj, hClusterLinkage, hClusterSimType);
+                        Cluster.hClustRow(obj, hClustPanel.hClusterLinkage, hClustPanel.hClusterSimType);
                         StateStorageMaster.addState(state);
 
                     } catch (Exception e) {
@@ -81,9 +84,9 @@ public class ClusterModule extends Module {
 
                         //To change body of generated methods, choose Tools | Templates.
                         CoolMapState state = CoolMapState.createStateColumns("H-Cluster columns", obj, null);
-                        HCluster.hclustColumn(CoolMapMaster.getActiveCoolMapObject(), hClusterLinkage, hClusterSimType);
+                        Cluster.hClustColumn(CoolMapMaster.getActiveCoolMapObject(), hClustPanel.hClusterLinkage, hClustPanel.hClusterSimType);
                         StateStorageMaster.addState(state);
-                        
+
                     } catch (Exception e) {
                         System.err.println("Cluster columns error:" + e);
                     }
@@ -96,20 +99,83 @@ public class ClusterModule extends Module {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), "Config");
-            if(returnVal == JOptionPane.YES_OPTION){
-                System.err.println("yes!");
+            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), hClustPanel, "HClust Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UI.getImageIcon("gearSmall"));
+            if (returnVal == JOptionPane.OK_OPTION) {
+//                System.err.println("yes!");
+                hClustPanel.setParameter();                
             }
         }
 
     }
+    
+    private class ObjectSorter implements Comparator {
+
+        @Override
+        public int compare(Object o1, Object o2) {
+            return o1.toString().compareTo(o2.toString());
+        }
+        
+    }
+    
+    
+
+    private HClustPanel hClustPanel = new HClustPanel();
 
     private class HClustPanel extends JPanel {
 
-        HierarchicalAgglomerativeClustering.ClusterLinkage linkage;
-        Similarity.SimType simType;
-        Object[] linkages = HierarchicalAgglomerativeClustering.ClusterLinkage.values();
-        Object[] simTypes = Similarity.SimType.values();
+//        HierarchicalAgglomerativeClustering.ClusterLinkage linkage;
+//        Similarity.SimType simType;
+        
+        Object[] linkages; //= HierarchicalAgglomerativeClustering.ClusterLinkage.values();
+        Object[] simTypes; // = Similarity.SimType.values();
+        
+        public HierarchicalAgglomerativeClustering.ClusterLinkage hClusterLinkage = HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE;
+        public Similarity.SimType hClusterSimType = Similarity.SimType.PEARSON_CORRELATION;
+        
+        private final JComboBox linkageCombo;
+        private final JComboBox similarityCombo;
+
+        public HClustPanel() {
+            
+            linkages = HierarchicalAgglomerativeClustering.ClusterLinkage.values();
+            simTypes = Similarity.SimType.values();
+            
+            Arrays.sort(linkages, new ObjectSorter());
+            Arrays.sort(simTypes, new ObjectSorter());
+//            Arrays.sort(simTypes);
+            
+            linkageCombo = new JComboBox(linkages);
+            similarityCombo = new JComboBox(simTypes);
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 0;
+            c.gridy = 0;
+            setLayout(new GridBagLayout());
+            c.insets = new Insets(5, 5, 5, 5);
+            
+            //row one
+            c.gridx = 0;
+            add(new JLabel("Linkage metric:"), c);
+            c.gridx = 1;
+            add(linkageCombo, c);
+            
+            //row two
+            c.gridx = 0;
+            c.gridy ++;
+            add(new JLabel("Similarity metric:"), c);
+            c.gridx = 1;
+            add(similarityCombo, c);
+            
+            
+            linkageCombo.setSelectedItem(HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE);
+            similarityCombo.setSelectedItem(Similarity.SimType.PEARSON_CORRELATION);
+            
+        }
+        
+        public void setParameter(){
+            hClusterLinkage = (HierarchicalAgglomerativeClustering.ClusterLinkage)linkageCombo.getSelectedItem();
+            hClusterSimType = (Similarity.SimType)similarityCombo.getSelectedItem();
+        }
 
     }
 
@@ -121,7 +187,7 @@ public class ClusterModule extends Module {
         item = new MenuItem("H-Cluster Column");
         CoolMapMaster.getCMainFrame().addMenuItem("Cluster/Hierarchical", item, false, false);
         item.addActionListener(new HClusterColumnAction());
-        
+
         item = new MenuItem("Config...");
         CoolMapMaster.getCMainFrame().addMenuItem("Cluster/Hierarchical", item, false, false);
         item.addActionListener(new HClusterConfigAction());

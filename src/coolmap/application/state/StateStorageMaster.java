@@ -73,9 +73,9 @@ public class StateStorageMaster {
 
         
         
-        System.out.println("\nQuick loading:");
-        System.out.println(quickSaved);
-        System.out.println("\n");
+//        System.out.println("\nQuick loading:");
+//        System.out.println(quickSaved);
+//        System.out.println("\n");
 
         
         //add 
@@ -96,7 +96,7 @@ public class StateStorageMaster {
 
 //    ///////////////////////////////////////////////////////////////////////////////////////
     public static void undo(CoolMapObject object) {
-        System.out.println("Trying to undo object:" + object);
+//        System.out.println("Trying to undo object:" + object);
         if(object == null){
             updateMenus(object);
             return;
@@ -121,7 +121,7 @@ public class StateStorageMaster {
     }
 
     public static void redo(CoolMapObject object) {
-        System.out.println("Trying to redo object:" + object);
+//        System.out.println("Trying to redo object:" + object);
         if(object == null){
             updateMenus(object);
             return;
@@ -145,7 +145,7 @@ public class StateStorageMaster {
     }
 
     public static void addState(CoolMapState state) {
-        System.out.println("new state added:" + state);
+//        System.out.println("new state added:" + state);
         //Get the queue
         //If queue does not exist, create one
         StateQueues queues = _stateQueuesHash.get(state.getCoolMapObjectID());
@@ -184,7 +184,7 @@ public class StateStorageMaster {
             _saveStateOperation.setEnabled(false);
         } else {
 
-            System.out.println("-----Menus to be updated");
+//            System.out.println("-----Menus to be updated");
             StateQueues queues = _stateQueuesHash.get(object.getID());
             if (queues == null) {
                 _undoOperation.setEnabled(false);

@@ -25,7 +25,10 @@
         }
     },
     "module": {
-        "load": ["coolmap.module.impl.ClusterModule"],
+        "load": [ 
+            "coolmap.module.impl.ClusterModule"
+            
+            ],
         "config": {
             
         }
