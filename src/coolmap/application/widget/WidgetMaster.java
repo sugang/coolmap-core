@@ -7,12 +7,13 @@ package coolmap.application.widget;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.widget.impl.WidgetAggregator;
 import coolmap.application.widget.impl.WidgetCMatrix;
-import coolmap.application.widget.impl.WidgetCOntology;
+//import coolmap.application.widget.impl.WidgetCOntology;
 import coolmap.application.widget.impl.WidgetDataMatrix;
 import coolmap.application.widget.impl.WidgetSearch;
 import coolmap.application.widget.impl.WidgetSyncer;
 import coolmap.application.widget.impl.WidgetViewRenderer;
 import coolmap.application.widget.impl.WidgetViewport;
+import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.utils.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -160,6 +161,7 @@ public class WidgetMaster {
 //            addWidget(new WidgetCoolMapProperties());
         //addWidget(new WidgetFilter());
         addWidget(new WidgetCMatrix());
+//        addWidget(new WidgetCOntology());
         addWidget(new WidgetCOntology());
     }
 

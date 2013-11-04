@@ -34,7 +34,8 @@ public class CanvasWidgetPropertyChangedListener implements PropertyChangeListen
             }
             else if(evt.getNewValue().equals(DockableState.NORMAL)){
                 Menu view = (Menu)CoolMapMaster.getCMainFrame().findMenu("View/Show Widgets");
-                if(!view.isEnabled()){
+                
+                if(view !=null && !view.isEnabled()){
                     view.setEnabled(true);
                 }
                                 

@@ -51,10 +51,14 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         _container.add(_toolBar, BorderLayout.NORTH);
 
         _toolBar.setFloatable(false);
-        _toolBar.add(new JLabel(UI.getImageIcon("search")));
+        
+        JLabel label = new JLabel(UI.getImageIcon("search"));
+        label.setToolTipText("<html>Type in row / colum node names in the current active view.<br/>Use <strong>|</strong> as 'OR' operator to separate terms</html>");
+        _toolBar.add(label);
+        
+        
         _toolBar.add(_searchField);
         _table.setAutoCreateRowSorter(true);
-
 
         _searchField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -148,7 +152,6 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
             return;
         }
 
-
         if (!rowIndices.isEmpty()) {
             System.out.println("Select rows:" + rowIndices);
             obj.getCoolMapView().setSelectionRowIndices(rowIndices);
@@ -156,11 +159,8 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         if (!columnIndices.isEmpty()) {
             obj.getCoolMapView().setSelectionsColumnIndices(columnIndices);
         }
-        
+
         obj.getCoolMapView().centerToSelections();
-        
-        
-        
 
         if (rowIndices.isEmpty() && columnIndices.isEmpty()) {
             //only group nodes are
@@ -187,9 +187,6 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
             obj.getCoolMapView().centerToRegion(center);
         }
 
-
-
-
     }
 
     private void _filterTable() {
@@ -205,7 +202,18 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         } else {
             try {
                 _searchField.setBackground(Color.WHITE);
-                ((TableRowSorter) _table.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
+
+//                ((TableRowSorter) _table.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                HashSet<RowFilter<Object, Object>> filters = new HashSet<>();
+
+                String ele[] = text.trim().split("\\s+");
+                for (String term : ele) {
+                    filters.add(RowFilter.regexFilter("(?i)" + term)); //apply to all indices
+                }
+
+//                        RowFilter.andFilter(filters);
+                ((TableRowSorter) _table.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
+
             } catch (Exception e) {
                 _searchField.setBackground(UI.colorRedWarning);
 
@@ -239,11 +247,13 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
     private void _updateList() {
 
-//        System.out.println("Table model updated");
+        SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
+            public void run() {
+                //        System.out.println("Table model updated");
         CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
         if (obj == null) {
             _table.setModel(new DefaultTableModel());
@@ -259,7 +269,6 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         String[] title = new String[]{"Node", "Direction", "Location", "Ontology"};
 
         //weird exception not thrown
-
         int row = 0;
         for (VNode node : rowNodes) {
             data[row][0] = node;
@@ -344,13 +353,14 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
 
         //_table.setCellSelectionEnabled(false);
         //_table.setColumnSelectionAllowed(false);
+            }
+        });
     }
 
     @Override
     public void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject activeCoolMapObject) {
         //also clear search terms
-        
-        
+
         _updateList();
     }
 

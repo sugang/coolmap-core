@@ -4,14 +4,17 @@
  */
 package coolmap.application.widget.impl.ontology;
 
+import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.DataStorageListener;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,6 +49,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -197,11 +201,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //                        "#OntologyID:");
 //                builder.append(((COntology) _ontologyCombo.getSelectedItem()).getID());
 //                builder.append("\n");
-
                 JSONObject nodesToInsert = new JSONObject();
 
                 ArrayList<String> list = new ArrayList();
-                
+
                 for (int i : _ontologyTable.getSelectedRows()) {
                     //builder.append(_ontologyTable.getModel().getValueAt(_ontologyTable.convertRowIndexToModel(i), 0)); //node name
                     //builder.append("\n");
@@ -211,19 +214,15 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                 try {
                     nodesToInsert.put("OntologyID", ((COntology) _ontologyCombo.getSelectedItem()).getID());
                     nodesToInsert.put("OntologyName", ((COntology) _ontologyCombo.getSelectedItem()).getName());
-                    nodesToInsert.put("Terms",list);
+                    nodesToInsert.put("Terms", list);
                     board.setContents(new StringSelection(nodesToInsert.toString()), null);
                 } catch (Exception ex) {
                     System.err.println("JSON creation exception in copying ontology nodes to clipbard");
                 }
-    
+
             }
         });
-        
 
-        
-        
-        
         _popupMenu.add(item);
 //        _popupMenu.addSeparator();
 
@@ -246,7 +245,6 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //                _insertNodesToColumn();
 //            }
 //        });
-
         toolBar.addSeparator();
         JButton button = new JButton(UI.getImageIcon("rowLabel"));
         toolBar.add(button);
@@ -271,7 +269,12 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
 
         toolBar.addSeparator();
-        toolBar.add(new JLabel(UI.getImageIcon("search")));
+        JLabel label = new JLabel();
+
+        label.setToolTipText("\"<html>Type in terms in the current active view.<br/>Use <strong>|</strong> as 'OR' operator to separate terms</html>\"");
+
+        toolBar.add(label);
+
         toolBar.add(_searchField);
         _searchField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -293,33 +296,51 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     }
 
     private void _filterTable() {
-        String text = _searchField.getText();
-        if (text == null || text.length() == 0) {
-            _searchField.setBackground(Color.WHITE);
-            if (_ontologyTable.getRowSorter() == null) {
-                return;
-            }
 
-            ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
+        SwingUtilities.invokeLater(new Runnable() {
 
-        } else {
-            try {
+            @Override
+            public void run() {
+                String text = _searchField.getText();
+                if (text == null || text.length() == 0) {
+                    _searchField.setBackground(Color.WHITE);
+                    if (_ontologyTable.getRowSorter() == null) {
+                        return;
+                    }
 
-                //Some more work with the filter for multiple terms
-                _searchField.setBackground(Color.WHITE);
-                ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                    ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
 
-            } catch (Exception e) {
-                _searchField.setBackground(UI.colorRedWarning);
+                } else {
+                    try {
 
-                //e.printStackTrace();
-                if (_ontologyTable.getRowSorter() == null) {
-                    return;
+                        //Some more work with the filter for multiple terms
+                        _searchField.setBackground(Color.WHITE);
+
+                        HashSet<RowFilter<Object, Object>> filters = new HashSet<>();
+
+                        String ele[] = text.trim().split("\\s+");
+                        for (String term : ele) {
+                            filters.add(RowFilter.regexFilter("(?i)" + term)); //apply to all indices
+                        }
+
+//                        RowFilter.andFilter(filters);
+                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
+
+//                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                    } catch (Exception e) {
+                        _searchField.setBackground(UI.colorRedWarning);
+
+                        //e.printStackTrace();
+                        if (_ontologyTable.getRowSorter() == null) {
+                            return;
+                        }
+                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
+
+                    }
                 }
-                ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
-
             }
-        }
+        });
+
     }
 
     @Override
@@ -353,16 +374,23 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     }
 
     private void _updateTable() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                if (_ontologyCombo.getSelectedItem() == null) {
+                    _ontologyTable.setModel(new DefaultTableModel());
+                    nodeToTableRowHash.clear();
+                }
+                COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+
+                DefaultTableModel model = _getOntologyAsTableModel(ontology);
+                _ontologyTable.setModel(model);
+            }
+        });
+
         //System.out.println("Table needs to be updated.");
-        if (_ontologyCombo.getSelectedItem() == null) {
-            _ontologyTable.setModel(new DefaultTableModel());
-            nodeToTableRowHash.clear();
-        }
-        COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
-
-        DefaultTableModel model = _getOntologyAsTableModel(ontology);
-        _ontologyTable.setModel(model);
-
 //        _ontologyTable.removeColumn(_ontologyTable.getColumn("ChildCount"));
         //Throws an execption
         //System.out.println("Column exists?" + _ontologyTable.getColumn("ChildCount"));
@@ -514,10 +542,20 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             newNodes.add(new VNode(n, ontology));
         }
 
+        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+        if (obj.getCoolMapView().getSelectedColumns() != null && !obj.getCoolMapView().getSelectedColumns().isEmpty()) {
+            centerTo.x = ((Range<Integer>) (obj.getCoolMapView().getSelectedColumns().get(0))).lowerEndpoint();
+        }
+
+        CoolMapState state = CoolMapState.createStateRows("Insert nodes to row", obj, null);
         obj.insertRowNodes(0, newNodes, true);
+        obj.getCoolMapView().centerToRegion(centerTo);
+        StateStorageMaster.addState(state);
+
     }
 
     private void _insertNodesToColumn() {
+
         CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
         if (obj == null) {
             return;
@@ -546,7 +584,15 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             newNodes.add(new VNode(n, ontology));
         }
 
+        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+        if (obj.getCoolMapView().getSelectedRows() != null && !obj.getCoolMapView().getSelectedRows().isEmpty()) {
+            centerTo.y = ((Range<Integer>) (obj.getCoolMapView().getSelectedRows().get(0))).lowerEndpoint();
+        }
+
+        CoolMapState state = CoolMapState.createStateColumns("Insert nodes to column", obj, null);
         obj.insertColumnNodes(0, newNodes, true);
+        obj.getCoolMapView().centerToRegion(centerTo);
+        StateStorageMaster.addState(state);
 
     }
 
