@@ -4,22 +4,35 @@
  */
 package coolmap.utils.cluster;
 
+import cern.colt.matrix.linalg.Property;
 import com.google.common.collect.HashMultimap;
 import coolmap.application.CoolMapMaster;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
+import coolmap.utils.graphics.UI;
+import edu.ucla.sspace.clustering.Assignment;
+import edu.ucla.sspace.clustering.Assignments;
+import edu.ucla.sspace.clustering.Clustering;
+import edu.ucla.sspace.clustering.DirectClustering;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.clustering.Merge;
+import edu.ucla.sspace.clustering.criterion.CriterionFunction;
+import edu.ucla.sspace.clustering.seeding.KMeansSeed;
 import edu.ucla.sspace.common.Similarity;
 import edu.ucla.sspace.matrix.ArrayMatrix;
 import edu.ucla.sspace.util.HashMultiMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,9 +40,152 @@ import java.util.Set;
  */
 public class Cluster {
 
-    public synchronized static void hClustRow(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
+    /**
+     * params
+     *
+     * @param object
+     * @param numClusters
+     * @param nullsAsZero
+     * @param resultName
+     * @param cFunction
+     * @param seedType
+     * @param numRepeats
+     */
+    public static void directKMeansRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, CriterionFunction cFunction, KMeansSeed seedType, int numRepeats) {
+        Properties properties = new Properties();
+        properties.put(DirectClustering.CRITERIA_PROPERTY, cFunction);
+        properties.put(DirectClustering.REPEAT_PROPERTY, numRepeats);
+        properties.put(DirectClustering.SEED_PROPERTY, seedType);
+        try {
+            clusterRow(object, new DirectClustering(), numClusters, properties, nullsAsZero, resultName);
+        } catch (Exception e) {
+            e.printStackTrace(); //replace this with console message
+        }
+    }
 
-        if (object == null || !object.isViewValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
+    private static void clusterRow(CoolMapObject<?, Double> object, Clustering clusterAlgorithm, int numClusters, Properties properties, boolean nullsAsZero, String resultName) throws CoolMapObjectInputException, CoolMapViewMissingValueException, InterruptedException {
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass()) || clusterAlgorithm == null || numClusters <= 0 || properties == null) {
+            //Some messages here
+            throw new CoolMapObjectInputException();
+        } else {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+            if (matrix == null) {
+                throw new CoolMapViewMissingValueException();
+            }
+            if (Thread.interrupted()) {
+                return;
+            }
+            Assignments assignments = clusterAlgorithm.cluster(matrix, numClusters, properties);
+            if (Thread.interrupted()) {
+                throw new CoolMapClusterInterruptedException("Clustering using: " + clusterAlgorithm.toString() + " was canceled");
+            }
+
+            List<Set<Integer>> clusters = assignments.clusters();
+            if (resultName == null || resultName.length() == 0) {
+                resultName = "Untitled " + clusterAlgorithm;
+            }
+
+            String ID = Tools.randomID();
+            COntology ontology = new COntology(resultName, null);
+            int counter = 0;
+            for (Set<Integer> cluster : clusters) {
+                String groupName = counter + " [" + ID + "]";
+                counter++;
+                for (Integer i : cluster) {
+                    ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeRow(i).getName());
+                }
+            }
+
+            //create row nodes to make it work
+            HashMultimap<COntology, String> map = HashMultimap.create();
+            for (VNode node : object.getViewNodesRow()) {
+                if (node.getCOntology() != null) {
+                    map.put(node.getCOntology(), node.getName());
+                }
+            }
+//
+//            it should be merged, but why not merged?
+            for (COntology otherOntology : map.keySet()) {
+                Set<String> termsToMerge = map.get(otherOntology);
+                System.out.println("Terms to merge:" + termsToMerge);
+                otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+            }
+
+            if (Thread.interrupted()) {
+                return;
+            }
+            CoolMapMaster.addNewCOntology(ontology);
+
+            CoolMapState state = CoolMapState.createStateRows("Cluster using " + clusterAlgorithm, object, null);
+            StateStorageMaster.addState(state);
+            //insert root nodes
+            List<VNode> rootNodes = ontology.getRootNodesOrdered();
+            object.replaceRowNodes(rootNodes, null);
+
+            for (VNode node : rootNodes) {
+                node.colorTree(UI.randomColor());
+            }
+
+            //merge with previous ontologies
+            //Need more polish here, need to save state
+            //This needs to be updated
+            //object.expandRowNodes(rootNodes);
+        }
+    }
+
+    private synchronized static ArrayMatrix convertToMatrixForRows(CoolMapObject object, boolean nullsAsZero) {
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
+            return null;
+        } else {
+            ArrayMatrix matrix = new ArrayMatrix(object.getViewNumRows(), object.getViewNumColumns());
+            for (int i = 0; i < object.getViewNumRows(); i++) {
+                for (int j = 0; j < object.getViewNumColumns(); j++) {
+                    Double data = (Double) object.getViewValue(i, j);
+                    if (data == null || data.isInfinite() || data.isNaN()) {
+                        if (nullsAsZero) {
+                            matrix.set(i, j, 0);
+                        } else {
+                            matrix.set(i, j, Double.NaN);
+                        }
+
+                    } else {
+                        matrix.set(i, j, data);
+                    }
+                }
+            }//end of 
+
+            return matrix;
+        }
+    }
+
+    private synchronized static ArrayMatrix convertToMatrixForColumns(CoolMapObject object, boolean nullsAsZero) {
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
+            return null;
+        } else {
+            ArrayMatrix matrix = new ArrayMatrix(object.getViewNumColumns(), object.getViewNumRows());
+            for (int i = 0; i < object.getViewNumRows(); i++) {
+                for (int j = 0; j < object.getViewNumColumns(); j++) {
+                    Double data = (Double) object.getViewValue(i, j);
+                    if (data == null || data.isInfinite() || data.isNaN()) {
+                        if (nullsAsZero) {
+                            matrix.set(j, i, 0);
+                        } else {
+                            matrix.set(j, i, Double.NaN);
+                        }
+
+                    } else {
+                        matrix.set(j, i, data);
+                    }
+                }
+            }
+
+            return matrix;
+        }
+    }
+
+    public synchronized static void hClustRow(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType, boolean nullsAsZero) {
+
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return;
         }
 
@@ -40,7 +196,12 @@ public class Cluster {
             for (int j = 0; j < object.getViewNumColumns(); j++) {
                 Double data = object.getViewValue(i, j);
                 if (data == null || data.isInfinite() || data.isNaN()) {
-                    matrix.set(i, j, Double.NaN);
+                    if (nullsAsZero) {
+                        matrix.set(i, j, 0);
+                    } else {
+                        matrix.set(i, j, Double.NaN);
+                    }
+
                 } else {
                     matrix.set(i, j, data);
                 }
@@ -160,9 +321,9 @@ public class Cluster {
 
     }
 
-    public synchronized static void hClustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType) {
+    public synchronized static void hClustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType, boolean nullsAsZero) {
 
-        if (object == null || !object.isViewValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return;
         }
 
@@ -173,7 +334,12 @@ public class Cluster {
             for (int j = 0; j < object.getViewNumColumns(); j++) {
                 Double data = object.getViewValue(i, j);
                 if (data == null || data.isInfinite() || data.isNaN()) {
-                    matrix.set(j, i, Double.NaN);
+                    if (nullsAsZero) {
+                        matrix.set(j, i, 0);
+                    } else {
+                        matrix.set(j, i, Double.NaN);
+                    }
+
                 } else {
                     matrix.set(j, i, data);
                 }

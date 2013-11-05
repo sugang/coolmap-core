@@ -572,7 +572,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     public boolean zoomIn(boolean zoomX, boolean zoomY) {
         //figure out the center row/column
-        if (_coolMapObject == null || !_coolMapObject.isViewValid() || zoomX == false && zoomY == false) {
+        if (_coolMapObject == null || !_coolMapObject.isViewMatrixValid() || zoomX == false && zoomY == false) {
             return false;
         }
 
@@ -625,7 +625,7 @@ public final class CoolMapView<BASE, VIEW> {
      * @param yIndex
      */
     public void setZoomIndices(int xIndex, int yIndex) {
-        if (_coolMapObject == null || !_coolMapObject.isViewValid()) {
+        if (_coolMapObject == null || !_coolMapObject.isViewMatrixValid()) {
             return;
         }
 
@@ -662,7 +662,7 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public boolean zoomOut(boolean zoomX, boolean zoomY) {
-        if (_coolMapObject == null || !_coolMapObject.isViewValid() || zoomX == false && zoomY == false) {
+        if (_coolMapObject == null || !_coolMapObject.isViewMatrixValid() || zoomX == false && zoomY == false) {
             return false;
         }
 
@@ -2975,7 +2975,7 @@ public final class CoolMapView<BASE, VIEW> {
                 _dragStartRow = null;
                 _dragStartCol = null;
 
-                if (_coolMapObject.isViewValid()) {
+                if (_coolMapObject.isViewMatrixValid()) {
                     updateCanvasEnforceAll(); //grid change not fired..
                 }
 

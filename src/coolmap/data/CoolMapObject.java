@@ -262,7 +262,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //    public JComponent getCanvas() {
 //        return _canvas.getRenderCanvas();
 //    }
-    public boolean isViewValid() {
+    public boolean isViewMatrixValid() {
         if (getViewNumColumns() > 0 && getViewNumRows() > 0) {
             return true;
         } else {
@@ -1210,7 +1210,7 @@ public final class CoolMapObject<BASE, VIEW> {
     }
 
     public synchronized boolean expandColumnNodes(List<VNode> nodes) {
-        if (nodes == null || nodes.isEmpty() || !isViewValid()) {
+        if (nodes == null || nodes.isEmpty() || !isViewMatrixValid()) {
             return false;
         }
 
@@ -1233,7 +1233,7 @@ public final class CoolMapObject<BASE, VIEW> {
     }
 
     public synchronized boolean expandRowNodes(List<VNode> nodes) {
-        if (nodes == null || nodes.isEmpty() || !isViewValid()) {
+        if (nodes == null || nodes.isEmpty() || !isViewMatrixValid()) {
             return false;
         }
 

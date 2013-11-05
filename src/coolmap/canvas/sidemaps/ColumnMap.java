@@ -187,7 +187,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
      */
     public boolean isDataViewValid() {
         CoolMapView view = getCoolMapView();
-        if (view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewValid()) {
+        if (view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewMatrixValid()) {
             return false;
         } else {
             return true;

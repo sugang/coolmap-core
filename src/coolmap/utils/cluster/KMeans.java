@@ -23,7 +23,7 @@ import java.util.Set;
 public class KMeans {
 
     public synchronized static void kMeansClusterRow(CoolMapObject<?, Double> object, int numClusters) {
-        if (object == null || !object.isViewValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
+        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return;
         }
 
