@@ -6,10 +6,12 @@
  */
 package coolmap.data.contology.model;
 
-import coolmap.data.contology.model.COntology;
-import com.google.common.collect.ImmutableMap;
 import coolmap.data.cmatrix.model.CMatrix;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,7 +24,7 @@ public class COntologyToCMatrixMap {
     private final ConcurrentHashMap<ItemKey, HashMap<String, Integer[]>> _baseIndexMaps = new ConcurrentHashMap<ItemKey, HashMap<String, Integer[]>>();
     private final ConcurrentHashMap<String, Integer[]> _tempBaseMap = new ConcurrentHashMap<String, Integer[]>();
 
-    public void destroy(){
+    public void clear(){
         _baseIndexMaps.clear();
         _tempBaseMap.clear();
     }
@@ -79,7 +81,8 @@ public class COntologyToCMatrixMap {
     }
 
     private synchronized void _buildBaseIndexMap(CMatrix matrix, Integer direction) {
-        if (matrix == null || _cOntology == null || !_cOntology.containsLoop().isEmpty()) {
+        if (matrix == null || _cOntology == null || _cOntology.containsLoop()) {
+            //change stuff here later on
             return;
         }
 

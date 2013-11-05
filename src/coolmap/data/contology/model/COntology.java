@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  *
  * @author gangsu
@@ -45,11 +44,8 @@ public final class COntology {
     private HashBasedTable<String, String, COntologyEdgeAttributeImpl> _edgeAttrTable = HashBasedTable.create();
     private Color _viewColor = null;
     private Class _ontologyAttributeClass = COntologyEdgeAttributeImpl.class;
-    
+
 //    private HashBasedTable<String, String, Object> _nodeAttrTable = HashBasedTable.create();
-    
-    
-    
 //    public Class getEdgetAttributeClass(){
 //        return _ontologyAttributeClass;
 //    }
@@ -81,7 +77,6 @@ public final class COntology {
 //            return new HashSet<>();
 //        }
 //    }
-    
     //worry about attribute classes later.
 //    public void addAttribute(String node, String attributeName, Object value){
 //        _nodeAttrTable.put(node, attributeName, value);
@@ -119,61 +114,75 @@ public final class COntology {
 //        
 //        //System.out.println("After validation");
 //    }
-    
     /**
-     * merge the terms from other ontology, to the current ontology. Child terms of the given terms will also be merged over
+     * merge the terms from other ontology, to the current ontology. Child terms
+     * of the given terms will also be merged over
+     *
      * @param ontology
-     * @param terms 
+     * @param terms
      */
     public boolean mergeCOntologyTo(COntology targetOntology, Collection<String> terms) {
-        
+
         //Use add
         //_addRelationship(_name, _ID);
         //Need a way to prevent acyclic loops
 //        boolean success = true;
-        try{
+        try {
             ArrayListMultimap<String, String> childMap = ArrayListMultimap.create();
+
 //            ArrayListMultimap<String, String> parentMap = ArrayListMultimap.create();
-            
-            
-            for(String term : terms){
-                System.out.println("Term:" + term);
+            //Also the depth needs to be copied over as well!
+//            System.out.println("Term:" + terms);
+            for (String term : terms) {
+
                 _getAllChildren(term, childMap);
             }
-            
+
             //If it contains problems, need to remove
             //nothing was added. What?
-            System.out.println("Target map to add: " + childMap.keySet());
-            
+//            System.out.println("Target map to add: " + childMap.keySet());
             targetOntology.addRelationshipUpdateDepth(childMap);
-            
+
             //if loop do exisit, simply remove all of them may not be a good idea
-            
+            //also need to update targeOntology edge attributes
+            //Also add the attr
+            for (String parent : childMap.keySet()) {
+                List<String> children = childMap.get(parent);
+                for (String child : children) {
+                    COntologyEdgeAttributeImpl attr = getEdgeAttribute(parent, child);
+                    if (attr != null) {
+                        targetOntology.addEdgeAttribute(parent, child, attr);
+                    }
+                }
+            }
+
+            //Let's see whether loops were removed
+            //This will get stack overflow issue
+            targetOntology.removeAllLoops();
+            //The target onto need to recompute depth
+            targetOntology._recomputeDepthFromLeaves();
+
             return true;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Error occured. Merge not successful. Possibly due to loops");
             return false;
         }
     }
-    
-    private void _getAllChildren(String node, ArrayListMultimap<String, String> childMap){
+
+    private void _getAllChildren(String node, ArrayListMultimap<String, String> childMap) {
         ArrayList<String> childNodes = getImmediateChildren(node);
-        
-        if(childNodes == null && childNodes.isEmpty()){
+
+        if (childNodes == null && childNodes.isEmpty()) {
             return;
-        }
-        else{
-            for(String child : childNodes){
+        } else {
+            for (String child : childNodes) {
                 childMap.put(node, child);
 //                parentMap.put(child, node);
                 _getAllChildren(child, childMap);
             }
         }
     }
-            
-    
-    
+
 //    public void removeAllLoops(){
 //        //Remove all terms in loops -> This could be very aggressive but it ensures that the 
 //        ArrayList<String> loop;
@@ -190,16 +199,10 @@ public final class COntology {
 //        }
 //        
 //    }
-    
-    
-    
-    
-    
-
     public void destroy() {
         _childMap.clear();
         _parentMap.clear();
-        _indexMap.destroy();
+        _indexMap.clear();
         _edgeAttrTable.clear();
         _isDestroyed = true;
     }
@@ -264,12 +267,13 @@ public final class COntology {
     }
 
     /**
-     * test 
+     * test
+     *
      * @param node
      * @param visitedNodes
-     * @return 
+     * @return
      */
-    private boolean _testLoop(String node, ArrayList<String> visitedNodes) {
+    private boolean _testLoopBottomUp(String node, ArrayList<String> visitedNodes) {
         ArrayList<String> parents = getImmediateParents(node);
         //System.out.println("Test loop");
 //        System.out.println(_visitedNodes + "," + node + "," + parents);
@@ -282,7 +286,7 @@ public final class COntology {
                     return true;
                 } else {
                     visitedNodes.add(parent);
-                    if (_testLoop(parent, visitedNodes)) {
+                    if (_testLoopBottomUp(parent, visitedNodes)) {
                         return true;
                     } else {
                         visitedNodes.remove(parent);
@@ -293,24 +297,53 @@ public final class COntology {
         return false;
     }
 
-    
-    public synchronized ArrayList<String> containsLoop() {
-        HashSet<String> allLeaves = getLeafNodes(); //It always returns a copy -> this is to start from a leaf
+    private boolean _testLoopTopDown(String node, ArrayList<String> visitedNodes) {
+        ArrayList<String> children = getImmediateChildren(node);
+
+        if (!children.isEmpty()) {
+            for (String child : children) {
+                if (visitedNodes.contains(child)) {
+                    visitedNodes.add(child);
+                    return true;
+                } else {
+                    visitedNodes.add(child);
+                    if (_testLoopTopDown(child, visitedNodes)) {
+                        return true;
+                    } else {
+                        visitedNodes.remove(child);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private synchronized ArrayList<String> containsLoopFromLeaf() {
+        HashSet<String> allLeaves = getLeafNames(); //It always returns a copy -> this is to start from a leaf
         ArrayList<String> visitedNodes = new ArrayList<String>();
         for (String leaf : allLeaves) {
             visitedNodes.clear();
             visitedNodes.add(leaf);
-            if (_testLoop(leaf, visitedNodes)) {
+            if (_testLoopBottomUp(leaf, visitedNodes)) {
                 //There is a loop detected
                 //System.out.println("loop detected!");
-                ArrayList<String> loop = new ArrayList<String>(visitedNodes);
-                visitedNodes.clear();
-                return loop;
+                return visitedNodes;
             }
         }
-        //done all.
-        visitedNodes.clear();
-        return new ArrayList<String>();
+        return null;
+    }
+
+    private synchronized ArrayList<String> containsLoopFromRoot() {
+        HashSet<String> allRoots = getRootNames();
+        ArrayList<String> visitedNodes = new ArrayList<String>();
+        for (String root : allRoots) {
+            visitedNodes.clear();
+            visitedNodes.add(root);
+            if (_testLoopTopDown(root, visitedNodes)) {
+                return visitedNodes;
+            }
+        }
+        return null;
     }
 
     /**
@@ -318,16 +351,16 @@ public final class COntology {
      *
      * @return
      */
-    public HashSet<String> getLeafNodes() {
+    public HashSet<String> getLeafNames() {
         HashSet<String> leaves = new HashSet<String>();
         leaves.addAll(_parentMap.keySet());
         leaves.removeAll(_childMap.keySet());
         return leaves;
     }
 
-    public ArrayList<String> getLeafNodesOrdered() {
+    public ArrayList<String> getLeafNamesOrdered() {
         ArrayList<String> l = new ArrayList<String>();
-        l.addAll(getLeafNodes());
+        l.addAll(getLeafNames());
         Collections.sort(l);
         return l;
     }
@@ -511,10 +544,9 @@ public final class COntology {
     public ArrayList<String> getImmediateChildren(String parent) {
         //System.out.println(parent);
         ArrayList<String> children;
-        try{
-         children = new ArrayList<String>(_childMap.get(parent));
-        }
-        catch(Exception e){
+        try {
+            children = new ArrayList<String>(_childMap.get(parent));
+        } catch (Exception e) {
             System.out.println(parent);
             return null;
         }
@@ -577,8 +609,7 @@ public final class COntology {
     private void _recomputeDepthFromLeaves() {
         //It is possible that it may contain a loop.
 
-
-        HashSet<String> leaves = getLeafNodes();
+        HashSet<String> leaves = getLeafNames();
         _depth.clear();
 
         for (String leaf : leaves) {
@@ -651,7 +682,7 @@ public final class COntology {
         }
         _recomputeDepthFromLeaves();
     }
-    
+
     public void addRelationshipUpdateDepth(Multimap<String, String> parentToChild) {
         if (parentToChild == null || parentToChild.isEmpty()) {
             return;
@@ -662,15 +693,10 @@ public final class COntology {
         }
         _recomputeDepthFromLeaves();
     }
-    
-    
-    
-    
-    
 
     public void validate() {
 //        _removeLoops();
-        
+
         _recomputeDepthFromLeaves();
     }
 
@@ -721,7 +747,6 @@ public final class COntology {
 //        _parentMap.putAll(parentMap);
 //
 //    }
-
     private void _exportFromRoot(String node, ArrayListMultimap<String, String> childMap, ArrayListMultimap<String, String> parentMap) {
         ArrayList<String> children = getImmediateChildren(node);
         if (!children.isEmpty()) {
@@ -790,10 +815,86 @@ public final class COntology {
     public String toString() {
         return getName();
     }
-    
-    
-    public static void main(String args[]){
-        COntology ontology = COntologyUtils.createSampleColOntology();
-        System.out.println(ontology.containsLoop());
+
+    public static void main(String args[]) {
+        //Contains no 
+        COntology ontology = COntologyUtils.createSampleLoopOntology();
+//        System.out.println("Root loops" + ontology.containsLoopFromRoot());
+//        System.out.println("Leaf loops" +ontology.containsLoopFromLeaf());
+        ontology.removeAllLoops();
+
+        COntologyUtils.printOntology(ontology);
+
+    }
+
+    //This is a quite complex thing to do
+    //Need to first start from both parent and leaf, and break loops;
+    //Then store only traces from parents (could contain cyclic balls)
+    /**
+     * This is one of the most annoying functions to write This function should
+     * be re-organized to make it more efficient.
+     */
+    public void removeAllLoops() {
+        ArrayList<String> loop;
+
+        //Removed all parent nodes
+        while ((loop = containsLoopFromLeaf()) != null) {
+            _removeRelationship(loop.get(loop.size() - 2), loop.get(loop.size() - 1));
+        }
+        //Removed all child nodes
+        while ((loop = containsLoopFromRoot()) != null) {
+            _removeRelationship(loop.get(loop.size() - 2), loop.get(loop.size() - 1));
+        }
+        //But still contains the loop balls
+        //need to remove the loop balls
+        /////////////////////////////////////////////////////////////////////////
+        //create two new hashes, and only copy over 
+//        COntology temp = new COntology();
+//        
+//        mergeCOntologyTo(temp, getRootNames()); //now need to merge
+//        
+//        replaceNodesFrom(temp); //Now the balls are all gone
+        /////////////////////////////////////////////////////////////////////////
+        //only persist rootNodes and beyond
+        HashSet<String> terms = getRootNames();
+        ArrayListMultimap<String, String> childMap = ArrayListMultimap.create();
+        for (String term : terms) {
+
+            _getAllChildren(term, childMap);
+        }
+        _getAllChildren(_name, childMap);
+        _childMap.clear();
+        _parentMap.clear();
+        
+        for(String parent : childMap.keySet()){
+            List<String> children = childMap.get(parent);
+            for(String child : children){
+                _addRelationship(parent, child);
+            }
+        }
+
+    }
+
+    private void replaceNodesFrom(COntology sourceOntology) {
+        _childMap.clear();
+        _parentMap.clear();
+        _edgeAttrTable.clear();
+        _depth.clear();
+        _indexMap.clear();
+        HashSet<String> parents = sourceOntology.getAllNodesWithChildren();
+        for (String parent : parents) {
+            ArrayList<String> children = sourceOntology.getImmediateChildren(parent);
+            for (String child : children) {
+                _addRelationship(parent, child);
+            }
+        }
+        _recomputeDepthFromLeaves();
+    }
+
+    public boolean containsLoop() {
+        //may still contain ball loops
+        //Therefore removeAllLoops is required when ontology is loaded
+
+        return containsLoopFromLeaf() != null || containsLoopFromRoot() != null;
     }
 }

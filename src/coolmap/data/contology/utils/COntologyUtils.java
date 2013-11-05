@@ -125,6 +125,17 @@ public class COntologyUtils {
     public static COntology createSampleLoopOntology(){
         COntology ontology = new COntology("Loop", null);
         
+        //cyclic ball
+        ontology.addRelationshipUpdateDepth("A", "B");
+        ontology.addRelationshipUpdateDepth("B", "C");
+        ontology.addRelationshipUpdateDepth("C", "D");
+        ontology.addRelationshipUpdateDepth("D", "A");
+        
+        //leaf loop
+//        ontology.addRelationshipUpdateDepth("C", "E");
+        
+        //root loop
+//        ontology.addRelationshipUpdateDepth("F", "A");
         
         return ontology;
     }
@@ -135,7 +146,7 @@ public class COntologyUtils {
 
     public static synchronized void printOntology(COntology ontology) {
         HashSet<String> roots = ontology.getRootNames();
-        HashSet<String> leaves = ontology.getLeafNodes();
+        HashSet<String> leaves = ontology.getLeafNames();
 
         System.out.println("------------");
         System.out.println("     Ontology: " + ontology.getName());
@@ -194,13 +205,13 @@ public class COntologyUtils {
         }
     }
 
-    public static void main(String[] args) {
-        //Automatically removes loops from ontology. Excellent!
-        COntology ontology = COntologyUtils.createSampleOntology();
-        System.out.println("Loops spotted?" + ontology.containsLoop());
-        COntologyUtils.printOntology(ontology);
-
-        System.out.println("Loops spotted?" + ontology.containsLoop());
-        COntologyUtils.printOntology(ontology);
-    }
+//    public static void main(String[] args) {
+//        //Automatically removes loops from ontology. Excellent!
+//        COntology ontology = COntologyUtils.createSampleOntology();
+//        System.out.println("Loops spotted?" + ontology.containsLoop());
+//        COntologyUtils.printOntology(ontology);
+//
+//        System.out.println("Loops spotted?" + ontology.containsLoop());
+//        COntologyUtils.printOntology(ontology);
+//    }
 }
