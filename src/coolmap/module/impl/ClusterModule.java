@@ -53,7 +53,7 @@ public class ClusterModule extends Module {
                 @Override
                 public void run() {
 //                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    Cluster.directKMeansRow(CoolMapMaster.getActiveCoolMapObject(), 5, false, null, new E1Function(), new RandomSeed(), 1);
+                    Cluster.directKMeansRow(CoolMapMaster.getActiveCoolMapObject(), 10, false, null, new E1Function(), new RandomSeed(), 1);
                 }
             });
         }
