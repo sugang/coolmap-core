@@ -4,7 +4,6 @@
  */
 package coolmap.utils.cluster;
 
-import cern.colt.matrix.linalg.Property;
 import com.google.common.collect.HashMultimap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
@@ -15,9 +14,7 @@ import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
-import edu.ucla.sspace.clustering.Assignment;
 import edu.ucla.sspace.clustering.Assignments;
-import edu.ucla.sspace.clustering.Clustering;
 import edu.ucla.sspace.clustering.DirectClustering;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.clustering.Merge;
@@ -29,10 +26,7 @@ import edu.ucla.sspace.util.HashMultiMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -52,87 +46,143 @@ public class Cluster {
      * @param numRepeats
      */
     public static void directKMeansRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, CriterionFunction cFunction, KMeansSeed seedType, int numRepeats) {
-        Properties properties = new Properties();
-        properties.put(DirectClustering.CRITERIA_PROPERTY, cFunction);
-        properties.put(DirectClustering.REPEAT_PROPERTY, numRepeats);
-        properties.put(DirectClustering.SEED_PROPERTY, seedType);
+
         try {
-            clusterRow(object, new DirectClustering(), numClusters, properties, nullsAsZero, resultName);
-        } catch (Exception e) {
-            e.printStackTrace(); //replace this with console message
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            Assignments assignments = DirectClustering.cluster(matrix, numClusters, numRepeats, seedType, cFunction);
+
+            if (Thread.interrupted()) {
+                //If clustering canceled
+                throw new InterruptedException();
+            }
+
+            clusterRow(object, assignments, resultName);
+            
+        } catch (InterruptedException | RuntimeException e) {
+            e.printStackTrace();
         }
+
     }
 
-    private static void clusterRow(CoolMapObject<?, Double> object, Clustering clusterAlgorithm, int numClusters, Properties properties, boolean nullsAsZero, String resultName) throws CoolMapObjectInputException, CoolMapViewMissingValueException, InterruptedException {
-        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass()) || clusterAlgorithm == null || numClusters <= 0 || properties == null) {
-            //Some messages here
-            throw new CoolMapObjectInputException();
-        } else {
-            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
-            if (matrix == null) {
-                throw new CoolMapViewMissingValueException();
-            }
-            if (Thread.interrupted()) {
-                return;
-            }
-            Assignments assignments = clusterAlgorithm.cluster(matrix, numClusters, properties);
-            if (Thread.interrupted()) {
-                throw new CoolMapClusterInterruptedException("Clustering using: " + clusterAlgorithm.toString() + " was canceled");
-            }
+    private static void clusterRow(CoolMapObject<?, Double> object, Assignments assignments, String resultOntologyName) {
+        List<Set<Integer>> clusters = assignments.clusters();
+        if (resultOntologyName == null || resultOntologyName.length() == 0) {
+            resultOntologyName = "Untitled";
+        }
 
-            List<Set<Integer>> clusters = assignments.clusters();
-            if (resultName == null || resultName.length() == 0) {
-                resultName = "Untitled " + clusterAlgorithm;
+        String ID = Tools.randomID();
+        COntology ontology = new COntology(resultOntologyName, null);
+        int counter = 0;
+        for (Set<Integer> cluster : clusters) {
+            String groupName = counter + " [" + ID + "]";
+            counter++;
+            for (Integer i : cluster) {
+                ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeRow(i).getName());
             }
+        }
 
-            String ID = Tools.randomID();
-            COntology ontology = new COntology(resultName, null);
-            int counter = 0;
-            for (Set<Integer> cluster : clusters) {
-                String groupName = counter + " [" + ID + "]";
-                counter++;
-                for (Integer i : cluster) {
-                    ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeRow(i).getName());
-                }
+        //create row nodes to make it work
+        HashMultimap<COntology, String> map = HashMultimap.create();
+        for (VNode node : object.getViewNodesRow()) {
+            if (node.getCOntology() != null) {
+                map.put(node.getCOntology(), node.getName());
             }
-
-            //create row nodes to make it work
-            HashMultimap<COntology, String> map = HashMultimap.create();
-            for (VNode node : object.getViewNodesRow()) {
-                if (node.getCOntology() != null) {
-                    map.put(node.getCOntology(), node.getName());
-                }
-            }
+        }
 //
 //            it should be merged, but why not merged?
-            for (COntology otherOntology : map.keySet()) {
-                Set<String> termsToMerge = map.get(otherOntology);
-                System.out.println("Terms to merge:" + termsToMerge);
-                otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
-            }
-
-            if (Thread.interrupted()) {
-                return;
-            }
-            CoolMapMaster.addNewCOntology(ontology);
-
-            CoolMapState state = CoolMapState.createStateRows("Cluster using " + clusterAlgorithm, object, null);
-            StateStorageMaster.addState(state);
-            //insert root nodes
-            List<VNode> rootNodes = ontology.getRootNodesOrdered();
-            object.replaceRowNodes(rootNodes, null);
-
-            for (VNode node : rootNodes) {
-                node.colorTree(UI.randomColor());
-            }
-
-            //merge with previous ontologies
-            //Need more polish here, need to save state
-            //This needs to be updated
-            //object.expandRowNodes(rootNodes);
+        for (COntology otherOntology : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntology);
+            System.out.println("Terms to merge:" + termsToMerge);
+            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
+
+        if (Thread.interrupted()) {
+            return;
+        }
+        CoolMapMaster.addNewCOntology(ontology);
+
+        CoolMapState state = CoolMapState.createStateRows("Cluster Rows", object, null);
+
+        //insert root nodes
+        List<VNode> rootNodes = ontology.getRootNodesOrdered();
+        object.replaceRowNodes(rootNodes, null);
+
+        for (VNode node : rootNodes) {
+            node.colorTree(UI.randomColor());
+        }
+
+        StateStorageMaster.addState(state);
     }
 
+//    private static void clusterRow(CoolMapObject<?, Double> object, Clustering clusterAlgorithm, int numClusters, Properties properties, boolean nullsAsZero, String resultName) throws CoolMapObjectInputException, CoolMapViewMissingValueException, InterruptedException {
+//        if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass()) || clusterAlgorithm == null || numClusters <= 0 || properties == null) {
+//            //Some messages here
+//            throw new CoolMapObjectInputException();
+//        } else {
+//
+//            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+//            if (matrix == null) {
+//                throw new CoolMapViewMissingValueException();
+//            }
+//            if (Thread.interrupted()) {
+//                return;
+//            }
+//
+//            List<Set<Integer>> clusters = assignments.clusters();
+//            if (resultName == null || resultName.length() == 0) {
+//                resultName = "Untitled " + clusterAlgorithm;
+//            }
+//
+//            String ID = Tools.randomID();
+//            COntology ontology = new COntology(resultName, null);
+//            int counter = 0;
+//            for (Set<Integer> cluster : clusters) {
+//                String groupName = counter + " [" + ID + "]";
+//                counter++;
+//                for (Integer i : cluster) {
+//                    ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeRow(i).getName());
+//                }
+//            }
+//
+//            //create row nodes to make it work
+//            HashMultimap<COntology, String> map = HashMultimap.create();
+//            for (VNode node : object.getViewNodesRow()) {
+//                if (node.getCOntology() != null) {
+//                    map.put(node.getCOntology(), node.getName());
+//                }
+//            }
+////
+////            it should be merged, but why not merged?
+//            for (COntology otherOntology : map.keySet()) {
+//                Set<String> termsToMerge = map.get(otherOntology);
+//                System.out.println("Terms to merge:" + termsToMerge);
+//                otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+//            }
+//
+//            if (Thread.interrupted()) {
+//                return;
+//            }
+//            CoolMapMaster.addNewCOntology(ontology);
+//
+//            CoolMapState state = CoolMapState.createStateRows("Cluster using " + clusterAlgorithm, object, null);
+//
+//            //insert root nodes
+//            List<VNode> rootNodes = ontology.getRootNodesOrdered();
+//            object.replaceRowNodes(rootNodes, null);
+//
+//            for (VNode node : rootNodes) {
+//                node.colorTree(UI.randomColor());
+//            }
+//
+//            StateStorageMaster.addState(state);
+//
+//            //merge with previous ontologies
+//            //Need more polish here, need to save state
+//            //This needs to be updated
+//            //object.expandRowNodes(rootNodes);
+//        }
+//    }
     private synchronized static ArrayMatrix convertToMatrixForRows(CoolMapObject object, boolean nullsAsZero) {
         if (object == null || !object.isViewMatrixValid() || object.getViewClass() == null || !Double.class.isAssignableFrom(object.getViewClass())) {
             return null;

@@ -471,10 +471,16 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     protected void render(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
 
 //        VNode firstNode = object.getViewNodeCol(fromCol);
+        try{
 //        computeNodeLocations();
         _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
 
         super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+        }
+        catch(Exception e){
+            //
+            System.out.println("node render exception");
+        }
 
 
     }
@@ -582,6 +588,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
 
         List<VNode> treeNodes = object.getViewTreeNodesColumn();
+        
         int anchorX = getCoolMapObject().getViewNodeColumn(fromCol).getViewOffset().intValue();
 
         Color nodeColor;

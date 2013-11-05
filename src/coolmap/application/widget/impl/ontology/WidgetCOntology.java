@@ -19,7 +19,6 @@ import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dialog;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -379,6 +378,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
             @Override
             public void run() {
+                
                 if (_ontologyCombo.getSelectedItem() == null) {
                     _ontologyTable.setModel(new DefaultTableModel());
                     nodeToTableRowHash.clear();
@@ -387,6 +387,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
                 DefaultTableModel model = _getOntologyAsTableModel(ontology);
                 _ontologyTable.setModel(model);
+                _ontologyBrowswer.setActiveCOntology(ontology);
             }
         });
 

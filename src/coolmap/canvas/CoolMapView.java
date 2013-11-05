@@ -1025,12 +1025,17 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public void updateActiveCell() {
+        try{
 //        System.err.println("Active cell updated");
         //Does not actually work
         setMouseXY(_cursor.x, _cursor.y);
 //        if(!_activeCell.isValidCell(_coolMapObject)){
 //            _hoverLayer.setVisible(false);
 //        }
+        }
+        catch(Exception e){
+            System.out.println("Update active cell exception");
+        }
     }
 
     public synchronized void setMouseXY(int x, int y) {

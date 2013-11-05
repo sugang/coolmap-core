@@ -15,8 +15,9 @@ import coolmap.module.Module;
 import coolmap.utils.cluster.Cluster;
 import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
-import edu.ucla.sspace.clustering.criterion.BaseFunction;
-import edu.ucla.sspace.clustering.criterion.E1Function;
+import edu.ucla.sspace.clustering.criterion.CriterionFunction;
+import edu.ucla.sspace.clustering.criterion.I1Function;
+import edu.ucla.sspace.clustering.seeding.KMeansSeed;
 import edu.ucla.sspace.clustering.seeding.RandomSeed;
 import edu.ucla.sspace.common.Similarity;
 import java.awt.GridBagConstraints;
@@ -33,6 +34,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -53,7 +55,8 @@ public class ClusterModule extends Module {
                 @Override
                 public void run() {
 //                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    Cluster.directKMeansRow(CoolMapMaster.getActiveCoolMapObject(), 10, false, null, new E1Function(), new RandomSeed(), 1);
+                    //Default: I1, random seed
+                    Cluster.directKMeansRow(CoolMapMaster.getActiveCoolMapObject(), 5, false, null, new I1Function(), new RandomSeed(), 1);
                 }
             });
         }
@@ -142,6 +145,35 @@ public class ClusterModule extends Module {
 
     }
 
+    
+    
+    private DKmeansPanel dKmeansPanel = new DKmeansPanel();
+    
+    private class DKmeansPanel extends JPanel {
+
+        public Integer numClusters = 5;
+        public Integer numIterations = 5;
+        public CriterionFunction criterionFunction = new I1Function();
+        public KMeansSeed seedType = new RandomSeed();
+        
+        private final JComboBox criterionCombo;
+        private final JComboBox seedCombo;
+        private final JTextField numClustersField;
+        private final JTextField numIterationsField;
+        
+        
+        public DKmeansPanel() {
+            numClustersField = new JTextField(Integer.toString(numClusters));
+            numIterationsField = new JTextField(Integer.toString(numIterations));
+            criterionCombo = new JComboBox(new CriterionFunction[]{});
+            seedCombo = new JComboBox(new KMeansSeed[]{});
+        }
+        
+        
+        
+    }
+    
+    
     private HClustPanel hClustPanel = new HClustPanel();
 
     private class HClustPanel extends JPanel {

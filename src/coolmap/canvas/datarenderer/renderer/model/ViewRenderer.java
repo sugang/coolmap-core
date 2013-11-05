@@ -451,7 +451,8 @@ public abstract class ViewRenderer<VIEW> {
                         }
 
                     } catch (Exception e) {
-                        System.err.println("View render exception.. Not serious should be repaired by itself");
+                        System.err.println("View render exception.. Current render session canceled");
+                        return;
                     }
 
                 }//end of inner loop
