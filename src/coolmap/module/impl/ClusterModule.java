@@ -17,6 +17,7 @@ import coolmap.utils.cluster.Cluster;
 import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.ClusteringByCommittee;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
+import edu.ucla.sspace.clustering.NeighborChainAgglomerativeClustering;
 import edu.ucla.sspace.clustering.criterion.CriterionFunction;
 import edu.ucla.sspace.clustering.criterion.H1Function;
 import edu.ucla.sspace.clustering.criterion.H2Function;
@@ -28,7 +29,21 @@ import edu.ucla.sspace.clustering.seeding.KMeansSeed;
 import edu.ucla.sspace.clustering.seeding.OrssSeed;
 import edu.ucla.sspace.clustering.seeding.RandomSeed;
 import edu.ucla.sspace.common.Similarity;
+import edu.ucla.sspace.similarity.AverageCommonFeatureRank;
+import edu.ucla.sspace.similarity.CosineSimilarity;
+import edu.ucla.sspace.similarity.DotProduct;
+import edu.ucla.sspace.similarity.EuclideanSimilarity;
+import edu.ucla.sspace.similarity.GaussianKernel;
+import edu.ucla.sspace.similarity.JaccardIndex;
+import edu.ucla.sspace.similarity.KLDivergence;
+import edu.ucla.sspace.similarity.KendallsTau;
+import edu.ucla.sspace.similarity.LinSimilarity;
+import edu.ucla.sspace.similarity.OneSimilarity;
 import edu.ucla.sspace.similarity.PearsonCorrelation;
+import edu.ucla.sspace.similarity.PolynomialKernel;
+import edu.ucla.sspace.similarity.SimilarityFunction;
+import edu.ucla.sspace.similarity.SpearmanRankCorrelation;
+import edu.ucla.sspace.similarity.TanimotoCoefficient;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -117,6 +132,32 @@ public class ClusterModule extends Module {
 
     }
 
+    private class NCARowsAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("NCA - Cluster rows") {
+                @Override
+                public void run() {
+                    Cluster.ncaRow(CoolMapMaster.getActiveCoolMapObject(), ncaPanel.numClusters, ncaPanel.nullsAsZero, "NCA Row (" + Tools.randomID() + ")", ncaPanel.similarityFunction, ncaPanel.link);
+                }
+            });
+        }
+    }
+
+    private class NCAColumnsAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("NCA - Cluster columns") {
+                @Override
+                public void run() {
+                    Cluster.ncaColumns(CoolMapMaster.getActiveCoolMapObject(), ncaPanel.numClusters, ncaPanel.nullsAsZero, "NCA Column (" + Tools.randomID() + ")", ncaPanel.similarityFunction, ncaPanel.link);
+                }
+            });
+        }
+    }
+
     private class DirectKmeansColumnAction extends AbstractAction {
 
         @Override
@@ -153,6 +194,40 @@ public class ClusterModule extends Module {
 
     }
 
+    private class StreemerRowAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Streemer - Cluster rows") {
+
+                @Override
+                public void run() {
+
+                    Cluster.streemerRow(CoolMapMaster.getActiveCoolMapObject(), strePanel.numClusters, strePanel.nullsAsZero, "Streemer Row (" + Tools.randomID() + ")", strePanel.backgroundClusterPerc, strePanel.similarityThreshold, (int) strePanel.minClusterSize, strePanel.similarityFunction);
+
+                }
+            });
+        }
+
+    }
+
+    private class StreemerColumnAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Streemer - Cluster columns") {
+
+                @Override
+                public void run() {
+
+                    Cluster.streemerColumn(CoolMapMaster.getActiveCoolMapObject(), strePanel.numClusters, strePanel.nullsAsZero, "Streemer Column (" + Tools.randomID() + ")", strePanel.backgroundClusterPerc, strePanel.similarityThreshold, (int) strePanel.minClusterSize, strePanel.similarityFunction);
+
+                }
+            });
+        }
+
+    }
+
     private class GapKmeansColumnAction extends AbstractAction {
 
         @Override
@@ -170,6 +245,70 @@ public class ClusterModule extends Module {
 
     }
 
+    private class SpecRowAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Spectral - Cluster rows") {
+
+                @Override
+                public void run() {
+
+                    Cluster.specCKVW03Row(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Spectral Row (" + Tools.randomID() + ")");
+
+                }
+            });
+        }
+    }
+
+    private class BisecRowAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Bisec Kmeans - Cluster rows") {
+
+                @Override
+                public void run() {
+
+                    Cluster.bisecKRows(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Bisec Kmeans Row (" + Tools.randomID() + ")");
+
+                }
+            });
+        }
+    }
+
+    private class SpecColumnAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Spectral - Cluster columns") {
+
+                @Override
+                public void run() {
+
+                    Cluster.specCKVW03Column(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Spectral Column (" + Tools.randomID() + ")");
+
+                }
+            });
+        }
+    }
+
+    private class BisecColumnAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskEngine.getInstance().submitTask(new LongTask("Bisec Kmeans - Cluster columns") {
+
+                @Override
+                public void run() {
+
+                    Cluster.bisecKColumns(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Bisec Kmeans Column (" + Tools.randomID() + ")");
+
+                }
+            });
+        }
+    }
+
     private class GapConfigAction extends AbstractAction {
 
         @Override
@@ -183,6 +322,19 @@ public class ClusterModule extends Module {
 
     }
 
+    private class StreemerConfigAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), strePanel, "DirectKMeans Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UI.getImageIcon("gearSmall"));
+            if (returnVal == JOptionPane.OK_OPTION) {
+//                System.err.println("yes!");
+                strePanel.setParameters();
+            }
+        }
+
+    }
+
     private class DirectKMeansConfigAction extends AbstractAction {
 
         @Override
@@ -191,6 +343,43 @@ public class ClusterModule extends Module {
             if (returnVal == JOptionPane.OK_OPTION) {
 //                System.err.println("yes!");
                 dKmeansPanel.setParameters();
+            }
+        }
+
+    }
+
+    private class SpecConfigAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), specPanel, "Spectral Clustering Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UI.getImageIcon("gearSmall"));
+            if (returnVal == JOptionPane.OK_OPTION) {
+//                System.err.println("yes!");
+                specPanel.setParameters();
+            }
+        }
+    }
+
+    private class BisecConfigurationAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), bisecPanel, "Bisec Kmeans Clustering Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UI.getImageIcon("gearSmall"));
+            if (returnVal == JOptionPane.OK_OPTION) {
+//                System.err.println("yes!");
+                bisecPanel.setParameters();
+            }
+        }
+    }
+
+    private class NCAConfigAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), ncaPanel, "Neighbor Chain Agglo (NCA) Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UI.getImageIcon("gearSmall"));
+            if (returnVal == JOptionPane.OK_OPTION) {
+//                System.err.println("yes!");
+                ncaPanel.setParameters();
             }
         }
 
@@ -385,6 +574,285 @@ public class ClusterModule extends Module {
     private DKmeansPanel dKmeansPanel = new DKmeansPanel();
     private GapPanel gapPanel = new GapPanel();
     private CBCPanel cbcPanel = new CBCPanel();
+    private NCAPanel ncaPanel = new NCAPanel();
+    private StreemerPanel strePanel = new StreemerPanel();
+    private SpecPanel specPanel = new SpecPanel();
+    private BisecPanel bisecPanel = new BisecPanel();
+
+    private class BisecPanel extends JPanel {
+
+        public int numClusters = 10;
+        private final JTextField numClustersField = new JTextField("10");
+        public boolean nullsAsZero = false;
+        private final JCheckBox nullsAsZeroCheck = new JCheckBox();
+
+        public BisecPanel() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 0;
+            c.gridy = 0;
+            setLayout(new GridBagLayout());
+            c.insets = new Insets(5, 5, 5, 5);
+
+            c.gridx = 0;
+            add(new JLabel("Num Clusters:"), c);
+            c.gridx = 1;
+            add(numClustersField, c);
+
+            c.gridx = 0;
+            c.gridy++;
+            add(new JLabel("Missing values as 0:"), c);
+            c.gridx = 1;
+            add(nullsAsZeroCheck, c);
+        }
+
+        public void setParameters() {
+            try {
+                numClusters = Integer.parseInt(numClustersField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid cluster number: " + numClustersField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+            nullsAsZero = nullsAsZeroCheck.isSelected();
+        }
+
+    }
+
+    private class SpecPanel extends JPanel {
+
+        public int numClusters = 10;
+        private final JTextField numClustersField = new JTextField("10");
+        public boolean nullsAsZero = false;
+        private final JCheckBox nullsAsZeroCheck = new JCheckBox();
+
+        public SpecPanel() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 0;
+            c.gridy = 0;
+            setLayout(new GridBagLayout());
+            c.insets = new Insets(5, 5, 5, 5);
+
+            c.gridx = 0;
+            add(new JLabel("Num Clusters:"), c);
+            c.gridx = 1;
+            add(numClustersField, c);
+
+            c.gridx = 0;
+            c.gridy++;
+            add(new JLabel("Missing values as 0:"), c);
+            c.gridx = 1;
+            add(nullsAsZeroCheck, c);
+        }
+
+        public void setParameters() {
+            try {
+                numClusters = Integer.parseInt(numClustersField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid cluster number: " + numClustersField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+            nullsAsZero = nullsAsZeroCheck.isSelected();
+        }
+
+    }
+
+    private class StreemerPanel extends JPanel {
+
+        public int numClusters = 10;
+        private final JTextField numClustersField = new JTextField("10");
+
+        public double backgroundClusterPerc = 0.25;
+        private final JTextField backgroundClusterPercField = new JTextField("0.25");
+
+        public double similarityThreshold = 0.75;
+        private final JTextField similarityThresholdField = new JTextField("0.75");
+
+        public double minClusterSize = 5;
+        private final JTextField minClusterSizeField = new JTextField("5");
+
+        public boolean nullsAsZero = false;
+        private final JCheckBox nullsAsZeroCheck = new JCheckBox();
+
+        public SimilarityFunction similarityFunction = new CosineSimilarity();
+        private final JComboBox simCombo = new JComboBox(new SimilarityFunction[]{new AverageCommonFeatureRank(), new CosineSimilarity(),
+            new DotProduct(),
+            new EuclideanSimilarity(),
+            new GaussianKernel(),
+            new JaccardIndex(),
+            new KendallsTau(),
+            new KLDivergence(),
+            new LinSimilarity(),
+            new OneSimilarity(),
+            new PearsonCorrelation(),
+            new PolynomialKernel(),
+            new SpearmanRankCorrelation(),
+            new TanimotoCoefficient()
+        });
+
+        ;
+        
+        public StreemerPanel() {
+            simCombo.setSelectedIndex(1);
+            setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 0;
+            c.gridy = 0;
+            setLayout(new GridBagLayout());
+            c.insets = new Insets(5, 5, 5, 5);
+
+            c.gridx = 0;
+            add(new JLabel("Num Clusters:"), c);
+            c.gridx = 1;
+            add(numClustersField, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Background Cluster %:"), c);
+            c.gridx = 1;
+            add(backgroundClusterPercField, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Similarity Cutoff:"), c);
+            c.gridx = 1;
+            add(similarityThresholdField, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Min Cluster Size:"), c);
+            c.gridx = 1;
+            add(minClusterSizeField, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Similarity Function:"), c);
+            c.gridx = 1;
+            add(simCombo, c);
+
+            c.gridx = 0;
+            c.gridy++;
+            add(new JLabel("Missing values as 0:"), c);
+            c.gridx = 1;
+            add(nullsAsZeroCheck, c);
+
+            simCombo.setRenderer(new ClassRenderer());
+        }
+
+        public void setParameters() {
+
+            try {
+                numClusters = Integer.parseInt(numClustersField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid cluster number: " + numClustersField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            try {
+                backgroundClusterPerc = Double.parseDouble(backgroundClusterPercField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid number: " + backgroundClusterPercField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            try {
+                similarityThreshold = Double.parseDouble(similarityThresholdField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid number: " + similarityThresholdField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            try {
+                minClusterSize = Double.parseDouble(minClusterSizeField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid number: " + minClusterSizeField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            similarityFunction = (SimilarityFunction) simCombo.getSelectedItem();
+            nullsAsZero = nullsAsZeroCheck.isSelected();
+
+        }
+
+    }
+
+    private class NCAPanel extends JPanel {
+
+        public NeighborChainAgglomerativeClustering.ClusterLink link = NeighborChainAgglomerativeClustering.ClusterLink.MEAN_LINK;
+        public SimilarityFunction similarityFunction = new CosineSimilarity();
+        public boolean nullsAsZero = false;
+        public int numClusters = 10;
+
+        private final JComboBox linkCombo;
+        private final JComboBox simCombo;
+        private final JCheckBox nullsAsZeroCheck = new JCheckBox();
+        private final JTextField numClustersField;
+
+        public NCAPanel() {
+            numClustersField = new JTextField(Integer.toString(numClusters));
+            linkCombo = new JComboBox(NeighborChainAgglomerativeClustering.ClusterLink.values());
+            simCombo = new JComboBox(new SimilarityFunction[]{new AverageCommonFeatureRank(), new CosineSimilarity(),
+                new DotProduct(),
+                new EuclideanSimilarity(),
+                new GaussianKernel(),
+                new JaccardIndex(),
+                new KendallsTau(),
+                new KLDivergence(),
+                new LinSimilarity(),
+                new OneSimilarity(),
+                new PearsonCorrelation(),
+                new PolynomialKernel(),
+                new SpearmanRankCorrelation(),
+                new TanimotoCoefficient()
+            });
+
+            linkCombo.setSelectedItem(NeighborChainAgglomerativeClustering.ClusterLink.MEAN_LINK);
+            simCombo.setSelectedIndex(1);
+
+            linkCombo.setRenderer(new EnumRenderer());
+            simCombo.setRenderer(new ClassRenderer());
+
+            setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 0;
+            c.gridy = 0;
+            setLayout(new GridBagLayout());
+            c.insets = new Insets(5, 5, 5, 5);
+
+            c.gridx = 0;
+            add(new JLabel("Num Clusters:"), c);
+            c.gridx = 1;
+            add(numClustersField, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Link Method:"), c);
+            c.gridx = 1;
+            add(linkCombo, c);
+
+            c.gridy++;
+            c.gridx = 0;
+            add(new JLabel("Similarity Function:"), c);
+            c.gridx = 1;
+            add(simCombo, c);
+
+            c.gridx = 0;
+            c.gridy++;
+            add(new JLabel("Missing values as 0:"), c);
+            c.gridx = 1;
+            add(nullsAsZeroCheck, c);
+
+        }
+
+        public void setParameters() {
+            link = (NeighborChainAgglomerativeClustering.ClusterLink) linkCombo.getSelectedItem();
+            similarityFunction = (SimilarityFunction) simCombo.getSelectedItem();
+            nullsAsZero = nullsAsZeroCheck.isSelected();
+            try {
+                numClusters = Integer.parseInt(numClustersField.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Invalid cluster number: " + numClustersField.getText(), "Parameter Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        }
+
+    }
 
     private class CBCPanel extends JPanel {
 
@@ -651,10 +1119,15 @@ public class ClusterModule extends Module {
 
     private void initHClust() {
 
-        //Gap
-        addClusterMenuItem("Cluster Row (HAC)", "Cluster/Hierarchical", new HClusterRowAction());
-        addClusterMenuItem("Cluster Column (HAC)", "Cluster/Hierarchical", new HClusterColumnAction());
-        addClusterMenuItem("Config...", "Cluster/Hierarchical", new HClusterConfigAction());
+        //bisec kmeans
+        addClusterMenuItem("Cluster Row (BK)", "Cluster/Bisec Kmeans", new BisecRowAction());
+        addClusterMenuItem("Cluster Column (BK)", "Cluster/Bisec Kmeans", new BisecColumnAction());
+        addClusterMenuItem("Config...", "Cluster/Bisec Kmeans", new BisecConfigurationAction());
+
+        //CBC
+        addClusterMenuItem("Cluster Row (CBC)", "Cluster/Clustering by Committee", new CBCRowsAction());
+        addClusterMenuItem("Cluster Column (CBC)", "Cluster/Clustering by Committee", new CBCColumnsAction());
+        addClusterMenuItem("Config...", "Cluster/Clustering by Committee", new CBCConfigAction());
 
         //Direct Kmeans
         addClusterMenuItem("Cluster Row (DKmeans)", "Cluster/Direct Kmeans", new DirectKmeansRowAction());
@@ -666,10 +1139,26 @@ public class ClusterModule extends Module {
         addClusterMenuItem("Cluster Column (Gap Kmeans)", "Cluster/Gap Kmeans", new GapKmeansColumnAction());
         addClusterMenuItem("Config...", "Cluster/Gap Kmeans", new GapConfigAction());
 
-        //CBC
-        addClusterMenuItem("Cluster Row (CBC)", "Cluster/Clustering by Committee", new CBCRowsAction());
-        addClusterMenuItem("Cluster Column (CBC)", "Cluster/Clustering by Committee", new CBCColumnsAction());
-        addClusterMenuItem("Config...", "Cluster/Clustering by Committee", new CBCConfigAction());
+        //HAC
+        addClusterMenuItem("Cluster Row (HAC)", "Cluster/Hierarchical", new HClusterRowAction());
+        addClusterMenuItem("Cluster Column (HAC)", "Cluster/Hierarchical", new HClusterColumnAction());
+        addClusterMenuItem("Config...", "Cluster/Hierarchical", new HClusterConfigAction());
+
+        //NCA
+        addClusterMenuItem("Cluster Row (NCA)", "Cluster/Neighbor Chain", new NCARowsAction());
+        addClusterMenuItem("Cluster Column (NCA)", "Cluster/Neighbor Chain", new NCAColumnsAction());
+        addClusterMenuItem("Config...", "Cluster/Neighbor Chain", new NCAConfigAction());
+
+        //spectral
+        addClusterMenuItem("Cluster Row (Spectral)", "Cluster/Spectral", new SpecRowAction());
+        addClusterMenuItem("Cluster Column (Spectral)", "Cluster/Spectral", new SpecColumnAction());
+        addClusterMenuItem("Config...", "Cluster/Spectral", new SpecConfigAction());
+
+        //Streemer
+        addClusterMenuItem("Cluster Row (Streemer)", "Cluster/Streemer", new StreemerRowAction());
+        addClusterMenuItem("Cluster Column (Streemer)", "Cluster/Streemer", new StreemerColumnAction());
+        addClusterMenuItem("Config...", "Cluster/Streemer", new StreemerConfigAction());
+
     }
 
     private void addClusterMenuItem(String label, String path, ActionListener actionListener) {

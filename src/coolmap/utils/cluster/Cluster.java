@@ -15,16 +15,21 @@ import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.Assignments;
+import edu.ucla.sspace.clustering.BisectingKMeans;
+import edu.ucla.sspace.clustering.CKVWSpectralClustering03;
 import edu.ucla.sspace.clustering.ClusteringByCommittee;
 import edu.ucla.sspace.clustering.DirectClustering;
 import edu.ucla.sspace.clustering.GapStatistic;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.clustering.Merge;
+import edu.ucla.sspace.clustering.NeighborChainAgglomerativeClustering;
+import edu.ucla.sspace.clustering.Streemer;
 import edu.ucla.sspace.clustering.criterion.CriterionFunction;
 import edu.ucla.sspace.clustering.seeding.KMeansSeed;
 import edu.ucla.sspace.common.Similarity;
 import edu.ucla.sspace.matrix.ArrayMatrix;
 import edu.ucla.sspace.matrix.SparseHashMatrix;
+import edu.ucla.sspace.similarity.SimilarityFunction;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +44,140 @@ import java.util.Set;
 public class Cluster {
 
     private static DecimalFormat df = new DecimalFormat("000");
+
+    public static void bisecKRows(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            BisectingKMeans k = new BisectingKMeans();
+
+            Assignments assignments = k.cluster(matrix, numClusters, new Properties());
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void bisecKColumns(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+
+            BisectingKMeans k = new BisectingKMeans();
+
+            Assignments assignments = k.cluster(matrix, numClusters, new Properties());
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void specCKVW03Row(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            CKVWSpectralClustering03 c = new CKVWSpectralClustering03();
+
+            Assignments assignments = c.cluster(matrix, numClusters, new Properties());
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void specCKVW03Column(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+            CKVWSpectralClustering03 c = new CKVWSpectralClustering03();
+            Assignments assignments = c.cluster(matrix, numClusters, new Properties());
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void streemerRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, double backgroundClusterPerc, double similarityThreshold, int minClusterSize, SimilarityFunction simFunction) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            Streemer s = new Streemer();
+
+            Assignments assignments = s.cluster(matrix, numClusters, backgroundClusterPerc, similarityThreshold, minClusterSize, simFunction);
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void streemerColumn(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, double backgroundClusterPerc, double similarityThreshold, int minClusterSize, SimilarityFunction simFunction) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+
+            Streemer s = new Streemer();
+
+            Assignments assignments = s.cluster(matrix, numClusters, backgroundClusterPerc, similarityThreshold, minClusterSize, simFunction);
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void ncaRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, SimilarityFunction similarityFunction, NeighborChainAgglomerativeClustering.ClusterLink method) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            NeighborChainAgglomerativeClustering nca = new NeighborChainAgglomerativeClustering(method, similarityFunction);
+
+            Assignments assignments = nca.cluster(matrix, numClusters, null);
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ncaColumns(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, SimilarityFunction similarityFunction, NeighborChainAgglomerativeClustering.ClusterLink method) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+
+            NeighborChainAgglomerativeClustering nca = new NeighborChainAgglomerativeClustering(method, similarityFunction);
+
+            Assignments assignments = nca.cluster(matrix, numClusters, null);
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void cbcRow(CoolMapObject<?, Double> object, boolean nullsAsZero, String resultName, Properties properties) {
         //this method allows setting similarity function
