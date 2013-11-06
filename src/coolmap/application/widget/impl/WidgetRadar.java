@@ -60,10 +60,16 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         try {
             CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
             if (object == null) {
+                bufferedImage = null;
+                _radarPanel.repaint();
+                region = null;
                 return;
             }
             ViewRenderer renderer = object.getViewRenderer();
             if (renderer == null) {
+                bufferedImage = null;
+                _radarPanel.repaint();
+                region = null;
                 return;
             }
             //need to determine the actual dimension of the map, when the size is set to 1
@@ -183,6 +189,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     @Override
     public void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject activeCoolMapObject) {
         //Re render
+//        System.err.println("Active cool map changed:" + activeCoolMapObject);
         fitView();
     }
 

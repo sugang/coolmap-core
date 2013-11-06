@@ -15,17 +15,21 @@ import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.Assignments;
+import edu.ucla.sspace.clustering.ClusteringByCommittee;
 import edu.ucla.sspace.clustering.DirectClustering;
+import edu.ucla.sspace.clustering.GapStatistic;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.clustering.Merge;
 import edu.ucla.sspace.clustering.criterion.CriterionFunction;
 import edu.ucla.sspace.clustering.seeding.KMeansSeed;
 import edu.ucla.sspace.common.Similarity;
 import edu.ucla.sspace.matrix.ArrayMatrix;
-import edu.ucla.sspace.util.HashMultiMap;
+import edu.ucla.sspace.matrix.SparseHashMatrix;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -33,6 +37,99 @@ import java.util.Set;
  * @author gangsu This will be another library outside of core.
  */
 public class Cluster {
+
+    private static DecimalFormat df = new DecimalFormat("000");
+
+    public static void cbcRow(CoolMapObject<?, Double> object, boolean nullsAsZero, String resultName, Properties properties) {
+        //this method allows setting similarity function
+        try {
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+
+            SparseHashMatrix sMatrix = new SparseHashMatrix(matrix.rows(), matrix.columns());
+
+            for (int i = 0; i < matrix.rows(); i++) {
+                for (int j = 0; j < matrix.columns(); j++) {
+                    sMatrix.set(i, j, matrix.get(i, j));
+                }
+            }
+
+            ClusteringByCommittee cbc = new ClusteringByCommittee();
+            Assignments assignments = cbc.cluster(sMatrix, properties);
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cbcColumn(CoolMapObject<?, Double> object, boolean nullsAsZero, String resultName, Properties properties) {
+        //this method allows setting similarity function
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+            SparseHashMatrix sMatrix = new SparseHashMatrix(matrix.rows(), matrix.columns());
+
+            for (int i = 0; i < matrix.rows(); i++) {
+                for (int j = 0; j < matrix.columns(); j++) {
+                    sMatrix.set(i, j, matrix.get(i, j));
+                }
+            }
+
+            ClusteringByCommittee cbc = new ClusteringByCommittee();
+            Assignments assignments = cbc.cluster(sMatrix, properties);
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void gapKmeansRow(CoolMapObject<?, Double> object, int maxNumClusters, boolean nullsAsZero, String resultName, CriterionFunction criterionFunction) {
+        try {
+
+            ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
+            GapStatistic gap = new GapStatistic();
+
+//            System.err.println(matrix + " " + maxNumClusters);
+            Properties prop = new Properties();
+            prop.put(GapStatistic.METHOD_PROPERTY, criterionFunction.getClass().getName());
+
+            Assignments assignments = gap.cluster(matrix, maxNumClusters, prop);
+
+            if (Thread.interrupted()) {
+                //If clustering canceled
+                throw new InterruptedException();
+            }
+            clusterRow(object, assignments, resultName);
+
+        } catch (InterruptedException | RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void gapKmeansColumn(CoolMapObject<?, Double> object, int maxNumClusters, boolean nullsAsZero, String resultName, CriterionFunction criterionFunction) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+            GapStatistic gap = new GapStatistic();
+
+            Properties prop = new Properties();
+            prop.put(GapStatistic.METHOD_PROPERTY, criterionFunction.getClass().getName());
+
+            Assignments assignments = gap.cluster(matrix, maxNumClusters, prop);
+
+            if (Thread.interrupted()) {
+                //If clustering canceled
+                throw new InterruptedException();
+            }
+            clusterColumn(object, assignments, resultName);
+
+        } catch (InterruptedException | RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * params
@@ -45,7 +142,7 @@ public class Cluster {
      * @param seedType
      * @param numRepeats
      */
-    public static void directKMeansRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, CriterionFunction cFunction, KMeansSeed seedType, int numRepeats) {
+    public static void directKmeansRow(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, CriterionFunction cFunction, KMeansSeed seedType, int numRepeats) {
 
         try {
             ArrayMatrix matrix = convertToMatrixForRows(object, nullsAsZero);
@@ -58,13 +155,30 @@ public class Cluster {
             }
 
             clusterRow(object, assignments, resultName);
-            
+
         } catch (InterruptedException | RuntimeException e) {
-            e.printStackTrace();
         }
 
     }
 
+    public static void directKmeansColumn(CoolMapObject<?, Double> object, int numClusters, boolean nullsAsZero, String resultName, CriterionFunction cFunction, KMeansSeed seedType, int numRepeats) {
+        try {
+            ArrayMatrix matrix = convertToMatrixForColumns(object, nullsAsZero);
+
+            Assignments assignments = DirectClustering.cluster(matrix, numClusters, numRepeats, seedType, cFunction);
+
+            if (Thread.interrupted()) {
+                //If clustering canceled
+                throw new InterruptedException();
+            }
+
+            clusterColumn(object, assignments, resultName);
+
+        } catch (InterruptedException | RuntimeException e) {
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
     private static void clusterRow(CoolMapObject<?, Double> object, Assignments assignments, String resultOntologyName) {
         List<Set<Integer>> clusters = assignments.clusters();
         if (resultOntologyName == null || resultOntologyName.length() == 0) {
@@ -75,7 +189,7 @@ public class Cluster {
         COntology ontology = new COntology(resultOntologyName, null);
         int counter = 0;
         for (Set<Integer> cluster : clusters) {
-            String groupName = counter + " [" + ID + "]";
+            String groupName = df.format(counter) + " [" + ID + "]";
             counter++;
             for (Integer i : cluster) {
                 ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeRow(i).getName());
@@ -93,7 +207,7 @@ public class Cluster {
 //            it should be merged, but why not merged?
         for (COntology otherOntology : map.keySet()) {
             Set<String> termsToMerge = map.get(otherOntology);
-            System.out.println("Terms to merge:" + termsToMerge);
+//            System.out.println("Terms to merge:" + termsToMerge);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
@@ -102,7 +216,7 @@ public class Cluster {
         }
         CoolMapMaster.addNewCOntology(ontology);
 
-        CoolMapState state = CoolMapState.createStateRows("Cluster Rows", object, null);
+        CoolMapState state = CoolMapState.createStateRows("Cluster rows", object, null);
 
         //insert root nodes
         List<VNode> rootNodes = ontology.getRootNodesOrdered();
@@ -113,6 +227,54 @@ public class Cluster {
         }
 
         StateStorageMaster.addState(state);
+    }
+
+    private static void clusterColumn(CoolMapObject<?, Double> object, Assignments assignments, String resultOntologyName) {
+        List<Set<Integer>> clusters = assignments.clusters();
+        if (resultOntologyName == null || resultOntologyName.length() == 0) {
+            resultOntologyName = "Untitled";
+        }
+
+        String ID = Tools.randomID();
+        COntology ontology = new COntology(resultOntologyName, null);
+
+        int counter = 0;
+        for (Set<Integer> cluster : clusters) {
+            String groupName = df.format(counter) + " [" + ID + "]";
+            counter++;
+            for (Integer i : cluster) {
+                ontology.addRelationshipNoUpdateDepth(groupName, object.getViewNodeColumn(i).getName());
+            }
+        }
+
+        HashMultimap<COntology, String> map = HashMultimap.create();
+        for (VNode node : object.getViewNodesColumn()) {
+            if (node.getCOntology() != null) {
+                map.put(node.getCOntology(), node.getName());
+            }
+        }
+
+        for (COntology otherOntology : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntology);
+//            System.out.println("Terms to merge:" + termsToMerge);
+            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+        }
+
+        if (Thread.interrupted()) {
+            return;
+        }
+        CoolMapMaster.addNewCOntology(ontology);
+
+        CoolMapState state = CoolMapState.createStateColumns("Cluster columns", object, null);
+        List<VNode> rootNodes = ontology.getRootNodesOrdered();
+        object.replaceColumnNodes(rootNodes, null);
+
+        for (VNode node : rootNodes) {
+            node.colorTree(UI.randomColor());
+        }
+
+        StateStorageMaster.addState(state);
+
     }
 
 //    private static void clusterRow(CoolMapObject<?, Double> object, Clustering clusterAlgorithm, int numClusters, Properties properties, boolean nullsAsZero, String resultName) throws CoolMapObjectInputException, CoolMapViewMissingValueException, InterruptedException {
@@ -293,7 +455,7 @@ public class Cluster {
             trackMapping.put(i, i);
         }
 
-        HashMultiMap<String, Object> parentChildMapping = new HashMultiMap<String, Object>();
+        HashMultimap<String, Object> parentChildMapping = HashMultimap.create();
         HashMap<String, Double> similarityMap = new HashMap<String, Double>();
         String iNodeName = null;
         Merge merge;
@@ -431,7 +593,7 @@ public class Cluster {
             trackMapping.put(i, i);
         }
 
-        HashMultiMap<String, Object> parentChildMapping = new HashMultiMap<String, Object>();
+        HashMultimap<String, Object> parentChildMapping = HashMultimap.create();
         HashMap<String, Double> similarityMap = new HashMap<String, Double>();
         String iNodeName = null;
         Merge merge;

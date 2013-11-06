@@ -586,6 +586,10 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             super.internalFrameClosing(ife);
             CoolMapMaster.destroyCoolMapObject(_object);
             _object = null;
+            if(_desktop.getAllFrames().length == 0){
+//                System.out.println("No more active cool map objects");
+                CoolMapMaster.setActiveCoolMapObject(null);
+            }
         }
 
         @Override

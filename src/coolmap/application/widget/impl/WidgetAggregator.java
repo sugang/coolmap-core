@@ -7,13 +7,11 @@ package coolmap.application.widget.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.widget.Widget;
-import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.*;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -81,7 +79,7 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
 
                     //
                     CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                    System.out.println("Active object:" + object.getName());
+//                    System.out.println("Active object:" + object.getName());
                     
                     if (object != null) {
 
