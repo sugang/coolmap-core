@@ -121,8 +121,11 @@ public class DoubleToColor extends ViewRenderer<Double> {
 
     @Override
     protected void _prepareGraphics(Graphics2D g2D) {
+        g2D.setFont(UI.fontMono.deriveFont(10f));
     }
 
+    private DecimalFormat df = new DecimalFormat("#.##");
+    
     @Override
     protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -224,6 +227,10 @@ public class DoubleToColor extends ViewRenderer<Double> {
     @Override
     protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        
+        //Also render a number
+
+        
     }
 
     @Override

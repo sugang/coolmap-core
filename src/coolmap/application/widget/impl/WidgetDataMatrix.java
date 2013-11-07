@@ -62,6 +62,10 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
     private JScrollPane scrollPane;
     private JTable rowHeader;
 
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
     //built in actions will not be used elsewhere
     private class CenterSelectionAction extends AbstractAction {
 

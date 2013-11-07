@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.actions;
+package coolmap.canvas.action;
 
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;

@@ -17,7 +17,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 
 /**
  *
@@ -278,5 +288,9 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
 
     @Override
     public void viewFilterChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void nameChanged(CoolMapObject object) {
     }
 }

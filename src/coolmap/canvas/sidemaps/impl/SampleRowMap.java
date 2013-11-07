@@ -27,6 +27,9 @@ public class SampleRowMap extends RowMap<Object, Object> implements CViewListene
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
 
     public SampleRowMap(CoolMapObject object) {
         super(object);
@@ -116,7 +119,6 @@ public class SampleRowMap extends RowMap<Object, Object> implements CViewListene
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
     @Override
     public void viewFilterChanged(CoolMapObject object) {
     }

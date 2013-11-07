@@ -3,7 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.actions;
+
+package coolmap.canvas.action;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
@@ -16,24 +17,28 @@ import javax.swing.AbstractAction;
  *
  * @author sugang
  */
-public class CollapseRowNodesUpAction extends AbstractAction {
+public class ExpandColumnNodesOneLevelAction extends AbstractAction{
 
     private final String id;
     
-    public CollapseRowNodesUpAction(String objectID) {
-        super("Collapse rows to previous level");
+    public ExpandColumnNodesOneLevelAction(String objectID){
+        super("Expand columns to next level");
         id = objectID;
     }
-
+    
+    
+    
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
+        try{
             CoolMapObject obj = CoolMapMaster.getCoolMapObjectByID(id);
-            CoolMapState state = CoolMapState.createStateRows("Collapse rows to previous level", obj, null);
-            obj.collapseRowNodesOneLayer();
+            CoolMapState state = CoolMapState.createStateColumns("Expand columns to next level", obj, null);
+            obj.expandColumnNodesOneLayer();
             StateStorageMaster.addState(state);
-        } catch (Exception ex) {
-
+        }
+        catch(Exception ex){
+            
         }
     }
+    
 }

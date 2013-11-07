@@ -74,6 +74,10 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
     }
 
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
     private class PointAnnotationEditor extends JPanel {
 
         private VNode currentRowNode;

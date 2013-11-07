@@ -141,7 +141,7 @@ public class Main {
             CoolMapMaster.addNewCOntology(onto);
 
             object.setAggregator(new DoubleDoubleMean());
-            object.setViewRenderer(new NumberToColor());
+            object.setViewRenderer(new NumberToColor(), true);
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//
@@ -153,6 +153,8 @@ public class Main {
             CoolMapMaster.addNewCoolMapObject(object);
 
             CoolMapMaster.setActiveCoolMapObject(object);
+            
+//            object.setName("Sample");
 
             //No need for point nanotation for now
             //try to add some annotations
@@ -206,7 +208,7 @@ public class Main {
                     object.insertColumnNodes(nodes);
 
                     object.setAggregator(new DoubleDoubleMean());
-                    object.setViewRenderer(new DoubleToColor());
+                    object.setViewRenderer(new DoubleToColor(), true);
 
                     object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                     object.getCoolMapView().addRowMap(new RowLabels(object));
@@ -253,7 +255,7 @@ public class Main {
                     object.insertColumnNodes(onto.getRootNodesOrdered());
 
                     object.setAggregator(new DoubleToNetwork());
-                    object.setViewRenderer(new NetworkToForceLayout());
+                    object.setViewRenderer(new NetworkToForceLayout(), true);
                     object.getCoolMapView().addRowMap(new RowLabels(object));
                     object.getCoolMapView().addRowMap(new RowTree(object));
                     object.getCoolMapView().addColumnMap(new ColumnLabels(object));

@@ -32,20 +32,17 @@ public class ZoomOutAction extends AbstractAction {
         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
         if (object != null) {
 
-            object.getCoolMapView().zoomOut(true, true);
-        }
-        
-        if(object.getCoolMapView().getZoomControlX().isLowestZoom() && object.getCoolMapView().getZoomControlY().isLowestZoom()){
-            return;
-        }
-        else{
-            CoolMapState zoomState = CoolMapState.createStateConfigs("Zoom out", object, new JSONObject());
-            boolean success = object.getCoolMapView().zoomOut(true, true);
-            if(success){
-                StateStorageMaster.addState(zoomState);
+//            object.getCoolMapView().zoomOut(true, true);
+            if (object.getCoolMapView().getZoomControlX().isLowestZoom() && object.getCoolMapView().getZoomControlY().isLowestZoom()) {
+                return;
+            } else {
+                CoolMapState zoomState = CoolMapState.createStateConfigs("Zoom out", object, new JSONObject());
+                boolean success = object.getCoolMapView().zoomOut(true, true);
+                if (success) {
+                    StateStorageMaster.addState(zoomState);
+                }
             }
         }
-        
-        
+
     }
 }

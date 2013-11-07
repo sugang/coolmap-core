@@ -21,6 +21,10 @@ import javax.swing.JComponent;
 public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewListener {
 
     @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
+    @Override
     public void viewFilterChanged(CoolMapObject object) {
     }
 
@@ -31,7 +35,6 @@ public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewL
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
-
     public SampleColumnMap(CoolMapObject object) {
         super(object);
     }
@@ -120,7 +123,6 @@ public class SampleColumnMap extends ColumnMap<Object, Object> implements CViewL
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
     @Override
     public void gridChanged(CoolMapObject object) {
     }

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package coolmap.canvas.actions;
+package coolmap.canvas.action;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;

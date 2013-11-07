@@ -28,5 +28,7 @@ public interface CObjectListener {
     public void viewRendererChanged(CoolMapObject object);
     
     public void viewFilterChanged(CoolMapObject object);
+    
+    public void nameChanged(CoolMapObject object);
 
 }

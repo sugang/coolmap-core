@@ -332,7 +332,7 @@ public class IOMaster {
                         try {
                             viewRendererClass = Class.forName(viewRendererString);
                             ViewRenderer viewRenderer = (ViewRenderer) viewRendererClass.newInstance(); //modify this later
-                            object.setViewRenderer(viewRenderer);
+                            object.setViewRenderer(viewRenderer, true);
                         } catch (Exception e) {
                             //Assign a default String renderer:
                             e.printStackTrace();
@@ -405,7 +405,7 @@ public class IOMaster {
                         object.insertColumnNodes(nodes);
 
                         object.setAggregator(new DoubleDoubleMean());
-                        object.setViewRenderer(new DoubleToColor());
+                        object.setViewRenderer(new DoubleToColor(), true);
                         object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                         object.getCoolMapView().addRowMap(new RowLabels(object));
                         object.getCoolMapView().addRowMap(new RowTree(object));

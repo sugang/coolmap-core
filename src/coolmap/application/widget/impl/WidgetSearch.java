@@ -18,7 +18,14 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.HashSet;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -366,5 +373,9 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void nameChanged(CoolMapObject object) {
     }
 }

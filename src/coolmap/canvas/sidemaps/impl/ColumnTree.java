@@ -7,8 +7,8 @@ package coolmap.canvas.sidemaps.impl;
 import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.actions.CollapseColumnNodesUpAction;
-import coolmap.canvas.actions.ExpandColumnNodesOneLevelAction;
+import coolmap.canvas.action.CollapseColumnNodesUpAction;
+import coolmap.canvas.action.ExpandColumnNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
@@ -48,6 +48,10 @@ import javax.swing.event.PopupMenuListener;
  */
 public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionListener {
 
+        @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+    
     private Color _leafColor;
     private Color _leafBorderColor;
     private int _ballInnerRadius = 2;

@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.LinearGradientPaint;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
@@ -108,7 +109,25 @@ public class GradientEditorPanel extends JPanel {
         }
     }
     
-    public float getColorPercentAt(int index){
+    public LinearGradientPaint getLinearGradientPaint(int x1, int y1, int x2, int y2){
+        Color c[] = new Color[getNumPoints()];
+        float p[] = new float[getNumPoints()];
+        
+        for(int i=0; i < getNumPoints(); i++){
+            c[i] = getColorAt(i);
+            p[i] = getColorPositionAt(i);
+        }
+        
+        try{
+            
+            return new LinearGradientPaint(x1, y1, x2, y2, p, c);
+        }
+        catch(Exception e){
+            return null;
+        }
+    }
+    
+    public float getColorPositionAt(int index){
         try{
             return editor.getPointPos(index);
         } catch (Exception e){
@@ -250,7 +269,7 @@ public class GradientEditorPanel extends JPanel {
             setLayout(null);
 
             AffineTransform at = new AffineTransform();
-            at.rotate(Math.PI / 3);
+            at.rotate(Math.PI /2.5 );
 
             tickFont = UI.fontMono.deriveFont(at).deriveFont(Font.BOLD).deriveFont(12f);
 
@@ -529,10 +548,11 @@ public class GradientEditorPanel extends JPanel {
 
             g.getTransform();//this is the way to save it. It's funny I can't restore to origin!
 
-            g.setStroke(UI.stroke1_5);
+            
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+            g.setStroke(UI.stroke1_5);
             for (int i = 0; i < list.size() - 1; i++) {
+                
                 ControlPoint now = (ControlPoint) list.get(i);
                 ControlPoint next = (ControlPoint) list.get(i + 1);
 
@@ -546,6 +566,7 @@ public class GradientEditorPanel extends JPanel {
             g.drawRect(10, y, width, barHeight - 1);
 
             for (int i = 0; i < list.size(); i++) {
+                g.setStroke(UI.stroke1_5);
                 ControlPoint pt = (ControlPoint) list.get(i);
                 g.translate(10 + (width * pt.pos), y + barHeight);
                 g.setColor(pt.col);
@@ -560,6 +581,7 @@ public class GradientEditorPanel extends JPanel {
                     //g.fillRect(-5, 12, 10, 3);
                     g.drawPolygon(poly);
                 }
+                
                 g.translate(-10 - (width * pt.pos), -y - barHeight);
             }
 

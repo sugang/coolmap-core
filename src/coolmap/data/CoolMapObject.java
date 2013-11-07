@@ -51,8 +51,16 @@ import java.util.Set;
  */
 public final class CoolMapObject<BASE, VIEW> {
 
+    @Override
+    public String toString() {
+        //    return super.toString(); //To change body of generated methods, choose Tools | Templates.
+        return getName();
+    }
+
+    
+    
     private final String _ID;
-    private String _name = null;
+    private String _name = "Untitled";
     //Basic instance
     //can contain many matrices
     private ArrayList<CMatrix<BASE>> _cMatrices = new ArrayList<CMatrix<BASE>>();
@@ -143,6 +151,11 @@ public final class CoolMapObject<BASE, VIEW> {
         if (getCoolMapView() != null && getCoolMapView().getViewFrame() != null) {
             getCoolMapView().getViewFrame().setTitle(name);
         }
+        
+        for(CObjectListener lis : _coolMapDataListeners){
+            lis.nameChanged(this);
+        }
+        
     }
 
     /**
@@ -319,11 +332,10 @@ public final class CoolMapObject<BASE, VIEW> {
     /**
      * set view renderer maybe an event is needed to notify changed
      */
-    public void setViewRenderer(ViewRenderer<VIEW> viewRenderer) {
+    public void setViewRenderer(ViewRenderer<VIEW> viewRenderer, boolean initialize) {
         _viewRenderer = viewRenderer;
         if (_viewRenderer != null) {
-            _viewRenderer.setCoolMapObject(this);
-            _viewRenderer.initialize();
+            _viewRenderer.setCoolMapObject(this, initialize);
             notifyViewRendererUpdated();
         }
     }
@@ -1948,7 +1960,7 @@ public final class CoolMapObject<BASE, VIEW> {
         colNodes.add(node2);
         coolMapObject.insertColumnNodes(0, colNodes, false);
 
-        coolMapObject.setViewRenderer(new DoubleToBoxPlot());
+        coolMapObject.setViewRenderer(new DoubleToBoxPlot(), true);
 
         node1.setViewColor(Color.RED);
 

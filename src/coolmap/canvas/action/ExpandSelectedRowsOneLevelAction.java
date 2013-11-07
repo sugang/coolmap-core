@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-package coolmap.canvas.actions;
+package coolmap.canvas.action;
 
 /**
  *
  * @author sugang
  */
-public class CollapseSelectedColumnsToRootsAction {
+public class ExpandSelectedRowsOneLevelAction {
     
 }

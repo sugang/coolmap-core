@@ -127,7 +127,7 @@ public class CreaterMaster {
                 
                 try{
                     newObject.setAggregator((CAggregator)object.getAggregator().getClass().newInstance());
-                    newObject.setViewRenderer((ViewRenderer)object.getViewRenderer().getClass().newInstance());
+                    newObject.setViewRenderer((ViewRenderer)object.getViewRenderer().getClass().newInstance(), true);
                 }
                 catch(Exception ex){
                     ex.printStackTrace();

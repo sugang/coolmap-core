@@ -46,9 +46,9 @@ public abstract class ViewRenderer<VIEW> {
     private int _globalMode = SD;
     private boolean _modeOverride = false;
     private CoolMapObject _coolMapObject;
-    
+
     protected static int DEFAULT_LEGEND_WIDTH = 100;
-    protected static int DEFAULT_LEGENT_HEIGHT = 30;
+    protected static int DEFAULT_LEGENT_HEIGHT = 25;
 
     public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
         //System.out.println(activeCell + " " + percentX + " " + PercentY + " " + cellWidth + " " + cellHeight);
@@ -63,8 +63,11 @@ public abstract class ViewRenderer<VIEW> {
         _coolMapObject = null;
     }
 
-    public final void setCoolMapObject(CoolMapObject object) {
+    public final void setCoolMapObject(CoolMapObject object, boolean initialize) {
         _coolMapObject = object;
+        if (initialize) {
+            initialize();
+        }
     }
 
     public final CoolMapObject getCoolMapObject() {
@@ -104,11 +107,11 @@ public abstract class ViewRenderer<VIEW> {
 
     ;
 
+
     /**
-     * called before adding to a new CoolMapInstance for renderer specific
-     * intialization.
+     * called when this view renderer is assigned to a coolmap object
      */
-    public abstract void initialize();
+    protected abstract void initialize();
 
     public abstract boolean canRender(Class<?> viewClass);
 
@@ -412,7 +415,7 @@ public abstract class ViewRenderer<VIEW> {
                         cellWidth = Math.round(colNode.getViewSizeInMap(__zoomX));
                         cellHeight = Math.round(rowNode.getViewSizeInMap(__zoomY));
 
-                    //System.out.println(cellWidth + " " + cellHeight);
+                        //System.out.println(cellWidth + " " + cellHeight);
                         //each cell can take a different size. Therefore need to 
                         if (!_modeOverride) {
                             if (cellWidth <= _ldThreshold || cellHeight <= _ldThreshold) {
@@ -428,7 +431,7 @@ public abstract class ViewRenderer<VIEW> {
 
                         //make sure drawing don't go to other cells
                         if (Thread.currentThread().isInterrupted()) {
-                        //throw new InterruptedException();
+                            //throw new InterruptedException();
                             //simply stop rendering
                             //System.out.println("Interrupted?");
                             //Immediately return

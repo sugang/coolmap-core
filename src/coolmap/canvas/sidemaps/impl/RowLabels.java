@@ -49,6 +49,10 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
     private final JMenuItem _sortDescending, _removeSelected;
 
     @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
+    @Override
     public void justifyView() {
         //System.out.println("view justified");
         _updateRectangle(getCoolMapView().getActiveCell());
@@ -164,11 +168,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
-
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
     @Override
     public void mapZoomChanged(CoolMapObject object) {
     }
@@ -284,8 +286,6 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 
         }
 
-
-
         CoolMapObject obj = getCoolMapObject();
         VNode lastSortedRow = obj.getSortTracker().lastSortedRow;
         boolean lastSortedRowDescending = obj.getSortTracker().lastSortedRowDescending;
@@ -310,8 +310,6 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
             g2D.drawLine(12, 0 + cellHeight / 2, 8, 0 + cellHeight);
         }
         g2D.setClip(null);
-
-
 
     }
 
@@ -394,30 +392,27 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         private final Rectangle _endRect = new Rectangle();
 
         public void setBeginEnd(MatrixCell oldCell, MatrixCell newCell) {
-            
-            
-            
+
             CoolMapView view = getCoolMapView();
 //            if (view == null || oldCell == null || oldCell.getRow() == null || newCell == null || newCell.getRow() == null) {
 //                return;
 //            }
-            if (view == null){ // || oldCell == null || oldCell.getCol() == null || newCell == null || newCell.getCol() == null) {
+            if (view == null) { // || oldCell == null || oldCell.getCol() == null || newCell == null || newCell.getCol() == null) {
                 return;
             }
-            
-            if(oldCell == null || newCell == null){
+
+            if (oldCell == null || newCell == null) {
                 return;
             }
-            
-            if(newCell.row == null){
+
+            if (newCell.row == null) {
                 return;
             }
-            
-            if(oldCell.row == null && newCell.row != null){
+
+            if (oldCell.row == null && newCell.row != null) {
                 oldCell.row = newCell.row;
             }
-            
-            
+
             VNode oldNode = getCoolMapView().getCoolMapObject().getViewNodeRow(oldCell.getRow());
             VNode newNode = getCoolMapView().getCoolMapObject().getViewNodeRow(newCell.getRow());
 
@@ -558,13 +553,11 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
             }
 
             //System.out.println("temp range:" + tempRange);
-
             if (tempRange == null) {
                 return; //no range contain this range
             } else {
                 if (tempRange.lowerEndpoint().intValue() == targetRow && tempRange.upperEndpoint().intValue() == targetRow + 1) {
                     selectedRows.remove(tempRange);
-
 
                 } else {
                     //split the rectangles, and remove that columns
@@ -654,7 +647,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         CoolMapState state = CoolMapState.createStateRows("Select row", obj, null);
         view.setSelections(newSelections);
         StateStorageMaster.addState(state);
-        
+
         _anchorRow = targetRow;
     }
 
@@ -672,7 +665,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         CoolMapState state = CoolMapState.createStateRows("Add selected row", obj, null);
         view.addSelection(newSelections);
         StateStorageMaster.addState(state);
-        
+
         _anchorRow = targetRow;
     }
     private boolean _dragStart = false;
@@ -707,12 +700,12 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                 //System.out.println("Drag row to:" + endRow);
                 //getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol.intValue());
                 if (_startRow != null && _startRow.intValue() != endRow.intValue()) {
-                    
+
                     ArrayList<Range<Integer>> rows = getCoolMapObject().getCoolMapView().getSelectedRows();
-                    if(rows == null || rows.isEmpty()){
+                    if (rows == null || rows.isEmpty()) {
                         return;
                     }
-                    
+
                     CoolMapState state = CoolMapState.createStateRows("Shift rows", getCoolMapObject(), null);
                     getCoolMapObject().multiShiftRows(getCoolMapView().getSelectedRows(), endRow.intValue());
                     StateStorageMaster.addState(state);

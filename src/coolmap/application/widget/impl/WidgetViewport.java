@@ -21,9 +21,10 @@ import coolmap.application.utils.viewportActions.ZoomInAction;
 import coolmap.application.utils.viewportActions.ZoomOutAction;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
-import coolmap.canvas.actions.PasteColumnNodesAction;
-import coolmap.canvas.actions.PasteRowNodesAction;
+import coolmap.canvas.action.PasteColumnNodesAction;
+import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
+import coolmap.data.action.RenameCoolMapObjectAction;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -69,6 +70,9 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
         getContentPane().setBackground(UI.colorBlack3);
 
+        JMenuItem renameAction = new JMenuItem(new RenameCoolMapObjectAction());
+        addPopupMenuItem("Edit",renameAction , false);
+        
         JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
         addPopupMenuItem("Paste nodes", pasteItem, false);
         pasteItem.addActionListener(new PasteColumnNodesAction());
@@ -109,7 +113,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         frame.addMenuItem("View", item, false, true);
         item.addActionListener(new CenterSelectionAction());
 
-        item = new MenuItem("Toggle Canvas state", new MenuShortcut(KeyEvent.VK_1));
+        item = new MenuItem("Toggle canvas state", new MenuShortcut(KeyEvent.VK_1));
         frame.addMenuItem("View/Canvas config", item, false, false);
         item.addActionListener(new ToggleCanvasStateAction());
 

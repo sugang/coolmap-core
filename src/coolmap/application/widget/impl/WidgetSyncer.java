@@ -38,6 +38,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -103,16 +104,15 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             view.setSyncColumnLayout(false);
         }
 
-       view.redrawCanvas();
+        view.redrawCanvas();
     }
 
     private void _updateSyncStatusAll() {
         for (int i = 0; i < _list.getModel().getSize(); i++) {
             CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
-            if(item.isSelected()){
+            if (item.isSelected()) {
                 _updateSyncStatus(item.getCoolMapObject());
-            }
-            else{
+            } else {
                 item.getCoolMapObject().prepareDesync();
             }
         }
@@ -225,24 +225,21 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         _list.addMouseListener(new MouseAdapter() {
 
             public void mouseClicked(MouseEvent event) {
-                JList list = (JList) event.getSource();
+
+                if (SwingUtilities.isLeftMouseButton(event)) {
+                    JList list = (JList) event.getSource();
 
                 // Get index of item clicked
-
-                int index = list.locationToIndex(event.getPoint());
-                CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
+                    int index = list.locationToIndex(event.getPoint());
+                    CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
 
                 // Toggle selected state
-
-                item.setSelected(!item.isSelected());
-
+                    item.setSelected(!item.isSelected());
 
                 // Repaint cell
+                    list.repaint(list.getCellBounds(index, index));
 
-                list.repaint(list.getCellBounds(index, index));
-
-
-
+                }
 
             }
         });
@@ -266,7 +263,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             //find the selected anchor names
             //if itself is not checked, return
 
-
             HashSet<String> nodeNames = new HashSet<String>();
             ArrayList<Range<Integer>> selectedColumns = object.getCoolMapView().getSelectedColumns();
             VNode node;
@@ -287,7 +283,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                         continue;
                     }
 
-
                     TreeSet<Integer> toBeSelectedIndices = new TreeSet<Integer>();
 
                     //iterate over all nodes associated with the name
@@ -306,7 +301,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
                     //now you have a good idea of to be selected
                     //System.out.println(toBeSelected);
-
                     //now merge them!
                     if (toBeSelectedIndices.isEmpty()) {
                         otherObject.getCoolMapView().setSelectionsColumn(null);
@@ -329,25 +323,19 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
 //                        System.out.println(otherObject.getName());
                         otherObject.getCoolMapView().setSelectionsColumn(selectedColumnsRanges);
-                        
+
 //                        ////////////////////////////////////////////////////////////////////////
 //                        ////////////////////////////////////////////////////////////////////////
 //                        otherObject.getCoolMapView().setSubSelectionColumns(nodeNames);
-                        
-                        
-                        
                     }
                     //end of changing selection operation
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
                     //ontology 
-                    
 
                 }
             }
         }//selection column done
-
-
 
         //figure out the selected node names
         if (_selectionRow.isSelected()) {
@@ -410,15 +398,13 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
                         //System.out.println(otherObject.getName());
                         otherObject.getCoolMapView().setSelectionsRow(selectedRowRanges);
-                        
+
 //                        otherObject.getCoolMapView().setSubSelectionRows(nodeNames); //remove subselection functions
                     }
 
                 }
             }
         }//selection row done
-
-
 
     }
 
@@ -445,8 +431,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             }
         }
 
-
-
     }
 
     @Override
@@ -463,7 +447,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         if (newCell != null && !newCell.isColValidCell(object)) {
             newCell.col = null;
         }
-
 
 //        if (_activeCell.isSelected()) {
 //            List<CoolMapObject> objects = CoolMapMaster.getActiveCoolMapObjects();
@@ -491,7 +474,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             nodeNameColumn = object.getViewNodeColumn(newCell.col.intValue()).getName();
             nodeNameRow = object.getViewNodeRow(newCell.row.intValue()).getName();
         }
-
 
         if (_activeCell.isSelected()) {
             for (int i = 0; i < _list.getModel().getSize(); i++) {
@@ -556,7 +538,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             }
 
 //            StateSnapshot snapshot = new StateSnapshot(object, COntology.ROW, StateSnapshot.STATESET);
-
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
                 if (item.isSelected()) {
@@ -567,7 +548,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
                     //start here
 //                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
-                    
                     if (_selectionRow.isSelected()) {
                         otherObject.getCoolMapView().setSelectionsRow(object.getCoolMapView().getSelectedRows());
                     }
@@ -592,7 +572,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             }
 
 //            StateSnapshot snapshot = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.STATESET);
-
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
                 if (item.isSelected()) {
@@ -603,14 +582,12 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
                     //start here
 //                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
-                    
                     if (_selectionColumn.isSelected()) {
                         otherObject.getCoolMapView().setSelectionsColumn(object.getCoolMapView().getSelectedColumns());
                     }
                 }
             }
         }
-
 
     }
 
@@ -683,7 +660,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 //    public void stateStorageUpdated(CoolMapObject object) {
 //        //do nothing
 //    }
-
     @Override
     public void contologyAdded(COntology ontology) {
     }
@@ -700,7 +676,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //        //not quite useful. No operation directly conducts subselection
 //    }
-
     @Override
     public void viewRendererChanged(CoolMapObject object) {
         //maybe can sync renderer as well
@@ -712,6 +687,11 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
     @Override
     public void gridChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void nameChanged(CoolMapObject object) {
+
     }
 
     private class CheckListItem {

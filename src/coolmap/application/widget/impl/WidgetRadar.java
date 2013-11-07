@@ -469,6 +469,10 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         updateBufferedImage();
     }
 
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
     private class RadarPanel extends JPanel {
         
         public RadarPanel(){

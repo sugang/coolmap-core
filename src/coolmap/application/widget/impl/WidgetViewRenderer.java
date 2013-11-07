@@ -86,7 +86,7 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                                 }
                             }
                         } else {
-                            object.setViewRenderer(renderer);
+                            object.setViewRenderer(renderer, true);
                             _scroller.setViewportView(object.getViewRenderer().getConfigUI());
                         }
                     } catch (Exception e) {

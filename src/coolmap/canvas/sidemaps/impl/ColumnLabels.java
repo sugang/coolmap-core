@@ -311,6 +311,10 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     public void gridChanged(CoolMapObject object) {
     }
 
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
+
     private class HoverTarget implements TimingTarget {
 
         private final Rectangle _beginRect = new Rectangle();

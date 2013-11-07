@@ -7,8 +7,8 @@ package coolmap.canvas.sidemaps.impl;
 import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.actions.CollapseRowNodesUpAction;
-import coolmap.canvas.actions.ExpandRowNodesOneLevelAction;
+import coolmap.canvas.action.CollapseRowNodesUpAction;
+import coolmap.canvas.action.ExpandRowNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
@@ -46,6 +46,10 @@ import javax.swing.event.PopupMenuListener;
  * @author gangsu
  */
 public class RowTree extends RowMap implements MouseListener, MouseMotionListener {
+
+    @Override
+    public void nameChanged(CoolMapObject object) {
+    }
 
     private Color _leafColor;
     private Color _leafBorderColor;
@@ -716,8 +720,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                         CoolMapState state = CoolMapState.createStateRows(operationName, getCoolMapObject(), null);
 
                         boolean success = getCoolMapObject().toggleRowNode(node);
-                        
-                        if(success){
+
+                        if (success) {
                             StateStorageMaster.addState(state);
                         }
                     }

@@ -9,14 +9,12 @@ import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
 import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
-import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -34,7 +32,18 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
 
 /**
  *
@@ -263,7 +272,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
 
                 try {
                     object.setAggregator((CAggregator) (_aggregators.getSelectedItem().getClass().newInstance()));
-                    object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()));
+                    object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()), true);
                     if(Double.class.isAssignableFrom(object.getViewClass())){
                         object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                     }
