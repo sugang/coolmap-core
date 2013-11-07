@@ -8,7 +8,7 @@ import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.actions.CollapseColumnNodesUpAction;
-import coolmap.canvas.actions.ExpandColumnNodesDownAction;
+import coolmap.canvas.actions.ExpandColumnNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
@@ -260,7 +260,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         _popupMenu.addSeparator();
         
         
-        _expandOneAll = new JMenuItem(new ExpandColumnNodesDownAction(getCoolMapObject().getID()));
+        _expandOneAll = new JMenuItem(new ExpandColumnNodesOneLevelAction(getCoolMapObject().getID()));
         
         //_expandOneAll = new JMenuItem("Expand all one level"); //, UI.getImageIcon("plusSmall")
         _popupMenu.add(_expandOneAll);

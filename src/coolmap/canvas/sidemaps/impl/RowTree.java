@@ -8,7 +8,7 @@ import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.actions.CollapseRowNodesUpAction;
-import coolmap.canvas.actions.ExpandRowNodesDownAction;
+import coolmap.canvas.actions.ExpandRowNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
@@ -177,7 +177,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
 
-        _expandOneAll = new JMenuItem(new ExpandRowNodesDownAction(getCoolMapObject().getID()));
+        _expandOneAll = new JMenuItem(new ExpandRowNodesOneLevelAction(getCoolMapObject().getID()));
         _popupMenu.add(_expandOneAll);
 
 //        _expandOneAll.addActionListener(new ActionListener() {

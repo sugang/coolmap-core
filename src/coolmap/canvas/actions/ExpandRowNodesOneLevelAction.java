@@ -17,28 +17,24 @@ import javax.swing.AbstractAction;
  *
  * @author sugang
  */
-public class ExpandColumnNodesDownAction extends AbstractAction{
-
-    private final String id;
+public class ExpandRowNodesOneLevelAction extends AbstractAction {
+        private final String id;
     
-    public ExpandColumnNodesDownAction(String objectID){
-        super("Expand columns to next level");
+    public ExpandRowNodesOneLevelAction(String objectID){
+        super("Expand rows to next level");
         id = objectID;
     }
-    
-    
-    
+      
     @Override
     public void actionPerformed(ActionEvent e) {
         try{
             CoolMapObject obj = CoolMapMaster.getCoolMapObjectByID(id);
-            CoolMapState state = CoolMapState.createStateColumns("Expand columns to next level", obj, null);
-            obj.expandColumnNodesOneLayer();
+            CoolMapState state = CoolMapState.createStateRows("Expand rows to next level", obj, null);
+            obj.expandRowNodesOneLayer();
             StateStorageMaster.addState(state);
         }
         catch(Exception ex){
             
         }
     }
-    
 }
