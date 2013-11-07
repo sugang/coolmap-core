@@ -83,6 +83,29 @@ public class NumberToColor extends ViewRenderer<Double> {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                try {
+                    GradientItem item = (GradientItem) presetColorComboBox.getSelectedItem();
+
+                    editor.clearColors();
+
+                    Color c[] = item.getColors();
+                    float p[] = item.getPositions();
+
+                    editor.setStart(c[0]);
+                    editor.setEnd(c[c.length - 1]);
+
+                    if (c.length > 2) {
+                        for (int i = 1; i < c.length - 1; i++) {
+                            editor.addColor(c[i], p[i]);
+                        }
+                    }
+
+                } catch (Exception ex) {
+                    editor.clearColors();
+                    editor.setStart(DEFAULT_MIN_COLOR);
+                    editor.setEnd(DEFAULT_MAX_COLOR);
+                }
+
                 updateParameters();
             }
         });
@@ -92,7 +115,23 @@ public class NumberToColor extends ViewRenderer<Double> {
         presetColorComboBox = new JComboBox();
         configUI.add(presetColorComboBox, c);
         presetColorComboBox.setRenderer(new GradientComboItemRenderer());
-        presetColorComboBox.addItem(new GradientItem(null, null, null));
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{DEFAULT_MIN_COLOR, DEFAULT_MAX_COLOR},
+                        new float[]{0f, 1f},
+                        "Teal - Pink"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{Color.GREEN, Color.BLACK, Color.RED},
+                        new float[]{0f, 0.5f, 1f},
+                        "Red - Blk - Green"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{Color.ORANGE, Color.BLUE},
+                        new float[]{0f, 1f},
+                        "Orange - Blue"));
 
         c.gridx = 0;
         c.gridy++;
@@ -156,6 +195,14 @@ public class NumberToColor extends ViewRenderer<Double> {
             public void actionPerformed(ActionEvent e) {
                 //hit button, redraw!
 
+                updateParameters();
+            }
+        });
+        
+        editor.applyButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 updateParameters();
             }
         });
@@ -443,8 +490,17 @@ public class NumberToColor extends ViewRenderer<Double> {
             this.pos = pos;
 
             //update preview
-            preview = new BufferedImage(100, 16, BufferedImage.TYPE_INT_RGB);
+            preview = new BufferedImage(100, 16, BufferedImage.TYPE_INT_ARGB);
             this.name = name;
+
+            LinearGradientPaint paint = new LinearGradientPaint(0, 0, 100, 0, pos, c);
+            Graphics2D g2D = preview.createGraphics();
+            g2D.setPaint(paint);
+            g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2D.fillRoundRect(2, 2, 90, 12, 4, 4);
+
+            g2D.dispose();
+
         }
 
         public Image getPreview() {
@@ -455,8 +511,16 @@ public class NumberToColor extends ViewRenderer<Double> {
         public String toString() {
             return name;//To change body of generated methods, choose Tools | Templates.
         }
-        
-        
+
+        public Color[] getColors() {
+            return c;
+        }
+
+        public float[] getPositions() {
+            return pos;
+
+        }
+
     }
 
     private class GradientComboItemRenderer extends DefaultListCellRenderer {
@@ -465,8 +529,8 @@ public class NumberToColor extends ViewRenderer<Double> {
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
             JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            l.setIcon(new ImageIcon(((GradientItem)value).getPreview()));
-            l.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+            l.setIcon(new ImageIcon(((GradientItem) value).getPreview()));
+            l.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             return l;
         }
 
