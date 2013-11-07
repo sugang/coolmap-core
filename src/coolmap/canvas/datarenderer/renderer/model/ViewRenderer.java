@@ -46,6 +46,9 @@ public abstract class ViewRenderer<VIEW> {
     private int _globalMode = SD;
     private boolean _modeOverride = false;
     private CoolMapObject _coolMapObject;
+    
+    protected static int DEFAULT_LEGEND_WIDTH = 100;
+    protected static int DEFAULT_LEGENT_HEIGHT = 30;
 
     public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
         //System.out.println(activeCell + " " + percentX + " " + PercentY + " " + cellWidth + " " + cellHeight);
@@ -60,14 +63,14 @@ public abstract class ViewRenderer<VIEW> {
         _coolMapObject = null;
     }
 
-    public void setViewRenderer(CoolMapObject object) {
+    public final void setCoolMapObject(CoolMapObject object) {
         _coolMapObject = object;
     }
 
-    public CoolMapObject getCoolMapObject() {
+    public final CoolMapObject getCoolMapObject() {
         return _coolMapObject;
     }
-    private String _name = null;
+    private String _name = "Untitiled";
 
     public String getName() {
         return _name;

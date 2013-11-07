@@ -388,6 +388,9 @@ public class DoubleToColor extends ViewRenderer<Double> {
                 _maxValue = high;
 
                 object.getCoolMapView().updateCanvasEnforceAll();
+                
+                //As long as the view renderer is updated it is then fine
+                object.notifyViewRendererUpdated();
             }
         });
 

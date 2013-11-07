@@ -19,7 +19,8 @@
         "config": {
             "coolmap.application.widget.impl.WidgetViewRenderer":
                     {
-                        "load": ["DoubleToColor", "DoubleToBar"],
+                        "load": [
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToColor"],
                         "preferred-location":"left-bottom"
                     }
         }

@@ -5,6 +5,7 @@ import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.impl.NetworkToForceLayout;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -140,7 +141,7 @@ public class Main {
             CoolMapMaster.addNewCOntology(onto);
 
             object.setAggregator(new DoubleDoubleMean());
-            object.setViewRenderer(new DoubleToColor());
+            object.setViewRenderer(new NumberToColor());
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//

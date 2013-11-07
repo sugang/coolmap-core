@@ -7,14 +7,9 @@ package coolmap.application.widget.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.widget.Widget;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToBar;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToBoxPlot;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToNumber;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToShape;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToSortedLines;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
+import coolmap.utils.Config;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -29,6 +24,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  *
@@ -139,19 +136,43 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
     }
 
     private void _initBuiltInViewRenderers() {
-        
-        registerViewRenderer(DoubleToColor.class.getName());
-        registerViewRenderer(DoubleToBar.class.getName());
-        registerViewRenderer(DoubleToShape.class.getName());
-        registerViewRenderer(DoubleToNumber.class.getName());
-        registerViewRenderer(DoubleToBoxPlot.class.getName());
-        registerViewRenderer(DoubleToSortedLines.class.getName());
-        
+
+//        registerViewRenderer(DoubleToColor.class.getName());
+//        registerViewRenderer(DoubleToBar.class.getName());
+//        registerViewRenderer(DoubleToShape.class.getName());
+//        registerViewRenderer(DoubleToNumber.class.getName());
+//        registerViewRenderer(DoubleToBoxPlot.class.getName());
+//        registerViewRenderer(DoubleToSortedLines.class.getName());
 //        registerViewRenderer(NetworkToForceLayout.class.getName());
 //        registerViewRenderer(ImageTest.class.getName());
 //        registerViewRenderer(Politics.class.getName());
-    }
+//        
+        if (Config.isInitialized()) {
+            try{
+                
+                JSONArray rendererToLoad = Config.getJSONConfig().getJSONObject("widget").getJSONObject("config").getJSONObject("coolmap.application.widget.impl.WidgetViewRenderer").getJSONArray("load");
+                for(int i=0; i<rendererToLoad.length(); i++){
+                    try{
+                        String rendererClass = rendererToLoad.getString(i);
+                        System.err.println(rendererClass);
+                        registerViewRenderer(rendererClass);
+                    }
+                    catch(JSONException exception){
+                        System.out.println("parsing error");
+                    }
+                }
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+                        
+            
 
+        }
+
+    }
+    
+    
     private void _updateList() {
         _model = new DefaultComboBoxModel();
         for (Class cls : _registeredRenderers) {

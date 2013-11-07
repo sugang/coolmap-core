@@ -322,7 +322,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void setViewRenderer(ViewRenderer<VIEW> viewRenderer) {
         _viewRenderer = viewRenderer;
         if (_viewRenderer != null) {
-            _viewRenderer.setViewRenderer(this);
+            _viewRenderer.setCoolMapObject(this);
             _viewRenderer.initialize();
             notifyViewRendererUpdated();
         }
