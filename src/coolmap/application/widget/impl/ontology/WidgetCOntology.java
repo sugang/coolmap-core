@@ -6,6 +6,8 @@ package coolmap.application.widget.impl.ontology;
 
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
+import coolmap.application.actions.DeleteCOntologyAction;
+import coolmap.application.actions.RenameCOntologyAction;
 import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
@@ -157,7 +159,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         ontologyButton.setBorder(null);
         ontologyButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        configPopupMenu.add(new JMenuItem("Rename"));
+        configPopupMenu.add(new RenameCOntologyAction());
+        configPopupMenu.add(new DeleteCOntologyAction());
+        
+        
 
         ontologyButton.addMouseListener(new MouseAdapter() {
 
@@ -244,26 +249,84 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //                _insertNodesToColumn();
 //            }
 //        });
+//        toolBar.add(new DeleteCOntologyAction());
+        
         toolBar.addSeparator();
-        JButton button = new JButton(UI.getImageIcon("rowLabel"));
+        JButton button = new JButton(UI.getImageIcon("prependRow"));
         toolBar.add(button);
         button.setToolTipText("Add selected nodes to rows in the active CoolMap, at the beginning");
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                _insertNodesToRow();
+                _prependRows();
             }
         });
 
-        button = new JButton(UI.getImageIcon("colLabel"));
+        button = new JButton(UI.getImageIcon("appendRow"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("replaceRow"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("rootRow"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        toolBar.addSeparator();
+
+        button = new JButton(UI.getImageIcon("prependColumn"));
         button.setToolTipText("Add selected nodes to columns in the active CoolMap, at the beginning");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                _insertNodesToColumn();
+                _prependColumns();
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("appendColumn"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("replaceColumn"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("rootColumn"));
+        toolBar.add(button);
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
             }
         });
 
@@ -273,6 +336,13 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         label.setToolTipText("\"<html>Type in terms in the current active view.<br/>Use <strong>|</strong> as 'OR' operator to separate terms</html>\"");
 
         toolBar.add(label);
+
+        toolBar = new JToolBar();
+
+        label = new JLabel(UI.getImageIcon("search"));
+        toolBar.add(label);
+        getContentPane().add(toolBar, BorderLayout.SOUTH);
+        toolBar.setFloatable(false);
 
         toolBar.add(_searchField);
         _searchField.getDocument().addDocumentListener(new DocumentListener() {
@@ -378,7 +448,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
             @Override
             public void run() {
-                
+
                 if (_ontologyCombo.getSelectedItem() == null) {
                     _ontologyTable.setModel(new DefaultTableModel());
                     nodeToTableRowHash.clear();
@@ -514,7 +584,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
     private final HashMap<String, Integer> nodeToTableRowHash = new HashMap<>();
 
-    private void _insertNodesToRow() {
+    private void _prependRows() {
         CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
         if (obj == null) {
             return;
@@ -555,7 +625,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
     }
 
-    private void _insertNodesToColumn() {
+    private void _prependColumns() {
 
         CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
         if (obj == null) {

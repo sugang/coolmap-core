@@ -52,7 +52,7 @@ public class UI {
     public static Color colorLightGreen1 = new Color(161, 217, 155, 200);
     public static Color colorLightGreen2 = new Color(49, 163, 84);
     public static Color colorLightGreen5 = new Color(173, 221, 142);
-    public static Color colorLightGreen6 = new Color(247,252,185);
+    public static Color colorLightGreen6 = new Color(247, 252, 185);
     public static Color colorLightBlue0 = new Color(158, 202, 225);
     public static Color colorLightBlue1 = new Color(50, 130, 190);
     public static Color colorDarkGreen1 = new Color(77, 172, 38);
@@ -63,8 +63,8 @@ public class UI {
     public static Color colorHighlightLabelSibling = new Color(255, 237, 160, 180);
     public static Color colorDirectBaseline = new Color(217, 95, 14, 200);
     public static Color colorLightPink = new Color(253, 224, 221);
-    public static Color colorPink = new Color(250,159,181);
-    
+    public static Color colorPink = new Color(250, 159, 181);
+
     //dash can be quite expensive to redraw for some reason.
     public static BasicStroke strokeDash1_5 = new BasicStroke(1.5f,
             BasicStroke.CAP_BUTT,
@@ -239,6 +239,16 @@ public class UI {
         _iconStash.put("compass", new ImageIcon(UI.class.getResource("/resources/iconCompass.png")));
         _iconStash.put("expand3", new ImageIcon(UI.class.getResource("/resources/iconThreearrows.png")));
         _iconStash.put("duplicate", new ImageIcon(UI.class.getResource("/resources/iconDuplicate.png")));
+
+        _iconStash.put("prependRow", new ImageIcon(UI.class.getResource("/resources/prependRow.png")));
+        _iconStash.put("appendRow", new ImageIcon(UI.class.getResource("/resources/appendRow.png")));
+        _iconStash.put("replaceRow", new ImageIcon(UI.class.getResource("/resources/replaceRow.png")));
+        _iconStash.put("rootRow", new ImageIcon(UI.class.getResource("/resources/rootRow.png")));
+
+        _iconStash.put("prependColumn", new ImageIcon(UI.class.getResource("/resources/prependColumn.png")));
+        _iconStash.put("appendColumn", new ImageIcon(UI.class.getResource("/resources/appendColumn.png")));
+        _iconStash.put("replaceColumn", new ImageIcon(UI.class.getResource("/resources/replaceColumn.png")));
+        _iconStash.put("rootColumn", new ImageIcon(UI.class.getResource("/resources/rootColumn.png")));
     }
 
     public static Color mixOpacity(Color input, float opacity) {
