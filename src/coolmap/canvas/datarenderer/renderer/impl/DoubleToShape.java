@@ -40,6 +40,10 @@ public class DoubleToShape extends ViewRenderer<Double> {
     }
 
     @Override
+    protected void updateRendererChanges() {
+    }
+
+    @Override
     public void initialize() {
 
         /////////////////////////////
@@ -120,12 +124,9 @@ public class DoubleToShape extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
         g2D.setColor(UI.colorBlack2);
-        g2D.fillRect((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
-        
+        g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
 
         if (v == null || v.isNaN()) {
             //System.out.println(v);
@@ -133,23 +134,14 @@ public class DoubleToShape extends ViewRenderer<Double> {
             //Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
             //System.out.println(c);
             g2D.setColor(UI.colorPink);
-            int radiusX = (int)(cellWidth * (v - _minValue) / (_maxValue - _minValue));
-            int radiusY = (int)(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-            
+            int radiusX = (int) (cellWidth * (v - _minValue) / (_maxValue - _minValue));
+            int radiusY = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
+
             //g2D.fillRect((int)anchorX+1, (int)(anchorY + cellHeight - height), (int)cellWidth-2, (int)height);
-            g2D.fillOval((int)(anchorX + (cellWidth - radiusX)/2), (int)(anchorY + (cellHeight - radiusY)/2), radiusX, radiusY);
+            g2D.fillOval((int) (anchorX + (cellWidth - radiusX) / 2), (int) (anchorY + (cellHeight - radiusY) / 2), radiusX, radiusY);
         }
 
-
-
-
-
-
-
-
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);
-
-
         //g2D.fillRect(20, 20, 100, 100);
     }
 

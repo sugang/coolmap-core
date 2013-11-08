@@ -48,6 +48,10 @@ public class DoubleToColor extends ViewRenderer<Double> {
         setDescription("Use color to represent numeric values");
     }
 
+    @Override
+    protected void updateRendererChanges() {
+    }
+
 //    public DoubleToColor(CoolMapObject object) {
 //        super(object);
 //        
@@ -125,7 +129,7 @@ public class DoubleToColor extends ViewRenderer<Double> {
     }
 
     private DecimalFormat df = new DecimalFormat("#.##");
-    
+
     @Override
     protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -227,10 +231,8 @@ public class DoubleToColor extends ViewRenderer<Double> {
     @Override
     protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-        
-        //Also render a number
 
-        
+        //Also render a number
     }
 
     @Override
@@ -395,7 +397,7 @@ public class DoubleToColor extends ViewRenderer<Double> {
                 _maxValue = high;
 
                 object.getCoolMapView().updateCanvasEnforceAll();
-                
+
                 //As long as the view renderer is updated it is then fine
                 object.notifyViewRendererUpdated();
             }

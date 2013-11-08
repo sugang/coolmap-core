@@ -107,6 +107,21 @@ public abstract class ViewRenderer<VIEW> {
 
     ;
 
+    public void updateRenderer() {
+        updateRendererChanges();
+        if(getConfigUI() != null){
+            getConfigUI().repaint();
+        }
+        
+        try {
+            getCoolMapObject().getCoolMapView().updateCanvasEnforceAll();
+            getCoolMapObject().notifyViewRendererUpdated();
+        } catch (Exception e) {
+            System.err.println("Update renderer failed");
+        }
+    }
+
+    protected abstract void updateRendererChanges();
 
     /**
      * called when this view renderer is assigned to a coolmap object

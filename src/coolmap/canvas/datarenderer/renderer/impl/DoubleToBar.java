@@ -32,6 +32,10 @@ public class DoubleToBar extends ViewRenderer<Double> {
     }
 
     @Override
+    protected void updateRendererChanges() {
+    }
+
+    @Override
     public void initialize() {
 
         /////////////////////////////
@@ -112,37 +116,25 @@ public class DoubleToBar extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
         g2D.setColor(UI.colorBlack2);
-        g2D.fillRect((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
-        
+        g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
 
         if (v == null || v.isNaN()) {
             //System.out.println(v);
         } else {
             //Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
             //System.out.println(c);
-            
-            int height = (int)(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-            
+
+            int height = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
+
             //GradientPaint paint = new GradientPaint(anchorX, anchorY, UI.colorLightYellow, anchorX, anchorY + cellHeight, UI.colorOrange0);
             //g2D.setPaint(paint);
             g2D.setColor(UI.colorLightYellow);
-            g2D.fillRect((int)anchorX+1, (int)(anchorY + cellHeight - height), (int)cellWidth-2, (int)height);
+            g2D.fillRect((int) anchorX + 1, (int) (anchorY + cellHeight - height), (int) cellWidth - 2, (int) height);
         }
 
-
-
-
-
-
-
-
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);
-
-
         //g2D.fillRect(20, 20, 100, 100);
     }
 

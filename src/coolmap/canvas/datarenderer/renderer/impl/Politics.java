@@ -485,4 +485,8 @@ public class Politics extends ViewRenderer<Double> {
 
         return panel;
     }
+
+    @Override
+    protected void updateRendererChanges() {
+    }
 }

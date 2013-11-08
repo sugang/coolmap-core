@@ -43,6 +43,10 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
+    protected void updateRendererChanges() {
+    }
+
+    @Override
     public void initialize() {
 
         /////////////////////////////
@@ -123,11 +127,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
-
-
         if (v == null || v.isNaN()) {
             //System.out.println(v);
         } else {
@@ -139,30 +139,20 @@ public class DoubleToNumber extends ViewRenderer<Double> {
             //System.out.println(c);
 //            g2D.setColor(c);
             g2D.setColor(UI.colorBlack2);
-            g2D.fillRect((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
+            g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
             g2D.setColor(UI.colorGrey1);
             String label;
-            if(v >= 0){
+            if (v >= 0) {
                 label = " " + _format.format(v);
-            }
-            else{
+            } else {
                 label = _format.format(v);
             }
             g2D.drawString(label, anchorX + 2, anchorY + 10);
             g2D.setColor(UI.colorBlack1);
-            g2D.drawLine((int)anchorX, (int)(anchorY + cellHeight-1), (int)(anchorX + cellWidth), (int)(anchorY + cellHeight-1));
+            g2D.drawLine((int) anchorX, (int) (anchorY + cellHeight - 1), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight - 1));
         }
 
-
-
-
-
-
-
-
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);
-
-
         //g2D.fillRect(20, 20, 100, 100);
     }
 

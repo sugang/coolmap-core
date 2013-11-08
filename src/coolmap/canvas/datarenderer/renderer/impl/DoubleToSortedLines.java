@@ -40,8 +40,11 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
     }
 
     @Override
-    public void initialize() {
+    protected void updateRendererChanges() {
+    }
 
+    @Override
+    public void initialize() {
 
         /////////////////////////////
         _minValue = Double.MAX_VALUE;
@@ -76,7 +79,6 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
                                 System.out.println(e);
                             }
                         }
-
 
                     }
                 }
@@ -128,15 +130,12 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
         g2D.setColor(UI.colorBlack2);
         g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
         g2D.setColor(Color.BLACK);
         g2D.setStroke(UI.stroke2);
         g2D.drawLine((int) anchorX, (int) (anchorY + cellHeight), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight));
-
 
         if (v == null || v.isNaN()) {
             //System.out.println(v);
@@ -145,12 +144,10 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
             //System.out.println(c);
 
             //int height = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
-
             //GradientPaint paint = new GradientPaint(anchorX, anchorY, UI.colorLightYellow, anchorX, anchorY + cellHeight, UI.colorOrange0);
             //g2D.setPaint(paint);
 //            g2D.setColor(UI.colorLightYellow);
 //            g2D.fillRect((int) anchorX + 1, (int) (anchorY + cellHeight - height), (int) cellWidth - 2, (int) height);
-
             if (rowNode.isSingleNode() && colNode.isSingleNode()) {
                 //draw v
                 g2D.setColor(UI.colorLightBlue0);
@@ -160,7 +157,6 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
             } else {
 
                 //find all
-
                 Integer[] rowIndices;
                 Integer[] colIndices;
                 if (rowNode.isGroupNode()) {
@@ -178,8 +174,7 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
                 List<CMatrix> matrices = getCoolMapObject().getBaseCMatrices();
                 Double value;
                 ArrayList<Double> values = new ArrayList<Double>();
-                
-                
+
                 //values not correct?
                 for (Integer i : rowIndices) {
                     if (i == null || i < 0) {
@@ -207,7 +202,7 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
 
                     }
                 }
-                
+
                 if (values.isEmpty()) {
                     return;
                 }
@@ -215,31 +210,27 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
                 //Why the values are not consistent?
                 //System.out.println(v + ":" + values + "--" + rowIndices + ":" + colIndices);
 //                System.out.println(v + ":" + Arrays.toString(rowIndices) + ":" + Arrays.toString(colIndices));
-
                 //should have been sorted already
                 Collections.sort(values);
-                
+
                 double range = _maxValue - _minValue;
                 float divideSize = cellWidth / values.size();
-                
-                for(int i=0; i <values.size()-1; i++){
-                    int h1 = (int)(cellHeight * (values.get(i) - _minValue) / range);
-                    int h2 = Math.round((float)((values.get(i+1) - _minValue) * cellHeight / range));
-                    
+
+                for (int i = 0; i < values.size() - 1; i++) {
+                    int h1 = (int) (cellHeight * (values.get(i) - _minValue) / range);
+                    int h2 = Math.round((float) ((values.get(i + 1) - _minValue) * cellHeight / range));
+
                     int x1 = Math.round(i * divideSize);
-                    int x2 = Math.round((i+1) * divideSize);
-                    
+                    int x2 = Math.round((i + 1) * divideSize);
+
                     g2D.setColor(UI.colorLightGreen0);
-                    g2D.drawLine((int)(anchorX + x1 + divideSize/2), (int)(anchorY + cellHeight - h1), (int)(anchorX + x2 + divideSize/2), (int)(anchorY + cellHeight - h2));
-                    
+                    g2D.drawLine((int) (anchorX + x1 + divideSize / 2), (int) (anchorY + cellHeight - h1), (int) (anchorX + x2 + divideSize / 2), (int) (anchorY + cellHeight - h2));
+
                     g2D.setColor(UI.colorLightBlue0);
-                    g2D.fillOval((int)(anchorX + x1 + divideSize/2)-1, (int)(anchorY + cellHeight - h1)-1, 3, 3);
-                    g2D.fillOval((int)(anchorX + x2 + divideSize/2)-1, (int)(anchorY + cellHeight - h2)-2, 3, 3);
+                    g2D.fillOval((int) (anchorX + x1 + divideSize / 2) - 1, (int) (anchorY + cellHeight - h1) - 1, 3, 3);
+                    g2D.fillOval((int) (anchorX + x2 + divideSize / 2) - 1, (int) (anchorY + cellHeight - h2) - 2, 3, 3);
                 }
-                
-                
-                
-                
+
 //                int size = values.size();
 //                double min = values.get(0);
 //                double max = values.get(values.size() - 1);
@@ -260,11 +251,6 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
 //                Percentile percentile = new Percentile();
 //                double q1 = percentile.evaluate(valueArray, 25);
 //                double q3 = percentile.evaluate(valueArray, 75);
-
-
-
-
-
 //This way is too slow                
 //                double[] valueArray = new double[values.size()];
 //                int c = 0;
@@ -287,7 +273,6 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
 //                double q3 = percentile.evaluate(valueArray, 75);
 ////                percentile.setQuantile(100);
 //                double max = percentile.evaluate(valueArray, 100);
-
 //                System.out.println(min + " " + q1 + " " + median + " " + q3 + " " + max);
 //                
 //
@@ -309,7 +294,6 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
 //                g2D.drawLine((int) (anchorX + 1), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth - 1), (int) (anchorY + cellHeight - cellHeight * medianP));
 //            
             }
-
 
         }
 

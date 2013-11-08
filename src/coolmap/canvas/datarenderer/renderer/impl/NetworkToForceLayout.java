@@ -80,4 +80,8 @@ public class NetworkToForceLayout extends ViewRenderer<LNetwork> {
     @Override
     protected void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
+
+    @Override
+    protected void updateRendererChanges() {
+    }
 }

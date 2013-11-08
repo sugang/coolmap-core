@@ -25,6 +25,10 @@ public class ImageTest extends ViewRenderer<Object> {
     private final HashMap<String, BufferedImage> maps = new HashMap<String, BufferedImage>();
 
     @Override
+    protected void updateRendererChanges() {
+    }
+
+    @Override
     public void initialize() {
     }
 
@@ -67,15 +71,14 @@ public class ImageTest extends ViewRenderer<Object> {
         try {
             int y = rowNode.getViewIndex().intValue();
             int x = columnNode.getViewIndex().intValue();
-            
+
             BufferedImage img = maps.get(x + "-" + y);
 
             g2D.drawImage(
-                    img.getScaledInstance((int)cellWidth, (int)cellHeight, BufferedImage.SCALE_FAST), 
-                    (int)anchorX, 
-                    (int)anchorY, 
+                    img.getScaledInstance((int) cellWidth, (int) cellHeight, BufferedImage.SCALE_FAST),
+                    (int) anchorX,
+                    (int) anchorY,
                     null);
-
 
         } catch (Exception e) {
         }

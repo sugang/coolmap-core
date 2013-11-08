@@ -48,6 +48,10 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
     }
 
     @Override
+    protected void updateRendererChanges() {
+    }
+
+    @Override
     public void initialize() {
 
         /////////////////////////////
@@ -83,7 +87,6 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
                                 System.out.println(e);
                             }
                         }
-
 
                     }
                 }
@@ -132,11 +135,11 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
         if (getCoolMapObject() == null || activeCell == null || !activeCell.isValidCell(getCoolMapObject())) {
             return null;
         }
-        
-        if(getCoolMapObject().getBaseCMatrices().isEmpty()){
+
+        if (getCoolMapObject().getBaseCMatrices().isEmpty()) {
             return null;
         }
-        
+
         CoolMapObject obj = getCoolMapObject();
         VNode rowNode = obj.getViewNodeRow(activeCell.getRow().intValue());
         VNode colNode = obj.getViewNodeColumn(activeCell.getCol().intValue());
@@ -149,13 +152,11 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
             return null;
         }
 
-        
-        
         Integer[] rowIndices;
         Integer[] colIndices;
 
         CMatrix m0 = (CMatrix) getCoolMapObject().getBaseCMatrices().get(0);
-        
+
         if (rowNode.isGroupNode()) {
             rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.ROW);
         } else {
@@ -171,14 +172,14 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
         List<CMatrix> matrices = getCoolMapObject().getBaseCMatrices();
         Double value;
         ArrayList<BoxplotEntry> values = new ArrayList<BoxplotEntry>();
-        
+
         for (Integer i : rowIndices) {
             if (i == null || i < 0) {
                 continue;
             }
-            
+
             String rowLabel = m0.getRowLabel(i);
-            
+
             for (Integer j : colIndices) {
 
                 if (j == null || j < 0) {
@@ -187,7 +188,7 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
                 //Double value = (Double) getCoolMapObject().getViewValue(i, j);
                 //This is wrong. it should eb the base matrix value, not the view values
                 String colLabel = m0.getColLabel(j);
-                
+
                 for (CMatrix<Double> matrix : matrices) {
 
                     value = matrix.getValue(i, j);
@@ -202,13 +203,13 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
 
             }
         }
-        
+
         if (values.isEmpty()) {
             return null;
         }
 
         Collections.sort(values);
-        
+
         int size = values.size();
         double min = values.get(0).value;
         double max = values.get(values.size() - 1).value;
@@ -239,39 +240,37 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
         double q3P = (q3 - _minValue) / range;
         DecimalFormat format = new DecimalFormat("#.###");
 
-        JLabel label = new JLabel("<html><table border='0' cellspacing='0'><tr><td><strong>Min</strong></td><td>"+ format.format(min) +"</td><tr/><tr><td><strong>Median</strong></td><td>"+format.format(median) +"</td><tr/>"+ 
-                "<tr><td><strong>" + "Max" + "</strong></td><td>" + format.format(max) + "</td></table></html>");
+        JLabel label = new JLabel("<html><table border='0' cellspacing='0'><tr><td><strong>Min</strong></td><td>" + format.format(min) + "</td><tr/><tr><td><strong>Median</strong></td><td>" + format.format(median) + "</td><tr/>"
+                + "<tr><td><strong>" + "Max" + "</strong></td><td>" + format.format(max) + "</td></table></html>");
         Font font = UI.fontPlain.deriveFont(12f);
         label.setFont(font);
-        label.setForeground(UI.colorBlack3);        
-        label.setBorder(BorderFactory.createEmptyBorder(2,5,2,2));
+        label.setForeground(UI.colorBlack3);
+        label.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 2));
         label.setSize(label.getPreferredSize());
-        
+
         BufferedImage image = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2D = (Graphics2D)image.createGraphics();
+        Graphics2D g2D = (Graphics2D) image.createGraphics();
         //g2D.setColor(Color.BLUE);
         //g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
         label.paint(g2D);
         return image;
     }
-    
+
     private class BoxplotEntry implements Comparable<BoxplotEntry> {
+
         public String label;
         public Double value;
-        
-        public BoxplotEntry(String l, Double v){
+
+        public BoxplotEntry(String l, Double v) {
             label = l;
             value = v;
         }
-        
 
         @Override
         public int compareTo(BoxplotEntry t) {
             return this.value.compareTo(t.value);
         }
     }
-    
-    
 
     @Override
     protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
@@ -282,15 +281,12 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
         //g2D.setColor(Color.RED);
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
-
-
         //can skip if width or height < 0
         g2D.setColor(UI.colorBlack2);
         g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
         g2D.setColor(Color.BLACK);
         g2D.setStroke(UI.stroke2);
         g2D.drawLine((int) anchorX, (int) (anchorY + cellHeight), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight));
-
 
         if (v == null || v.isNaN()) {
             //System.out.println(v);
@@ -304,7 +300,6 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
             //g2D.setPaint(paint);
 //            g2D.setColor(UI.colorLightYellow);
 //            g2D.fillRect((int) anchorX + 1, (int) (anchorY + cellHeight - height), (int) cellWidth - 2, (int) height);
-
             if (rowNode.isSingleNode() && colNode.isSingleNode()) {
                 //draw v
                 g2D.setColor(UI.colorLightBlue0);
@@ -314,7 +309,6 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
             } else {
 
                 //find all
-
                 Integer[] rowIndices;
                 Integer[] colIndices;
                 if (rowNode.isGroupNode()) {
@@ -361,7 +355,6 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
                 if (values.isEmpty()) {
                     return;
                 }
-
 
                 Collections.sort(values);
                 int size = values.size();

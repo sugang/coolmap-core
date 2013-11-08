@@ -106,7 +106,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                     editor.setEnd(DEFAULT_MAX_COLOR);
                 }
 
-                updateParameters();
+                updateRenderer();
             }
         });
 
@@ -123,6 +123,12 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         presetColorComboBox.addItem(
                 new GradientItem(
+                        new Color[]{Color.GREEN, Color.RED},
+                        new float[]{0f, 1f},
+                        "Green - Red"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
                         new Color[]{Color.GREEN, Color.BLACK, Color.RED},
                         new float[]{0f, 0.5f, 1f},
                         "Red - Blk - Green"));
@@ -132,6 +138,18 @@ public class NumberToColor extends ViewRenderer<Double> {
                         new Color[]{Color.ORANGE, Color.BLUE},
                         new float[]{0f, 1f},
                         "Orange - Blue"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{Color.ORANGE, Color.BLACK, Color.BLUE},
+                        new float[]{0f, 0.5f, 1f},
+                        "Orange - Blk - Blue"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{Color.BLACK, Color.GREEN},
+                        new float[]{0f, 1f},
+                        "Blk - Green"));
 
         c.gridx = 0;
         c.gridy++;
@@ -152,7 +170,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                     maxValueField.setText("1");
                 }
 
-                updateParameters();
+                updateRenderer();
             }
         });
 
@@ -195,21 +213,22 @@ public class NumberToColor extends ViewRenderer<Double> {
             public void actionPerformed(ActionEvent e) {
                 //hit button, redraw!
 
-                updateParameters();
+                updateRenderer();
             }
         });
-        
+
         editor.applyButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateParameters();
+                updateRenderer();
             }
         });
 
     }
 
-    private void updateParameters() {
+    @Override
+    protected void updateRendererChanges() {
 
         if (getCoolMapObject() == null) {
             return;
@@ -237,14 +256,6 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         updateGradient();
 
-        configUI.repaint();
-
-        try {
-            getCoolMapObject().getCoolMapView().updateCanvasEnforceAll();
-            getCoolMapObject().notifyViewRendererUpdated();
-        } catch (Exception e) {
-            System.err.println("Update renderer failed");
-        }
     }
 
     private void updateGradient() {
@@ -333,7 +344,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         editor.setStart(DEFAULT_MIN_COLOR);
         editor.setEnd(DEFAULT_MAX_COLOR);
 
-        updateParameters();
+        updateRenderer();
     }
 
     @Override
