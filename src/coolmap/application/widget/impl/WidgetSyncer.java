@@ -691,7 +691,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
     @Override
     public void nameChanged(CoolMapObject object) {
-
+        getContentPane().repaint();
     }
 
     private class CheckListItem {
