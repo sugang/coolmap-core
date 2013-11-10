@@ -20,7 +20,9 @@
             "coolmap.application.widget.impl.WidgetViewRenderer":
                     {
                         "load": [
-                            "coolmap.canvas.datarenderer.renderer.impl.NumberToColor"],
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToColor",
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBar"
+                            ],
                         "preferred-location":"left-bottom"
                     }
         }

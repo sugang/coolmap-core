@@ -408,7 +408,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //        System.out.println("Map zoom changed");
         //repaint
         //fitView();
-        updateRegion();
+//        updateBufferedImage();
+//        updateRegion();
+        fitView();
     }
 
 //    @Override

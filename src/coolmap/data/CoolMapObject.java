@@ -7,7 +7,7 @@ package coolmap.data;
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToBoxPlot;
+import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToBoxPlot;
 import coolmap.canvas.datarenderer.renderer.model.AnnotationRenderer;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.datarenderer.renderer.impl;
+package coolmap.canvas.datarenderer.renderer.impl.obsolete;
 
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;

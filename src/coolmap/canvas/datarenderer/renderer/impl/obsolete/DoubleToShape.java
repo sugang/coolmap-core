@@ -2,21 +2,29 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.datarenderer.renderer.impl;
+package coolmap.canvas.datarenderer.renderer.impl.obsolete;
 
+import coolmap.data.aggregator.impl.DoubleDoubleMax;
 import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 
 /**
  *
  * @author gangsu
  */
-public class DoubleToBar extends ViewRenderer<Double> {
+public class DoubleToShape extends ViewRenderer<Double> {
 
     private double _minValue;
     private double _maxValue;
@@ -26,9 +34,9 @@ public class DoubleToBar extends ViewRenderer<Double> {
     private Color[] _colors = null;
     private CImageGradient _gradient = new CImageGradient(10000);
 
-    public DoubleToBar() {
-        setName("Double to Bar");
-        setDescription("Use bar to represent numeric values");
+    public DoubleToShape() {
+        setName("Double to Shape");
+        setDescription("Use shape to represent numeric values");
     }
 
     @Override
@@ -125,13 +133,12 @@ public class DoubleToBar extends ViewRenderer<Double> {
         } else {
             //Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
             //System.out.println(c);
+            g2D.setColor(UI.colorPink);
+            int radiusX = (int) (cellWidth * (v - _minValue) / (_maxValue - _minValue));
+            int radiusY = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
 
-            int height = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
-
-            //GradientPaint paint = new GradientPaint(anchorX, anchorY, UI.colorLightYellow, anchorX, anchorY + cellHeight, UI.colorOrange0);
-            //g2D.setPaint(paint);
-            g2D.setColor(UI.colorLightYellow);
-            g2D.fillRect((int) anchorX + 1, (int) (anchorY + cellHeight - height), (int) cellWidth - 2, (int) height);
+            //g2D.fillRect((int)anchorX+1, (int)(anchorY + cellHeight - height), (int)cellWidth-2, (int)height);
+            g2D.fillOval((int) (anchorX + (cellWidth - radiusX) / 2), (int) (anchorY + (cellHeight - radiusY) / 2), radiusX, radiusY);
         }
 
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);

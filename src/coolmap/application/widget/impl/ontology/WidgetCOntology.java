@@ -335,13 +335,16 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         label.setToolTipText("\"<html>Type in terms in the current active view.<br/>Use <strong>|</strong> as 'OR' operator to separate terms</html>\"");
 
+        
+        
+        
         toolBar.add(label);
 
-        toolBar = new JToolBar();
+//        toolBar = new JToolBar();
 
         label = new JLabel(UI.getImageIcon("search"));
         toolBar.add(label);
-        getContentPane().add(toolBar, BorderLayout.SOUTH);
+//        getContentPane().add(toolBar, BorderLayout.SOUTH);
         toolBar.setFloatable(false);
 
         toolBar.add(_searchField);

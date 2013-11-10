@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.datarenderer.renderer.impl;
+package coolmap.canvas.datarenderer.renderer.impl.obsolete;
 
 import coolmap.data.aggregator.impl.DoubleDoubleMax;
 import coolmap.data.CoolMapObject;
@@ -12,9 +12,11 @@ import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -24,7 +26,7 @@ import javax.swing.JComponent;
  *
  * @author gangsu
  */
-public class DoubleToShape extends ViewRenderer<Double> {
+public class DoubleToNumber extends ViewRenderer<Double> {
 
     private double _minValue;
     private double _maxValue;
@@ -33,10 +35,11 @@ public class DoubleToShape extends ViewRenderer<Double> {
     private Color _maxColor = new Color(252, 146, 114);
     private Color[] _colors = null;
     private CImageGradient _gradient = new CImageGradient(10000);
+    private DecimalFormat _format = new DecimalFormat("#.###");
 
-    public DoubleToShape() {
-        setName("Double to Shape");
-        setDescription("Use shape to represent numeric values");
+    public DoubleToNumber() {
+        setName("Double to Number");
+        setDescription("Draw numeric values to matrix cells");
     }
 
     @Override
@@ -74,11 +77,11 @@ public class DoubleToShape extends ViewRenderer<Double> {
         }
 
         System.out.println("Min/Max:" + _minValue + ":" + _maxValue);
-//        _gradient.reset();
-//        _gradient.addColor(_minColor, 0.0);
-//        _gradient.addColor(_mediumColor, 0.5);
-//        _gradient.addColor(_maxColor, 1.0);
-//        _colors = _gradient.generateGradient(CImageGradient.InterType.Linear);
+        _gradient.reset();
+        _gradient.addColor(_minColor, 0.0);
+        _gradient.addColor(_mediumColor, 0.5);
+        _gradient.addColor(_maxColor, 1.0);
+        _colors = _gradient.generateGradient(CImageGradient.InterType.Linear);
     }
 
     @Override
@@ -92,26 +95,26 @@ public class DoubleToShape extends ViewRenderer<Double> {
 
     @Override
     protected void _prepareGraphics(Graphics2D g2D) {
+        g2D.setFont(UI.fontMono.deriveFont(10f).deriveFont(Font.BOLD));
     }
 
     @Override
     protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
-//        if (cellWidth > 1 || cellHeight > 1) {
-//            _renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
-//        } else {
-//            //g2D.setColor(Color.RED);
-//
-//            if (v == null || v.isNaN()) {
-//                //System.out.println(v);
-//            } else {
-//                Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
-//                //System.out.println(c);
-//                g2D.setColor(c);
-//                g2D.drawLine(Math.round(anchorX), Math.round(anchorY), Math.round(anchorX), Math.round(anchorY));
-//            }
-//        }
-        _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        if (cellWidth > 5 && cellHeight > 5) {
+            _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            //g2D.setColor(Color.RED);
+
+            if (v == null || v.isNaN()) {
+                //System.out.println(v);
+            } else {
+                Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
+                //System.out.println(c);
+                g2D.setColor(c);
+                g2D.drawLine(Math.round(anchorX), Math.round(anchorY), Math.round(anchorX), Math.round(anchorY));
+            }
+        }
 
     }
 
@@ -125,20 +128,28 @@ public class DoubleToShape extends ViewRenderer<Double> {
         //System.out.println(color);
         //System.out.println("Render here:" + anchorX + " " + anchorY + " " + cellWidth + " " + cellHeight);
         //can skip if width or height < 0
-        g2D.setColor(UI.colorBlack2);
-        g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
-
         if (v == null || v.isNaN()) {
             //System.out.println(v);
         } else {
-            //Color c = _colors[(int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length)];
+//            int index = (int) ((v - _minValue) / (_maxValue - _minValue) * _colors.length);
+//            if(index >= _colors.length){
+//                index = _colors.length-1;
+//            }
+//            Color c = _colors[index];
             //System.out.println(c);
-            g2D.setColor(UI.colorPink);
-            int radiusX = (int) (cellWidth * (v - _minValue) / (_maxValue - _minValue));
-            int radiusY = (int) (cellHeight * (v - _minValue) / (_maxValue - _minValue));
-
-            //g2D.fillRect((int)anchorX+1, (int)(anchorY + cellHeight - height), (int)cellWidth-2, (int)height);
-            g2D.fillOval((int) (anchorX + (cellWidth - radiusX) / 2), (int) (anchorY + (cellHeight - radiusY) / 2), radiusX, radiusY);
+//            g2D.setColor(c);
+            g2D.setColor(UI.colorBlack2);
+            g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+            g2D.setColor(UI.colorGrey1);
+            String label;
+            if (v >= 0) {
+                label = " " + _format.format(v);
+            } else {
+                label = _format.format(v);
+            }
+            g2D.drawString(label, anchorX + 2, anchorY + 10);
+            g2D.setColor(UI.colorBlack1);
+            g2D.drawLine((int) anchorX, (int) (anchorY + cellHeight - 1), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight - 1));
         }
 
         //g2D.fillOval(anchorX, 50 + (int)(Math.random()*50), cellWidth, cellHeight);

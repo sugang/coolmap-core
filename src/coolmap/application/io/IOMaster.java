@@ -11,7 +11,7 @@ import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.datarenderer.renderer.impl.DoubleToColor;
+import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
