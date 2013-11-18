@@ -14,14 +14,16 @@
                     "coolmap.application.widget.impl.WidgetViewRenderer",
                     "coolmap.application.widget.impl.WidgetDataMatrix",
                     "coolmap.application.widget.impl.WidgetRadar",
-                    "coolmap.application.widget.impl.WidgetPointAnnotation"
+                    "coolmap.application.widget.impl.WidgetPointAnnotation",
+                    "coolmap.application.widget.impl.WidgetFilter"
                  ],
         "config": {
             "coolmap.application.widget.impl.WidgetViewRenderer":
                     {
                         "load": [
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToColor",
-                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBar"
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBar",
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot"
                             ],
                         "preferred-location":"left-bottom"
                     }

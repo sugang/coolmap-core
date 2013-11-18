@@ -270,7 +270,7 @@ public class ClusterModule extends Module {
                 @Override
                 public void run() {
 
-                    Cluster.bisecKRows(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Bisec Kmeans Row (" + Tools.randomID() + ")");
+                    Cluster.bisecKRows(CoolMapMaster.getActiveCoolMapObject(), bisecPanel.numClusters, bisecPanel.nullsAsZero, "Bisec Kmeans Row (" + Tools.randomID() + ")");
 
                 }
             });
@@ -302,7 +302,7 @@ public class ClusterModule extends Module {
                 @Override
                 public void run() {
 
-                    Cluster.bisecKColumns(CoolMapMaster.getActiveCoolMapObject(), specPanel.numClusters, specPanel.nullsAsZero, "Bisec Kmeans Column (" + Tools.randomID() + ")");
+                    Cluster.bisecKColumns(CoolMapMaster.getActiveCoolMapObject(), bisecPanel.numClusters, bisecPanel.nullsAsZero, "Bisec Kmeans Column (" + Tools.randomID() + ")");
 
                 }
             });

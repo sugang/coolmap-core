@@ -597,13 +597,8 @@ public class IOMaster {
         System.out.println("Initialize IO Master..");
 
 
-
-
-
-
-
         MenuItem item = new MenuItem("Save Project", new MenuShortcut(KeyEvent.VK_S));
-        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
+//        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
         item.addActionListener(new ActionListener() {
 
             @Override

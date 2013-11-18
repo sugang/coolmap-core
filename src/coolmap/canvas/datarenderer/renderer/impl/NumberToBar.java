@@ -157,11 +157,11 @@ public class NumberToBar extends ViewRenderer<Double> {
             maxValueField.setBackground(errorBG);
         }
 
-        updateGradient();
+        updateLegend();
 
     }
 
-    private void updateGradient() {
+    private void updateLegend() {
 
         int width = DEFAULT_LEGEND_WIDTH;
         int height = DEFAULT_LEGENT_HEIGHT;
@@ -169,9 +169,18 @@ public class NumberToBar extends ViewRenderer<Double> {
         Graphics2D g = (Graphics2D) legend.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.setPaint(Color.WHITE);
+        g.setPaint(UI.colorBlack2);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
 
+        g.setColor(UI.colorLightYellow);
+        int boxNum = 10;
+        for(int i=0; i<boxNum; i++){
+            int h = (height - 12) / boxNum * i;
+            g.fillRect(i * width/boxNum, height - 12 - h, width/boxNum, h);
+        }
+        
+        
+        
         g.setColor(UI.colorGrey1);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");

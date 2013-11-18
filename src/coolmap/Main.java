@@ -3,6 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.NetworkToForceLayout;
 import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
@@ -90,8 +91,8 @@ public class Main {
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
 // /Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt
 //            "/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
-            
+//            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
             
             
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
@@ -141,7 +142,7 @@ public class Main {
             CoolMapMaster.addNewCOntology(onto);
 
             object.setAggregator(new DoubleDoubleMean());
-            object.setViewRenderer(new NumberToColor(), true);
+            object.setViewRenderer(new NumberToBoxPlot(), true);
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//

@@ -240,15 +240,15 @@ public class UI {
         _iconStash.put("expand3", new ImageIcon(UI.class.getResource("/resources/iconThreearrows.png")));
         _iconStash.put("duplicate", new ImageIcon(UI.class.getResource("/resources/iconDuplicate.png")));
 
-        _iconStash.put("prependRow", new ImageIcon(UI.class.getResource("/resources/prependRow.png")));
-        _iconStash.put("appendRow", new ImageIcon(UI.class.getResource("/resources/appendRow.png")));
-        _iconStash.put("replaceRow", new ImageIcon(UI.class.getResource("/resources/replaceRow.png")));
-        _iconStash.put("rootRow", new ImageIcon(UI.class.getResource("/resources/rootRow.png")));
+        _iconStash.put("prependRow", new ImageIcon(UI.class.getResource("/resources/iconPrependRow.png")));
+        _iconStash.put("appendRow", new ImageIcon(UI.class.getResource("/resources/iconAppendRow.png")));
+        _iconStash.put("replaceRow", new ImageIcon(UI.class.getResource("/resources/iconReplaceRow.png")));
+        _iconStash.put("rootRow", new ImageIcon(UI.class.getResource("/resources/iconRootRow.png")));
 
-        _iconStash.put("prependColumn", new ImageIcon(UI.class.getResource("/resources/prependColumn.png")));
-        _iconStash.put("appendColumn", new ImageIcon(UI.class.getResource("/resources/appendColumn.png")));
-        _iconStash.put("replaceColumn", new ImageIcon(UI.class.getResource("/resources/replaceColumn.png")));
-        _iconStash.put("rootColumn", new ImageIcon(UI.class.getResource("/resources/rootColumn.png")));
+        _iconStash.put("prependColumn", new ImageIcon(UI.class.getResource("/resources/iconPrependColumn.png")));
+        _iconStash.put("appendColumn", new ImageIcon(UI.class.getResource("/resources/iconAppendColumn.png")));
+        _iconStash.put("replaceColumn", new ImageIcon(UI.class.getResource("/resources/iconReplaceColumn.png")));
+        _iconStash.put("rootColumn", new ImageIcon(UI.class.getResource("/resources/iconRootColumn.png")));
     }
 
     public static Color mixOpacity(Color input, float opacity) {

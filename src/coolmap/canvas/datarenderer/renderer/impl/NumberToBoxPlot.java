@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package coolmap.canvas.datarenderer.renderer.impl;
 
 import com.google.common.collect.Range;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.utils.CImageGradient;
-import coolmap.utils.graphics.GradientEditorPanel;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Component;
@@ -42,21 +41,18 @@ import javax.swing.JTextField;
  *
  * @author sugang
  */
-public class NumberToColor extends ViewRenderer<Double> {
-
-    private GradientEditorPanel editor = new GradientEditorPanel();
-
+public class NumberToBoxPlot extends ViewRenderer<Double>{
+    
     private JTextField minValueField = new JTextField();
     private JTextField maxValueField = new JTextField();
 
     private Color normalBG = Color.WHITE;
     private Color errorBG = UI.colorRedWarning;
     private JComboBox presetRangeComboBox;
-    private JComboBox presetColorComboBox;
 
-    public NumberToColor() {
-        setName("Number to Color");
-        setDescription("Use color to represent numeric values");
+    public NumberToBoxPlot() {
+        setName("Number to BoxPlot");
+        setDescription("Use bar height to represent numeric values");
 
         //initialize UI
         configUI.setLayout(new GridBagLayout());
@@ -67,95 +63,12 @@ public class NumberToColor extends ViewRenderer<Double> {
         c.ipadx = 5;
         c.ipady = 5;
         c.insets = new Insets(5, 5, 5, 5);
-        c.gridwidth = 2;
-//        c.weightx = 0.8;
-
-        configUI.add(editor, c);
-
+        c.gridwidth = 1;
+        
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
         JButton button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset gradient");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                try {
-                    GradientItem item = (GradientItem) presetColorComboBox.getSelectedItem();
-
-                    editor.clearColors();
-
-                    Color c[] = item.getColors();
-                    float p[] = item.getPositions();
-
-                    editor.setStart(c[0]);
-                    editor.setEnd(c[c.length - 1]);
-
-                    if (c.length > 2) {
-                        for (int i = 1; i < c.length - 1; i++) {
-                            editor.addColor(c[i], p[i]);
-                        }
-                    }
-
-                } catch (Exception ex) {
-                    editor.clearColors();
-                    editor.setStart(DEFAULT_MIN_COLOR);
-                    editor.setEnd(DEFAULT_MAX_COLOR);
-                }
-
-                updateRenderer();
-            }
-        });
-
-        c.gridx = 1;
-        c.gridwidth = 1;
-        presetColorComboBox = new JComboBox();
-        configUI.add(presetColorComboBox, c);
-        presetColorComboBox.setRenderer(new GradientComboItemRenderer());
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{DEFAULT_MIN_COLOR, Color.BLACK, DEFAULT_MAX_COLOR},
-                        new float[]{0f, 0.5f, 1f},
-                        "Teal - Blk - Pink"));
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{Color.GREEN, Color.RED},
-                        new float[]{0f, 1f},
-                        "Green - Red"));
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{Color.GREEN, Color.BLACK, Color.RED},
-                        new float[]{0f, 0.5f, 1f},
-                        "Red - Blk - Green"));
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{Color.ORANGE, Color.BLUE},
-                        new float[]{0f, 1f},
-                        "Orange - Blue"));
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{Color.ORANGE, Color.BLACK, Color.BLUE},
-                        new float[]{0f, 0.5f, 1f},
-                        "Orange - Blk - Blue"));
-
-        presetColorComboBox.addItem(
-                new GradientItem(
-                        new Color[]{Color.BLACK, Color.GREEN},
-                        new float[]{0f, 1f},
-                        "Blk - Green"));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 1;
-        button = new JButton("Apply");
         configUI.add(button, c);
         button.setToolTipText("Apply preset data ranges");
         button.addActionListener(new ActionListener() {
@@ -218,14 +131,6 @@ public class NumberToColor extends ViewRenderer<Double> {
             }
         });
 
-        editor.applyButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateRenderer();
-            }
-        });
-
     }
 
     @Override
@@ -252,27 +157,11 @@ public class NumberToColor extends ViewRenderer<Double> {
             maxValueField.setBackground(errorBG);
         }
 
-        editor.setMinValue(new Float(_minValue));
-        editor.setMaxValue(new Float(_maxValue));
-
-        updateGradient();
+        updateLegend();
 
     }
 
-    private void updateGradient() {
-        _gradient.reset();
-        for (int i = 0; i < editor.getNumPoints(); i++) {
-            Color c = editor.getColorAt(i);
-            float p = editor.getColorPositionAt(i);
-
-            if (c == null || p < 0 || p > 1) {
-                continue;
-            }
-
-            _gradient.addColor(c, p);
-        }
-
-        _gradientColors = _gradient.generateGradient(CImageGradient.InterType.Linear);
+    private void updateLegend() {
 
         int width = DEFAULT_LEGEND_WIDTH;
         int height = DEFAULT_LEGENT_HEIGHT;
@@ -280,11 +169,20 @@ public class NumberToColor extends ViewRenderer<Double> {
         Graphics2D g = (Graphics2D) legend.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        LinearGradientPaint paint = editor.getLinearGradientPaint(0, 0, width, 0);
-        g.setPaint(paint);
+        g.setPaint(UI.colorBlack2);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
 
-        g.setColor(UI.colorGrey1);
+        g.setColor(barColor);
+        int boxNum = 10;
+        g.setStroke(UI.stroke1_5);
+        for(int i=0; i<boxNum; i++){
+            int h = (height - 12) / boxNum * i;
+            g.drawLine(i * width/boxNum, height - 12 - h, (i + 1) * width/boxNum, height - 12 - h);
+        }
+        
+        
+        
+        g.setColor(barColor);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");
         g.drawString(format.format(_minValue), 2, 23);
@@ -304,9 +202,6 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     private double _minValue = 0;
     private double _maxValue = 1;
-    private static Color DEFAULT_MIN_COLOR = new Color(127, 205, 187);
-    private static Color DEFAULT_MAX_COLOR = new Color(252, 146, 114);
-    private CImageGradient _gradient = new CImageGradient(10000);
     private Color[] _gradientColors = null;
 
     @Override
@@ -341,11 +236,6 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         minValueField.setText(minValue + "");
         maxValueField.setText(maxValue + "");
-
-        editor.setStart(DEFAULT_MIN_COLOR);
-        editor.addColor(Color.BLACK, 0.5f);
-        editor.setEnd(DEFAULT_MAX_COLOR);
-
         updateRenderer();
     }
 
@@ -364,7 +254,8 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     @Override
     protected void _prepareGraphics(Graphics2D g2D) {
-        g2D.setFont(UI.fontMono.deriveFont(12f));
+//        g2D.setFont(UI.fontMono.deriveFont(12f));
+//        g2D.setColor(UI.colorLightYellow);
     }
 
     @Override
@@ -372,23 +263,21 @@ public class NumberToColor extends ViewRenderer<Double> {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
+    private Color barColor = UI.colorLightGreen0;
+    
     @Override
     protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
         } else {
             try {
-                int index = (int) ((v - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
-                if (index >= _gradientColors.length) {
-                    index = _gradientColors.length - 1;
-                }
-                if (index < 0) {
-                    index = 0;
-                }
-                Color c = _gradientColors[index];
-                //System.out.println(c);
-                g2D.setColor(c);
+                g2D.setColor(UI.colorBlack2);
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+                int height = (int)Math.round(cellHeight * (v - _minValue)/(_maxValue - _minValue));
+                g2D.setColor(barColor);
+                g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
+                g2D.setColor(UI.colorBlack2);
+                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             } catch (Exception e) {
                 System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
                 e.printStackTrace();
@@ -547,6 +436,5 @@ public class NumberToColor extends ViewRenderer<Double> {
             return l;
         }
 
-    }
-
+    }    
 }
