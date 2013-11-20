@@ -4074,7 +4074,10 @@ public final class CoolMapView<BASE, VIEW> {
 
                 //also need to paint the value
                 String value = _coolMapObject.getViewValueAsSnippet(row, col);
+                
+                //might not have been initialized
                 g2D.setFont(labelFontValue);
+                
                 int stringWidth = g2D.getFontMetrics().stringWidth(value);
                 int vHeight = 25;
                 int vWidth = 20 + stringWidth;

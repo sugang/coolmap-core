@@ -664,9 +664,13 @@ public class GradientEditorPanel extends JPanel {
          * include start and end points)
          */
         public void clearPoints() {
-            for (int i = 1; i < list.size() - 1; i++) {
+            
+            //why it keeps the first one and last one?
+            while(list.size() > 2) {
                 list.remove(1);
             }
+            
+//            System.err.println("Remaining points:" + list.size());
             
             repaint(0);
             fireUpdate();

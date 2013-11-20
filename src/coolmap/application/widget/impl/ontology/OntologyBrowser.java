@@ -18,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -200,11 +201,12 @@ public class OntologyBrowser {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g); //To change body of generated methods, choose Tools | Templates.
-            Graphics2D g2D = (Graphics2D) g;
+            Graphics2D g2D = (Graphics2D)(((Graphics2D) g).create());
             g2D.setFont(labelFontBold);
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //            g2D.setColor(UI.colorBlack2);
 //            g2D.fillRect(0, 0, getWidth(), getHeight());
+            Shape defaultClip = g2D.getClip();
 
             int cellWidth = getWidth() / 3;
             anchorCenter.x = cellWidth;
@@ -257,7 +259,7 @@ public class OntologyBrowser {
                     }
                 }
 
-                paintCell(g2D, anchorCenter, cellWidth, cellHeight, activeTerm, nodeType.ACTIVE_CENTER);
+                paintCell(g2D, anchorCenter, cellWidth, cellHeight, activeTerm, nodeType.ACTIVE_CENTER, defaultClip);
 
                 if (parents != null && !parents.isEmpty()) {
                     int offset = 0;
@@ -268,7 +270,7 @@ public class OntologyBrowser {
                             type = nodeType.ACTIVE_PARENT;
                         }
 
-                        paintCell(g2D, new Point(anchorParents.x, anchorParents.y + offset), cellWidth, cellHeight, parent, type);
+                        paintCell(g2D, new Point(anchorParents.x, anchorParents.y + offset), cellWidth, cellHeight, parent, type, defaultClip);
                         offset += cellHeight;
                     }
                 }
@@ -282,7 +284,7 @@ public class OntologyBrowser {
                             type = nodeType.ACTIVE_CHILD;
                         }
 
-                        paintCell(g2D, new Point(anchorChildren.x, anchorChildren.y + offset), cellWidth, cellHeight, child, type);
+                        paintCell(g2D, new Point(anchorChildren.x, anchorChildren.y + offset), cellWidth, cellHeight, child, type, defaultClip);
                         offset += cellHeight;
                     }
                 }
@@ -301,7 +303,7 @@ public class OntologyBrowser {
 
                         for (int i = 0; i < index; i++) {
                             String label = siblings.get(i);
-                            paintCell(g2D, new Point(getWidth() / 3, siblingStart + i * cellHeight), cellWidth, cellHeight, label, nodeType.CENTER);
+                            paintCell(g2D, new Point(getWidth() / 3, siblingStart + i * cellHeight), cellWidth, cellHeight, label, nodeType.CENTER, defaultClip);
                         }
 
                         //this part was not painted?
@@ -310,7 +312,7 @@ public class OntologyBrowser {
 //                        System.out.println("What the fuck this is not printed?");
                             String label = siblings.get(i);
 //                        System.out.println(label);
-                            paintCell(g2D, new Point(getWidth() / 3, siblingStart + i * cellHeight), cellWidth, cellHeight, label, nodeType.CENTER);
+                            paintCell(g2D, new Point(getWidth() / 3, siblingStart + i * cellHeight), cellWidth, cellHeight, label, nodeType.CENTER, defaultClip);
                         }
                     }
 
@@ -490,7 +492,8 @@ public class OntologyBrowser {
         private int fontDescent = 2;
         private int paddingL = 10;
 
-        private void paintCell(Graphics2D g2D, Point anchor, int width, int height, String label, nodeType type) {
+        private void paintCell(Graphics2D g2D, Point anchor, int width, int height, String label, nodeType type, Shape defaultClip) {
+            
             if (anchor.y + height < 0 || anchor.y > getHeight()) {
                 return; //only paint those 
             }
@@ -526,12 +529,14 @@ public class OntologyBrowser {
 
             g2D.setColor(Color.BLACK);
 //            g2D.drawRect(anchor.x, anchor.y, width, height);
-
+            
             if (activeTerm != null) {
                 //g2D.setClip(new Rectangle());
-                g2D.setClip(new Rectangle(cellx + marginTB, celly, cellWidth - 2 * marginTB, cellHeight));
+                
+                g2D.setClip(defaultClip);
+                g2D.clip(new Rectangle(cellx + marginTB, celly, cellWidth - 2 * marginTB, cellHeight));
                 g2D.drawString(label, cellx + marginTB, celly + fontSize / 2 + fontDescent + 1);
-                g2D.setClip(null);
+                g2D.setClip(defaultClip);
             }
 
             //toolTip with full name

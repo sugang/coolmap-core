@@ -385,4 +385,6 @@ public abstract class CMatrix<T> {
     public String getDisplayLabel(){
         return "<html><strong>" + getName() +  "</strong> [" + getMemberClass().getSimpleName() + "] [ Rows:" + getNumRows() + ", Columns: " + getNumColumns() + "]</html>";
     }
+    
+    
 }

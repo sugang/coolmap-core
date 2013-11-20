@@ -4,7 +4,6 @@
  */
 package coolmap.utils;
 
-
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -19,25 +18,25 @@ public class CImageGradient {
     private ArrayList<Double> pos = new ArrayList();
     private Color defaultColor = new Color(200, 150, 150);
 
-    public ArrayList<Color> getColors(){
-        return (ArrayList<Color>)(colors.clone());
+    public ArrayList<Color> getColors() {
+        return (ArrayList<Color>) (colors.clone());
     }
 
-    public ArrayList<Double> getPos(){
-        return (ArrayList<Double>)pos.clone();
+    public ArrayList<Double> getPos() {
+        return (ArrayList<Double>) pos.clone();
     }
-    
+
 //    public void clearAll(){
 //        colors.clear();
 //        pos.clear();
 //    }
-    
-    public void removeAt(int index){
+    public void removeAt(int index) {
         colors.remove(index);
         pos.remove(index);
-    }    
-    
+    }
+
     public enum InterType {
+
         Linear, HSB
     }
 
@@ -80,13 +79,10 @@ public class CImageGradient {
 
             int[] blockSizes = new int[pos.size() - 1];
 
-
-
             for (int i = 0; i < pos.size() - 1; i++) {
                 //System.out.println(pos.get(i));
                 blockSizes[i] = (int) Math.round((pos.get(i + 1) - pos.get(i)) * length);
             }
-
 
             Color c1, c2;
             int c1R, c1G, c1B, c2R, c2G, c2B;
@@ -119,13 +115,15 @@ public class CImageGradient {
 
                             //System.out.println(iR + " " + iG + " " + iB + " " + iA );
                             //System.out.println(new Color(iR, iG, iB, iA));
-                            gradients[counter++] = (new Color(iR, iG, iB));
+                            if (counter < gradients.length) {
+                                gradients[counter++] = (new Color(iR, iG, iB));
+                            }
                         }
 
                     }
 
                     break;
-                    
+
                 case HSB: //hsb interpolation
                     float iH = 0f,
                      iS = 0f,
@@ -159,8 +157,6 @@ public class CImageGradient {
                     break;
             }
 
-
-
         }
 
         return gradients;
@@ -187,7 +183,7 @@ public class CImageGradient {
 //    }    
     /**
      * Generate the gradient from the color definitions.
-     * 
+     *
      * Need to interpolate from other algorithms
      */
 //    public int[] generateGradientHLS() {
