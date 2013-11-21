@@ -21,13 +21,13 @@ public class NumberToLine extends NumberToBar {
 
     public NumberToLine() {
         super();
-        setName("NameToLine");
+        setName("Name To Line");
         setDescription("Use consequtivelines to connect dots");
         setClipCell(true); //make rendering possible to span to neighbor cells
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -125,7 +125,7 @@ public class NumberToLine extends NumberToBar {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
                 if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -211,7 +211,7 @@ public class NumberToLine extends NumberToBar {
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);

@@ -74,6 +74,7 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                     }
                     try {
                         ViewRenderer renderer = ((ViewRenderer) _viewRenderers.getSelectedItem()).getClass().newInstance();
+                        
                         if (!renderer.canRender(object.getViewClass())) {
                             ViewRenderer r = object.getViewRenderer();
                             if (r != null) {
@@ -86,9 +87,17 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                                 }
                             }
                         } else {
-                            object.setViewRenderer(renderer, true);
+                            //it can be renderered. Therefore:
+                            if(object.getViewRenderer() != null && object.getViewRenderer().getClass() == renderer.getClass()){
+                                //no need to change
+                            }
+                            else{
+                                object.setViewRenderer(renderer, true);
+                            }
+
                             _scroller.setViewportView(object.getViewRenderer().getConfigUI());
                         }
+                        
                     } catch (Exception e) {
                         _scroller.setViewportView(null);
                         object.notifyViewRendererUpdated();
@@ -154,7 +163,7 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                 for(int i=0; i<rendererToLoad.length(); i++){
                     try{
                         String rendererClass = rendererToLoad.getString(i);
-                        System.err.println(rendererClass);
+//                        System.err.println(rendererClass);
                         registerViewRenderer(rendererClass);
                     }
                     catch(JSONException exception){
@@ -217,7 +226,10 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                 registerViewRenderer(renderer.getClass().getName());
                 for (int i = 0; i < _viewRenderers.getItemCount(); i++) {
                     if (_viewRenderers.getItemAt(i).getClass().equals(renderer.getClass())) {
+                        
+                        //This would basically, re-initialize one round of renderer as the item state was changed
                         _viewRenderers.setSelectedIndex(i);
+                        
                         _updatetip();
                         return;
                     }

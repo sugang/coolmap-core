@@ -229,7 +229,10 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void updateRendererChanges() {
+    public void updateRendererChanges() {
+        
+//        System.err.println("Renderer changes updated" + getCoolMapObject());
+//        System.out.println("===Update renderer changes called===");
 
         if (getCoolMapObject() == null) {
             return;
@@ -293,6 +296,8 @@ public class NumberToColor extends ViewRenderer<Double> {
         int swidth = g.getFontMetrics().stringWidth(maxString);
         g.drawString(maxString, width - 2 - swidth, 23);
         g.dispose();
+        
+//        System.out.println("===Gradient updated===" + _gradientColors + " " + this);
     }
 
     private BufferedImage legend;
@@ -311,6 +316,8 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     @Override
     protected void initialize() {
+//        System.out.println("===Number to color initialized===");
+        
         CoolMapObject obj = getCoolMapObject();
         if (!canRender(obj.getViewClass())) {
             return;
@@ -346,6 +353,8 @@ public class NumberToColor extends ViewRenderer<Double> {
         editor.addColor(Color.BLACK, 0.5f);
         editor.setEnd(DEFAULT_MAX_COLOR);
 
+//        System.err.println("Number to color initialized");
+        
         updateRenderer();
     }
 
@@ -359,21 +368,21 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void _prepareGraphics(Graphics2D g2D) {
+    protected void prepareGraphics(Graphics2D g2D) {
         g2D.setFont(UI.fontMono.deriveFont(12f));
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+    public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -392,15 +401,15 @@ public class NumberToColor extends ViewRenderer<Double> {
 //                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
+                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
+                //e.printStackTrace();
             }
         }
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+    public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
 
 //        g2D.setColor(Color.BLACK);
 //        g2D.drawString(df.format(v), anchorX, anchorY + cellHeight);
@@ -409,7 +418,7 @@ public class NumberToColor extends ViewRenderer<Double> {
     DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
-    protected void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     private JPanel configUI = new JPanel();

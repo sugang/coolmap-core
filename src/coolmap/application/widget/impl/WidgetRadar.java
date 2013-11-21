@@ -503,7 +503,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //    }
     @Override
     public void viewRendererChanged(CoolMapObject object) {
-        System.out.println("View renderer changed");
+//        System.out.println("View renderer changed");
         //update image
         updateBufferedImage();
     }

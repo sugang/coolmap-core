@@ -40,7 +40,7 @@ import javax.swing.JTextField;
 /**
  *
  * @author sugang
- * this is a base one for all.
+ this is a base one for all.
  */
 public class NumberToBar extends ViewRenderer<Double> {
 
@@ -135,7 +135,7 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void updateRendererChanges() {
+    public void updateRendererChanges() {
 
         if (getCoolMapObject() == null) {
             return;
@@ -210,6 +210,7 @@ public class NumberToBar extends ViewRenderer<Double> {
 
     @Override
     protected void initialize() {
+        System.out.println("Number to Bar initalized");
         CoolMapObject obj = getCoolMapObject();
         if (!canRender(obj.getViewClass())) {
             return;
@@ -253,22 +254,22 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void _prepareGraphics(Graphics2D g2D) {
+    protected void prepareGraphics(Graphics2D g2D) {
 //        g2D.setFont(UI.fontMono.deriveFont(12f));
 //        g2D.setColor(UI.colorLightYellow);
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+    public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -289,8 +290,8 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+    public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
 
 //        g2D.setColor(Color.BLACK);
 //        g2D.drawString(df.format(v), anchorX, anchorY + cellHeight);
@@ -299,7 +300,7 @@ public class NumberToBar extends ViewRenderer<Double> {
     DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
-    protected void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     private JPanel configUI = new JPanel();

@@ -35,7 +35,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void updateRendererChanges() {
+    public void updateRendererChanges() {
     }
 
     @Override
@@ -82,19 +82,19 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void _prepareGraphics(Graphics2D g2D) {
+    protected void prepareGraphics(Graphics2D g2D) {
         g2D.setFont(UI.fontMono.deriveFont(10f).deriveFont(Font.BOLD));
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
         if (cellWidth > 5 && cellHeight > 5) {
-            _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+            renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
             //g2D.setColor(Color.RED);
 
@@ -111,7 +111,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+    public void renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //System.out.println("Rendered");
         //System.out.println(anchorX + " " + anchorY);
 
@@ -149,12 +149,12 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+    public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     public static void main(String args[]) {

@@ -65,7 +65,9 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
     public final void setCoolMapObject(CoolMapObject object, boolean initialize) {
         _coolMapObject = object;
+//        System.out.println(object + "===" + initialize);
         if (initialize) {
+//            System.out.println("===Initalize is called in setCoolMapObject:" + this);
             initialize();
         }
     }
@@ -79,7 +81,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         return _name;
     }
 
-    protected void setName(String name) {
+    public void setName(String name) {
         _name = name;
     }
 
@@ -121,7 +123,10 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         }
     }
 
-    protected abstract void updateRendererChanges();
+    /**
+     * update parameters changes for the render; will be called in the updateRenderer function
+     */
+    public abstract void updateRendererChanges();
 
     /**
      * called when this view renderer is assigned to a coolmap object
@@ -134,15 +139,15 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         _antiAliasing = antiAlias;
     }
 
-    protected abstract void _preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
+    protected abstract void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
-    protected abstract void _prepareGraphics(Graphics2D g2D);
+    protected abstract void prepareGraphics(Graphics2D g2D);
 
-    protected abstract void _renderCellLD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
+    public abstract void renderCellLD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
-    protected abstract void _renderCellSD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
+    public abstract void renderCellSD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
-    protected abstract void _renderCellHD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
+    public abstract void renderCellHD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
     
     /**
      * a built in method to mark Null
@@ -176,7 +181,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //    protected abstract void _renderCellAnnotationSD(VIEW v, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight);
 //    
 //    protected abstract void _renderCellAnnotationHD();
-    protected abstract void _postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
+    protected abstract void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
 //    public synchronized BufferedImage getRenderedRadarView(CoolMapObject data, int imageWidth, int imageHeight) throws InterruptedException{
 //        //I can't possibly render a map that is overwhelmingly large
@@ -243,7 +248,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                 VIEW v = data.getViewValue(i, j);
 
                 //use low definition mode
-                _renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
+                renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
 //                try{
 //                    Thread.sleep(50);
 //                }
@@ -289,7 +294,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
 //            _threadNum = 1;
             //do something before render
-            _preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+            preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
 
             //Can process!
             int numRow = toRow - fromRow;
@@ -364,7 +369,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             }
 
             //Do something after render
-            _postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+            postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
 
             return viewMap;
         }
@@ -436,7 +441,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                 g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             }
 
-            _prepareGraphics(g2D);
+            prepareGraphics(g2D);
 
             int anchorX;
             int anchorY;
@@ -494,17 +499,17 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //                    System.out.println("Render SD row:" + i + " col:" + j);
                         switch (__mode) {
                             case LD:
-                                _renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
                                 break;
                             case SD:
 
-                                _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
                                 break;
                             case HD:
-                                _renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
                                 break;
                             default:
-                                _renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
                         }
 
                     } catch (Exception e) {

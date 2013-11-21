@@ -272,7 +272,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
 
                 try {
                     object.setAggregator((CAggregator) (_aggregators.getSelectedItem().getClass().newInstance()));
-                    object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()), true);
+//                    object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()), true);
                     if(Double.class.isAssignableFrom(object.getViewClass())){
                         object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                     }

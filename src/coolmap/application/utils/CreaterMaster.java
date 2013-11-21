@@ -8,7 +8,6 @@ import com.google.common.collect.Range;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -127,7 +126,7 @@ public class CreaterMaster {
                 
                 try{
                     newObject.setAggregator((CAggregator)object.getAggregator().getClass().newInstance());
-                    newObject.setViewRenderer((ViewRenderer)object.getViewRenderer().getClass().newInstance(), true);
+//                    newObject.setViewRenderer((ViewRenderer)object.getViewRenderer().getClass().newInstance(), true);
                 }
                 catch(Exception ex){
                     ex.printStackTrace();

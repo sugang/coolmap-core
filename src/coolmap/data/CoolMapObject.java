@@ -7,7 +7,6 @@ package coolmap.data;
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToBoxPlot;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
@@ -333,6 +332,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void setViewRenderer(ViewRenderer<VIEW> viewRenderer, boolean initialize) {
         _viewRenderer = viewRenderer;
         if (_viewRenderer != null) {
+            System.out.println("Set the view renderer to: " + initialize);
             _viewRenderer.setCoolMapObject(this, initialize);
             notifyViewRendererUpdated();
         }
@@ -1957,7 +1957,7 @@ public final class CoolMapObject<BASE, VIEW> {
         colNodes.add(node2);
         coolMapObject.insertColumnNodes(0, colNodes, false);
 
-        coolMapObject.setViewRenderer(new DoubleToBoxPlot(), true);
+//        coolMapObject.setViewRenderer(new DoubleToBoxPlot(), true);
 
         node1.setViewColor(Color.RED);
 

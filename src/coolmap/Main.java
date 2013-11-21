@@ -3,9 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToLine;
-import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
-import coolmap.canvas.datarenderer.renderer.impl.obsolete.NetworkToForceLayout;
+import coolmap.canvas.datarenderer.renderer.impl.NumberComposite;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -144,7 +142,13 @@ public class Main {
             object.insertColumnNodes(onto.getRootNodesOrdered());
 
             object.setAggregator(new DoubleDoubleMean());
-            object.setViewRenderer(new NumberToLine(), true);
+            
+            System.out.println("Set view renderer:");
+            object.setViewRenderer(new NumberComposite(), true);
+            //object.setViewRenderer(new NumberComposite(), false);
+            System.out.println("What the fuck this should only be run once\n\n");
+            
+            
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//
@@ -211,7 +215,7 @@ public class Main {
                     object.insertColumnNodes(nodes);
 
                     object.setAggregator(new DoubleDoubleMean());
-                    object.setViewRenderer(new DoubleToColor(), true);
+//                    object.setViewRenderer(new DoubleToColor(), true);
 
                     object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                     object.getCoolMapView().addRowMap(new RowLabels(object));
@@ -258,7 +262,7 @@ public class Main {
                     object.insertColumnNodes(onto.getRootNodesOrdered());
 
                     object.setAggregator(new DoubleToNetwork());
-                    object.setViewRenderer(new NetworkToForceLayout(), true);
+//                    object.setViewRenderer(new NetworkToForceLayout(), true);
                     object.getCoolMapView().addRowMap(new RowLabels(object));
                     object.getCoolMapView().addRowMap(new RowTree(object));
                     object.getCoolMapView().addColumnMap(new ColumnLabels(object));

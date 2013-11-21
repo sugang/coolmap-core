@@ -11,7 +11,6 @@ import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
@@ -332,7 +331,7 @@ public class IOMaster {
                         try {
                             viewRendererClass = Class.forName(viewRendererString);
                             ViewRenderer viewRenderer = (ViewRenderer) viewRendererClass.newInstance(); //modify this later
-                            object.setViewRenderer(viewRenderer, true);
+//                            object.setViewRenderer(viewRenderer, true);
                         } catch (Exception e) {
                             //Assign a default String renderer:
                             e.printStackTrace();
@@ -405,7 +404,7 @@ public class IOMaster {
                         object.insertColumnNodes(nodes);
 
                         object.setAggregator(new DoubleDoubleMean());
-                        object.setViewRenderer(new DoubleToColor(), true);
+//                        object.setViewRenderer(new DoubleToColor(), true);
                         object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                         object.getCoolMapView().addRowMap(new RowLabels(object));
                         object.getCoolMapView().addRowMap(new RowTree(object));
