@@ -23,16 +23,14 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
 
 /**
  *
@@ -103,11 +101,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             containerWidth = containerWidth < 0 ? 0 : containerWidth;
             containerHeight = containerHeight < 0 ? 0 : containerHeight;
 
-            System.out.println("Map dimensions:" + mapWidth + " " + mapHeight);
-
+//            System.out.println("Map dimensions:" + mapWidth + " " + mapHeight);
 //           by the time it is loaded, container may not have been added yet; this could be avoided by loading  
-            System.out.println("Container Dimension:" + _container.getWidth() + " " + _container.getHeight());
-
+//            System.out.println("Container Dimension:" + _container.getWidth() + " " + _container.getHeight());
             //now decide the percentage, and put it @ center
             mapAnchor.x = containerWidth / 2 + margin;
             mapAnchor.y = containerHeight / 2 + margin;
@@ -142,7 +138,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             mapAnchor.x -= previewWidth / 2;
             mapAnchor.y -= previewHeight / 2;
 
-            System.out.println(percentage);
+//            System.out.println(percentage);
             updateBufferedImage();
 
 //            _radarPanel.repaint();
@@ -151,6 +147,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         }
 
     }
+
+    private boolean busy;
 
     public WidgetRadar() {
         super("Radar", W_MODULE, L_LEFTBOTTOM, UI.getImageIcon("compass"), "Radar");
@@ -167,22 +165,39 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
         _container.add(_radarPanel, BorderLayout.CENTER);
 
-        JToolBar toolBar = new JToolBar();
-        toolBar.setFloatable(false);
-
-        
-        
-        JButton button = new JButton(UI.getImageIcon("expand3"));
-        button.setToolTipText("Fit preview to current window");
-        button.addActionListener(new ActionListener() {
+//        JToolBar toolBar = new JToolBar();
+//        toolBar.setFloatable(false);
+//
+//        JButton button = new JButton(UI.getImageIcon("expand3"));
+//        button.setToolTipText("Fit preview to current window");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                fitView();
+//            }
+//        });
+//        _container.add(toolBar, BorderLayout.NORTH);
+//        toolBar.add(button);
+        _container.addComponentListener(new ComponentListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void componentResized(ComponentEvent e) {
                 fitView();
             }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
         });
-        _container.add(toolBar, BorderLayout.NORTH);
-        toolBar.add(button);
 
     }
 
@@ -214,13 +229,12 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             //canvas
             Rectangle canvas = view.getCanvasDimension();
 
-        //may cause the 
+            //may cause the 
 //        System.out.println("");
 //        System.out.println(canvas.x + " " + (canvas.x + canvas.width));
 //            System.out.println("Map Anchor in listener:" + view.getMapAnchor());
 //            System.out.println("======= ======");
             //no problem in mapAnchor
-
             //The bug:
             //while searching, the subMapIndex not updated yet.
             //The search was not a good one - the search should occur AFTER the update
@@ -235,7 +249,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             float zoomY = obj.getCoolMapView().getZoomY();
 //            there are problems with getCurrentRow and getCurrentCol
 //            can't figure it out!! fuck fuck 
-        //System.out.println(canvas);
+            //System.out.println(canvas);
 //        System.out.println("minCol: " + minCol + " maxCol: " + maxCol + " -- " + " minRow: " +  minRow + " maxRow: " + maxRow);
 //        System.out.println("");
 //        System.out.println("");
@@ -318,6 +332,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         //only do for the active CoolMapObject
         try {
 
+            busy = true;
+            _radarPanel.repaint();
 //            renderer.getRenderedRadarView(object, L_VIEWPORT, L_LEFTTOP);
             //redraw the buffered image
             if (Thread.interrupted()) {
@@ -366,6 +382,13 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
                 return;
             }
 
+//            try{
+//                Thread.sleep(10000);
+//            }
+//            catch(Exception e){
+//                
+//            }
+            //This is the function that created the problem
             image = renderer.getRenderedFullMap(object, percentage);
 
             if (Thread.interrupted()) {
@@ -380,6 +403,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //        }
             //a new method is needed then
             updateRegion();
+
+            busy = false;
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -410,7 +435,24 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         //fitView();
 //        updateBufferedImage();
 //        updateRegion();
+//        fitView();
+
+//        It does not necessarily run in a 
+//        Thread thread = new Thread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                try {
+//                    fitView();/
+////                    Thread.sleep(10000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(WidgetRadar.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        });
+//        thread.start();
         fitView();
+
     }
 
 //    @Override
@@ -452,7 +494,6 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //    public void stateStorageUpdated(CoolMapObject object) {
 //        //do nothing
 //    }
-
     @Override
     public void viewRendererChanged(CoolMapObject object) {
         System.out.println("View renderer changed");
@@ -476,9 +517,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     }
 
     private class RadarPanel extends JPanel {
-        
-        public RadarPanel(){
-            MouseTracker tracker = new MouseTracker();                    
+
+        public RadarPanel() {
+            MouseTracker tracker = new MouseTracker();
             addMouseListener(tracker);
             addMouseMotionListener(tracker);
         }
@@ -506,10 +547,22 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
                 g2D.setStroke(UI.strokeDash1_5);
                 g2D.drawRect((int) (region.x + mapAnchor.x), (int) (region.y + mapAnchor.y), region.width, region.height);
             }
+
+            if (busy) {
+                
+                g2D.setColor(UI.mixOpacity(UI.colorWhite, 0.5f));
+                g2D.fillRoundRect(getWidth() / 2 - UI.blockLoader.getWidth(_container) / 2 - 10, getHeight() / 2 - UI.blockLoader.getHeight(_container) / 2 - 10, UI.blockLoader.getWidth(_container) + 20, UI.blockLoader.getHeight(_container) + 20, 10, 10);
+                
+                try {
+                    g2D.drawImage(UI.blockLoader, getWidth() / 2 - UI.blockLoader.getWidth(_container) / 2, getHeight() / 2 - UI.blockLoader.getHeight(_container) / 2, this);
+                } catch (Exception e) {
+                }
+
+            }
         }
 
     }
-    
+
     /**
      * Mouse Tracker
      */
@@ -519,29 +572,25 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         public void mouseClicked(MouseEvent e) {
 //            System.out.println("Mouse clicked");
             //jump to a region
-            
-            if(CoolMapMaster.getActiveCoolMapObject() == null  || bufferedImage == null)
+
+            if (CoolMapMaster.getActiveCoolMapObject() == null || bufferedImage == null) {
                 return;
-            
-            float xPercentage =  (e.getX() - mapAnchor.x)/bufferedImage.getWidth() ;
-            float yPercentage =  (e.getY() - mapAnchor.y)/bufferedImage.getHeight() ;
-            
+            }
+
+            float xPercentage = (e.getX() - mapAnchor.x) / bufferedImage.getWidth();
+            float yPercentage = (e.getY() - mapAnchor.y) / bufferedImage.getHeight();
+
             //System.out.println(xPercentage + "--" + xPercentage);
-            
             //the distance from the anchor
             //need to determine the location
-            
-            
-            xPercentage  = xPercentage < 0 ? 0 : xPercentage;
+            xPercentage = xPercentage < 0 ? 0 : xPercentage;
             xPercentage = xPercentage > 1 ? 1 : xPercentage;
             yPercentage = yPercentage < 0 ? 0 : yPercentage;
             yPercentage = yPercentage > 1 ? 1 : yPercentage;
-            
+
             CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
             obj.getCoolMapView().centerToPercentage(xPercentage, yPercentage);
-            
-            
-            
+
         }
 
         @Override
@@ -567,7 +616,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         @Override
         public void mouseMoved(MouseEvent e) {
         }
-        
+
     }
 
 }

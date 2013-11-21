@@ -6,7 +6,6 @@ import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.NetworkToForceLayout;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -107,13 +106,13 @@ public class Main {
             for (Object label : matrix.getRowLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-//            object.insertRowNodes(nodes);
+            object.insertRowNodes(nodes);
 
             nodes.clear();
             for (Object label : matrix.getColLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-//            object.insertColumnNodes(nodes);
+            object.insertColumnNodes(nodes);
 
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////

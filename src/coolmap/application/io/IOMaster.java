@@ -726,9 +726,11 @@ public class IOMaster {
                             if (object.getAggregator() != null) {
                                 jobject.put(IOTerm.FIELD_COOLMAPOBJECT_AGGREGATOR, object.getAggregator().getClass().getName());
                             }
-                            if (object.getAnnotationRenderer() != null) {
-                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER, object.getAnnotationRenderer().getClass().getName());
-                            }
+                            
+//                            if (object.getAnnotationRenderer() != null) {
+//                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER, object.getAnnotationRenderer().getClass().getName());
+//                            }
+                            
                             if (object.getViewRenderer() != null) {
                                 jobject.put(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER, object.getViewRenderer().getClass().getName());
                             }

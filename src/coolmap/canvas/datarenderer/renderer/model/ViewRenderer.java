@@ -5,7 +5,6 @@
 package coolmap.canvas.datarenderer.renderer.model;
 
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.Tools;
@@ -18,13 +17,11 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-import sun.awt.X11.XConstants;
 
 /**
  *
@@ -55,7 +52,7 @@ public abstract class ViewRenderer<VIEW> {
     protected static int DEFAULT_LEGEND_WIDTH = 100;
     protected static int DEFAULT_LEGENT_HEIGHT = 25;
 
-    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
+    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode colNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
         //System.out.println(activeCell + " " + percentX + " " + PercentY + " " + cellWidth + " " + cellHeight);
         return null;
     }
@@ -165,7 +162,7 @@ public abstract class ViewRenderer<VIEW> {
 //        
 //        return null;
 //    }
-    public synchronized BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
+    public BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
         if (data == null) {
             return null;
         }
@@ -192,6 +189,14 @@ public abstract class ViewRenderer<VIEW> {
         float currentWidth = 0;
         float currentHeight = 0;
 
+//        try{
+//            Thread.sleep(5000);
+//        }
+//        catch(Exception e){
+//            
+//        }
+        
+        
 //        Thread.sleep(1000);
         //then render
         for (int i = 0; i < data.getViewNumRows(); i++) {
@@ -514,18 +519,29 @@ public abstract class ViewRenderer<VIEW> {
 //        _antiAliasing = antiAliasing;
 //    }
     public static BufferedImage createToolTipFromJLabel(JLabel label){
-        return null;
+        label.setSize(label.getPreferredSize());
+        Font font = label.getFont();
+        label.setSize(label.getPreferredSize()); //make sure it is the preferred size.
+        
+        BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(label.getWidth(), label.getHeight());
+        Graphics2D g2D = (Graphics2D) image.createGraphics();
+        g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        label.paint(g2D);
+        g2D.dispose();
+        
+        //return label paint as
+        return image;
     }
     
     
     
     
-    public static BufferedImage createToolTipFromString(String tipString){
+    public static BufferedImage createToolTipFromString(String tipString, Font font){
         if(tipString == null || tipString.length() == 0)
             return null;
         
         int width = 2, height = 2;
-        Font font = UI.fontMono.deriveFont(12f).deriveFont(Font.BOLD);
+//        Font font = UI.fontMono.deriveFont(12f).deriveFont(Font.BOLD);
         Color fontColor = UI.colorBlack4;
         Color backgroundColor = UI.colorGrey2;
         BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(width, height);
@@ -559,10 +575,13 @@ public abstract class ViewRenderer<VIEW> {
         g2D.setColor(fontColor);
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
+        int descent = fMetrics.getMaxDescent();
+        
+        
         g2D.translate(marginLR, 0);
         for(String line : lines){
             g2D.translate(0, marginTB + font.getSize());
-            g2D.drawString(line, 0, -2);
+            g2D.drawString(line, 0, -font.getSize()/2 + descent);
             g2D.translate(0, marginTB);
         }
     

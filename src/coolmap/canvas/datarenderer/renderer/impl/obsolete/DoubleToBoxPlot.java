@@ -4,28 +4,18 @@
  */
 package coolmap.canvas.datarenderer.renderer.impl.obsolete;
 
-import coolmap.data.aggregator.impl.DoubleDoubleMax;
-import coolmap.data.CoolMapObject;
-import coolmap.data.cmatrix.impl.DoubleCMatrix;
-import coolmap.data.cmatrixview.model.VNode;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
-import coolmap.canvas.misc.MatrixCell;
+import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.text.DecimalFormat;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
@@ -130,133 +120,133 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
 
     }
 
-    @Override
-    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
-        if (getCoolMapObject() == null || activeCell == null || !activeCell.isValidCell(getCoolMapObject())) {
-            return null;
-        }
-
-        if (getCoolMapObject().getBaseCMatrices().isEmpty()) {
-            return null;
-        }
-
-        CoolMapObject obj = getCoolMapObject();
-        VNode rowNode = obj.getViewNodeRow(activeCell.getRow().intValue());
-        VNode colNode = obj.getViewNodeColumn(activeCell.getCol().intValue());
-
-        if (rowNode == null || colNode == null) {
-            return null;
-        }
-
-        if (rowNode.isSingleNode() && colNode.isSingleNode()) {
-            return null;
-        }
-
-        Integer[] rowIndices;
-        Integer[] colIndices;
-
-        CMatrix m0 = (CMatrix) getCoolMapObject().getBaseCMatrices().get(0);
-
-        if (rowNode.isGroupNode()) {
-            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.ROW);
-        } else {
-            rowIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
-        }
-
-        if (colNode.isGroupNode()) {
-            colIndices = colNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.COLUMN);
-        } else {
-            colIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfColName(colNode.getName())};
-        }
-
-        List<CMatrix> matrices = getCoolMapObject().getBaseCMatrices();
-        Double value;
-        ArrayList<BoxplotEntry> values = new ArrayList<BoxplotEntry>();
-
-        for (Integer i : rowIndices) {
-            if (i == null || i < 0) {
-                continue;
-            }
-
-            String rowLabel = m0.getRowLabel(i);
-
-            for (Integer j : colIndices) {
-
-                if (j == null || j < 0) {
-                    continue;
-                }
-                //Double value = (Double) getCoolMapObject().getViewValue(i, j);
-                //This is wrong. it should eb the base matrix value, not the view values
-                String colLabel = m0.getColLabel(j);
-
-                for (CMatrix<Double> matrix : matrices) {
-
-                    value = matrix.getValue(i, j);
-
-                    if (value == null || value.isNaN()) {
-                        continue;
-                    } else {
-                        //System.out.println(i + " " + j + " " + v);
-                        values.add(new BoxplotEntry("<html><strong>Row:</strong>" + rowLabel + "<br/><strong>Col:</strong>" + colLabel + "</html>", value));
-                    }
-                }
-
-            }
-        }
-
-        if (values.isEmpty()) {
-            return null;
-        }
-
-        Collections.sort(values);
-
-        int size = values.size();
-        double min = values.get(0).value;
-        double max = values.get(values.size() - 1).value;
-
-        double median;
-        if (size % 2 == 0) {
-            median = (values.get(size / 2).value + values.get(size / 2 - 1).value) / 2;
-        } else {
-            median = (values.get(size / 2).value);
-        }
-
-        double[] valueArray = new double[values.size()];
-        int c = 0;
-        for (BoxplotEntry d : values) {
-            valueArray[c++] = d.value.doubleValue();
-        }
-
-        Percentile percentile = new Percentile();
-        double q1 = percentile.evaluate(valueArray, 25);
-        double q3 = percentile.evaluate(valueArray, 75);
-
-        double range = _maxValue - _minValue;
-
-        double minP = (min - _minValue) / range;
-        double maxP = (max - _minValue) / range;
-        double medianP = (median - _minValue) / range;
-        double q1P = (q1 - _minValue) / range;
-        double q3P = (q3 - _minValue) / range;
-        DecimalFormat format = new DecimalFormat("#.###");
-
-        JLabel label = new JLabel("<html><table border='0' cellspacing='0'><tr><td><strong>Min</strong></td><td>" + format.format(min) + "</td><tr/><tr><td><strong>Median</strong></td><td>" + format.format(median) + "</td><tr/>"
-                + "<tr><td><strong>" + "Max" + "</strong></td><td>" + format.format(max) + "</td></table></html>");
-        Font font = UI.fontPlain.deriveFont(12f);
-        label.setFont(font);
-        label.setForeground(UI.colorBlack3);
-        label.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 2));
-        label.setSize(label.getPreferredSize());
-
-        BufferedImage image = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2D = (Graphics2D) image.createGraphics();
-        //g2D.setColor(Color.BLUE);
-        //g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
-        label.paint(g2D);
-        return image;
-        
-        //This is a way to use JLabel, also need to create one like this
-    }
+//    @Override
+//    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
+//        if (getCoolMapObject() == null || activeCell == null || !activeCell.isValidCell(getCoolMapObject())) {
+//            return null;
+//        }
+//
+//        if (getCoolMapObject().getBaseCMatrices().isEmpty()) {
+//            return null;
+//        }
+//
+//        CoolMapObject obj = getCoolMapObject();
+//        VNode rowNode = obj.getViewNodeRow(activeCell.getRow().intValue());
+//        VNode colNode = obj.getViewNodeColumn(activeCell.getCol().intValue());
+//
+//        if (rowNode == null || colNode == null) {
+//            return null;
+//        }
+//
+//        if (rowNode.isSingleNode() && colNode.isSingleNode()) {
+//            return null;
+//        }
+//
+//        Integer[] rowIndices;
+//        Integer[] colIndices;
+//
+//        CMatrix m0 = (CMatrix) getCoolMapObject().getBaseCMatrices().get(0);
+//
+//        if (rowNode.isGroupNode()) {
+//            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.ROW);
+//        } else {
+//            rowIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+//        }
+//
+//        if (colNode.isGroupNode()) {
+//            colIndices = colNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.COLUMN);
+//        } else {
+//            colIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfColName(colNode.getName())};
+//        }
+//
+//        List<CMatrix> matrices = getCoolMapObject().getBaseCMatrices();
+//        Double value;
+//        ArrayList<BoxplotEntry> values = new ArrayList<BoxplotEntry>();
+//
+//        for (Integer i : rowIndices) {
+//            if (i == null || i < 0) {
+//                continue;
+//            }
+//
+//            String rowLabel = m0.getRowLabel(i);
+//
+//            for (Integer j : colIndices) {
+//
+//                if (j == null || j < 0) {
+//                    continue;
+//                }
+//                //Double value = (Double) getCoolMapObject().getViewValue(i, j);
+//                //This is wrong. it should eb the base matrix value, not the view values
+//                String colLabel = m0.getColLabel(j);
+//
+//                for (CMatrix<Double> matrix : matrices) {
+//
+//                    value = matrix.getValue(i, j);
+//
+//                    if (value == null || value.isNaN()) {
+//                        continue;
+//                    } else {
+//                        //System.out.println(i + " " + j + " " + v);
+//                        values.add(new BoxplotEntry("<html><strong>Row:</strong>" + rowLabel + "<br/><strong>Col:</strong>" + colLabel + "</html>", value));
+//                    }
+//                }
+//
+//            }
+//        }
+//
+//        if (values.isEmpty()) {
+//            return null;
+//        }
+//
+//        Collections.sort(values);
+//
+//        int size = values.size();
+//        double min = values.get(0).value;
+//        double max = values.get(values.size() - 1).value;
+//
+//        double median;
+//        if (size % 2 == 0) {
+//            median = (values.get(size / 2).value + values.get(size / 2 - 1).value) / 2;
+//        } else {
+//            median = (values.get(size / 2).value);
+//        }
+//
+//        double[] valueArray = new double[values.size()];
+//        int c = 0;
+//        for (BoxplotEntry d : values) {
+//            valueArray[c++] = d.value.doubleValue();
+//        }
+//
+//        Percentile percentile = new Percentile();
+//        double q1 = percentile.evaluate(valueArray, 25);
+//        double q3 = percentile.evaluate(valueArray, 75);
+//
+//        double range = _maxValue - _minValue;
+//
+//        double minP = (min - _minValue) / range;
+//        double maxP = (max - _minValue) / range;
+//        double medianP = (median - _minValue) / range;
+//        double q1P = (q1 - _minValue) / range;
+//        double q3P = (q3 - _minValue) / range;
+//        DecimalFormat format = new DecimalFormat("#.###");
+//
+//        JLabel label = new JLabel("<html><table border='0' cellspacing='0'><tr><td><strong>Min</strong></td><td>" + format.format(min) + "</td><tr/><tr><td><strong>Median</strong></td><td>" + format.format(median) + "</td><tr/>"
+//                + "<tr><td><strong>" + "Max" + "</strong></td><td>" + format.format(max) + "</td></table></html>");
+//        Font font = UI.fontPlain.deriveFont(12f);
+//        label.setFont(font);
+//        label.setForeground(UI.colorBlack3);
+//        label.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 2));
+//        label.setSize(label.getPreferredSize());
+//
+//        BufferedImage image = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//        Graphics2D g2D = (Graphics2D) image.createGraphics();
+//        //g2D.setColor(Color.BLUE);
+//        //g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
+//        label.paint(g2D);
+//        return image;
+//        
+//        //This is a way to use JLabel, also need to create one like this
+//    }
 
     private class BoxplotEntry implements Comparable<BoxplotEntry> {
 

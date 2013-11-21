@@ -4178,7 +4178,7 @@ public final class CoolMapView<BASE, VIEW> {
                 float percentX = (mouse.x - (colNode.getViewOffset() + _mapDimension.x)) / colNode.getViewSizeInMap(_zoom.x);
                 float percentY = (mouse.y - (rowNode.getViewOffset() + _mapDimension.y)) / rowNode.getViewSizeInMap(_zoom.y);
                 
-                Image subTip = renderer.getSubTip(_activeCell, percentX, percentY, Math.round(colNode.getViewSizeInMap(_zoom.x)), Math.round(rowNode.getViewSizeInMap(_zoom.y)));
+                Image subTip = renderer.getSubTip(_coolMapObject, rowNode, colNode, percentX, percentY, Math.round(colNode.getViewSizeInMap(_zoom.x)), Math.round(rowNode.getViewSizeInMap(_zoom.y)));
                 if (subTip == null) {
                     return;
                 }

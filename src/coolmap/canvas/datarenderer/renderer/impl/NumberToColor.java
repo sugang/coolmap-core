@@ -388,6 +388,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                 Color c = _gradientColors[index];
                 //System.out.println(c);
                 g2D.setColor(c);
+//                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
             } catch (Exception e) {
                 System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);

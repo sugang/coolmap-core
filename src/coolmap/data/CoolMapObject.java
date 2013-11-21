@@ -8,7 +8,6 @@ import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToBoxPlot;
-import coolmap.canvas.datarenderer.renderer.model.AnnotationRenderer;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
@@ -76,7 +75,6 @@ public final class CoolMapObject<BASE, VIEW> {
     //view renderer
     protected ViewRenderer<VIEW> _viewRenderer = null;
     //annotation renderer
-    protected AnnotationRenderer<BASE, VIEW> _annotationRenderer = null;
     protected SnippetConverter<VIEW> _snippetConverter = null;
     private final HashSet<CObjectListener> _coolMapDataListeners = new HashSet<CObjectListener>();
     private final HashSet<CObjectStateStoreListener> _cObjectStateRestoreListeners = new HashSet<CObjectStateStoreListener>();
@@ -340,9 +338,9 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public void setAnnotationRenderer(AnnotationRenderer<BASE, VIEW> annotationRenderer) {
-        _annotationRenderer = annotationRenderer;
-    }
+//    public void setAnnotationRenderer(AnnotationRenderer<BASE, VIEW> annotationRenderer) {
+//        _annotationRenderer = annotationRenderer;
+//    }
 
     /**
      * get view value, attempt to retreive from cache used for generate tooltips
@@ -1757,9 +1755,9 @@ public final class CoolMapObject<BASE, VIEW> {
         return _viewRenderer;
     }
 
-    public AnnotationRenderer<BASE, VIEW> getAnnotationRenderer() {
-        return _annotationRenderer;
-    }
+//    public AnnotationRenderer<BASE, VIEW> getAnnotationRenderer() {
+//        return _annotationRenderer;
+//    }
 
 //    public Filter<VIEW> getViewFilter() {
 //        return _viewFilter;
@@ -1855,7 +1853,6 @@ public final class CoolMapObject<BASE, VIEW> {
 //        _viewFilter = null;
         _masterFilter.clearFilters();
         _viewRenderer = null;
-        _annotationRenderer = null;
         _cAggregator = null;
         _snippetConverter = null;
         _sortTracker.clear();
