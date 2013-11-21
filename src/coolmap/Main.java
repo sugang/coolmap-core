@@ -86,15 +86,15 @@ public class Main {
             CoolMapObject object;
             COntology onto;
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
-            //CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
+//            CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
             //import sample
             //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
 // /Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt
 //            "/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"
 //            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
+//            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
             
-            
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
             System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();
@@ -107,13 +107,13 @@ public class Main {
             for (Object label : matrix.getRowLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertRowNodes(nodes);
+//            object.insertRowNodes(nodes);
 
             nodes.clear();
             for (Object label : matrix.getColLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertColumnNodes(nodes);
+//            object.insertColumnNodes(nodes);
 
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,6 +140,9 @@ public class Main {
 //            object.insertColumnNodes(nodes);
             onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
+            
+            object.insertRowNodes(onto.getRootNodesOrdered());
+            object.insertColumnNodes(onto.getRootNodesOrdered());
 
             object.setAggregator(new DoubleDoubleMean());
             object.setViewRenderer(new NumberToBoxPlot(), true);

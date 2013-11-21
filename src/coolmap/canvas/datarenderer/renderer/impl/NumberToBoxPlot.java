@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package coolmap.canvas.datarenderer.renderer.impl;
 
 import com.google.common.collect.Range;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
+import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.contology.model.COntology;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Component;
@@ -26,6 +28,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
@@ -36,13 +41,14 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
  * @author sugang
  */
-public class NumberToBoxPlot extends ViewRenderer<Double>{
-    
+public class NumberToBoxPlot extends ViewRenderer<Double> {
+
     private JTextField minValueField = new JTextField();
     private JTextField maxValueField = new JTextField();
 
@@ -64,7 +70,7 @@ public class NumberToBoxPlot extends ViewRenderer<Double>{
         c.ipady = 5;
         c.insets = new Insets(5, 5, 5, 5);
         c.gridwidth = 1;
-        
+
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
@@ -175,13 +181,11 @@ public class NumberToBoxPlot extends ViewRenderer<Double>{
         g.setColor(barColor);
         int boxNum = 10;
         g.setStroke(UI.stroke1_5);
-        for(int i=0; i<boxNum; i++){
+        for (int i = 0; i < boxNum; i++) {
             int h = (height - 12) / boxNum * i;
-            g.drawLine(i * width/boxNum, height - 12 - h, (i + 1) * width/boxNum, height - 12 - h);
+            g.drawLine(i * width / boxNum, height - 12 - h, (i + 1) * width / boxNum, height - 12 - h);
         }
-        
-        
-        
+
         g.setColor(barColor);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");
@@ -260,11 +264,43 @@ public class NumberToBoxPlot extends ViewRenderer<Double>{
 
     @Override
     protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
-        _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        if (v == null || v.isNaN()) {
+            //System.out.println(v);
+        } else {
+            g2D.setColor(UI.colorBlack2);
+            g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+            g2D.setColor(barColor);
+            double medianP = (v - _minValue) / (_maxValue - _minValue);
+            g2D.drawLine((int) (anchorX + 1), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth - 1), (int) (anchorY + cellHeight - cellHeight * medianP));
+
+        }
     }
 
+    @Override
+    public Image getSubTip(MatrixCell activeCell, float percentX, float PercentY, int cellWidth, int cellHeight) {
+
+        try {
+            if (activeCell.valueEquals(lastActivreCell)) {
+                return subTip; //Still in the same cell
+            } else {
+                updateSubTip(activeCell);
+            }
+        } catch (Exception e) {
+            updateSubTip(activeCell);
+        }
+
+        return subTip;
+    }
+
+    private void updateSubTip(MatrixCell activeCell) {
+        
+    }
+
+    private MatrixCell lastActivreCell = null;
+    private BufferedImage subTip = null;
+
     private Color barColor = UI.colorLightGreen0;
-    
+
     @Override
     protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
         if (v == null || v.isNaN()) {
@@ -273,10 +309,111 @@ public class NumberToBoxPlot extends ViewRenderer<Double>{
             try {
                 g2D.setColor(UI.colorBlack2);
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
-                int height = (int)Math.round(cellHeight * (v - _minValue)/(_maxValue - _minValue));
                 g2D.setColor(barColor);
-                g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
-                g2D.setColor(UI.colorBlack2);
+                //This is the 
+
+                //int height = (int)Math.round(cellHeight * (v - _minValue)/(_maxValue - _minValue));
+                //g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
+                if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
+                    double medianP = (v - _minValue) / (_maxValue - _minValue);
+                    g2D.drawLine((int) (anchorX + 1), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth - 1), (int) (anchorY + cellHeight - cellHeight * medianP));
+                } else {
+                    Integer[] rowIndices;
+                    Integer[] colIndices;
+                    if (rowNode.isGroupNode()) {
+                        rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.ROW);
+                    } else {
+                        rowIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+                    }
+                    if (columnNode.isGroupNode()) {
+                        colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) getCoolMapObject().getBaseCMatrices().get(0), COntology.COLUMN);
+                    } else {
+                        colIndices = new Integer[]{((CMatrix) getCoolMapObject().getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+                    }
+
+                    //A box plot across all matrices
+                    List<CMatrix> matrices = getCoolMapObject().getBaseCMatrices();
+                    Double value;
+                    ArrayList<Double> values = new ArrayList<Double>();
+
+                    //add values
+                    for (Integer i : rowIndices) {
+                        if (i == null || i < 0) {
+                            continue;
+                        }
+
+                        for (Integer j : colIndices) {
+
+                            if (j == null || j < 0) {
+                                continue;
+                            }
+                            //Double value = (Double) getCoolMapObject().getViewValue(i, j);
+                            //This is wrong. it should eb the base matrix value, not the view values
+                            for (CMatrix<Double> matrix : matrices) {
+
+                                value = matrix.getValue(i, j);
+
+                                if (value == null || value.isNaN()) {
+                                    continue;
+                                } else {
+                                    //System.out.println(i + " " + j + " " + v);
+                                    values.add(value);
+                                }
+                            }
+
+                        }
+                    }
+
+                    if (values.isEmpty()) {
+                        return;
+                    }
+
+                    Collections.sort(values);
+                    int size = values.size();
+                    double min = values.get(0);
+                    double max = values.get(values.size() - 1);
+                    double median;
+                    if (size % 2 == 0) {
+                        median = (values.get(size / 2) + values.get(size / 2 - 1)) / 2;
+                    } else {
+                        median = (values.get(size / 2));
+                    }
+
+                    double[] valueArray = new double[values.size()];
+                    int c = 0;
+                    for (Double d : values) {
+                        valueArray[c++] = d.doubleValue();
+                    }
+
+                    Percentile percentile = new Percentile();
+                    double q1 = percentile.evaluate(valueArray, 25);
+                    double q3 = percentile.evaluate(valueArray, 75);
+//                    double min = percentile.evaluate(valueArray, 0);
+//                    double max = percentile.evaluate(valueArray, 100)
+
+                    double range = _maxValue - _minValue;
+                    double minP = (min - _minValue) / range;
+                    double maxP = (max - _minValue) / range;
+                    double medianP = (median - _minValue) / range;
+                    double q1P = (q1 - _minValue) / range;
+                    double q3P = (q3 - _minValue) / range;
+
+                    try {
+                        g2D.drawLine((int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * maxP), (int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * minP));
+
+                        g2D.setColor(UI.colorLightGreen4);
+                        g2D.fillRect((int) (anchorX + cellWidth / 4), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth / 2), (int) (cellHeight * (q3P - q1P)));
+
+                        g2D.setColor(barColor);
+                        g2D.drawRect((int) (anchorX + cellWidth / 4), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth / 2), (int) (cellHeight * (q3P - q1P)));
+
+                        g2D.drawLine((int) (anchorX + 1), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth - 1), (int) (anchorY + cellHeight - cellHeight * medianP));
+                    } catch (Exception e) {
+                        System.err.println("Boxplot render exception");
+                    }
+                }
+
+                g2D.setColor(UI.colorBlack1);
                 g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             } catch (Exception e) {
                 System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
@@ -436,5 +573,5 @@ public class NumberToBoxPlot extends ViewRenderer<Double>{
             return l;
         }
 
-    }    
+    }
 }

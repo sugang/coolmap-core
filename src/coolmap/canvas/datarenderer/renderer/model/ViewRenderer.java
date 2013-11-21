@@ -9,17 +9,22 @@ import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.Tools;
+import coolmap.utils.graphics.UI;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import sun.awt.X11.XConstants;
 
 /**
  *
@@ -508,4 +513,59 @@ public abstract class ViewRenderer<VIEW> {
 //    protected final void setAntiAliasing(boolean antiAliasing){
 //        _antiAliasing = antiAliasing;
 //    }
+    public static BufferedImage createToolTipFromJLabel(JLabel label){
+        return null;
+    }
+    
+    
+    
+    
+    public static BufferedImage createToolTipFromString(String tipString){
+        if(tipString == null || tipString.length() == 0)
+            return null;
+        
+        int width = 2, height = 2;
+        Font font = UI.fontMono.deriveFont(12f).deriveFont(Font.BOLD);
+        Color fontColor = UI.colorBlack4;
+        Color backgroundColor = UI.colorGrey2;
+        BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(width, height);
+        Graphics2D g2D = image.createGraphics();
+        g2D.setFont(font);
+        FontMetrics fMetrics = g2D.getFontMetrics();
+        int marginLR = 10;
+        int marginTB = 4;
+        
+        String[] lines = tipString.split("\\n");
+        
+        for(String line : lines){
+            int w = fMetrics.stringWidth(line);
+            if(width < w){
+                width = w;
+            }
+        }
+        
+        width += marginLR*2;
+        
+        height = lines.length * (font.getSize() + marginTB * 2);
+        
+        
+        
+        image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+        g2D = image.createGraphics();
+        g2D.setFont(font);
+        g2D.setColor(backgroundColor);
+        g2D.fillRoundRect(0, 0, width, height, 5, 5);
+        
+        g2D.setColor(fontColor);
+        g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        g2D.translate(marginLR, 0);
+        for(String line : lines){
+            g2D.translate(0, marginTB + font.getSize());
+            g2D.drawString(line, 0, -2);
+            g2D.translate(0, marginTB);
+        }
+    
+        return image;
+    } 
 }

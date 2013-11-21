@@ -254,6 +254,8 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
         //g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
         label.paint(g2D);
         return image;
+        
+        //This is a way to use JLabel, also need to create one like this
     }
 
     private class BoxplotEntry implements Comparable<BoxplotEntry> {
@@ -352,6 +354,7 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
 
                     }
                 }
+                
                 if (values.isEmpty()) {
                     return;
                 }
