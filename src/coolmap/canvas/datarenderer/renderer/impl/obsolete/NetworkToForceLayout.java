@@ -59,12 +59,12 @@ public class NetworkToForceLayout extends ViewRenderer<LNetwork> {
     }
 
     @Override
-    protected void _renderCellLD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //
     }
 
     @Override
-    protected void _renderCellSD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //
         //System.out.println("network:" + v);
         BufferedImage image = v.drawNetwork(Math.round(cellWidth), Math.round(cellHeight));
@@ -72,7 +72,7 @@ public class NetworkToForceLayout extends ViewRenderer<LNetwork> {
     }
 
     @Override
-    protected void _renderCellHD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(LNetwork v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //more refined network
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }

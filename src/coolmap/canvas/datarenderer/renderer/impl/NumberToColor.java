@@ -284,7 +284,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         g.setPaint(paint);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
 
-        g.setColor(UI.colorGrey1);
+        g.setColor(UI.colorBlack2);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");
         g.drawString(format.format(_minValue), 2, 23);
@@ -368,14 +368,15 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
             try {
                 int index = (int) ((v - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
@@ -398,7 +399,7 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
 
 //        g2D.setColor(Color.BLACK);

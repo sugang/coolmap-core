@@ -1,12 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.canvas.datarenderer.renderer.model;
 
 import coolmap.canvas.CoolMapView;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.utils.StateSavable;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -22,12 +19,13 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import org.json.JSONObject;
 
 /**
  *
  * @author gangsu
  */
-public abstract class ViewRenderer<VIEW> {
+public abstract class ViewRenderer<VIEW> implements StateSavable {
 
     private boolean _antiAliasing = true;
     private int _threadNum = 2;
@@ -140,11 +138,38 @@ public abstract class ViewRenderer<VIEW> {
 
     protected abstract void _prepareGraphics(Graphics2D g2D);
 
-    protected abstract void _renderCellLD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight);
+    protected abstract void _renderCellLD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
-    protected abstract void _renderCellSD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight);
+    protected abstract void _renderCellSD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
-    protected abstract void _renderCellHD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight);
+    protected abstract void _renderCellHD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
+    
+    /**
+     * a built in method to mark Null
+     * @param v
+     * @param rowNode
+     * @param columnNode
+     * @param g2D
+     * @param anchorX
+     * @param anchorY
+     * @param cellWidth
+     * @param cellHeight 
+     */
+    protected void _markNull(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight){
+        if(v == null){
+            g2D.setColor(UI.colorBlack2);
+            int anchorXI = Math.round(anchorY);
+            int anchorYI = Math.round(anchorY);
+            int widthI = Math.round(cellWidth);
+            int heightI = Math.round(cellHeight);
+            g2D.setStroke(UI.stroke1_5);
+            g2D.fillRect(anchorXI, anchorYI, widthI, heightI);
+            g2D.setColor(UI.colorSHOJYOHI);
+            g2D.drawLine(anchorXI, anchorYI, anchorXI+widthI, anchorYI+heightI);
+            g2D.drawLine(anchorXI + widthI, anchorYI, anchorXI, anchorYI + heightI);
+        }
+    }
+    
 
 //    protected abstract void _renderCellAnnotationLD();
 //    
@@ -413,10 +438,10 @@ public abstract class ViewRenderer<VIEW> {
 
             _prepareGraphics(g2D);
 
-            float anchorX;
-            float anchorY;
-            float cellWidth;
-            float cellHeight;
+            int anchorX;
+            int anchorY;
+            int cellWidth;
+            int cellHeight;
             float offsetX = __data.getViewNodeColumn(__matrixFromCol).getViewOffset();
             float offsetY = __data.getViewNodeRow(__matrixFromRow).getViewOffset();
             VNode rowNode;
@@ -432,13 +457,13 @@ public abstract class ViewRenderer<VIEW> {
 
                         value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
 
-                        anchorX = Math.round(colNode.getViewOffset() - offsetX);
+                        anchorX = (int)Math.round(colNode.getViewOffset() - offsetX);
 
                         //sometimes error here.
-                        anchorY = Math.round(rowNode.getViewOffset() - offsetY);
+                        anchorY = (int)Math.round(rowNode.getViewOffset() - offsetY);
 
-                        cellWidth = Math.round(colNode.getViewSizeInMap(__zoomX));
-                        cellHeight = Math.round(rowNode.getViewSizeInMap(__zoomY));
+                        cellWidth = (int)Math.round(colNode.getViewSizeInMap(__zoomX));
+                        cellHeight = (int)Math.round(rowNode.getViewSizeInMap(__zoomY));
 
                         //System.out.println(cellWidth + " " + cellHeight);
                         //each cell can take a different size. Therefore need to 
@@ -464,7 +489,8 @@ public abstract class ViewRenderer<VIEW> {
                         }
 
 //                    System.out.println(cellWidth + " " + cellHeight);
-//                    g2D.setClip((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
+                        
+                    if(_clipCell)g2D.setClip((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
 //                    System.out.println("Render SD row:" + i + " col:" + j);
                         switch (__mode) {
                             case LD:
@@ -511,6 +537,13 @@ public abstract class ViewRenderer<VIEW> {
 
         }
     }
+    
+    protected boolean _clipCell = true;
+    
+    protected void setClipCell(boolean clip){
+        _clipCell = clip;
+    }
+    
 
     protected final boolean getAntiAliasing() {
         return _antiAliasing;
@@ -587,4 +620,27 @@ public abstract class ViewRenderer<VIEW> {
     
         return image;
     } 
+
+    /**
+     * override this to save state to JSON
+     * @return 
+     */
+    @Override
+    public JSONObject saveState() {
+        return null;
+    }
+
+    /**
+     * override this to make this restorable
+     * @param savedState
+     * @return 
+     */
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
+    
+    
 }

@@ -14,11 +14,8 @@ import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JComponent;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
@@ -101,7 +98,7 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
 //        if (cellWidth > 1 || cellHeight > 1) {
 //            _renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -122,7 +119,7 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //System.out.println("Rendered");
         //System.out.println(anchorX + " " + anchorY);
 
@@ -300,7 +297,7 @@ public class DoubleToSortedLines extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 

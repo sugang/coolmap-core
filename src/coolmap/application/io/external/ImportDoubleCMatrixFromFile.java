@@ -4,7 +4,6 @@
  */
 package coolmap.application.io.external;
 
-import coolmap.application.io.IOTerm;
 import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
 import java.io.BufferedReader;
@@ -51,7 +50,7 @@ public class ImportDoubleCMatrixFromFile {
                 try {
                     value = Double.parseDouble(ele[i]);
                 } catch (Exception e) {
-                    value = Double.NaN;
+                    value = null;
                 }
                 matrix.setValue(counter, i - 1, value);
             }

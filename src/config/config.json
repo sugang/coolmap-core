@@ -23,7 +23,8 @@
                         "load": [
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToColor",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToBar",
-                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot"
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot",
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToLine"
                             ],
                         "preferred-location":"left-bottom"
                     }

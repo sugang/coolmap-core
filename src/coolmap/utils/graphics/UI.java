@@ -64,6 +64,16 @@ public class UI {
     public static Color colorDirectBaseline = new Color(217, 95, 14, 200);
     public static Color colorLightPink = new Color(253, 224, 221);
     public static Color colorPink = new Color(250, 159, 181);
+    
+    public static Color colorSHOJYOHI = new Color(226,4,27);
+    public static Color colorTSUYUKUSA = new Color(46,169,223);
+    public static Color colorMIZU = new Color(129,199,212);
+    
+    
+    
+    
+    
+    
 
     //dash can be quite expensive to redraw for some reason.
     public static BasicStroke strokeDash1_5 = new BasicStroke(1.5f,

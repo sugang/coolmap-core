@@ -5034,7 +5034,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     private class NotificationLayer extends JPanel {
 
-        private Color _bgColor = UI.mixOpacity(Color.WHITE, 0.2f);
+        private Color _bgColor = UI.colorGrey2;
         private Color _warningBgColor = UI.mixOpacity(UI.colorRedWarning, 0.3f);
         private Color _activeBgColor = UI.mixOpacity(UI.colorLightBlue0, 0.3f);
 
@@ -5062,7 +5062,7 @@ public final class CoolMapView<BASE, VIEW> {
 
             if (_isKeyboardActive) {
                 if (_isActive) {
-                    g.setColor(_activeBgColor);
+                    g.setColor(_bgColor);
                 } else {
                     g.setColor(_warningBgColor);
                 }
@@ -5133,7 +5133,7 @@ public final class CoolMapView<BASE, VIEW> {
             g.fillRoundRect(getWidth() - width - 8, 29 + 24, width, 18, 5, 5);
 //            g.setColor(UI.colorGrey2);
 //            g.drawString(tip, getWidth() - width - 8 + 4, 29 + 24 + 18 - 4);
-            g.setColor(UI.colorGrey2);
+            g.setColor(UI.colorBlack3);
             g.drawString(tip, getWidth() - width - 8 + 3, 29 + 24 + 18 - 5);
         }
         private ArrayList<Image> _linkIcons = new ArrayList(10);

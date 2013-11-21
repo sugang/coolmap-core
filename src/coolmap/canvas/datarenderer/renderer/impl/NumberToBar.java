@@ -40,6 +40,7 @@ import javax.swing.JTextField;
 /**
  *
  * @author sugang
+ * this is a base one for all.
  */
 public class NumberToBar extends ViewRenderer<Double> {
 
@@ -161,7 +162,7 @@ public class NumberToBar extends ViewRenderer<Double> {
 
     }
 
-    private void updateLegend() {
+    protected void updateLegend() {
 
         int width = DEFAULT_LEGEND_WIDTH;
         int height = DEFAULT_LEGENT_HEIGHT;
@@ -181,7 +182,7 @@ public class NumberToBar extends ViewRenderer<Double> {
         
         
         
-        g.setColor(UI.colorGrey1);
+        g.setColor(UI.colorBlack2);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");
         g.drawString(format.format(_minValue), 2, 23);
@@ -191,16 +192,20 @@ public class NumberToBar extends ViewRenderer<Double> {
         g.drawString(maxString, width - 2 - swidth, 23);
         g.dispose();
     }
+    
+    
+    
+     
 
-    private BufferedImage legend;
+    protected BufferedImage legend;
 
     @Override
     public Image getLegend() {
         return legend;
     }
 
-    private double _minValue = 0;
-    private double _maxValue = 1;
+    protected double _minValue = 0;
+    protected double _maxValue = 1;
     private Color[] _gradientColors = null;
 
     @Override
@@ -258,14 +263,15 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null || v.isNaN()) {
             //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
             try {
                 g2D.setColor(UI.colorBlack3);
@@ -283,7 +289,7 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
 
 //        g2D.setColor(Color.BLACK);

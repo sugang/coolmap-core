@@ -5,14 +5,8 @@
 package coolmap.canvas.viewmaps;
 
 import coolmap.data.CoolMapObject;
-import coolmap.data.cmatrixview.model.VNode;
-import coolmap.utils.graphics.UI;
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import javax.management.relation.RoleInfo;
 
 /**
  *
@@ -40,7 +34,7 @@ public class CoolMapLayer<BASE, VIEW> implements MapLayer<BASE, VIEW> {
         
         }
         catch(InterruptedException ie){
-            System.out.println("Interrupted");
+//            System.out.println("Interrupted");
         }
         catch(Exception e){
             e.printStackTrace();

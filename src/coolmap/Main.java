@@ -3,7 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToLine;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.DoubleToColor;
 import coolmap.canvas.datarenderer.renderer.impl.obsolete.NetworkToForceLayout;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
@@ -144,7 +144,7 @@ public class Main {
             object.insertColumnNodes(onto.getRootNodesOrdered());
 
             object.setAggregator(new DoubleDoubleMean());
-            object.setViewRenderer(new NumberToBoxPlot(), true);
+            object.setViewRenderer(new NumberToLine(), true);
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//

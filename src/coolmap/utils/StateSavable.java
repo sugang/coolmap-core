@@ -14,7 +14,16 @@ import org.json.JSONObject;
  */
 public interface StateSavable {
     
+    /**
+     * state and be persisted using JSON
+     * @return 
+     */
     public abstract JSONObject saveState();
     
-    public boolean restoreState(JSONObject savedState);
+    /**
+     * state can be restored from JSON
+     * @param savedState
+     * @return 
+     */
+    public abstract boolean restoreState(JSONObject savedState);
 }

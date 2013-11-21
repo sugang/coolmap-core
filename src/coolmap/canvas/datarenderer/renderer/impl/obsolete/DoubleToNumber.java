@@ -4,23 +4,15 @@
  */
 package coolmap.canvas.datarenderer.renderer.impl.obsolete;
 
-import coolmap.data.aggregator.impl.DoubleDoubleMax;
-import coolmap.data.CoolMapObject;
-import coolmap.data.cmatrix.impl.DoubleCMatrix;
-import coolmap.data.cmatrixview.model.VNode;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
+import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.JComponent;
 
 /**
  *
@@ -99,7 +91,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //_renderCellSD(v, g2D, anchorX, anchorY, cellWidth, cellHeight);
         if (cellWidth > 5 && cellHeight > 5) {
             _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -119,7 +111,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //System.out.println("Rendered");
         //System.out.println(anchorX + " " + anchorY);
 
@@ -157,7 +149,7 @@ public class DoubleToNumber extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(Double v, VNode rowNode, VNode colNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 

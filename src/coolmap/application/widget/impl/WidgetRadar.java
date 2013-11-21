@@ -49,9 +49,6 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     private int margin = 10;
 
-    private void updatePercentage() {
-
-    }
 
     public void fitView() {
         //need to compute the optimal percentage for the activecoolMap
@@ -143,6 +140,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
 //            _radarPanel.repaint();
         } catch (Exception ex) {
+            //no exception here
             ex.printStackTrace();
         }
 
@@ -333,20 +331,28 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
         try {
 
             busy = true;
+//            System.err.println("update radar");
             _radarPanel.repaint();
 //            renderer.getRenderedRadarView(object, L_VIEWPORT, L_LEFTTOP);
             //redraw the buffered image
             if (Thread.interrupted()) {
                 return;
             }
+            
             CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
             if (object == null) {
+                busy = false;
                 return;
             }
+            
             ViewRenderer renderer = object.getViewRenderer();
             if (renderer == null) {
+                busy = false;
                 return;
             }
+            
+            
+            
             float zoomX = object.getCoolMapView().getZoomX();
             float zoomY = object.getCoolMapView().getZoomY();
             float mapWidth = object.getCoolMapView().getMapWidth();
@@ -357,6 +363,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
             if (previewWidth < margin * 2 || previewHeight < margin * 2) {
                 bufferedImage = null;
+                busy = false;
                 return;
             }
 

@@ -61,12 +61,12 @@ public class ImageTest extends ViewRenderer<Object> {
     }
 
     @Override
-    protected void _renderCellLD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellLD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 
     @Override
-    protected void _renderCellSD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellSD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         //need the names of row nodes and column nodes
         try {
             int y = rowNode.getViewIndex().intValue();
@@ -85,7 +85,7 @@ public class ImageTest extends ViewRenderer<Object> {
     }
 
     @Override
-    protected void _renderCellHD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight) {
+    protected void _renderCellHD(Object v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         _renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
     }
 

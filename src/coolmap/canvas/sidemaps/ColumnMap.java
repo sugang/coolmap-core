@@ -11,8 +11,14 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -236,7 +242,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
             }
 
             if (Thread.currentThread().isInterrupted()) {
-                System.out.println("Interrupted");
+//                System.out.println("Interrupted");
                 return;
             }
 
@@ -244,7 +250,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
 
             g2D.dispose();
             if (Thread.currentThread().isInterrupted()) {
-                System.out.println("Interrupted");
+//                System.out.println("Interrupted");
                 return;//If interrupted, don't update.
             }
             _mapBuffer = buffer;
