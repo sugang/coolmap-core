@@ -38,7 +38,7 @@ public class ImageTest extends ViewRenderer<Object> {
     }
 
     @Override
-    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
         //load the images from these rows
         maps.clear();
         for (int i = fromRow; i < toRow; i++) {
@@ -57,7 +57,7 @@ public class ImageTest extends ViewRenderer<Object> {
     }
 
     @Override
-    protected void prepareGraphics(Graphics2D g2D) {
+    public void prepareGraphics(Graphics2D g2D) {
     }
 
     @Override
@@ -90,6 +90,6 @@ public class ImageTest extends ViewRenderer<Object> {
     }
 
     @Override
-    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 }

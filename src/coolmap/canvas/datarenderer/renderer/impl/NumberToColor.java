@@ -368,11 +368,11 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void prepareGraphics(Graphics2D g2D) {
+    public void prepareGraphics(Graphics2D g2D) {
         g2D.setFont(UI.fontMono.deriveFont(12f));
     }
 
@@ -409,16 +409,34 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     @Override
     public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-
-//        g2D.setColor(Color.BLACK);
-//        g2D.drawString(df.format(v), anchorX, anchorY + cellHeight);
+        if (v == null || v.isNaN()) {
+            //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            try {
+                int index = (int) ((v - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
+                if (index >= _gradientColors.length) {
+                    index = _gradientColors.length - 1;
+                }
+                if (index < 0) {
+                    index = 0;
+                }
+                Color c = _gradientColors[index];
+                //System.out.println(c);
+                g2D.setColor(c);
+//                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
+                g2D.fillRoundRect((int) anchorX + 1, (int) anchorY + 1, (int) cellWidth - 2, (int) cellHeight - 2, 4, 4);
+            } catch (Exception e) {
+                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
+                //e.printStackTrace();
+            }
+        }
     }
 
     DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
-    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     private JPanel configUI = new JPanel();

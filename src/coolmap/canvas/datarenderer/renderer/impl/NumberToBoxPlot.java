@@ -282,11 +282,11 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void prepareGraphics(Graphics2D g2D) {
+    public void prepareGraphics(Graphics2D g2D) {
 //        g2D.setFont(UI.fontMono.deriveFont(12f));
 //        g2D.setColor(UI.colorLightYellow);
     }
@@ -600,7 +600,7 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
 
 //    DecimalFormat df = new DecimalFormat("#.##");
     @Override
-    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     private JPanel configUI = new JPanel();

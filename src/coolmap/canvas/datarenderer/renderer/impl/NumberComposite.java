@@ -5,6 +5,7 @@
  */
 package coolmap.canvas.datarenderer.renderer.impl;
 
+import coolmap.application.CoolMapMaster;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
@@ -15,11 +16,17 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,9 +43,14 @@ public class NumberComposite extends ViewRenderer<Double> {
     private ViewRenderer<Double> rowColumnGroupRenderer;
     private ViewRenderer<Double> singleRenderer;
 
+    private JLabel singleLegend;
+    private JLabel rowLegend;
+    private JLabel columnLegend;
+    private JLabel rowColumnLegend;
+
     public NumberComposite() {
 
-        setName("What the fuck man");
+        setName("Number to Composite");
         System.out.println("Created a new NumberComposite");
         setDescription("A renderer that can be used to assign renderers to different aggregations");
 
@@ -49,39 +61,164 @@ public class NumberComposite extends ViewRenderer<Double> {
         c.gridy = 0;
         c.ipadx = 5;
         c.ipady = 5;
-        c.insets = new Insets(5, 5, 5, 5);
+        c.insets = new Insets(2, 2, 2, 2);
         c.gridwidth = 1;
 
         //This combo box will need to be able to add registered
-        singleComboBox = new JComboBox<ViewRenderer<Double>>();
-        rowComboBox = new JComboBox<ViewRenderer<Double>>();
-        columnComboBox = new JComboBox<ViewRenderer<Double>>();
-        rowColumnComboBox = new JComboBox<ViewRenderer<Double>>();
+        singleComboBox = new JComboBox();
+        rowComboBox = new JComboBox();
+        columnComboBox = new JComboBox();
+        rowColumnComboBox = new JComboBox();
+
+        singleLegend = new JLabel();
+        rowLegend = new JLabel();
+        columnLegend = new JLabel();
+        rowColumnLegend = new JLabel();
+
+        singleLegend.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        rowLegend.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        columnLegend.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        rowColumnLegend.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
         //Add them
+        JLabel label = new JLabel("Default:");
+        label.setToolTipText("Default renderer");
         c.gridx = 0;
         c.gridy++;
-        configUI.add(new JLabel("Default:"), c);
+        configUI.add(label, c);
         c.gridx = 1;
         configUI.add(singleComboBox, c);
+        c.gridx = 2;
+        JButton config = new JButton(UI.getImageIcon("gear"));
+        configUI.add(config, c);
+        config.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (singleRenderer == null) {
+                    return;
+                }
+//                JOptionPane.showmess
+                int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), singleRenderer.getConfigUI(), "Default Renderer Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                if (returnVal == JOptionPane.OK_OPTION) {
+                    updateRenderer();
+                }
+            }
+        });
+
+        c.gridx = 1;
+        c.gridy++;
+        c.gridwidth = 1;
+        configUI.add(singleLegend, c);
+
+//////////////////////////////////////////////////////////////
         c.gridx = 0;
         c.gridy++;
-        configUI.add(new JLabel("Row Group:"), c);
+        c.gridwidth = 1;
+        label = new JLabel("Row Group:");
+        label.setToolTipText("Renderer for row ontology nodes");
+        configUI.add(label, c);
         c.gridx = 1;
         configUI.add(rowComboBox, c);
+        c.gridx++;
+        config = new JButton(UI.getImageIcon("gear"));
+        configUI.add(config, c);
+        config.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (rowGroupRenderer == null) {
+                    return;
+                }
+//                JOptionPane.showmess
+                int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), rowGroupRenderer.getConfigUI(), "Row Group Renderer Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                if (returnVal == JOptionPane.OK_OPTION) {
+                    updateRenderer();
+                }
+
+            }
+        });
+
+        c.gridx = 1;
+        c.gridy++;
+        c.gridwidth = 1;
+        configUI.add(rowLegend, c);
 
         c.gridx = 0;
         c.gridy++;
-        configUI.add(new JLabel("Column Group"), c);
+        c.gridwidth = 1;
+        label = new JLabel("Column Group:");
+        label.setToolTipText("Renderer for column ontology nodes");
+        configUI.add(label, c);
         c.gridx = 1;
         configUI.add(columnComboBox, c);
+        c.gridx++;
+        config = new JButton(UI.getImageIcon("gear"));
+        configUI.add(config, c);
+        config.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (columnGroupRenderer == null) {
+                    return;
+                }
+//                JOptionPane.showmess
+                int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), columnGroupRenderer.getConfigUI(), "Column Group Renderer Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                if (returnVal == JOptionPane.OK_OPTION) {
+                    updateRenderer();
+                }
+            }
+        });
+
+        c.gridx = 1;
+        c.gridy++;
+        c.gridwidth = 1;
+        configUI.add(columnLegend, c);
 
         c.gridx = 0;
         c.gridy++;
-        configUI.add(new JLabel("Row & Column Group"), c);
+        c.gridwidth = 1;
+        label = new JLabel("Row & Column Group:");
+        label.setToolTipText("Renderer for row and column ontology nodes");
+        configUI.add(label, c);
         c.gridx = 1;
         configUI.add(rowColumnComboBox, c);
+        c.gridx++;
+        config = new JButton(UI.getImageIcon("gear"));
+        configUI.add(config, c);
+        config.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (rowColumnGroupRenderer == null) {
+                    return;
+                }
+//                JOptionPane.showmess
+                int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), rowColumnGroupRenderer.getConfigUI(), "Row + Column Group Renderer Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                if (returnVal == JOptionPane.OK_OPTION) {
+                    updateRenderer();
+                }
+            }
+        });
+
+        c.gridx = 1;
+        c.gridy++;
+        c.gridwidth = 1;
+        configUI.add(rowColumnLegend, c);
+
+        JButton button = new JButton("Apply Changes", UI.getImageIcon("refresh"));
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateRenderer();
+            }
+        });
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 2;
+        configUI.add(button, c);
 
         singleComboBox.setRenderer(new ComboRenderer());
         rowComboBox.setRenderer(new ComboRenderer());
@@ -97,10 +234,12 @@ public class NumberComposite extends ViewRenderer<Double> {
         @Override
         public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
             JLabel label = (JLabel) super.getListCellRendererComponent(jlist, o, i, bln, bln1);
-            if (o == null) {
+            if (o == null || !(o instanceof ViewRenderer)) {
+//                label.setForeground(UI.colorLightRed);
                 return label;
             }
             if (getCoolMapObject() != null) {
+//                label.setForeground(UI.colorBlack1);
                 CoolMapObject obj = getCoolMapObject();
                 ViewRenderer renderer = (ViewRenderer) o;
                 if (renderer != null && obj != null && renderer.canRender(obj.getViewClass())) {
@@ -124,8 +263,14 @@ public class NumberComposite extends ViewRenderer<Double> {
         }
 
     }
-    
+
     private void _updateLists() {
+
+        rowComboBox.addItem("No renderer");
+        columnComboBox.addItem("No renderer");
+        rowColumnComboBox.addItem("No renderer");
+//        rowComboBox.addItem(new Object());
+
         if (Config.isInitialized()) {
             try {
 
@@ -153,19 +298,19 @@ public class NumberComposite extends ViewRenderer<Double> {
                 e.printStackTrace();
             }
 
-            
-            singleComboBox.setSelectedIndex(1);
-            rowComboBox.setSelectedIndex(2);
-            
-            //problem is at column??
-            columnComboBox.setSelectedIndex(3);
-            rowColumnComboBox.setSelectedIndex(0);
+//            singleComboBox.setSelectedIndex(1);
+//            rowComboBox.setSelectedIndex(2);
+//
+//            //problem is at column??
+//            columnComboBox.setSelectedIndex(3);
+//            rowColumnComboBox.setSelectedIndex(0);
         }
     }
     private JPanel configUI = new JPanel();
 
     @Override
     public JComponent getConfigUI() {
+//        return configUI;
         return configUI;
     }
 
@@ -189,56 +334,95 @@ public class NumberComposite extends ViewRenderer<Double> {
         if (singleRenderer != null) {
             singleRenderer.updateRendererChanges();
         }
+
     }
 
     @Override
     protected void initialize() {
         CoolMapObject obj = getCoolMapObject();
-        System.err.println("The coolMap object is:" + obj);
 //        why this is initlaized twice?
 //        System.out.println("===initialize composite renderer===");
         if (!canRender(obj.getViewClass())) {
             return;
         }
 
+        updateRenderer();
+    }
+
+    @Override
+    public void updateRenderer() {
+
         try {
-            singleRenderer = (ViewRenderer<Double>) singleComboBox.getSelectedItem().getClass().newInstance();
-            singleRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
+
+            if (singleRenderer == null || singleRenderer.getClass() != singleComboBox.getSelectedItem().getClass()) {
+                singleRenderer = (ViewRenderer<Double>) singleComboBox.getSelectedItem().getClass().newInstance();
+                singleRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
 //            singleRenderer.setName("Single ++");
+            }
 
         } catch (Exception e) {
-            System.err.println("single renderer fail");
+            singleRenderer = null;
         }
 
         try {
-            rowGroupRenderer = (ViewRenderer<Double>) rowComboBox.getSelectedItem().getClass().newInstance();
-            rowGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
+            if (rowGroupRenderer == null || rowGroupRenderer.getClass() != rowComboBox.getSelectedItem().getClass()) {
+                rowGroupRenderer = (ViewRenderer<Double>) rowComboBox.getSelectedItem().getClass().newInstance();
+                rowGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
 //            rowGroupRenderer.setName("Row group ++");
-
+            }
         } catch (Exception e) {
-            System.err.println("row group renderer fail");
+            rowGroupRenderer = null;
         }
 
         try {
-            
-            columnGroupRenderer = (ViewRenderer<Double>) columnComboBox.getSelectedItem().getClass().newInstance();
-            columnGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
+            if (columnGroupRenderer == null || columnGroupRenderer.getClass() != columnComboBox.getSelectedItem().getClass()) {
+                columnGroupRenderer = (ViewRenderer<Double>) columnComboBox.getSelectedItem().getClass().newInstance();
+                columnGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
 //            columnGroupRenderer.setName("Col group ++");
-
+            }
         } catch (Exception e) {
-            System.err.println("column group renderer fail");
+            columnGroupRenderer = null;
         }
 
         try {
-            rowColumnGroupRenderer = (ViewRenderer<Double>) rowColumnComboBox.getSelectedItem().getClass().newInstance();
-            rowColumnGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
+            if (rowColumnGroupRenderer == null || rowColumnGroupRenderer.getClass() != rowColumnComboBox.getSelectedItem().getClass()) {
+                rowColumnGroupRenderer = (ViewRenderer<Double>) rowColumnComboBox.getSelectedItem().getClass().newInstance();
+                rowColumnGroupRenderer.setCoolMapObject(getCoolMapObject(), true); //also set parent object and initialize
+            }
 //            rowColumnGroupRenderer.setName("Row + Column group");
 
         } catch (Exception e) {
-            System.err.println("row + column group renderer fail");
+            rowColumnGroupRenderer = null;
         }
 
-        updateRenderer();
+        super.updateRenderer(); //To change body of generated methods, choose Tools | Templates.
+
+        //update legend
+        if (singleRenderer != null) {
+            singleLegend.setIcon(new ImageIcon(singleRenderer.getLegend()));
+        } else {
+            singleLegend.setIcon(null);
+        }
+
+        if (rowGroupRenderer != null) {
+            rowLegend.setIcon(new ImageIcon(this.rowGroupRenderer.getLegend()));
+        } else {
+            rowLegend.setIcon(null);
+        }
+
+        if (columnGroupRenderer != null) {
+            columnLegend.setIcon(new ImageIcon(this.columnGroupRenderer.getLegend()));
+        } else {
+            columnLegend.setIcon(null);
+        }
+
+        if (rowColumnGroupRenderer != null) {
+            rowColumnLegend.setIcon(new ImageIcon(this.rowColumnGroupRenderer.getLegend()));
+        } else {
+            rowColumnLegend.setIcon(null);
+        }
+
+        getConfigUI().repaint();
     }
 
     @Override
@@ -251,15 +435,107 @@ public class NumberComposite extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+        if (singleRenderer != null) {
+            singleRenderer.preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (rowGroupRenderer != null) {
+            rowGroupRenderer.preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (columnGroupRenderer != null) {
+            columnGroupRenderer.preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (rowColumnGroupRenderer != null) {
+            rowColumnGroupRenderer.preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
     }
 
     @Override
-    protected void prepareGraphics(Graphics2D g2D) {
+    public void prepareGraphics(Graphics2D g2D) {
+        if (singleRenderer != null) {
+            singleRenderer.prepareGraphics(g2D);
+        }
+
+        if (rowGroupRenderer != null) {
+            rowGroupRenderer.prepareGraphics(g2D);
+        }
+
+        if (columnGroupRenderer != null) {
+            columnGroupRenderer.prepareGraphics(g2D);
+        }
+
+        if (rowColumnGroupRenderer != null) {
+            rowColumnGroupRenderer.prepareGraphics(g2D);
+        }
     }
 
     @Override
     public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        if (v == null || rowNode == null || columnNode == null) {
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+//            if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
+//                //single | single
+//                try {
+//                    singleRenderer.renderCellLD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else if (rowNode.isSingleNode() && columnNode.isGroupNode()) {
+//                //single | group
+//                try {
+//                    columnGroupRenderer.renderCellLD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else if (rowNode.isGroupNode() && columnNode.isSingleNode()) {
+//                //group | single
+//                try {
+//                    rowGroupRenderer.renderCellLD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else {
+//                //both group
+//                try {
+//                    rowColumnGroupRenderer.renderCellLD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            }
+            ViewRenderer<Double> renderer = assignRenderer(rowNode, columnNode);
+            try {
+                renderer.renderCellLD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+            } catch (Exception e) {
+
+            }
+
+        }
+    }
+
+    private ViewRenderer<Double> assignRenderer(VNode rowNode, VNode columnNode) {
+        ViewRenderer<Double> currentRenderer = singleRenderer;
+        if (rowNode.isGroupNode() && columnNode.isGroupNode()) {
+            if (rowColumnGroupRenderer != null) {
+                currentRenderer = rowColumnGroupRenderer;
+            } else if (columnGroupRenderer != null) {
+                currentRenderer = columnGroupRenderer;
+            } else if (rowGroupRenderer != null) {
+                currentRenderer = rowGroupRenderer;
+            }
+        } else if (rowNode.isGroupNode() && columnNode.isSingleNode()) {
+            if (rowGroupRenderer != null) {
+                currentRenderer = rowGroupRenderer;
+            }
+        } else if (columnNode.isGroupNode() && rowNode.isSingleNode()) {
+            if (columnGroupRenderer != null) {
+                currentRenderer = columnGroupRenderer;
+            }
+        }
+        return currentRenderer;
     }
 
     //
@@ -268,45 +544,77 @@ public class NumberComposite extends ViewRenderer<Double> {
         if (v == null || rowNode == null || columnNode == null) {
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
-            if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
-                //single | single
-                try {
-                    singleRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                } catch (Exception e) {
 
-                }
-            } else if (rowNode.isSingleNode() && columnNode.isGroupNode()) {
-                //single | group
-                try {
-                    columnGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                } catch (Exception e) {
+            ViewRenderer<Double> renderer = assignRenderer(rowNode, columnNode);
+            try {
+                renderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+            } catch (Exception e) {
 
-                }
-            } else if (rowNode.isGroupNode() && columnNode.isSingleNode()) {
-                //group | single
-                try {
-                    rowGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                } catch (Exception e) {
-
-                }
-            } else {
-                //both group
-                try {
-                    rowColumnGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                } catch (Exception e) {
-
-                }
             }
 
+//            if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
+//                //single | single
+//                try {
+//                    singleRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else if (rowNode.isSingleNode() && columnNode.isGroupNode()) {
+//                //single | group
+//                try {
+//                    columnGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else if (rowNode.isGroupNode() && columnNode.isSingleNode()) {
+//                //group | single
+//                try {
+//                    rowGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            } else {
+//                //both group
+//                try {
+//                    rowColumnGroupRenderer.renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//                } catch (Exception e) {
+//
+//                }
+//            }
         }
     }//
 
     @Override
     public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        if (v == null || rowNode == null || columnNode == null) {
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            ViewRenderer<Double> renderer = assignRenderer(rowNode, columnNode);
+            try {
+                renderer.renderCellHD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+            } catch (Exception e) {
+
+            }
+        }
     }
 
     @Override
-    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+        if (singleRenderer != null) {
+            singleRenderer.postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (rowGroupRenderer != null) {
+            rowGroupRenderer.postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (columnGroupRenderer != null) {
+            columnGroupRenderer.postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
+
+        if (rowColumnGroupRenderer != null) {
+            rowColumnGroupRenderer.postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+        }
     }
 
 }

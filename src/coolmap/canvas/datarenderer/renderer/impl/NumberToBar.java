@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package coolmap.canvas.datarenderer.renderer.impl;
 
 import com.google.common.collect.Range;
@@ -39,8 +38,7 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author sugang
- this is a base one for all.
+ * @author sugang this is a base one for all.
  */
 public class NumberToBar extends ViewRenderer<Double> {
 
@@ -65,7 +63,7 @@ public class NumberToBar extends ViewRenderer<Double> {
         c.ipady = 5;
         c.insets = new Insets(5, 5, 5, 5);
         c.gridwidth = 1;
-        
+
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
@@ -175,13 +173,11 @@ public class NumberToBar extends ViewRenderer<Double> {
 
         g.setColor(UI.colorLightYellow);
         int boxNum = 10;
-        for(int i=0; i<boxNum; i++){
+        for (int i = 0; i < boxNum; i++) {
             int h = (height - 12) / boxNum * i;
-            g.fillRect(i * width/boxNum, height - 12 - h, width/boxNum, h);
+            g.fillRect(i * width / boxNum, height - 12 - h, width / boxNum, h);
         }
-        
-        
-        
+
         g.setColor(UI.colorBlack2);
         g.setFont(UI.fontMono.deriveFont(10f));
         DecimalFormat format = new DecimalFormat("#.##");
@@ -192,10 +188,6 @@ public class NumberToBar extends ViewRenderer<Double> {
         g.drawString(maxString, width - 2 - swidth, 23);
         g.dispose();
     }
-    
-    
-    
-     
 
     protected BufferedImage legend;
 
@@ -254,18 +246,35 @@ public class NumberToBar extends ViewRenderer<Double> {
     }
 
     @Override
-    protected void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     @Override
-    protected void prepareGraphics(Graphics2D g2D) {
+    public void prepareGraphics(Graphics2D g2D) {
 //        g2D.setFont(UI.fontMono.deriveFont(12f));
 //        g2D.setColor(UI.colorLightYellow);
     }
 
     @Override
     public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        if (v == null || v.isNaN()) {
+            //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            try {
+                g2D.setStroke(UI.stroke1_5);
+                g2D.setColor(UI.colorBlack3);
+                g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+                int height = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
+                g2D.setColor(UI.colorLightYellow);
+                g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
+//                g2D.setColor(UI.colorBlack2);
+//                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
+            } catch (Exception e) {
+                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -275,9 +284,10 @@ public class NumberToBar extends ViewRenderer<Double> {
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
             try {
+                g2D.setStroke(UI.stroke1_5);
                 g2D.setColor(UI.colorBlack3);
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
-                int height = (int)Math.round(cellHeight * (v - _minValue)/(_maxValue - _minValue));
+                int height = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
                 g2D.setColor(UI.colorLightYellow);
                 g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
                 g2D.setColor(UI.colorBlack2);
@@ -291,16 +301,34 @@ public class NumberToBar extends ViewRenderer<Double> {
 
     @Override
     public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        if (v == null || v.isNaN()) {
+            //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            try {
+                g2D.setStroke(UI.stroke2);
+                g2D.setColor(UI.colorBlack3);
+                g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+                int height = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
 
-//        g2D.setColor(Color.BLACK);
-//        g2D.drawString(df.format(v), anchorX, anchorY + cellHeight);
+                LinearGradientPaint paint = new LinearGradientPaint(anchorX, anchorY, anchorX, anchorY + cellHeight, new float[]{0f, 1f}, new Color[]{UI.colorLightYellow, UI.colorOrange0});
+
+                g2D.setPaint(paint);
+                g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
+
+                g2D.setColor(UI.colorBlack2);
+                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
+            } catch (Exception e) {
+                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
+                e.printStackTrace();
+            }
+        }
     }
 
     DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
-    protected void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
+    public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }
 
     private JPanel configUI = new JPanel();
@@ -440,5 +468,5 @@ public class NumberToBar extends ViewRenderer<Double> {
             return l;
         }
 
-    }    
+    }
 }

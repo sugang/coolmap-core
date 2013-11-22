@@ -139,9 +139,9 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         _antiAliasing = antiAlias;
     }
 
-    protected abstract void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
+    public abstract void preRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
-    protected abstract void prepareGraphics(Graphics2D g2D);
+    public abstract void prepareGraphics(Graphics2D g2D);
 
     public abstract void renderCellLD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
@@ -181,7 +181,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //    protected abstract void _renderCellAnnotationSD(VIEW v, Graphics2D g2D, float anchorX, float anchorY, float cellWidth, float cellHeight);
 //    
 //    protected abstract void _renderCellAnnotationHD();
-    protected abstract void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
+    public abstract void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY);
 
 //    public synchronized BufferedImage getRenderedRadarView(CoolMapObject data, int imageWidth, int imageHeight) throws InterruptedException{
 //        //I can't possibly render a map that is overwhelmingly large

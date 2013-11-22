@@ -21,7 +21,7 @@ public class NumberToLine extends NumberToBar {
 
     public NumberToLine() {
         super();
-        setName("Name To Line");
+        setName("Number To Line");
         setDescription("Use consequtivelines to connect dots");
         setClipCell(true); //make rendering possible to span to neighbor cells
     }
