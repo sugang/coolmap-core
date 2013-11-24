@@ -6,8 +6,11 @@ package coolmap.utils;
 
 import java.io.File;
 import java.util.UUID;
+import javax.swing.Icon;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.border.Border;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -20,6 +23,26 @@ public class Tools {
     private static final JFileChooser _fileChooser = new JFileChooser();
     private static final JColorChooser _colorChooser = new JColorChooser();
     private static final JFileChooser _folderChooser = new JFileChooser();
+
+    public static JLabel createJLabel(String text, Icon icon, String tooltip, Border border) {
+
+        JLabel label = new JLabel();
+        if (text != null) {
+            label.setText(text);
+        }
+        if (icon != null) {
+            label.setIcon(icon);
+        }
+        if (border != null) {
+            label.setBorder(border);
+        }
+        if (tooltip != null) {
+            label.setToolTipText(tooltip);
+        }
+
+        return label;
+
+    }
 
     public static void initialize() {
 //        _folderChooser.setFileFilter(new FileFilter() {
@@ -106,7 +129,6 @@ public class Tools {
         UUID u = UUID.randomUUID();
 
         //return DigestUtils.md5Hex(UUID.randomUUID().toString());
-        
         //a shorter UUID
         return toIDString(u.getMostSignificantBits()) + toIDString(u.getLeastSignificantBits()); //This UUID is only 20 key long
     }

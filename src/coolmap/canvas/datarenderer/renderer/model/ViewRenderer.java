@@ -564,6 +564,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(label.getWidth(), label.getHeight());
         Graphics2D g2D = (Graphics2D) image.createGraphics();
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
         label.paint(g2D);
         g2D.dispose();
         

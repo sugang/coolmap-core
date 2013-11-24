@@ -4,6 +4,7 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.canvas.datarenderer.renderer.impl.NumberComposite;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -22,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -92,25 +94,26 @@ public class Main {
 //            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
             
             CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
-            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
+//            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();
             object.addBaseCMatrix(matrix);
             
-            
+            CMatrix matrix2 = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+//            object.addBaseCMatrix(matrix2);
 
 //            Add base nodes ===================================================
             ArrayList<VNode> nodes = new ArrayList<VNode>();
             for (Object label : matrix.getRowLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertRowNodes(nodes);
+//            object.insertRowNodes(nodes);
 
             nodes.clear();
             for (Object label : matrix.getColLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertColumnNodes(nodes);
+//            object.insertColumnNodes(nodes);
 
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,11 +143,23 @@ public class Main {
             
             object.insertRowNodes(onto.getRootNodesOrdered());
             object.insertColumnNodes(onto.getRootNodesOrdered());
+            
+//            ArrayList l = new ArrayList();
+//            List<VNode> l2 = onto.getRootNodesOrdered();
+//            l.add(l2.get(0));
+//            
+//            object.insertRowNodes(l);
+//            l.clear();
+//            l2 = onto.getRootNodesOrdered();
+//            l.add(l2.get(0));
+//            
+//            object.insertColumnNodes(l);
+            
 
             object.setAggregator(new DoubleDoubleMean());
             
             System.out.println("Set view renderer:");
-            object.setViewRenderer(new NumberComposite(), true);
+            object.setViewRenderer(new NumberToColor(), true);
             //object.setViewRenderer(new NumberComposite(), false);
             System.out.println("What the fuck this should only be run once\n\n");
             

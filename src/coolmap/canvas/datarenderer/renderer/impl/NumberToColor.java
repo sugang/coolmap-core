@@ -8,10 +8,14 @@ package coolmap.canvas.datarenderer.renderer.impl;
 import com.google.common.collect.Range;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
+import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.contology.model.COntology;
 import coolmap.utils.CImageGradient;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.GradientEditorPanel;
 import coolmap.utils.graphics.UI;
+import de.javasoft.swing.JYSwitchButton;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -27,10 +31,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -53,6 +59,7 @@ public class NumberToColor extends ViewRenderer<Double> {
     private Color errorBG = UI.colorRedWarning;
     private JComboBox presetRangeComboBox;
     private JComboBox presetColorComboBox;
+    private JCheckBox drawSubMap;
 
     public NumberToColor() {
         setName("Number to Color");
@@ -204,6 +211,16 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 1;
+        JLabel label = Tools.createJLabel("Draw Sub-heatmap:", null, "Draw sub-heatmaps for collapsed ontology nodes", null);
+        configUI.add(label, c);
+
+        c.gridx = 1;
+        drawSubMap = new JCheckBox();
+        configUI.add(drawSubMap, c);
+
+        c.gridx = 0;
+        c.gridy++;
         c.gridwidth = 3;
 
         button = new JButton("Update", UI.getImageIcon("refresh"));
@@ -226,14 +243,20 @@ public class NumberToColor extends ViewRenderer<Double> {
             }
         });
 
+        
+        toolTipLabel = new JLabel();
+        toolTipLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        toolTipLabel.setBackground(UI.colorGrey3);
+        toolTipLabel.setOpaque(true);
+        toolTipLabel.setForeground(UI.colorBlack2);
+        toolTipLabel.setFont(UI.fontPlain.deriveFont(12f));
     }
 
     @Override
     public void updateRendererChanges() {
-        
+
 //        System.err.println("Renderer changes updated" + getCoolMapObject());
 //        System.out.println("===Update renderer changes called===");
-
         if (getCoolMapObject() == null) {
             return;
         }
@@ -296,7 +319,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         int swidth = g.getFontMetrics().stringWidth(maxString);
         g.drawString(maxString, width - 2 - swidth, 23);
         g.dispose();
-        
+
 //        System.out.println("===Gradient updated===" + _gradientColors + " " + this);
     }
 
@@ -317,7 +340,7 @@ public class NumberToColor extends ViewRenderer<Double> {
     @Override
     protected void initialize() {
 //        System.out.println("===Number to color initialized===");
-        
+
         CoolMapObject obj = getCoolMapObject();
         if (!canRender(obj.getViewClass())) {
             return;
@@ -354,7 +377,6 @@ public class NumberToColor extends ViewRenderer<Double> {
         editor.setEnd(DEFAULT_MAX_COLOR);
 
 //        System.err.println("Number to color initialized");
-        
         updateRenderer();
     }
 
@@ -378,7 +400,29 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     @Override
     public void renderCellLD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+//        renderCellSD(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        if (v == null || v.isNaN()) {
+            //System.out.println(v);
+            _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+        } else {
+            try {
+                int index = (int) ((v - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
+                if (index >= _gradientColors.length) {
+                    index = _gradientColors.length - 1;
+                }
+                if (index < 0) {
+                    index = 0;
+                }
+                Color c = _gradientColors[index];
+                //System.out.println(c);
+                g2D.setColor(c);
+//                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
+                g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+            } catch (Exception e) {
+
+            }
+        }
+
     }
 
     @Override
@@ -400,12 +444,195 @@ public class NumberToColor extends ViewRenderer<Double> {
                 g2D.setColor(c);
 //                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+//                System.out.println("WH:" + cellWidth + " " + cellHeight);
+
+                if (drawSubMap.isSelected()) {
+                    //paint the sub heatmap block
+
+//                    System.out.println("draw submap");
+                    if (rowNode == null || columnNode == null || rowNode.isSingleNode() && columnNode.isSingleNode()) {
+                        return;
+                    } else {
+
+                        //need to determine the number of cMatrices
+                        CoolMapObject object = getCoolMapObject();
+                        List<CMatrix> matrices = object.getBaseCMatrices();
+                        Double value;
+
+                        //row and column indices
+                        Integer[] rowIndices;
+                        Integer[] colIndices;
+
+                        //whether they are group node or node
+                        if (rowNode.isGroupNode()) {
+                            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.ROW);
+                        } else {
+                            rowIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+                        }
+                        if (columnNode.isGroupNode()) {
+                            colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.COLUMN);
+                        } else {
+                            colIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+                        }
+
+                        //then determine the width
+                        int subMatrixWidth = Math.round(cellWidth * 1.0f / matrices.size());
+
+                        int subAnchorX = anchorX;
+
+                        int subCellHeight = Math.round(cellHeight * 1.0f / rowIndices.length);
+                        int subCellWidth = Math.round(subMatrixWidth * 1.0f / colIndices.length);
+
+//                        System.out.println("CW:" + cellWidth + " " + colIndices.length + " " + subCellWidth);
+//                        System.out.println("CH:" + cellHeight + " " + rowIndices.length + " " + subCellHeight);
+                        if (subCellHeight < 1) {
+                            subCellHeight = 1;
+                        }
+                        if (subCellWidth < 1) {
+                            subCellWidth = 1;
+                        }
+
+                        for (CMatrix matrix : matrices) {
+
+                            int rowIndex = 0;
+                            for (Integer i : rowIndices) {
+                                if (i == null || i < 0) {
+                                    continue;
+                                }
+                                int columnIndex = 0;
+                                for (Integer j : colIndices) {
+                                    if (j == null || j < 0) {
+                                        continue;
+                                    }
+                                    try {
+
+                                        value = (Double) matrix.getValue(i, j);
+                                        index = (int) ((value - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
+                                        if (index >= _gradientColors.length) {
+                                            index = _gradientColors.length - 1;
+                                        }
+                                        if (index < 0) {
+                                            index = 0;
+                                        }
+                                        c = _gradientColors[index];
+
+                                        g2D.setColor(c);
+
+                                        int subCellX = Math.round(subMatrixWidth * 1.0f * columnIndex / colIndices.length) + subAnchorX;
+                                        int subCellY = Math.round(cellHeight * 1.0f * rowIndex / rowIndices.length) + anchorY;
+
+//                                        System.out.println("WTF:" + columnIndex + " " + rowIndex + "----" + subCellX + " " + subCellY + " " + subCellWidth + " " + subCellHeight);
+                                        g2D.fillRect(subCellX, subCellY, subCellWidth, subCellHeight);
+
+                                    } catch (Exception e) {
+                                        //draw it here
+                                        e.printStackTrace();
+                                    }
+
+                                    columnIndex++;
+                                }//end of column loop
+
+                                rowIndex++;
+                            }//end of row loop
+
+                            subAnchorX += subMatrixWidth;
+                        }//end of matrix loop
+
+                        g2D.setStroke(UI.stroke1);
+                        g2D.setColor(Color.BLACK);
+                        g2D.drawRect(anchorX, anchorY, cellWidth, cellHeight);
+                    }
+                }
+
             } catch (Exception e) {
                 System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
                 //e.printStackTrace();
             }
         }
     }
+
+    @Override
+    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
+        
+        try{
+        if (!drawSubMap.isSelected()) {
+            return null;
+        }
+
+        if (rowNode == null || columnNode == null || rowNode.isSingleNode() && columnNode.isSingleNode()) {
+            return null;
+        }
+
+        List<CMatrix> matrices = object.getBaseCMatrices();
+
+        //row and column indices
+        Integer[] rowIndices;
+        Integer[] colIndices;
+
+        //whether they are group node or node
+        if (rowNode.isGroupNode()) {
+            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.ROW);
+        } else {
+            rowIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+        }
+        
+        
+        
+        if (columnNode.isGroupNode()) {
+            colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.COLUMN);
+        } else {
+            colIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+        }
+        
+        //determine where it is in the map
+        int matrixIndex = (int)(percentX * matrices.size());
+        
+        int rowIndex = (int)(PercentY * rowIndices.length);
+        int colIndex = (int)((cellWidth * percentX - matrixIndex * 1.0 / matrices.size() * cellWidth)/(cellWidth/matrices.size()) * colIndices.length);
+        
+//        System.out.println(rowIndex + " " + colIndex + " " + percentX + " " + matrixIndex + " " + colIndices.length);
+        
+        if(rowIndex < 0) rowIndex = 0;
+        if(colIndex < 0) colIndex = 0;
+        
+        if(rowIndex >= rowIndices.length)
+            rowIndex = rowIndices.length - 1;
+        
+        if(colIndex >= colIndices.length)
+            colIndex = colIndices.length - 1;
+        
+        int rowBaseIndex = rowIndices[rowIndex];
+        int colBaseIndex = colIndices[colIndex];
+        
+        
+//        if(rowBaseIndex < 0 )rowBaseIndex = 0;
+//        if(colBaseIndex < 0 )colBaseIndex = 0;
+//        
+//        if(rowBaseIndex >= rowIndices.length) rowBaseIndex = rowIndices.length - 1;
+//        if(colBaseIndex >= colIndices.length) colBaseIndex = colIndices.length - 1;
+        
+        CMatrix matrix = matrices.get(matrixIndex);
+        Double value = (Double)matrix.getValue(rowBaseIndex, colBaseIndex);
+        
+        String rowLabel = matrix.getRowLabel(rowBaseIndex);
+        String colLabel = matrix.getColLabel(colBaseIndex);
+
+//        System.out.println(matrixIndex + " " + rowBaseIndex + " " + colBaseIndex + " " + rowLabel + " -- " + colLabel + " -- " + value);
+        
+        
+        toolTipLabel.setText("<html><table cellspacing='1' border='0' cellpadding='1'>" + 
+                ((matrices.size() > 1) ? "<tr><td><strong>Data: </strong></td><td>" + matrices.get(matrixIndex).getName() + "</td></tr>" : "")
+                + "<tr><td><strong>Row: </strong></td><td>" + rowLabel + "</td></tr><tr><td><strong>Column: </strong></td><td>" + colLabel + "</td></tr><tr><td><strong>Value: </strong></td><td><span style='color:#020202;font-weight:bold;'>" + df.format(value) +"</span></td></tr></table></html>");
+        
+        return createToolTipFromJLabel(toolTipLabel);}
+        catch(Exception e){
+            return null;
+        }
+        
+    }
+    
+    private DecimalFormat df = new DecimalFormat("#.###");
+    private JLabel toolTipLabel;
 
     @Override
     public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
@@ -426,14 +653,125 @@ public class NumberToColor extends ViewRenderer<Double> {
                 g2D.setColor(c);
 //                System.out.println((int) cellWidth + " " + ((int) cellHeight)) ;
                 g2D.fillRoundRect((int) anchorX + 1, (int) anchorY + 1, (int) cellWidth - 2, (int) cellHeight - 2, 4, 4);
+
+                if (drawSubMap.isSelected()) {
+                    //paint the sub heatmap block
+
+//                    System.out.println("draw submap");
+                    if (rowNode == null || columnNode == null || rowNode.isSingleNode() && columnNode.isSingleNode()) {
+                        return;
+                    } else {
+
+                        g2D.setStroke(UI.strokeDash1_5);
+                        //need to determine the number of cMatrices
+                        CoolMapObject object = getCoolMapObject();
+                        List<CMatrix> matrices = object.getBaseCMatrices();
+                        Double value;
+
+                        //row and column indices
+                        Integer[] rowIndices;
+                        Integer[] colIndices;
+
+                        //whether they are group node or node
+                        if (rowNode.isGroupNode()) {
+                            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.ROW);
+                        } else {
+                            rowIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+                        }
+                        if (columnNode.isGroupNode()) {
+                            colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.COLUMN);
+                        } else {
+                            colIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+                        }
+
+                        //then determine the width
+                        int subMatrixWidth = Math.round(cellWidth * 1.0f / matrices.size());
+
+                        int subAnchorX = anchorX;
+
+                        int subCellHeight = Math.round(cellHeight * 1.0f / rowIndices.length);
+                        int subCellWidth = Math.round(subMatrixWidth * 1.0f / colIndices.length);
+
+//                        System.out.println("CW:" + cellWidth + " " + colIndices.length + " " + subCellWidth);
+//                        System.out.println("CH:" + cellHeight + " " + rowIndices.length + " " + subCellHeight);
+                        
+                        
+                        if (subCellHeight < 1) {
+                            subCellHeight = 1;
+                        }
+                        if (subCellWidth < 1) {
+                            subCellWidth = 1;
+                        }
+
+                        
+                        int matrixIndex = 0;
+                        for (CMatrix matrix : matrices) {
+
+                            int rowIndex = 0;
+                            for (Integer i : rowIndices) {
+                                if (i == null || i < 0) {
+                                    continue;
+                                }
+                                int columnIndex = 0;
+                                for (Integer j : colIndices) {
+                                    if (j == null || j < 0) {
+                                        continue;
+                                    }
+                                    try {
+
+                                        value = (Double) matrix.getValue(i, j);
+                                        index = (int) ((value - _minValue) / (_maxValue - _minValue) * _gradientColors.length);
+                                        if (index >= _gradientColors.length) {
+                                            index = _gradientColors.length - 1;
+                                        }
+                                        if (index < 0) {
+                                            index = 0;
+                                        }
+                                        c = _gradientColors[index];
+
+                                        g2D.setColor(c);
+
+                                        int subCellX = Math.round(subMatrixWidth * 1.0f * columnIndex / colIndices.length) + subAnchorX;
+                                        int subCellY = Math.round(cellHeight * 1.0f * rowIndex / rowIndices.length) + anchorY;
+
+//                                        System.out.println("WTF:" + columnIndex + " " + rowIndex + "----" + subCellX + " " + subCellY + " " + subCellWidth + " " + subCellHeight);
+                                        g2D.fillRect(subCellX, subCellY, subCellWidth, subCellHeight);
+
+                                    } catch (Exception e) {
+                                        //draw it here
+                                        e.printStackTrace();
+                                    }
+
+                                    columnIndex++;
+                                }//end of column loop
+
+                                rowIndex++;
+                            }//end of row loop
+
+                            g2D.setColor(UI.colorBlack1);
+                            g2D.drawRect(subAnchorX, anchorY, subMatrixWidth, cellHeight);
+
+                            //
+//                            subAnchorX += subMatrixWidth;
+                            matrixIndex++;
+                            subAnchorX = anchorX +  Math.round(cellWidth * 1.0f * matrixIndex / matrices.size());
+                        }//end of matrix loop
+
+                        g2D.setStroke(UI.stroke2);
+                        g2D.setColor(Color.BLACK);
+                        g2D.drawRect(anchorX, anchorY, cellWidth, cellHeight);
+                    }
+                }
+
             } catch (Exception e) {
                 System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
                 //e.printStackTrace();
+
             }
         }
     }
 
-    DecimalFormat df = new DecimalFormat("#.##");
+//    DecimalFormat df = new DecimalFormat("#.##");
 
     @Override
     public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {

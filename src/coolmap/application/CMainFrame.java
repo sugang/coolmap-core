@@ -20,6 +20,11 @@ import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.utils.Config;
+import de.javasoft.plaf.synthetica.SyntheticaAluOxideLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -573,8 +578,24 @@ public class CMainFrame extends JFrame {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
+//            SyntheticaLookAndFeel.setWindowsDecorated(false);
+//            JFrame.setDefaultLookAndFeelDecorated(true);
+//            UIManager.setLookAndFeel("de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel");
+            
+//            UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+            
+//            UIManager.setLookAndFeel(new SyntheticaAluOxideLookAndFeel());
+//            UIManager.put("Synthetica.window.shape", "ROUND_RECT");
+//            UIManager.put("Synthetica.window.arcW", "10");
+//            UIManager.put("Synthetica.window.arcH", "10");
+//            UIManager.put("Synthetica.window.shapeSupportOnMac", true);
 
+            
+
+        } catch (Exception e) {
+//            e.printStackTrace();
+            //could be error but it looks pretty good
+//            e.printStackTrace();
         }
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -683,20 +704,19 @@ public class CMainFrame extends JFrame {
                 });
                 g2D.setPaint(paint);
                 g2D.fillRect(0, 0, getWidth(), getHeight());//
-                
+
                 g2D.setFont(labelFont);
-                
+
                 g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 String msg = "Rearrange Widgets";
-                
-                
+
                 int strW = g2D.getFontMetrics().stringWidth(msg);
-                
-                g2D.setColor(new Color(50,50,50));
-                g2D.fillRoundRect(getWidth()/2 - strW/2 - 20, getHeight()/2 - 18, strW + 40, 40, 10, 10);
-                
+
+                g2D.setColor(new Color(50, 50, 50));
+                g2D.fillRoundRect(getWidth() / 2 - strW / 2 - 20, getHeight() / 2 - 18, strW + 40, 40, 10, 10);
+
                 g2D.setColor(Color.WHITE);
-                g2D.drawString(msg, getWidth()/2 - strW/2, getHeight()/2 + 12);
+                g2D.drawString(msg, getWidth() / 2 - strW / 2, getHeight() / 2 + 12);
             }
 
         }
