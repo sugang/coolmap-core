@@ -48,7 +48,7 @@ public class RowHeader extends JTable
 
         Component c = getParent();
 
-		//  Keep scrolling of the row table in sync with the main table.
+        //  Keep scrolling of the row table in sync with the main table.
         if (c instanceof JViewport) {
             JViewport viewport = (JViewport) c;
             viewport.addChangeListener(this);
@@ -60,7 +60,11 @@ public class RowHeader extends JTable
      */
     @Override
     public int getRowCount() {
-        return main.getRowCount();
+        try {
+            return main.getRowCount();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @Override
@@ -74,7 +78,7 @@ public class RowHeader extends JTable
      */
     @Override
     public Object getValueAt(int row, int column) {
-                //this is the value 
+        //this is the value 
         //return Integer.toString(row + 1);
         if (isEnabled()) {
             return main.getValueAt(row, 0);

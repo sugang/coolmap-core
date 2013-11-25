@@ -15,7 +15,6 @@ import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.GradientEditorPanel;
 import coolmap.utils.graphics.UI;
-import de.javasoft.swing.JYSwitchButton;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;

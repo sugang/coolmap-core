@@ -20,11 +20,6 @@ import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.utils.Config;
-import de.javasoft.plaf.synthetica.SyntheticaAluOxideLookAndFeel;
-import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
-import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
-import de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel;
-import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -56,7 +51,6 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.UIManager;
 
 /**
  *
@@ -576,27 +570,28 @@ public class CMainFrame extends JFrame {
 
     private void _initFrame() {
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//            SyntheticaLookAndFeel.setWindowsDecorated(false);
-//            JFrame.setDefaultLookAndFeelDecorated(true);
-//            UIManager.setLookAndFeel("de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel");
-            
-//            UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
-            
-//            UIManager.setLookAndFeel(new SyntheticaAluOxideLookAndFeel());
-//            UIManager.put("Synthetica.window.shape", "ROUND_RECT");
-//            UIManager.put("Synthetica.window.arcW", "10");
-//            UIManager.put("Synthetica.window.arcH", "10");
-//            UIManager.put("Synthetica.window.shapeSupportOnMac", true);
-
-            
-
-        } catch (Exception e) {
-//            e.printStackTrace();
-            //could be error but it looks pretty good
-//            e.printStackTrace();
-        }
+//        try {
+////            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+////            SyntheticaLookAndFeel.setWindowsDecorated(false);
+////            JFrame.setDefaultLookAndFeelDecorated(true);
+////            UIManager.setLookAndFeel("de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel");
+//            
+////            UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+//            
+////            UIManager.setLookAndFeel(new SyntheticaAluOxideLookAndFeel());
+////            UIManager.put("Synthetica.window.shape", "ROUND_RECT");
+////            UIManager.put("Synthetica.window.arcW", "10");
+////            UIManager.put("Synthetica.window.arcH", "10");
+////            UIManager.put("Synthetica.window.shapeSupportOnMac", true);
+//
+//            
+////            UIManager.setLookAndFeel(new SubstanceAutumnLookAndFeel());
+//
+//        } catch (Exception e) {
+////            e.printStackTrace();
+//            //could be error but it looks pretty good
+////            e.printStackTrace();
+//        }
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.setTitle("CoolMap Application");
