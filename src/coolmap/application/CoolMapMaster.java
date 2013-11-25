@@ -30,6 +30,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import quicktime.util.QTUtils;
 
 /**
  *
@@ -122,6 +124,19 @@ public final class CoolMapMaster {
      */
     public static void initialize() {
 
+        try{
+//            WebLookAndFeel.install();
+//            UIManager.LookAndFeelInfo[] infos = UIManager.getInstalledLookAndFeels();
+//            for( UIManager.LookAndFeelInfo info : infos){
+//                System.out.println(info.getName());
+//            }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch(Exception e){
+            
+        }
+        
+        
         Config.initialize();
         
         //
