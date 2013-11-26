@@ -71,6 +71,8 @@ public class UI {
     public static Color colorMIZU = new Color(129,199,212);
     public static Color colorKARAKURENAI = new Color(208, 16, 76);
     public static Color colorTOKIWA = new Color(27, 129, 62);
+    public static Color colorAKABENI = new Color(203, 64, 66);
+    public static Color colorMIDORI = new Color(34,125,81);
     
 //    private static final HashMap<String, Color> _colorPalette = new HashMap<String, Color>();
     

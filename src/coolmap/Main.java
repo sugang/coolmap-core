@@ -3,6 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
@@ -181,6 +182,7 @@ public class Main {
 //            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
 //            object.getAnnotationStorage().addAnnotation(annotation);
 //            CoolMapMaster.getCMainFrame().showBusyDialog(true);
+            CMConsole.log("Loaded coolmap");
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }

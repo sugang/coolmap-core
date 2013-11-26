@@ -51,7 +51,7 @@ import javax.swing.JTextField;
  */
 public class NumberToColor extends ViewRenderer<Double> {
 
-    private GradientEditorPanel editor; 
+    private GradientEditorPanel editor;
 
     private JTextField minValueField = new JTextField();
     private JTextField maxValueField = new JTextField();
@@ -119,7 +119,7 @@ public class NumberToColor extends ViewRenderer<Double> {
 //                updateRenderer();
 //            }
 //        });
-        configUI.add(new JLabel("Preset Pallete:"), c);
+        configUI.add(new JLabel("Preset palette:"), c);
 
         c.gridx = 1;
         c.gridwidth = 1;
@@ -145,6 +145,21 @@ public class NumberToColor extends ViewRenderer<Double> {
                         for (int i = 1; i < c.length - 1; i++) {
                             editor.addColor(c[i], p[i]);
                         }
+                    }
+
+                    try {
+                        Double[] ranges = item.getRanges();
+                        if (ranges != null) {
+                            minValueField.setText(ranges[0].toString());
+                            maxValueField.setText(ranges[1].toString());
+                            editor.setMinValue(ranges[0].floatValue());
+                            editor.setMaxValue(ranges[1].floatValue());
+                        }
+                    } catch (Exception ex) {
+                            minValueField.setText("-1");
+                            maxValueField.setText("1");
+                            editor.setMinValue(-1);
+                            editor.setMaxValue(1);
                     }
 
                 } catch (Exception ex) {
@@ -193,6 +208,12 @@ public class NumberToColor extends ViewRenderer<Double> {
                         new Color[]{Color.BLACK, Color.GREEN},
                         new float[]{0f, 1f},
                         "Blk - Green"));
+
+        presetColorComboBox.addItem(
+                new GradientItem(
+                        new Color[]{Color.RED, UI.colorAKABENI, Color.BLACK, Color.BLACK},
+                        new float[]{0f, 0.05f, 0.051f, 1f},
+                        "P-value 0.05", 0d, 1d));
 
         c.gridx = 0;
         c.gridy++;
@@ -358,7 +379,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         LinearGradientPaint paint = editor.getLinearGradientPaint(0, 0, width, 0);
-        
+
         g.setPaint(paint);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
 
@@ -425,7 +446,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         maxValueField.setText(maxValue + "");
 
         editor.clearColors();
-        
+
         editor.setStart(DEFAULT_MIN_COLOR);
         editor.addColor(Color.BLACK, 0.5f);
         editor.setEnd(DEFAULT_MAX_COLOR);
@@ -914,7 +935,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         private final BufferedImage preview;
         private final String name;
 
-        public GradientItem(Color[] c, float[] pos, String name) {
+        public GradientItem(Color[] c, float[] pos, String name, Double low, Double high) {
             this.c = c;
             this.pos = pos;
 
@@ -930,6 +951,13 @@ public class NumberToColor extends ViewRenderer<Double> {
 
             g2D.dispose();
 
+            this.low = low;
+            this.high = high;
+
+        }
+
+        public GradientItem(Color[] c, float[] pos, String name) {
+            this(c, pos, name, null, null);
         }
 
         public Image getPreview() {
@@ -949,6 +977,16 @@ public class NumberToColor extends ViewRenderer<Double> {
             return pos;
 
         }
+
+        public Double[] getRanges() {
+            if (low == null || high == null) {
+                return null;
+            }
+            return new Double[]{low, high};
+        }
+
+        private Double low = null;
+        private Double high = null;
 
     }
 

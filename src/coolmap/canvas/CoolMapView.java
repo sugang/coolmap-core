@@ -793,12 +793,11 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
 
-        
         ArrayList<Range<Integer>> selectedColumns = getSelectedColumns();
         if (selectedColumns.isEmpty()) {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
-        
+
         System.out.println("Selected columns:" + selectedColumns);
         System.out.println("Selected rows:" + selectedRows);
 
@@ -811,7 +810,7 @@ public final class CoolMapView<BASE, VIEW> {
 
 //        System.out.println("New selections:" + newSelections);
         System.out.println("New selections" + newSelections);
-        
+
         setSelections(newSelections);
     }
 
@@ -906,10 +905,9 @@ public final class CoolMapView<BASE, VIEW> {
                     _selections.add(selection);
                 }
             }
-            
+
 //             System.out.println("selections added");
-             
-             //This guy got issues!
+            //This guy got issues!
             _fireViewSelectionChanged();
 //            System.out.println("To update view area:..");
             _selectionLayer.updateViewArea();
@@ -1025,15 +1023,14 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public void updateActiveCell() {
-        try{
+        try {
 //        System.err.println("Active cell updated");
-        //Does not actually work
-        setMouseXY(_cursor.x, _cursor.y);
+            //Does not actually work
+            setMouseXY(_cursor.x, _cursor.y);
 //        if(!_activeCell.isValidCell(_coolMapObject)){
 //            _hoverLayer.setVisible(false);
 //        }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Update active cell exception");
         }
     }
@@ -3859,6 +3856,7 @@ public final class CoolMapView<BASE, VIEW> {
         private final Font labelFont;
         private final Font labelFontRotated;
         private final Font labelFontValue;
+        private final Font labelFontTip;
 
         public HoverLayer() {
             setOpaque(false);
@@ -3868,6 +3866,7 @@ public final class CoolMapView<BASE, VIEW> {
             at.rotate(-Math.PI / 2);
             labelFontRotated = labelFont.deriveFont(at);
             labelFontValue = UI.fontPlain.deriveFont(16f).deriveFont(Font.BOLD);
+            labelFontTip = UI.fontPlain.deriveFont(10f).deriveFont(Font.BOLD);
         }
 
         @Override
@@ -4056,6 +4055,10 @@ public final class CoolMapView<BASE, VIEW> {
 
                     g2D.drawLine(colX, colY, columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2, center.y - colLabelMargin);
                 }
+                
+                
+                
+                
                 g2D.setColor(_hoverTipBackgroundColor);
                 columnLabelHeight += 20;
 
@@ -4074,10 +4077,10 @@ public final class CoolMapView<BASE, VIEW> {
 
                 //also need to paint the value
                 String value = _coolMapObject.getViewValueAsSnippet(row, col);
-                
+
                 //might not have been initialized
                 g2D.setFont(labelFontValue);
-                
+
                 int stringWidth = g2D.getFontMetrics().stringWidth(value);
                 int vHeight = 25;
                 int vWidth = 20 + stringWidth;
@@ -4085,8 +4088,35 @@ public final class CoolMapView<BASE, VIEW> {
                 g2D.setColor(_hoverSubTipBackgroundColor);
                 g2D.fillRoundRect(center.x - vWidth / 2, rowLabelTop + rowLabelHeight + 5, vWidth, vHeight, 5, 5);
 
+                //need to draw the forlking tip
+                g2D.setColor(UI.colorBlack4);
+
                 g2D.setColor(UI.colorBlack2);
                 g2D.drawString(value, center.x - vWidth / 2 + 10, rowLabelTop + rowLabelHeight + 23);
+
+                                //if it's aggregators
+                try {
+                    VNode rowNode = _coolMapObject.getViewNodeRow(_activeCell.row.intValue());
+                    VNode colNode = _coolMapObject.getViewNodeColumn(_activeCell.col.intValue());
+
+                    if (rowNode.isGroupNode() || colNode.isGroupNode()) {
+                        //draw a tip
+                        g2D.setFont(labelFontTip);
+//                        g2D.setColor(_tipNameColor);
+                        String aggrTip = _coolMapObject.getAggregator().getTipName();
+                        int aggrTipWidth = g2D.getFontMetrics().stringWidth(aggrTip);
+                        
+                        g2D.setColor(UI.colorGrey1);
+                        g2D.fillRoundRect(center.x - vWidth / 2 - 10 - aggrTipWidth - 4, rowLabelTop + rowLabelHeight + 5, aggrTipWidth + 10, vHeight, 5, 5);
+                        
+                        g2D.setColor(_tipNameColor);
+                        g2D.drawString(aggrTip, center.x - vWidth / 2 - 5 - aggrTipWidth - 4, rowLabelTop + rowLabelHeight + 20);
+                        
+                    }
+                } catch (Exception e) {
+
+                }
+
 
             } catch (Exception e) {
                 e.printStackTrace(); //debugging when error occurs
@@ -4177,7 +4207,7 @@ public final class CoolMapView<BASE, VIEW> {
 
                 float percentX = (mouse.x - (colNode.getViewOffset() + _mapDimension.x)) / colNode.getViewSizeInMap(_zoom.x);
                 float percentY = (mouse.y - (rowNode.getViewOffset() + _mapDimension.y)) / rowNode.getViewSizeInMap(_zoom.y);
-                
+
                 Image subTip = renderer.getSubTip(_coolMapObject, rowNode, colNode, percentX, percentY, Math.round(colNode.getViewSizeInMap(_zoom.x)), Math.round(rowNode.getViewSizeInMap(_zoom.y)));
                 if (subTip == null) {
                     return;
@@ -4246,7 +4276,7 @@ public final class CoolMapView<BASE, VIEW> {
                 toolTip = "";
             }
 
-            boolean useAggregator = false;
+//            boolean useAggregator = false;
             String tipName = "";
             _coolMapObject.getAggregator().getTipName();
             //System.out.println(_coolMapObject.getAggregator().getTipName());
