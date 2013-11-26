@@ -26,6 +26,8 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -76,25 +78,26 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        JButton button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset data ranges");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
-                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
-                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
-                } catch (Exception ex) {
-                    minValueField.setText("-1");
-                    maxValueField.setText("1");
-                }
-
-                updateRenderer();
-            }
-        });
+//        JButton button = new JButton("Apply");
+//        configUI.add(button, c);
+//        button.setToolTipText("Apply preset data ranges");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                try {
+//                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+//                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+//                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+//                } catch (Exception ex) {
+//                    minValueField.setText("-1");
+//                    maxValueField.setText("1");
+//                }
+//
+//                updateRenderer();
+//            }
+//        });
+        configUI.add(new JLabel("Preset range:"), c);
 
         c.gridx = 1;
         c.gridwidth = 1;
@@ -106,6 +109,20 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
         presetRangeComboBox.addItem(new DefinedMinMaxItem(-1, 0));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 100));
 
+        presetRangeComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                try {
+                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+                } catch (Exception ex) {
+                    minValueField.setText("-1");
+                    maxValueField.setText("1");
+                }
+            }
+        });
 ////////////////////////////////////////////////////////////////////////////////
 //        c.weightx = 0.2;
         c.gridx = 0;
@@ -135,7 +152,7 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
         c.gridy++;
         c.gridwidth = 3;
 
-        button = new JButton("Update", UI.getImageIcon("refresh"));
+        JButton button = new JButton("Update", UI.getImageIcon("refresh"));
         configUI.add(button, c);
         button.addActionListener(new ActionListener() {
 
@@ -308,7 +325,7 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
                 if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
 
                     double value = (v - _minValue) / (_maxValue - _minValue);
-                    
+
                     if (v >= disectBound) {
                         g2D.setColor(barColorNormal);
                     } else {
@@ -335,25 +352,25 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
 
                     try {
 //                        if (cellWidth >= 2 && cellHeight >= 2) {
-                            g2D.drawLine((int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * maxP), (int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * minP));
+                        g2D.drawLine((int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * maxP), (int) (anchorX + cellWidth / 2), (int) (anchorY + cellHeight - cellHeight * minP));
 
-                            if (fiveVal[2] >= disectBound) {
-                                g2D.setColor(UI.colorLightGreen4);
-                            } else {
-                                g2D.setColor(UI.colorOrange2);
-                            }
+                        if (fiveVal[2] >= disectBound) {
+                            g2D.setColor(UI.colorLightGreen4);
+                        } else {
+                            g2D.setColor(UI.colorOrange2);
+                        }
 
-                            g2D.fillRect((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth), (int) (cellHeight * (q3P - q1P)));
+                        g2D.fillRect((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth), (int) (cellHeight * (q3P - q1P)));
 
-                            if (fiveVal[2] >= disectBound) {
-                                g2D.setColor(barColorNormal);
-                            } else {
-                                g2D.setColor(barColorBelow);
-                            }
+                        if (fiveVal[2] >= disectBound) {
+                            g2D.setColor(barColorNormal);
+                        } else {
+                            g2D.setColor(barColorBelow);
+                        }
 
 //                        g2D.setColor(barColorNormal);
-                            //g2D.drawRect((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth), (int) (cellHeight * (q3P - q1P)));
-                            g2D.drawLine((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight - cellHeight * medianP));
+                        //g2D.drawRect((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * q3P), (int) (cellWidth), (int) (cellHeight * (q3P - q1P)));
+                        g2D.drawLine((int) (anchorX), (int) (anchorY + cellHeight - cellHeight * medianP), (int) (anchorX + cellWidth), (int) (anchorY + cellHeight - cellHeight * medianP));
 //                        } else {
 //
 //                            if (fiveVal[2] >= medianP) {

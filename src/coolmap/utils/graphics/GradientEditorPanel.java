@@ -62,7 +62,7 @@ public class GradientEditorPanel extends JPanel {
 //    public JToolBar getToolBar(){
 //        return toolBar;
 //    }
-    public final JButton applyButton;
+//    public final JButton applyButton;
     
     public GradientEditorPanel() {
         
@@ -80,7 +80,7 @@ public class GradientEditorPanel extends JPanel {
         addButton = new JButton("Add Point", UI.getImageIcon("plusSmall"));
         editButton = new JButton("Edit Point", UI.getImageIcon("pen"));
         delButton = new JButton("Remove Point", UI.getImageIcon("minusSmall"));
-        applyButton = new JButton(UI.getImageIcon("refresh"));
+//        applyButton = new JButton(UI.getImageIcon("refresh"));
 
 //        addButton.setBounds(20, 70, 75, 20);
         toolBar.add(addButton);
@@ -89,7 +89,7 @@ public class GradientEditorPanel extends JPanel {
 //        delButton.setBounds(180, 70, 75, 20);
         toolBar.add(delButton);
         
-        toolBar.add(applyButton);
+//        toolBar.add(applyButton);
         
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

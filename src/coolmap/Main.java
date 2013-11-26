@@ -3,7 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToSortedBar;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -98,7 +98,7 @@ public class Main {
             object.addBaseCMatrix(matrix);
             
             CMatrix matrix2 = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
-            object.addBaseCMatrix(matrix2);
+//            object.addBaseCMatrix(matrix2);
 
 //            Add base nodes ===================================================
             ArrayList<VNode> nodes = new ArrayList<VNode>();
@@ -157,7 +157,7 @@ public class Main {
             object.setAggregator(new DoubleDoubleMean());
             
             System.out.println("Set view renderer:");
-            object.setViewRenderer(new NumberToSortedBar(), true);
+            object.setViewRenderer(new NumberToColor(), true);
             //object.setViewRenderer(new NumberComposite(), false);
             System.out.println("What the fuck this should only be run once\n\n");
             

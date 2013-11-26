@@ -24,6 +24,8 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import javax.swing.BorderFactory;
@@ -68,25 +70,26 @@ public class NumberToBar extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        JButton button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset data ranges");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
-                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
-                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
-                } catch (Exception ex) {
-                    minValueField.setText("-1");
-                    maxValueField.setText("1");
-                }
-
-                updateRenderer();
-            }
-        });
+//        JButton button = new JButton("Apply");
+//        configUI.add(button, c);
+//        button.setToolTipText("Apply preset data ranges");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                try {
+//                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+//                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+//                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+//                } catch (Exception ex) {
+//                    minValueField.setText("-1");
+//                    maxValueField.setText("1");
+//                }
+//
+//                updateRenderer();
+//            }
+//        });
+        configUI.add(new JLabel("Preset range:"), c);
 
         c.gridx = 1;
         c.gridwidth = 1;
@@ -97,6 +100,21 @@ public class NumberToBar extends ViewRenderer<Double> {
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 1));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(-1, 0));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 100));
+
+        presetRangeComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                try {
+                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+                } catch (Exception ex) {
+                    minValueField.setText("-1");
+                    maxValueField.setText("1");
+                }
+            }
+        });
 
 ////////////////////////////////////////////////////////////////////////////////
 //        c.weightx = 0.2;
@@ -119,7 +137,7 @@ public class NumberToBar extends ViewRenderer<Double> {
         c.gridy++;
         c.gridwidth = 3;
 
-        button = new JButton("Update", UI.getImageIcon("refresh"));
+        JButton button = new JButton("Update", UI.getImageIcon("refresh"));
         configUI.add(button, c);
         button.addActionListener(new ActionListener() {
 

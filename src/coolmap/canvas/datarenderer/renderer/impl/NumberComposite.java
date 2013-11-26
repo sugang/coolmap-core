@@ -13,11 +13,16 @@ import coolmap.utils.Config;
 import coolmap.utils.graphics.UI;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
@@ -47,6 +52,61 @@ public class NumberComposite extends ViewRenderer<Double> {
     private JLabel rowLegend;
     private JLabel columnLegend;
     private JLabel rowColumnLegend;
+
+    private BufferedImage legend = null;
+
+    @Override
+    public Image getLegend() {
+        //To change body of generated methods, choose Tools | Templates.
+        return legend;
+    }
+
+    private void updateLegend() {
+        try {
+            ArrayList<Image> legends = new ArrayList<Image>(4);
+            if (singleRenderer != null && singleRenderer.getLegend() != null) {
+                legends.add(singleRenderer.getLegend());
+            }
+            if (rowGroupRenderer != null && rowGroupRenderer.getLegend() != null) {
+                legends.add(rowGroupRenderer.getLegend());
+            }
+            if (columnGroupRenderer != null && columnGroupRenderer.getLegend() != null) {
+                legends.add(columnGroupRenderer.getLegend());
+            }
+            if (rowColumnGroupRenderer != null && rowColumnGroupRenderer.getLegend() != null) {
+                legends.add(rowColumnGroupRenderer.getLegend());
+            }
+
+            if (!legends.isEmpty()) {
+                int margin = 5;
+                int imageWidth = 0;
+                int imageHeight = 0;
+                for (Image l : legends) {
+                    imageHeight += margin * 2 + l.getHeight(null);
+                    if (imageWidth < l.getWidth(null)) {
+                        imageWidth = l.getWidth(null);
+                    }
+                }
+
+                imageWidth += margin * 2;
+
+                if (imageWidth > 0 && imageHeight > 0) {
+                    legend = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight, Transparency.TRANSLUCENT);
+                    Graphics2D g2D = legend.createGraphics();
+                    g2D.translate(margin, 0);
+                    for (Image l : legends) {
+                        g2D.translate(0, margin);
+                        g2D.drawImage(l, 0, 0, null);
+                        g2D.translate(0, margin + l.getHeight(null));
+                    }
+                    g2D.dispose();
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+    }
 
     public NumberComposite() {
 
@@ -335,6 +395,7 @@ public class NumberComposite extends ViewRenderer<Double> {
             singleRenderer.updateRendererChanges();
         }
 
+        updateLegend();
     }
 
     @Override
@@ -536,6 +597,17 @@ public class NumberComposite extends ViewRenderer<Double> {
             }
         }
         return currentRenderer;
+    }
+
+    @Override
+    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode colNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
+//        return super.getSubTip(object, rowNode, colNode, percentX, PercentY, cellWidth, cellHeight); //To change body of generated methods, choose Tools | Templates.
+        try {
+            ViewRenderer renderer = assignRenderer(rowNode, colNode);
+            return renderer.getSubTip(object, rowNode, colNode, percentX, PercentY, cellWidth, cellHeight);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     //

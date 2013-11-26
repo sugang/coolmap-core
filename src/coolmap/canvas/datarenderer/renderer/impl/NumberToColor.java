@@ -28,6 +28,8 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -49,7 +51,7 @@ import javax.swing.JTextField;
  */
 public class NumberToColor extends ViewRenderer<Double> {
 
-    private GradientEditorPanel editor = new GradientEditorPanel();
+    private GradientEditorPanel editor; 
 
     private JTextField minValueField = new JTextField();
     private JTextField maxValueField = new JTextField();
@@ -76,18 +78,57 @@ public class NumberToColor extends ViewRenderer<Double> {
         c.gridwidth = 2;
 //        c.weightx = 0.8;
 
+        editor = new GradientEditorPanel();
         configUI.add(editor, c);
 
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        JButton button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset gradient");
-        button.addActionListener(new ActionListener() {
+//        JButton button = new JButton("Apply");
+//        configUI.add(button, c);
+//        button.setToolTipText("Apply preset gradient");
+//
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//
+//                try {
+//                    GradientItem item = (GradientItem) presetColorComboBox.getSelectedItem();
+//
+//                    editor.clearColors();
+//
+//                    Color c[] = item.getColors();
+//                    float p[] = item.getPositions();
+//
+//                    editor.setStart(c[0]);
+//                    editor.setEnd(c[c.length - 1]);
+//
+//                    if (c.length > 2) {
+//                        for (int i = 1; i < c.length - 1; i++) {
+//                            editor.addColor(c[i], p[i]);
+//                        }
+//                    }
+//
+//                } catch (Exception ex) {
+//                    editor.clearColors();
+//                    editor.setStart(DEFAULT_MIN_COLOR);
+//                    editor.setEnd(DEFAULT_MAX_COLOR);
+//                }
+//
+//                updateRenderer();
+//            }
+//        });
+        configUI.add(new JLabel("Preset Pallete:"), c);
+
+        c.gridx = 1;
+        c.gridwidth = 1;
+        presetColorComboBox = new JComboBox();
+
+        presetColorComboBox.addItemListener(new ItemListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void itemStateChanged(ItemEvent e) {
 
                 try {
                     GradientItem item = (GradientItem) presetColorComboBox.getSelectedItem();
@@ -111,14 +152,9 @@ public class NumberToColor extends ViewRenderer<Double> {
                     editor.setStart(DEFAULT_MIN_COLOR);
                     editor.setEnd(DEFAULT_MAX_COLOR);
                 }
-
-                updateRenderer();
             }
         });
 
-        c.gridx = 1;
-        c.gridwidth = 1;
-        presetColorComboBox = new JComboBox();
         configUI.add(presetColorComboBox, c);
         presetColorComboBox.setRenderer(new GradientComboItemRenderer());
 
@@ -161,25 +197,27 @@ public class NumberToColor extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset data ranges");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
-                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
-                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
-                } catch (Exception ex) {
-                    minValueField.setText("-1");
-                    maxValueField.setText("1");
-                }
-
-                updateRenderer();
-            }
-        });
+//        button = new JButton("Apply");
+//        
+//        button.setToolTipText("Apply preset data ranges");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                try {
+//                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+//                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+//                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+//                } catch (Exception ex) {
+//                    minValueField.setText("-1");
+//                    maxValueField.setText("1");
+//                }
+//
+//                updateRenderer();
+//            }
+//        });
+//        configUI.add(button, c);
+        configUI.add(new JLabel("Preset range:"), c);
 
         c.gridx = 1;
         c.gridwidth = 1;
@@ -190,6 +228,21 @@ public class NumberToColor extends ViewRenderer<Double> {
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 1));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(-1, 0));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 100));
+
+        presetRangeComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                try {
+                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+                } catch (Exception ex) {
+                    minValueField.setText("-1");
+                    maxValueField.setText("1");
+                }
+            }
+        });
 
 ////////////////////////////////////////////////////////////////////////////////
 //        c.weightx = 0.2;
@@ -222,7 +275,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         c.gridy++;
         c.gridwidth = 3;
 
-        button = new JButton("Update", UI.getImageIcon("refresh"));
+        JButton button = new JButton("Update", UI.getImageIcon("refresh"));
         configUI.add(button, c);
         button.addActionListener(new ActionListener() {
 
@@ -234,17 +287,15 @@ public class NumberToColor extends ViewRenderer<Double> {
             }
         });
 
-        editor.applyButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateRenderer();
-            }
-        });
-
-        
+//        editor.applyButton.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                updateRenderer();
+//            }
+//        });
         toolTipLabel = new JLabel();
-        toolTipLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        toolTipLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         toolTipLabel.setBackground(UI.colorGrey3);
         toolTipLabel.setOpaque(true);
         toolTipLabel.setForeground(UI.colorBlack2);
@@ -285,6 +336,7 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     private void updateGradient() {
+//        System.out.println("Gradient updated..");
         _gradient.reset();
         for (int i = 0; i < editor.getNumPoints(); i++) {
             Color c = editor.getColorAt(i);
@@ -306,6 +358,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         LinearGradientPaint paint = editor.getLinearGradientPaint(0, 0, width, 0);
+        
         g.setPaint(paint);
         g.fillRoundRect(0, 0, width, height - 12, 5, 5);
 
@@ -371,6 +424,8 @@ public class NumberToColor extends ViewRenderer<Double> {
         minValueField.setText(minValue + "");
         maxValueField.setText(maxValue + "");
 
+        editor.clearColors();
+        
         editor.setStart(DEFAULT_MIN_COLOR);
         editor.addColor(Color.BLACK, 0.5f);
         editor.setEnd(DEFAULT_MAX_COLOR);
@@ -552,84 +607,83 @@ public class NumberToColor extends ViewRenderer<Double> {
 
     @Override
     public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
-        
-        try{
-        if (!drawSubMap.isSelected()) {
-            return null;
-        }
 
-        if (rowNode == null || columnNode == null || rowNode.isSingleNode() && columnNode.isSingleNode()) {
-            return null;
-        }
+        try {
+            if (!drawSubMap.isSelected()) {
+                return null;
+            }
 
-        List<CMatrix> matrices = object.getBaseCMatrices();
+            if (rowNode == null || columnNode == null || rowNode.isSingleNode() && columnNode.isSingleNode()) {
+                return null;
+            }
 
-        //row and column indices
-        Integer[] rowIndices;
-        Integer[] colIndices;
+            List<CMatrix> matrices = object.getBaseCMatrices();
 
-        //whether they are group node or node
-        if (rowNode.isGroupNode()) {
-            rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.ROW);
-        } else {
-            rowIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
-        }
-        
-        
-        
-        if (columnNode.isGroupNode()) {
-            colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.COLUMN);
-        } else {
-            colIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
-        }
-        
-        //determine where it is in the map
-        int matrixIndex = (int)(percentX * matrices.size());
-        
-        int rowIndex = (int)(PercentY * rowIndices.length);
-        int colIndex = (int)((cellWidth * percentX - matrixIndex * 1.0 / matrices.size() * cellWidth)/(cellWidth/matrices.size()) * colIndices.length);
-        
+            //row and column indices
+            Integer[] rowIndices;
+            Integer[] colIndices;
+
+            //whether they are group node or node
+            if (rowNode.isGroupNode()) {
+                rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.ROW);
+            } else {
+                rowIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+            }
+
+            if (columnNode.isGroupNode()) {
+                colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) object.getBaseCMatrices().get(0), COntology.COLUMN);
+            } else {
+                colIndices = new Integer[]{((CMatrix) object.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+            }
+
+            //determine where it is in the map
+            int matrixIndex = (int) (percentX * matrices.size());
+
+            int rowIndex = (int) (PercentY * rowIndices.length);
+            int colIndex = (int) ((cellWidth * percentX - matrixIndex * 1.0 / matrices.size() * cellWidth) / (cellWidth / matrices.size()) * colIndices.length);
+
 //        System.out.println(rowIndex + " " + colIndex + " " + percentX + " " + matrixIndex + " " + colIndices.length);
-        
-        if(rowIndex < 0) rowIndex = 0;
-        if(colIndex < 0) colIndex = 0;
-        
-        if(rowIndex >= rowIndices.length)
-            rowIndex = rowIndices.length - 1;
-        
-        if(colIndex >= colIndices.length)
-            colIndex = colIndices.length - 1;
-        
-        int rowBaseIndex = rowIndices[rowIndex];
-        int colBaseIndex = colIndices[colIndex];
-        
-        
+            if (rowIndex < 0) {
+                rowIndex = 0;
+            }
+            if (colIndex < 0) {
+                colIndex = 0;
+            }
+
+            if (rowIndex >= rowIndices.length) {
+                rowIndex = rowIndices.length - 1;
+            }
+
+            if (colIndex >= colIndices.length) {
+                colIndex = colIndices.length - 1;
+            }
+
+            int rowBaseIndex = rowIndices[rowIndex];
+            int colBaseIndex = colIndices[colIndex];
+
 //        if(rowBaseIndex < 0 )rowBaseIndex = 0;
 //        if(colBaseIndex < 0 )colBaseIndex = 0;
 //        
 //        if(rowBaseIndex >= rowIndices.length) rowBaseIndex = rowIndices.length - 1;
 //        if(colBaseIndex >= colIndices.length) colBaseIndex = colIndices.length - 1;
-        
-        CMatrix matrix = matrices.get(matrixIndex);
-        Double value = (Double)matrix.getValue(rowBaseIndex, colBaseIndex);
-        
-        String rowLabel = matrix.getRowLabel(rowBaseIndex);
-        String colLabel = matrix.getColLabel(colBaseIndex);
+            CMatrix matrix = matrices.get(matrixIndex);
+            Double value = (Double) matrix.getValue(rowBaseIndex, colBaseIndex);
+
+            String rowLabel = matrix.getRowLabel(rowBaseIndex);
+            String colLabel = matrix.getColLabel(colBaseIndex);
 
 //        System.out.println(matrixIndex + " " + rowBaseIndex + " " + colBaseIndex + " " + rowLabel + " -- " + colLabel + " -- " + value);
-        
-        
-        toolTipLabel.setText("<html><table cellspacing='1' border='0' cellpadding='1'>" + 
-                ((matrices.size() > 1) ? "<tr><td><strong>Data: </strong></td><td>" + matrices.get(matrixIndex).getName() + "</td></tr>" : "")
-                + "<tr><td><strong>Row: </strong></td><td>" + rowLabel + "</td></tr><tr><td><strong>Column: </strong></td><td>" + colLabel + "</td></tr><tr><td><strong>Value: </strong></td><td><span style='color:#020202;font-weight:bold;'>" + df.format(value) +"</span></td></tr></table></html>");
-        
-        return createToolTipFromJLabel(toolTipLabel);}
-        catch(Exception e){
+            toolTipLabel.setText("<html><table cellspacing='1' border='0' cellpadding='1'>"
+                    + ((matrices.size() > 1) ? "<tr><td><strong>Data: </strong></td><td>" + matrices.get(matrixIndex).getName() + "</td></tr>" : "")
+                    + "<tr><td><strong>Row: </strong></td><td>" + rowLabel + "</td></tr><tr><td><strong>Column: </strong></td><td>" + colLabel + "</td></tr><tr><td><strong>Value: </strong></td><td><span style='color:#020202;font-weight:bold;'>" + df.format(value) + "</span></td></tr></table></html>");
+
+            return createToolTipFromJLabel(toolTipLabel);
+        } catch (Exception e) {
             return null;
         }
-        
+
     }
-    
+
     private DecimalFormat df = new DecimalFormat("#.###");
     private JLabel toolTipLabel;
 
@@ -693,8 +747,6 @@ public class NumberToColor extends ViewRenderer<Double> {
 
 //                        System.out.println("CW:" + cellWidth + " " + colIndices.length + " " + subCellWidth);
 //                        System.out.println("CH:" + cellHeight + " " + rowIndices.length + " " + subCellHeight);
-                        
-                        
                         if (subCellHeight < 1) {
                             subCellHeight = 1;
                         }
@@ -702,7 +754,6 @@ public class NumberToColor extends ViewRenderer<Double> {
                             subCellWidth = 1;
                         }
 
-                        
                         int matrixIndex = 0;
                         for (CMatrix matrix : matrices) {
 
@@ -753,7 +804,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                             //
 //                            subAnchorX += subMatrixWidth;
                             matrixIndex++;
-                            subAnchorX = anchorX +  Math.round(cellWidth * 1.0f * matrixIndex / matrices.size());
+                            subAnchorX = anchorX + Math.round(cellWidth * 1.0f * matrixIndex / matrices.size());
                         }//end of matrix loop
 
                         g2D.setStroke(UI.stroke2);
@@ -771,7 +822,6 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
 //    DecimalFormat df = new DecimalFormat("#.##");
-
     @Override
     public void postRender(int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY) {
     }

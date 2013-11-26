@@ -6,6 +6,7 @@
 package coolmap.canvas.datarenderer.renderer.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.CoolMapMaster;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
@@ -25,6 +26,10 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -33,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -112,25 +118,26 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        JButton button = new JButton("Apply");
-        configUI.add(button, c);
-        button.setToolTipText("Apply preset data ranges");
-        button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
-                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
-                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
-                } catch (Exception ex) {
-                    minValueField.setText("-1");
-                    maxValueField.setText("1");
-                }
-
-                updateRenderer();
-            }
-        });
+//        JButton button = new JButton("Apply");
+//        configUI.add(button, c);
+//        button.setToolTipText("Apply preset data ranges");
+//        button.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                try {
+//                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+//                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+//                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+//                } catch (Exception ex) {
+//                    minValueField.setText("-1");
+//                    maxValueField.setText("1");
+//                }
+//
+//                updateRenderer();
+//            }
+//        });
+        configUI.add(new JLabel("Preset range:"), c);
 
         c.gridx = 1;
         c.gridwidth = 1;
@@ -141,6 +148,21 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 1));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(-1, 0));
         presetRangeComboBox.addItem(new DefinedMinMaxItem(0, 100));
+
+        presetRangeComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                try {
+                    MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
+                    minValueField.setText(item.getMinMax().lowerEndpoint().toString());
+                    maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+                } catch (Exception ex) {
+                    minValueField.setText("-1");
+                    maxValueField.setText("1");
+                }
+            }
+        });
 
 ////////////////////////////////////////////////////////////////////////////////
 //        c.weightx = 0.2;
@@ -153,7 +175,19 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         configUI.add(minValueField, c);
         c.gridx = 2;
         lowColorLabel = new ColorLabel(lowColor);
+        lowColorLabel.setToolTipText("Click to change lower bound color");
         configUI.add(lowColorLabel, c);
+        lowColorLabel.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                Color newColor = JColorChooser.showDialog(CoolMapMaster.getCMainFrame(), "Choose lower bound color", null);
+                if (newColor != null) {
+                    lowColorLabel.setBackground(newColor);
+                }
+            }
+        });
 
         c.gridx = 0;
         c.gridy++;
@@ -163,7 +197,20 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         configUI.add(maxValueField, c);
         c.gridx = 2;
         highColorLabel = new ColorLabel(highColor);
+        highColorLabel.setToolTipText("Click to change upper bound color");
         configUI.add(highColorLabel, c);
+        highColorLabel.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e); //To change body of generated methods, choose Tools | Templates.
+                Color newColor = JColorChooser.showDialog(CoolMapMaster.getCMainFrame(), "Choose upper bound color", null);
+                if (newColor != null) {
+                    highColorLabel.setBackground(newColor);
+                }
+            }
+
+        });
 
 //        c.gridx = 0;
 //        c.gridy++;
@@ -176,7 +223,7 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         c.gridy++;
         c.gridwidth = 3;
 
-        button = new JButton("Update", UI.getImageIcon("refresh"));
+        JButton button = new JButton("Update", UI.getImageIcon("refresh"));
         configUI.add(button, c);
         button.addActionListener(new ActionListener() {
 
@@ -489,15 +536,31 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
                 //group nodes
                 //also for multiple datasets, it need to separate
                 try {
-                    //update orders
-                    //need to consider what if the cMatrix was added or removed? need to 
-                    if (lastRowNode != rowNode || lastColumnNode != columnNode) {
-                        updateNodeOrders(getCoolMapObject(), rowNode, columnNode);
-                    }
+//                    //update orders
+//                    //need to consider what if the cMatrix was added or removed? need to
+//                    //this is not thread safe
+//                    if (lastRowNode != rowNode || lastColumnNode != columnNode) {
+//                        updateNodeOrders(getCoolMapObject(), rowNode, columnNode);
+//                    }
 
                     //then go on
                     CoolMapObject obj = getCoolMapObject();
                     List<CMatrix> matrices = obj.getBaseCMatrices();
+
+                    Integer[] rowIndices;
+                    Integer[] colIndices;
+                    if (rowNode.isGroupNode()) {
+                        rowIndices = rowNode.getBaseIndicesFromCOntology((CMatrix) obj.getBaseCMatrices().get(0), COntology.ROW);
+                    } else {
+                        rowIndices = new Integer[]{((CMatrix) obj.getBaseCMatrices().get(0)).getIndexOfRowName(rowNode.getName())};
+                    }
+                    if (columnNode.isGroupNode()) {
+                        colIndices = columnNode.getBaseIndicesFromCOntology((CMatrix) obj.getBaseCMatrices().get(0), COntology.COLUMN);
+                    } else {
+                        colIndices = new Integer[]{((CMatrix) obj.getBaseCMatrices().get(0)).getIndexOfColName(columnNode.getName())};
+                    }
+
+                    Double value;
 
                     int subMatrixWidth = Math.round(cellWidth / matrices.size());
                     for (int mIndex = 0; mIndex < matrices.size(); mIndex++) {
@@ -507,7 +570,36 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
                         int sHeight = cellHeight;
                         CMatrix mx = matrices.get(mIndex);
 
-                        ArrayList<NodePair> pairsSorted = nodePairHash.get(mx.getID());
+                        ArrayList<NodePair> pairsSorted = new ArrayList<NodePair>();
+
+                        for (Integer i : rowIndices) {
+                            if (i == null || i < 0) {
+                                continue;
+                            }
+
+                            for (Integer j : colIndices) {
+
+                                if (j == null || j < 0) {
+                                    continue;
+                                }
+                                for (CMatrix<Double> matrix : matrices) {
+
+                                    value = matrix.getValue(i, j);
+
+                                    if (value == null || value.isNaN()) {
+                                        continue;
+                                    } else {
+                                        //System.out.println(i + " " + j + " " + v);
+                                        pairsSorted.add(new NodePair(mx, mx.getRowLabel(i), mx.getColLabel(j), value));
+                                    }
+                                }
+
+                            }
+                        }
+                        Collections.sort(pairsSorted);
+
+                        //sometimes this could be null?
+//                        ArrayList<NodePair> pairsSorted = nodePairHash.get(mx.getID());
                         if (pairsSorted == null) {
                             return;
                         }
@@ -517,7 +609,6 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
                         int sCellWidth = 1;
                         //now I have all the nodePairs, then start from the first one
                         NodePair pr;
-                        Double value;
                         int subX1, subX2, subY;
                         for (int i = 0; i < pairsSorted.size(); i++) {
                             pr = pairsSorted.get(i);
@@ -553,6 +644,7 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
                     }
 
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
@@ -564,7 +656,8 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
     }
 
     @Override
-    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
+    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight
+    ) {
         try {
             List<CMatrix> matrices = object.getBaseCMatrices();
             int matIndex = (int) (percentX * matrices.size());
@@ -600,7 +693,7 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
             String htmlLabel = pair.getHTMLLabel(matrices, matIndex);
 
             toolTipLabel.setText(htmlLabel);
-            
+
             return createToolTipFromJLabel(toolTipLabel);
         } catch (Exception e) {
             return null;
