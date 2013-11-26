@@ -21,7 +21,7 @@ public class NumberToLine extends NumberToBar {
 
     public NumberToLine() {
         super();
-        setName("Number To Line");
+        setName("Number to Line");
         setDescription("Use consequtivelines to connect dots");
         setClipCell(true); //make rendering possible to span to neighbor cells
     }
@@ -45,51 +45,58 @@ public class NumberToLine extends NumberToBar {
 
                 //Else draw something
                 int nextIndex = columnIndex.intValue() + 1;
-                VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
-                }
-
-                Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-
-                //need to find center of these two columnNodes
                 int centerX = anchorX + cellWidth / 2;
-                int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-
                 int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-                //cell height are the same
-                int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                
+                //compute effective cellWidth
+                //effective
+                float effectiveZoomX = cellWidth / columnNode.getCurrentViewMultiplier();
+                
+                try {
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
 
-                g2D.setColor(UI.colorTSUYUKUSA);
+                    //need to find center of these two columnNodes
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    
+                    
+                    
+                    int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(effectiveZoomX) / 2);
 
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                    
+                    //cell height are the same
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+
+                    g2D.setColor(UI.colorTSUYUKUSA);
+
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                } catch (Exception e) {
+                }
 
                 //bad fix -> as 4 threads, the block can't span...
-                nextIndex = columnIndex.intValue() - 1;
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
+                try {
+                    nextIndex = columnIndex.intValue() - 1;
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    int nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(effectiveZoomX) / 2);
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                    g2D.setColor(UI.colorTSUYUKUSA);
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+
+                } catch (Exception e) {
                 }
-
-                nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-                nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-                heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
-                g2D.setColor(UI.colorTSUYUKUSA);
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
-
                 g2D.setColor(UI.colorMIZU);
                 g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
-
                 g2D.setColor(UI.colorBlack1);
                 g2D.drawLine(anchorX, anchorY + cellHeight - 1, anchorX + cellWidth, anchorY + cellHeight - 1);
             } catch (Exception e) {
                 g2D.setColor(UI.colorMIZU);
                 int centerX = anchorX + cellWidth / 2;
                 int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
+
                 g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
                 g2D.setColor(UI.colorBlack1);
                 g2D.drawLine(anchorX, anchorY + cellHeight - 1, anchorX + cellWidth, anchorY + cellHeight - 1);
+
             }
 
         }
@@ -126,7 +133,7 @@ public class NumberToLine extends NumberToBar {
 
     @Override
     public void renderCellHD(Double v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-                if (v == null || v.isNaN()) {
+        if (v == null || v.isNaN()) {
             //System.out.println(v);
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
@@ -143,66 +150,64 @@ public class NumberToLine extends NumberToBar {
 
                 //Else draw something
                 int nextIndex = columnIndex.intValue() + 1;
-                VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
-                }
-
-                Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-
-                //need to find center of these two columnNodes
                 int centerX = anchorX + cellWidth / 2;
-                int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-
                 int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-                //cell height are the same
-                int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                try {
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
 
-                g2D.setColor(UI.colorTSUYUKUSA);
+                    //need to find center of these two columnNodes
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
 
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                    //cell height are the same
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+
+                    g2D.setColor(UI.colorTSUYUKUSA);
+
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                } catch (Exception e) {
+                }
 
                 //bad fix -> as 4 threads, the block can't span...
-                nextIndex = columnIndex.intValue() - 1;
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
+                try {
+                    nextIndex = columnIndex.intValue() - 1;
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    int nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                    g2D.setColor(UI.colorTSUYUKUSA);
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+
+                } catch (Exception e) {
                 }
 
-                nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-                nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-                heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
-                g2D.setColor(UI.colorTSUYUKUSA);
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
-
-                g2D.setStroke(UI.stroke2);
                 
+                
+                
+                
+                g2D.setStroke(UI.stroke2);
+
                 g2D.setColor(UI.colorWhite);
                 g2D.drawOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
-                
+
                 g2D.setColor(UI.colorMIZU);
                 g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
-                
 
                 g2D.setColor(UI.colorBlack1);
                 g2D.drawLine(anchorX, anchorY + cellHeight - 1, anchorX + cellWidth, anchorY + cellHeight - 1);
-                
+
             } catch (Exception e) {
-                
+
                 g2D.setColor(UI.colorMIZU);
                 int centerX = anchorX + cellWidth / 2;
                 int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-                
-                
+
                 g2D.setColor(UI.colorWhite);
                 g2D.drawOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
-                
+
                 g2D.setColor(UI.colorMIZU);
                 g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
-                
-                
-                
+
                 g2D.setColor(UI.colorBlack1);
                 g2D.drawLine(anchorX, anchorY + cellHeight - 1, anchorX + cellWidth, anchorY + cellHeight - 1);
             }
@@ -224,48 +229,44 @@ public class NumberToLine extends NumberToBar {
                     return;
                 }
 
+                
+                float effectiveZoomX = cellWidth / columnNode.getCurrentViewMultiplier();
                 //Else draw something
                 int nextIndex = columnIndex.intValue() + 1;
-                VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
-                }
-
-                Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-
-                //need to find center of these two columnNodes
                 int centerX = anchorX + cellWidth / 2;
-                int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-
                 int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-                //cell height are the same
-                int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                try {
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
 
-                g2D.setColor(UI.colorTSUYUKUSA);
+                    //need to find center of these two columnNodes
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    int nextCenterX = (int) (anchorX + cellWidth + nextColumnNode.getViewSizeInMap(effectiveZoomX) / 2);
 
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                    //cell height are the same
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+
+                    g2D.setColor(UI.colorTSUYUKUSA);
+
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                } catch (Exception e) {
+                }
 
                 //bad fix -> as 4 threads, the block can't span...
-                nextIndex = columnIndex.intValue() - 1;
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
-                if (nextColumnNode == null) {
-                    throw new Exception();
-                }
+                try {
+                    nextIndex = columnIndex.intValue() - 1;
+                    Double nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
+                    VNode nextColumnNode = getCoolMapObject().getViewNodeColumn(nextIndex);
+                    int nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(effectiveZoomX) / 2);
+                    int heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
+                    g2D.setColor(UI.colorTSUYUKUSA);
+                    g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
 
-                nextV = (Double) getCoolMapObject().getViewValue(rowNode.getViewIndex().intValue(), nextIndex);
-                nextCenterX = (int) (anchorX - nextColumnNode.getViewSizeInMap(getCoolMapObject().getCoolMapView().getZoomX()) / 2);
-                heightNext = (int) Math.round(cellHeight * (nextV - _minValue) / (_maxValue - _minValue));
-                g2D.setColor(UI.colorTSUYUKUSA);
-                g2D.drawLine(centerX, anchorY + cellHeight - heightV, nextCenterX, anchorY + cellHeight - heightNext);
+                } catch (Exception e) {
+                }
 
 //                g2D.setColor(UI.colorMIZU);
 //                g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
             } catch (Exception e) {
-                g2D.setColor(UI.colorMIZU);
-                int centerX = anchorX + cellWidth / 2;
-                int heightV = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
-                g2D.fillOval(centerX - 2, anchorY + cellHeight - heightV - 2, 4, 4);
             }
 
         }

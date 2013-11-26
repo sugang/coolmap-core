@@ -3,8 +3,7 @@ package coolmap;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
-import coolmap.canvas.datarenderer.renderer.impl.NumberComposite;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToSortedBar;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -23,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -159,7 +157,7 @@ public class Main {
             object.setAggregator(new DoubleDoubleMean());
             
             System.out.println("Set view renderer:");
-            object.setViewRenderer(new NumberToColor(), true);
+            object.setViewRenderer(new NumberToSortedBar(), true);
             //object.setViewRenderer(new NumberComposite(), false);
             System.out.println("What the fuck this should only be run once\n\n");
             

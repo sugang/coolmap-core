@@ -9,6 +9,7 @@ import com.google.common.collect.Range;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.utils.CImageGradient;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Component;
@@ -110,7 +111,7 @@ public class NumberToBar extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        configUI.add(new JLabel("Max valuee: "), c);
+        configUI.add(new JLabel("Max value: "), c);
         c.gridx = 1;
         configUI.add(maxValueField, c);
 
@@ -131,6 +132,8 @@ public class NumberToBar extends ViewRenderer<Double> {
         });
 
     }
+
+    private CImageGradient _gradient = new CImageGradient(10000);
 
     @Override
     public void updateRendererChanges() {
@@ -198,7 +201,6 @@ public class NumberToBar extends ViewRenderer<Double> {
 
     protected double _minValue = 0;
     protected double _maxValue = 1;
-    private Color[] _gradientColors = null;
 
     @Override
     protected void initialize() {
@@ -271,8 +273,6 @@ public class NumberToBar extends ViewRenderer<Double> {
 //                g2D.setColor(UI.colorBlack2);
 //                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
             }
         }
     }
@@ -290,12 +290,11 @@ public class NumberToBar extends ViewRenderer<Double> {
                 int height = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
                 g2D.setColor(UI.colorLightYellow);
                 g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
-                g2D.setColor(UI.colorBlack2);
-                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
+
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
             }
+            g2D.setColor(UI.colorBlack2);
+            g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
         }
     }
 
@@ -311,17 +310,15 @@ public class NumberToBar extends ViewRenderer<Double> {
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
                 int height = (int) Math.round(cellHeight * (v - _minValue) / (_maxValue - _minValue));
 
-                LinearGradientPaint paint = new LinearGradientPaint(anchorX, anchorY, anchorX, anchorY + cellHeight, new float[]{0f, 1f}, new Color[]{UI.colorLightYellow, UI.colorOrange0});
+                LinearGradientPaint paint = new LinearGradientPaint(anchorX, anchorY, anchorX, anchorY + cellHeight, new float[]{0f, 1f}, new Color[]{Color.white, UI.colorLightYellow});
 
                 g2D.setPaint(paint);
                 g2D.fillRect(Math.round(anchorX), Math.round(anchorY + cellHeight - height), Math.round(cellWidth), Math.round(cellHeight));
 
-                g2D.setColor(UI.colorBlack2);
-                g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
             }
+            g2D.setColor(UI.colorBlack2);
+            g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
         }
     }
 

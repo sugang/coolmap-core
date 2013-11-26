@@ -65,11 +65,14 @@ public class UI {
     public static Color colorLightPink = new Color(253, 224, 221);
     public static Color colorPink = new Color(250, 159, 181);
     
+    
     public static Color colorSHOJYOHI = new Color(226,4,27);
     public static Color colorTSUYUKUSA = new Color(46,169,223);
     public static Color colorMIZU = new Color(129,199,212);
+    public static Color colorKARAKURENAI = new Color(208, 16, 76);
+    public static Color colorTOKIWA = new Color(27, 129, 62);
     
-    
+//    private static final HashMap<String, Color> _colorPalette = new HashMap<String, Color>();
     
     
     

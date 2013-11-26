@@ -119,7 +119,7 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        configUI.add(new JLabel("Max valuee: "), c);
+        configUI.add(new JLabel("Max value: "), c);
         c.gridx = 1;
         configUI.add(maxValueField, c);
 
@@ -235,7 +235,6 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
 
     private double _minValue = 0;
     private double _maxValue = 1;
-    private Color[] _gradientColors = null;
 
     @Override
     protected void initialize() {
@@ -378,8 +377,6 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
 //                    g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
 //                }
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
             }
         }
     }
@@ -584,8 +581,6 @@ public class NumberToBoxPlot extends ViewRenderer<Double> {
                 g2D.setColor(UI.colorBlack1);
                 g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors);
-                e.printStackTrace();
             }
         }
     }

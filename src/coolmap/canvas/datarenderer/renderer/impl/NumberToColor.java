@@ -204,7 +204,7 @@ public class NumberToColor extends ViewRenderer<Double> {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        configUI.add(new JLabel("Max valuee: "), c);
+        configUI.add(new JLabel("Max value: "), c);
         c.gridx = 1;
         configUI.add(maxValueField, c);
 
