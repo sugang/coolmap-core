@@ -157,10 +157,8 @@ public class Main {
 
             object.setAggregator(new DoubleDoubleMean());
             
-            System.out.println("Set view renderer:");
             object.setViewRenderer(new NumberToColor(), true);
             //object.setViewRenderer(new NumberComposite(), false);
-            System.out.println("What the fuck this should only be run once\n\n");
             
             
             object.setSnippetConverter(new DoubleSnippet1_3());
@@ -182,6 +180,9 @@ public class Main {
 //            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
 //            object.getAnnotationStorage().addAnnotation(annotation);
 //            CoolMapMaster.getCMainFrame().showBusyDialog(true);
+            
+            
+            
             CMConsole.log("Loaded coolmap");
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
