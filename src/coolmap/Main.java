@@ -98,7 +98,7 @@ public class Main {
             object.addBaseCMatrix(matrix);
             
             CMatrix matrix2 = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
-//            object.addBaseCMatrix(matrix2);
+            object.addBaseCMatrix(matrix2);
 
 //            Add base nodes ===================================================
             ArrayList<VNode> nodes = new ArrayList<VNode>();

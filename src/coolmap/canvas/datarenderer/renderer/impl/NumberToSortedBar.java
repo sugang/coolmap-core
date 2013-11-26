@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -84,7 +85,17 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
 
     }
 
+    private final JLabel toolTipLabel;
+
     public NumberToSortedBar() {
+
+        toolTipLabel = new JLabel();
+        toolTipLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        toolTipLabel.setBackground(UI.colorGrey3);
+        toolTipLabel.setOpaque(true);
+        toolTipLabel.setForeground(UI.colorBlack2);
+        toolTipLabel.setFont(UI.fontPlain.deriveFont(12f));
+
         setName("Number to Sorted Bar");
         setDescription("Use bar height to represent numeric values, with all member pairs sorted by value");
 
@@ -415,30 +426,30 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
             _markNull(v, rowNode, columnNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
         } else {
 //            if (rowNode.isSingleNode() && columnNode.isSingleNode()) {
-                //single nodes
-                try {
-                    g2D.setStroke(UI.stroke1_5);
-                    g2D.setColor(UI.colorBlack3);
-                    g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+            //single nodes
+            try {
+                g2D.setStroke(UI.stroke1_5);
+                g2D.setColor(UI.colorBlack3);
+                g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
 
-                    double percentage = (v - _minValue) / (_maxValue - _minValue);
-                    int height = (int) Math.round(cellHeight * percentage);
-                    int cIndex = (int) (_gradientColors.length * percentage);
-                    if (cIndex < 0) {
-                        cIndex = 0;
-                    }
-                    if (cIndex >= _gradientColors.length) {
-                        cIndex = _gradientColors.length - 1;
-                    }
-                    Color c = _gradientColors[(int) (cIndex)];
+                double percentage = (v - _minValue) / (_maxValue - _minValue);
+                int height = (int) Math.round(cellHeight * percentage);
+                int cIndex = (int) (_gradientColors.length * percentage);
+                if (cIndex < 0) {
+                    cIndex = 0;
+                }
+                if (cIndex >= _gradientColors.length) {
+                    cIndex = _gradientColors.length - 1;
+                }
+                Color c = _gradientColors[(int) (cIndex)];
 
 //                g2D.setStroke(UI.stroke1_5);
-                    g2D.setColor(c);
-                    g2D.fillRect(anchorX, anchorY + cellHeight - height, cellWidth, height);
-                    
-                } catch (Exception e) {
+                g2D.setColor(c);
+                g2D.fillRect(anchorX, anchorY + cellHeight - height, cellWidth, height);
 
-                }
+            } catch (Exception e) {
+
+            }
 //            }
         }
     }
@@ -548,6 +559,51 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
             g2D.setColor(UI.colorBlack2);
             //g2D.drawRect(Math.round(anchorX), Math.round(anchorY), Math.round(cellWidth), Math.round(cellHeight));
             g2D.drawLine(anchorX, anchorY + cellHeight, anchorX + cellWidth, anchorY + cellHeight);
+
+        }
+    }
+
+    @Override
+    public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight) {
+        try {
+            List<CMatrix> matrices = object.getBaseCMatrices();
+            int matIndex = (int) (percentX * matrices.size());
+
+            CMatrix currentMatrix = matrices.get(matIndex);
+
+            if (lastRowNode != rowNode || lastColumnNode != columnNode) {
+                updateNodeOrders(getCoolMapObject(), rowNode, columnNode);
+            }
+
+            ArrayList<NodePair> pairs = nodePairHash.get(currentMatrix.getID());
+            if (pairs == null) {
+                return null;
+            }
+
+            //now get the column percentage
+            float subPercent = (percentX - 1.0f * matIndex / matrices.size()) * matrices.size();
+            if (subPercent < 0) {
+                subPercent = 0;
+            } else if (subPercent > 1) {
+                subPercent = 1;
+            }
+
+            int index = Math.round(pairs.size() * subPercent);
+            if (index < 0) {
+                index = 0;
+            } else if (index >= pairs.size()) {
+                index = pairs.size() - 1;
+            }
+
+            NodePair pair = pairs.get(index);
+
+            String htmlLabel = pair.getHTMLLabel(matrices, matIndex);
+
+            toolTipLabel.setText(htmlLabel);
+            
+            return createToolTipFromJLabel(toolTipLabel);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -619,11 +675,13 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
     private class NodePair implements Comparable<NodePair> {
 
         private final Double value;
-        private final String label;
+        private final String rowLabel;
+        private final String columnLabel;
 
         public NodePair(CMatrix matrix, String rowLabel, String columnLabel, Double v) {
             value = v;
-            label = rowLabel + " " + columnLabel + " " + value;
+            this.rowLabel = rowLabel;
+            this.columnLabel = columnLabel;
         }
 
         @Override
@@ -636,12 +694,25 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
         }
 
         public String getLabel() {
-            return label;
+            return rowLabel + "," + columnLabel;
         }
 
         public Double getValue() {
             return value;
         }
+
+        @Override
+        public String toString() {
+            return rowLabel + "," + columnLabel + "," + value;
+        }
+
+        public String getHTMLLabel(List<CMatrix> matrices, int index) {
+            return "<html><table cellspacing='1' border='0' cellpadding='1'>"
+                    + ((matrices.size() > 1) ? "<tr><td><strong>Data: </strong></td><td>" + matrices.get(index).getName() + "</td></tr>" : "")
+                    + "<tr><td><strong>Row: </strong></td><td>" + rowLabel + "</td></tr><tr><td><strong>Column: </strong></td><td>" + columnLabel + "</td></tr><tr><td><strong>Value: </strong></td><td><span style='color:#020202;font-weight:bold;'>" + df.format(value) + "</span></td></tr></table></html>";
+        }
+
+        private DecimalFormat df = new DecimalFormat("#.###");
 
     }
 
