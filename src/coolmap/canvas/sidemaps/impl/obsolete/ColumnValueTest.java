@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.canvas.sidemaps.impl;
+package coolmap.canvas.sidemaps.impl.obsolete;
 
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;

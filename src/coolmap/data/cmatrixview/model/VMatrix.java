@@ -1197,6 +1197,8 @@ public class VMatrix<BASE, VIEW> {
 //                 }
             }
         }
+        
+        Collections.sort(_activeRowNodesInTree, new VNodeIndexComparator());
         _rebuildActiveRowNameToNodeMap();
     }
 
@@ -1217,8 +1219,25 @@ public class VMatrix<BASE, VIEW> {
             }
         }
 ///////////////////////////////////////////////////////////////////////////////
+        //Rebuild a hashmap that contains column names to indices
+        Collections.sort(_activeRowNodesInTree, new VNodeIndexComparator());
         _rebuildActiveColumnNameToNodeMap();
     }
+    
+    public ArrayList<VNode> getRowTreeNodes(int fromIndex, int toIndex){
+    
+        //binary search from ffrom index, then add till to index
+        return null;
+    }
+    
+    public ArrayList<VNode> getColumnTreeNodes(int fromColumn, int toColumn){
+        //binary search from from index, then add till to index
+        return null;
+    }
+    
+    
+    
+    
 
     private void _rebuildActiveColumnNameToNodeMap() {
         _activeColumnNameToNodeMap.clear();

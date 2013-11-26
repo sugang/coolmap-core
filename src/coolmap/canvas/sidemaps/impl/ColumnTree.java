@@ -48,10 +48,10 @@ import javax.swing.event.PopupMenuListener;
  */
 public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionListener {
 
-        @Override
+    @Override
     public void nameChanged(CoolMapObject object) {
     }
-    
+
     private Color _leafColor;
     private Color _leafBorderColor;
     private int _ballInnerRadius = 2;
@@ -121,7 +121,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
     @Override
     public void gridChanged(CoolMapObject object) {
     }
@@ -178,9 +177,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         }
 
         //must sort with 
-
-
-
         HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
 
         VNode firstNode = childNodeInTree.get(0);
@@ -224,11 +220,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         });
 
-
-
-
-
-
         JMenu linetype = new JMenu("Line type");
 
         _expandOne = new JMenuItem("Expand selected one level");
@@ -262,13 +253,12 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         });
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
-        
-        
+
         _expandOneAll = new JMenuItem(new ExpandColumnNodesOneLevelAction(getCoolMapObject().getID()));
-        
+
         //_expandOneAll = new JMenuItem("Expand all one level"); //, UI.getImageIcon("plusSmall")
         _popupMenu.add(_expandOneAll);
-        
+
 //        _expandOneAll.addActionListener(new ActionListener() {
 //
 //            @Override
@@ -277,10 +267,9 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //                getCoolMapObject().expandColumnNodesOneLayer();
 //            }
 //        });
-
         _collapseOneAll = new JMenuItem(new CollapseColumnNodesUpAction(getCoolMapObject().getID())); //UI.getImageIcon("minusSmall")
         _popupMenu.add(_collapseOneAll);
-        
+
 //        _collapseOneAll.addActionListener(new ActionListener() {
 //
 //            @Override
@@ -288,14 +277,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //                getCoolMapObject().collapseColumnNodesOneLayer();
 //            }
 //        });
-
-
-
-
-
-
-
-
         _colorTree = new JMenuItem("Color subtree");
         _popupMenu.addSeparator();
         _popupMenu.add(_colorTree);
@@ -387,7 +368,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         }
 
-
         ////
         _popupMenu.addPopupMenuListener(new PopupMenuListener() {
 
@@ -471,23 +451,28 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     public void selectionChanged(CoolMapObject obj) {
     }
 
+    
+    
+    
     @Override
     protected void render(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
-
 //        VNode firstNode = object.getViewNodeCol(fromCol);
-        try{
+        try {
 //        computeNodeLocations();
-        _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
-
-        super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+            //Because certain tree nodes are not situated in between. yes. this is to render tree nodes
+            _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+            
+            //this is to render base nodes
+            super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+            
+        } catch (Exception e) {
         }
-        catch(Exception e){
-            //
-            System.out.println("node render exception");
-        }
-
-
     }
+    
+
+    
+    
+    
 //    private final HashMap<VNode, Float> _nodeOffset = new HashMap<VNode, Float>();
 //    private void computeNodeLocations(){
 //        _nodeOffset.clear();
@@ -592,7 +577,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
 
         List<VNode> treeNodes = object.getViewTreeNodesColumn();
-        
+
         int anchorX = getCoolMapObject().getViewNodeColumn(fromCol).getViewOffset().intValue();
 
         Color nodeColor;
@@ -606,7 +591,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             Float viewIndex = treeNode.getViewIndex();
             boolean parentInView = viewIndex >= fromCol && viewIndex < toCol;
             parentOffset = _getTreeNodeOffset(treeNode, object);
-
 
             //System.out.println("Parent offset:" + treeNode + ":" + parentOffset);
             if (parentOffset == null) {
@@ -646,8 +630,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         childY = (int) Math.round((renderHeight - _baseHeight - childHeight * _heightMultiple));
                     }
 
-
-
                     _renderLine(g2D, parentX - 1, parentY, childX - 1, childY, zoomX);
                 }
             }
@@ -661,12 +643,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             } else {
                 nodeColor = treeNode.getCOntology().getViewColor();
             }
-
-
-
-
-
-
 
             if (zoomX > 6) {
                 //draw fixed ball.
@@ -792,13 +768,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             g2D.setColor(UI.colorBlack2);
             g2D.drawString(label, x - labelWidth - 7, y - 5);
 
-
             //g2D.drawString(_activeNode.getViewLabel(), _activeNodePoint.x + getCoolMapView().getMapAnchor().x, height + _activeNodePoint.y);
         }
 
-
         if (_isSelecting && _selectionStartPoint != null && _selectionEndPoint != null && _screenRegion != null) {
-
 
             g2D.setColor(UI.colorRedWarning);
             g2D.setStroke(UI.strokeDash1_5);
@@ -827,24 +800,22 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         _selectedNodes.add(node);
                     }
                     if (me.getClickCount() > 1) {
-                        
+
                         String operationName = "";
-                        if(node.isExpanded()){
+                        if (node.isExpanded()) {
                             operationName = "Collapse column '" + node.getViewLabel() + "'";
+                        } else {
+                            operationName = "Expand column '" + node.getViewLabel() + "' to bottom";
                         }
-                        else{
-                            operationName = "Expand column '" + node.getViewLabel() + "' to bottom"; 
-                        }
-                        
+
                         CoolMapState state = CoolMapState.createStateColumns(operationName, getCoolMapObject(), null);
-                        
-                        
+
                         boolean success = getCoolMapObject().toggleColumnNode(node);
-                        
-                        if(success){
+
+                        if (success) {
                             StateStorageMaster.addState(state);
                         }
-                        
+
                     }
                 }
 
@@ -854,7 +825,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         }
     }
-    
+
     private Point _selectionStartPoint;
     private Point _selectionEndPoint;
     private boolean _isSelecting = false;
@@ -884,7 +855,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     private void _selectNodesInRegion(Rectangle screenRegion) {
         //of course you can use binary search here..
-        
+        //need to check all the nodes
+        //better to have a relative points of nodes
+        _selectedNodes.clear();
+
     }
 
     @Override
@@ -911,7 +885,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 y = _selectionEndPoint.y;
                 sheight = _selectionStartPoint.y - _selectionEndPoint.y;
             }
-            _screenRegion = new Rectangle(x,y,swidth,sheight);
+            _screenRegion = new Rectangle(x, y, swidth, sheight);
             getViewPanel().repaint();
         }
     }
@@ -953,6 +927,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         }
     }
 
+    //optimize this: no need to 
     private VNode _getActiveNode(int screenX, int screenY) {
         CoolMapView view = getCoolMapView();
         JComponent panel = getViewPanel();
@@ -986,7 +961,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     if (Math.abs(nodeX - screenX) > _ballOutterRadius) {
                         continue;
                     }
-
 
                     int nodeY = (int) Math.round((renderHeight - _baseHeight - node.getViewHeightInTree() * _heightMultiple));
                     if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
