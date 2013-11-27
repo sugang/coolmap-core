@@ -1344,6 +1344,7 @@ public final class CoolMapObject<BASE, VIEW> {
             } else {
                 Range<Integer> selectedColumn = Range.closedOpen(index.intValue(), index.intValue() + 1);
                 getCoolMapView().setSelectionsColumn(Collections.singletonList(selectedColumn));
+                getCoolMapView().centerToSelections();
             }
 
             //
@@ -1523,6 +1524,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //            StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWCOLLAPSE);
 //            notifyStateStorageUpdated();
             _vMatrix.collapseTreeRowNode(node);
+            
             getCoolMapView().updateNodeDisplayParams();
             //should all have something
             Float index = node.getViewIndex();
@@ -1531,6 +1533,7 @@ public final class CoolMapObject<BASE, VIEW> {
             } else {
                 Range<Integer> selectedRow = Range.closedOpen(index.intValue(), index.intValue() + 1);
                 getCoolMapView().setSelectionsRow(Collections.singletonList(selectedRow));
+                getCoolMapView().centerToSelections();
             }
 
             //

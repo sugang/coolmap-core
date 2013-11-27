@@ -604,7 +604,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
-        List<VNode> treeNodes = object.getViewTreeNodesRow();
+        
+        List<VNode> treeNodes = object.getViewTreeNodesRow(); //should contain all tree nodes
 
         //Attn: minor bug may exist here. Null pointer exception?
         int anchorY = getCoolMapObject().getViewNodeRow(fromRow).getViewOffset().intValue();
@@ -634,8 +635,16 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             parentX = (int) Math.round(_baseWidth + parentHeight * _heightMultiple);
             List<VNode> childNodes = treeNode.getChildNodes();
 
+            boolean childInView;
             for (VNode child : childNodes) {
-                if (parentInView || (child != null && child.getViewIndex() >= fromRow && child.getViewIndex() < toRow && child.getViewHeightInTree() != null)) {
+                //parentInView || (child != null && child.getViewIndex() >= fromRow && child.getViewIndex() < toRow && child.getViewHeightInTree() != null)
+                Float cIndex = child.getViewIndex();
+                if(viewIndex == null)
+                    continue;
+                childInView = cIndex >= fromRow && cIndex < toRow;
+                
+                //need to consider the 'Cross' situation
+                if (parentInView || childInView || viewIndex < fromRow && cIndex >= toRow || viewIndex >= toRow && cIndex < fromRow ) {
 
                     if (!child.isExpanded()) {
                         childY = (int) (child.getViewOffset() + child.getViewSizeInMap(zoomY) / 2 - anchorY);
@@ -662,6 +671,10 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     _renderLine(g2D, parentX, parentY, childX, childY, zoomY);
 
                 }
+                
+                
+                
+                
             }
 
             if (!parentInView) {
@@ -874,6 +887,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //        _activeNode = null;
 //        _activeNodePoint = null;
         _plotHover = false;
+        _activeNode = null;
+        _activeNodePoint = null;
         getViewPanel().repaint();
     }
 

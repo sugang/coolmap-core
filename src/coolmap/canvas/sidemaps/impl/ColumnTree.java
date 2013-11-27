@@ -614,9 +614,18 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             parentY = (int) Math.round((renderHeight - _baseHeight - parentHeight * _heightMultiple));
 
             List<VNode> childNodes = treeNode.getChildNodes();
+            boolean childInView;
+
             for (VNode child : childNodes) {
-                if (parentInView || (child != null && child.getViewIndex() >= fromCol && child.getViewIndex() < toCol && child.getViewHeightInTree() != null)) {
+                Float cIndex = child.getViewIndex();
+                if (viewIndex == null) {
+                    continue;
+                }
+                childInView = cIndex >= fromCol && cIndex < toCol;
+//parentInView || (child != null && child.getViewIndex() >= fromCol && child.getViewIndex() < toCol && child.getViewHeightInTree() != null)
+                if (parentInView || childInView || viewIndex < fromCol && cIndex > toCol || viewIndex >= toCol && cIndex < toCol) {
                     //renderline
+
                     if (!child.isExpanded()) {
                         childX = (int) (child.getViewOffset() + child.getViewSizeInMap(zoomX) / 2 - anchorX);
                     } else {
