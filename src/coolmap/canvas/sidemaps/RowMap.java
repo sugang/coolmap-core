@@ -222,7 +222,7 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 
     public final synchronized void updateBuffer(int minRow, int maxRow, int minCol, int maxCol, Rectangle dimension) {
 //        System.out.println("Row buffer updated");
-
+        try{
         CoolMapView canvas = _coolMapObject.getCoolMapView();
         if (canvas == null || !canRender(canvas.getCoolMapObject())) {
             _mapBuffer = null;
@@ -265,6 +265,10 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         justifyView();
 
         _viewPanel.repaint();
+        }
+        catch(Exception e){
+            System.err.println("Minor issue when rendering row map");
+        }
     }
 
     protected void render(Graphics2D g2D, CoolMapObject<BASE, VIEW> object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {

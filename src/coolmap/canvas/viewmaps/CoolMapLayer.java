@@ -37,7 +37,7 @@ public class CoolMapLayer<BASE, VIEW> implements MapLayer<BASE, VIEW> {
 //            System.out.println("Interrupted");
         }
         catch(Exception e){
-            e.printStackTrace();
+            System.err.println("Minor issue when trying to render a coolMap layer map");
         }
         
         

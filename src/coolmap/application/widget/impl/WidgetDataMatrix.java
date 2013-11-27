@@ -120,34 +120,33 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
             int[] columns = _dataTable.getSelectedColumns();
             int[] rows = _dataTable.getSelectedRows();
-            
+
             //these are the column and row indices
             System.out.println(Arrays.toString(columns));
             System.out.println(Arrays.toString(rows));
-            
+
             Arrays.sort(columns);
             Arrays.sort(rows);
-            
-            //inclusive
-           content.append("Row Nodes/Column Nodes");
-           for(int j=columns[0]-1; j<=columns[columns.length-1]-1; j++){
-               content.append("\t");
-               content.append(_activeObject.getViewNodeColumn(j));
-           }
-           content.append("\n");
-           
-           for(int i=rows[0]; i<=rows[rows.length-1]; i++){
-               content.append(_activeObject.getViewNodeRow(i));
-               for(int j=columns[0]-1; j<=columns[columns.length-1]-1; j++){
-                   content.append("\t");
-                   content.append(_activeObject.getViewValue(i, j));
-               }
-               content.append("\n");
-           }
-           
 
-           StringSelection str = new StringSelection(content.toString());
-           clpBoard.setContents(str, null);
+            //inclusive
+            content.append("Row Nodes/Column Nodes");
+            for (int j = columns[0] - 1; j <= columns[columns.length - 1] - 1; j++) {
+                content.append("\t");
+                content.append(_activeObject.getViewNodeColumn(j));
+            }
+            content.append("\n");
+
+            for (int i = rows[0]; i <= rows[rows.length - 1]; i++) {
+                content.append(_activeObject.getViewNodeRow(i));
+                for (int j = columns[0] - 1; j <= columns[columns.length - 1] - 1; j++) {
+                    content.append("\t");
+                    content.append(_activeObject.getViewValue(i, j));
+                }
+                content.append("\n");
+            }
+
+            StringSelection str = new StringSelection(content.toString());
+            clpBoard.setContents(str, null);
         }
 
     }
@@ -269,93 +268,97 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
     }
 
     private void _replaceTableModel() {
-        CoolMapObject object = _activeObject;
-        if (object == null) {
-            _dataTable.setModel(new DataTableModel());
-            return;
-        }
+        try {
+            CoolMapObject object = _activeObject;
+            if (object == null) {
+                _dataTable.setModel(new DataTableModel());
+                return;
+            }
             //need to make sure it's sortable
-        //The selections will be
+            //The selections will be
 
-        //secure column labels
-        Object[] columnLabels = new Object[object.getViewNumColumns() + 1];
+            //secure column labels
+            Object[] columnLabels = new Object[object.getViewNumColumns() + 1];
 //            _dataTable.clearColumnClasses();
-        columnLabels[0] = "Row Nodes";
-        for (int i = 0; i < object.getViewNumColumns(); i++) {
-            columnLabels[i + 1] = object.getViewNodeColumn(i);
+            columnLabels[0] = "Row Nodes";
+            for (int i = 0; i < object.getViewNumColumns(); i++) {
+                columnLabels[i + 1] = object.getViewNodeColumn(i);
 //                if(Double.class.isAssignableFrom(object.getViewClass())){
 //                    _dataTable.setColumnClass(i+1, Double.class);
 //                }
-            if (Thread.interrupted()) {
-                return;
-            }
-        }
-
-        //create
-        Object[][] data = new Object[object.getViewNumRows()][object.getViewNumColumns() + 1];
-
-        for (int i = 0; i < object.getViewNumRows(); i++) {
-            data[i][0] = object.getViewNodeRow(i);
-            for (int j = 0; j < object.getViewNumColumns(); j++) {
-//                    data[i][j+1]
-                data[i][j + 1] = object.getViewValue(i, j);
                 if (Thread.interrupted()) {
                     return;
                 }
             }
-        }
+
+            //create
+            Object[][] data = new Object[object.getViewNumRows()][object.getViewNumColumns() + 1];
+
+            for (int i = 0; i < object.getViewNumRows(); i++) {
+                data[i][0] = object.getViewNodeRow(i);
+                for (int j = 0; j < object.getViewNumColumns(); j++) {
+//                    data[i][j+1]
+                    data[i][j + 1] = object.getViewValue(i, j);
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                }
+            }
 
 //            DataTableModel model = new DataTableModel();
-        if (Thread.interrupted()) {
-            return;
-        }
-
-        //Then set table model
-        DataTableModel model = new DataTableModel(data, columnLabels);
-
-        //
-        for (int i = 1; i < columnLabels.length; i++) {
-            if (Double.class.isAssignableFrom(object.getViewClass())) {
-                model.setColumnClass(i, null);
+            if (Thread.interrupted()) {
+                return;
             }
-        }
-        if (Thread.interrupted()) {
-            return;
-        }
 
-        _dataTable.setModel(model);
+            //Then set table model
+            DataTableModel model = new DataTableModel(data, columnLabels);
+
+            //
+            for (int i = 1; i < columnLabels.length; i++) {
+                if (Double.class.isAssignableFrom(object.getViewClass())) {
+                    model.setColumnClass(i, null);
+                }
+            }
+            if (Thread.interrupted()) {
+                return;
+            }
+
+            _dataTable.setModel(model);
 
         //Remove
 //        _dataTable.getColumnModel().removeColumn(_dataTable.getColumn("Row Nodes"));
-        //add
-        _dataTable.getRowSorter().addRowSorterListener(new RowSorterListener() {
+            //add
+            _dataTable.getRowSorter().addRowSorterListener(new RowSorterListener() {
 
-            @Override
-            public void sorterChanged(RowSorterEvent e) {
+                @Override
+                public void sorterChanged(RowSorterEvent e) {
 //                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                if (e.getType() == RowSorterEvent.Type.SORTED) {
-                    System.out.println("sort changed");
+                    if (e.getType() == RowSorterEvent.Type.SORTED) {
+                        System.out.println("sort changed");
 
-                    rowHeader.repaint();
+                        rowHeader.repaint();
 
-                    //replace nodes
-                    if (_activeObject == null) {
-                        return;
+                        //replace nodes
+                        if (_activeObject == null) {
+                            return;
+                        }
+                        List treeNodes = _activeObject.getViewTreeNodesRow();
+                        ArrayList<VNode> nodes = new ArrayList<VNode>();
+
+                        for (int i = 0; i < _dataTable.getRowCount(); i++) {
+                            nodes.add((VNode) _dataTable.getValueAt(i, 0));
+                        }
+                        //System.out.println(nodes);
+                        _sorterTrigger = true;
+                        _activeObject.replaceRowNodes(nodes, treeNodes);
+
                     }
-                    List treeNodes = _activeObject.getViewTreeNodesRow();
-                    ArrayList<VNode> nodes = new ArrayList<VNode>();
-
-                    for (int i = 0; i < _dataTable.getRowCount(); i++) {
-                        nodes.add((VNode) _dataTable.getValueAt(i, 0));
-                    }
-                    //System.out.println(nodes);
-                    _sorterTrigger = true;
-                    _activeObject.replaceRowNodes(nodes, treeNodes);
 
                 }
-
-            }
-        });
+            });
+        } catch (Exception e) {
+            System.err.println("Minor issue when attempting to update table model. Possibly due to render cancelation");
+        }
     }
 
     private boolean _sorterTrigger = false;
@@ -655,7 +658,6 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 ////            return rendererCp;
 //            return super.prepareRenderer(renderer, row, column);
 //        }
-
     }
 
     //This is where it was broken!

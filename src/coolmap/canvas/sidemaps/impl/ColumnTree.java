@@ -14,6 +14,7 @@ import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.state.CoolMapState;
+import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -66,6 +67,8 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     //This records the offset of node: x = parentNode 
     //private final HashSet<Point> _nodeOffset = new HashSet<Point>();
+    private final Color[] labelColors;
+
     public ColumnTree(CoolMapObject object) {
         super(object);
         setName("Column Ontology");
@@ -75,6 +78,11 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         getViewPanel().addMouseMotionListener(this);
         _hoverFont = UI.fontMono.deriveFont(Font.BOLD).deriveFont(11f);
         _initPopupMenu();
+
+        CImageGradient gradient = new CImageGradient(10);
+        gradient.addColor(new Color(245, 245, 245), 0f);
+        gradient.addColor(UI.colorWhite, 1f);
+        labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
     }
     private JPopupMenu _popupMenu;
     private JCheckBoxMenuItem[] _linetypes = new JCheckBoxMenuItem[3];
@@ -166,6 +174,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     }
     private JMenuItem _expandOne, _expandToAll, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
 
+    //This is only selecting the active nodes. need to select from selected nodes -> require efficient algorithms. Also will require merges
     private void _selectSubTree() {
         if (_activeNode == null || !_activeNode.isGroupNode() || !_activeNode.isExpanded() || !isDataViewValid()) {
             return;
@@ -451,9 +460,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     public void selectionChanged(CoolMapObject obj) {
     }
 
-    
-    
-    
     @Override
     protected void render(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
 //        VNode firstNode = object.getViewNodeCol(fromCol);
@@ -461,18 +467,21 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //        computeNodeLocations();
             //Because certain tree nodes are not situated in between. yes. this is to render tree nodes
             _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
-            
+
             //this is to render base nodes
             super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
-            
+
+            //keep track of 
+            //System.out.println(object.getViewNodesColumnTree(fromCol, toCol));
+            activeTreeNodes.clear();
+            activeTreeNodes.addAll(object.getViewNodesColumnTree(fromCol, toCol)); //if it's null then don't add anything
+
         } catch (Exception e) {
         }
     }
-    
 
-    
-    
-    
+    private final ArrayList<VNode> activeTreeNodes = new ArrayList<VNode>();
+
 //    private final HashMap<VNode, Float> _nodeOffset = new HashMap<VNode, Float>();
 //    private void computeNodeLocations(){
 //        _nodeOffset.clear();
@@ -697,6 +706,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         }
 
         //_nodeLocation.put(node, new Point(anchorX + cellWidth / 2, anchorY + cellHeight - _baseHeight + 1));
+//        object.getViewNodes
     }
 
     @Override
@@ -717,6 +727,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         if (!_selectedNodes.isEmpty()) {
             g2D.setFont(_hoverFont);
             g2D.setColor(UI.colorBlack3);
+            int index = 0;
             for (VNode node : _selectedNodes) {
                 Point p = _getNodePositionInView(node);
                 if (p == null) {
@@ -736,12 +747,23 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 g2D.setColor(UI.colorBlack5);
                 g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
-                g2D.setColor(UI.colorWhite);
+                if (_selectedNodes.size() > 1) {
+                    int ci = (int) (labelColors.length * 1.0f * index / _selectedNodes.size());
+                    if (ci == labelColors.length) {
+                        ci = labelColors.length - 1;
+                    }
+
+                    g2D.setColor(labelColors[ci]);
+                } else {
+                    g2D.setColor(Color.WHITE);
+                }
+
                 g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
 
                 g2D.setColor(UI.colorBlack2);
                 g2D.drawString(label, x - labelWidth - 7, y - 5);
 
+                index++;
             }
         }
 
@@ -771,9 +793,11 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             //g2D.drawString(_activeNode.getViewLabel(), _activeNodePoint.x + getCoolMapView().getMapAnchor().x, height + _activeNodePoint.y);
         }
 
+        //Draw a selection
         if (_isSelecting && _selectionStartPoint != null && _selectionEndPoint != null && _screenRegion != null) {
 
-            g2D.setColor(UI.colorRedWarning);
+            g2D.setColor(UI.colorOrange0);
+
             g2D.setStroke(UI.strokeDash1_5);
             g2D.drawRect(_screenRegion.x, _screenRegion.y, _screenRegion.width, _screenRegion.height);
 
@@ -791,8 +815,9 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             if (isDataViewValid()) {
                 VNode node = _getActiveNode(me.getX(), me.getY());
                 if (node == null) {
+//                    System.out.println("Nodes cleared");
                     _selectedNodes.clear();
-
+                    _screenRegion = null;
                 } else {
                     if (_selectedNodes.contains(node)) {
                         _selectedNodes.remove(node);
@@ -836,18 +861,23 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         if (SwingUtilities.isLeftMouseButton(me)) {
             _selectionStartPoint = new Point(me.getX(), me.getY());
             _isSelecting = true;
+
+            //Also index all the node positions cost 
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent me) {
         if (SwingUtilities.isLeftMouseButton(me)) {
-            _isSelecting = false;
-            //select nodes in region
-            _selectNodesInRegion(_screenRegion);
 
-            _selectionStartPoint = null;
-            _selectionEndPoint = null;
+            if (_isSelecting) {
+                _isSelecting = false;
+                //select nodes in region
+                _selectNodesInRegion(_screenRegion);
+
+                _selectionStartPoint = null;
+                _selectionEndPoint = null;
+            }
 
             getViewPanel().repaint();
         }
@@ -857,7 +887,63 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         //of course you can use binary search here..
         //need to check all the nodes
         //better to have a relative points of nodes
+
+        if (screenRegion == null) {
+            return;
+        }
+
         _selectedNodes.clear();
+        //_screenRegion contains the rectangle region
+        //first check whether any of the active nodes were selected
+        int x = screenRegion.x;
+        int y = screenRegion.y;
+        int w = screenRegion.width;
+        int h = screenRegion.height;
+        JComponent panel = getViewPanel();
+        CoolMapView view = getCoolMapView();
+        int pHeight = panel.getHeight();
+        CoolMapObject object = getCoolMapObject();
+
+        if (y + h > pHeight - _baseHeight) {
+            //check active nodes
+            int minCol = view.getMinColInView(); //inclusive
+            int maxCol = view.getMaxColInView(); //exclusive
+
+            //select active column nodes
+            for (int i = minCol; i < maxCol; i++) {
+                VNode node = object.getViewNodeColumn(i);
+                float nodeOffset = node.getrViewOffsetCenter(view.getZoomX()) + view.getMapAnchor().x;
+                if (nodeOffset < x) {
+                    continue;
+                } else if (nodeOffset > x + w) {
+                    break;
+                } else {
+                    _selectedNodes.add(node);
+                }
+            }
+        }
+
+        //check tree nodes in 
+        if (activeTreeNodes.isEmpty()) {
+            return;
+        }
+
+        for (VNode node : activeTreeNodes) {
+
+            if (node == null || node.getViewHeightInTree() == null) {
+                continue;
+            }
+
+            float offsetX = _getTreeNodeOffset(node, object) + view.getMapAnchor().x; //its own offset does not work anymore. or maybe it's null.
+            float offsetY = (int) Math.round((pHeight - _baseHeight - node.getViewHeightInTree() * _heightMultiple));
+
+//                if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
+//                    continue;
+//                }
+            if (_screenRegion.contains(new Point.Float(offsetX, offsetY))) {
+                _selectedNodes.add(node);
+            }
+        }
 
     }
 
@@ -927,49 +1013,60 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         }
     }
 
-    //optimize this: no need to 
+    //optimize this: no need to
+    //now we know where these nodes are
     private VNode _getActiveNode(int screenX, int screenY) {
-        CoolMapView view = getCoolMapView();
-        JComponent panel = getViewPanel();
-        CoolMapObject object = getCoolMapObject();
-        int renderHeight = panel.getHeight();
+        try {
+            CoolMapView view = getCoolMapView();
+            JComponent panel = getViewPanel();
+            CoolMapObject object = getCoolMapObject();
+            int renderHeight = panel.getHeight();
 
-        if (screenY > panel.getHeight() - _baseHeight) {
-            //search in baseNodes
-            Integer col = view.getCurrentCol(screenX);
-            if (col != null) {
-                return getCoolMapObject().getViewNodeColumn(col);
+            if (screenY > renderHeight - _baseHeight) {
+                //search in baseNodes
+                Integer col = view.getCurrentCol(screenX);
+                if (col != null) {
+                    return getCoolMapObject().getViewNodeColumn(col);
+                } else {
+                    return null;
+                }
             } else {
+                //List<VNode> treeNodes = object.getViewTreeNodesColumn();
+
+                for (VNode node : activeTreeNodes) {
+                    if (node == null || node.getViewHeightInTree() == null) {
+                        continue;
+                    }
+
+                    if (view.getMinColInView() == null || view.getMaxColInView() == null) {
+                        return null;
+                    }
+
+                    Float index = node.getViewIndex();
+
+                    if (index < view.getMinColInView() || index >= view.getMaxColInView()) {
+                        continue; //not in view
+                    } else {
+                        Integer offset = _getTreeNodeOffset(node, object);
+                        if (offset == null) {
+                            continue;
+                        }
+                        int nodeX = offset + view.getMapAnchor().x;
+                        if (Math.abs(nodeX - screenX) > _ballOutterRadius) {
+                            continue;
+                        }
+
+                        int nodeY = (int) Math.round((renderHeight - _baseHeight - node.getViewHeightInTree() * _heightMultiple));
+                        if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
+                            continue;
+                        }
+
+                        return node;
+                    }
+                }//end of for all tree node
                 return null;
             }
-        } else {
-            List<VNode> treeNodes = object.getViewTreeNodesColumn();
-            for (VNode node : treeNodes) {
-                if (node == null || node.getViewHeightInTree() == null) {
-                    continue;
-                }
-
-                Float index = node.getViewIndex();
-                if (index < view.getMinColInView() || index >= view.getMaxColInView()) {
-                    continue; //not in view
-                } else {
-                    Integer offset = _getTreeNodeOffset(node, object);
-                    if (offset == null) {
-                        continue;
-                    }
-                    int nodeX = offset + view.getMapAnchor().x;
-                    if (Math.abs(nodeX - screenX) > _ballOutterRadius) {
-                        continue;
-                    }
-
-                    int nodeY = (int) Math.round((renderHeight - _baseHeight - node.getViewHeightInTree() * _heightMultiple));
-                    if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
-                        continue;
-                    }
-
-                    return node;
-                }
-            }//end of for all tree node
+        } catch (Exception e) {
             return null;
         }
     }

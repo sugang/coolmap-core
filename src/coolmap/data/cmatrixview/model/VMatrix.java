@@ -253,6 +253,9 @@ public class VMatrix<BASE, VIEW> {
     public synchronized void removeActiveRowNodes(HashSet<VNode> nodes) {
         if (nodes != null && !nodes.isEmpty()) {
 
+            System.out.println("row node size before removal:");
+            System.out.println(_activeRowNodes.size());
+            
             //why this step takes so long!
             LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>(_activeRowNodes);
             rowNodes.removeAll(nodes);
@@ -264,6 +267,10 @@ public class VMatrix<BASE, VIEW> {
             for (VNode node : nodes) {
                 node.setViewIndex(null);
             }
+            
+            System.out.println("row node size after removal");
+            System.out.println(_activeRowNodes.size());
+            
 
             _updateActiveRowNodeViewIndices();
         }
@@ -536,10 +543,16 @@ public class VMatrix<BASE, VIEW> {
         }
         ArrayList<VNode> nodesToAdd = new ArrayList<VNode>(1);
         nodesToAdd.add(node);
+        
         _replaceRowNodes(nodesToBeRemovedFromBase, nodesToAdd, index);
+        
         _activeRowNodesInTree.removeAll(nodesToBeRemovedFromTree);
+        
         _updateActiveRowNodeHeights();
+        
+        System.out.println("== collapse tree node called ==");
         _updateActiveRowNodeViewIndices();
+        
         node.setExpanded(false);
     }
 
@@ -1174,6 +1187,9 @@ public class VMatrix<BASE, VIEW> {
     }
 
     private void _updateActiveRowNodeViewIndices() {
+        
+        
+        
         VNode node;
         //assign all base nodes - as indices
         for (int i = 0; i < _activeRowNodes.size(); i++) {
@@ -1197,8 +1213,17 @@ public class VMatrix<BASE, VIEW> {
 //                 }
             }
         }
+
+        //it will cause an error ...no why would this happen? -> when nodes are spanning beyond? all nodes should have a view index
+        //don't know why they don't have, why there are nodes with null view index?
+//        for(int i=0; i<_activeRowNodesInTree.size(); i++){
+//            System.out.println(_activeRowNodesInTree.get(i).getViewIndex());
+//        }
+//        Then there are nodes with view index of null. How could this be happening?
         
-        Collections.sort(_activeRowNodesInTree, new VNodeIndexComparator());
+//        it's possible when updating, some of the nodes may have index of null in this case
+        Collections.sort(_activeRowNodesInTree, new VNodeIndexComparator()); //make sure it's always sorted
+        
         _rebuildActiveRowNameToNodeMap();
     }
 
@@ -1220,24 +1245,165 @@ public class VMatrix<BASE, VIEW> {
         }
 ///////////////////////////////////////////////////////////////////////////////
         //Rebuild a hashmap that contains column names to indices
-        Collections.sort(_activeRowNodesInTree, new VNodeIndexComparator());
+        Collections.sort(_activeColNodesInTree, new VNodeIndexComparator()); //make sure it's always sorted
         _rebuildActiveColumnNameToNodeMap();
     }
-    
-    public ArrayList<VNode> getRowTreeNodes(int fromIndex, int toIndex){
-    
+
+    public ArrayList<VNode> getTreeNodesRow(float fromViewIndex, float toViewIndex) {
+
+        if(_activeRowNodesInTree.isEmpty()){
+            return null;
+        }
+        
+        try {
+            
+            
+            Integer iStart = null;
+            
+            Integer searchIndexStart = 0;
+            Integer searchIndexEnd = _activeRowNodesInTree.size() - 1;
+            
+            Float startViewIndexInTree = _activeRowNodesInTree.get(searchIndexStart).getViewIndex();
+            Float endViewIndexInTree = _activeRowNodesInTree.get(searchIndexEnd).getViewIndex();
+            
+            Integer searchIndexMiddle = null;
+            Float viewIndexMiddle;
+            
+            
+            if (fromViewIndex <= startViewIndexInTree) {
+                iStart = 0;
+            }
+            else if(fromViewIndex >= endViewIndexInTree) {
+                iStart = null;
+            }
+            else{
+                
+                while(searchIndexStart != searchIndexEnd-1 && searchIndexStart != searchIndexEnd){
+                    
+                    searchIndexMiddle = (searchIndexStart + searchIndexEnd)/2;
+                    viewIndexMiddle = _activeRowNodesInTree.get(searchIndexMiddle).getViewIndex();
+                    
+                    if(viewIndexMiddle <= fromViewIndex){
+                        searchIndexStart = searchIndexMiddle;
+                    }
+                    else{
+                        searchIndexEnd = searchIndexMiddle; 
+                    }
+                    
+                    
+                }
+                
+                iStart = searchIndexStart;
+
+            }
+
+            //now iStart was determined
+            if(iStart == null)
+                return null;
+            
+            searchIndexEnd = _activeRowNodesInTree.size() - 1;
+            ArrayList<VNode> nodesToReturn = new ArrayList<VNode>();
+            for(int i = iStart; i <= searchIndexEnd; i++){
+                VNode node = _activeRowNodesInTree.get(i);
+                if(node == null || node.getViewIndex() == null){
+                }
+                else{
+                    if(node.getViewIndex() >= toViewIndex){
+                        nodesToReturn.add(node);
+                        break; //immediately return
+                    }
+                    else{
+                        nodesToReturn.add(node);
+                    }
+                }
+            }
+            
+            return nodesToReturn;
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.err.println("Search error when trying to look for row tree nodes");
+        }
+
         //binary search from ffrom index, then add till to index
         return null;
     }
-    
-    public ArrayList<VNode> getColumnTreeNodes(int fromColumn, int toColumn){
+
+    public ArrayList<VNode> getTreeNodesColumn(float fromViewIndex, float toViewIndex) {
         //binary search from from index, then add till to index
+        if(_activeColNodesInTree.isEmpty()){
+            return null;
+        }
+        
+                try {
+            Integer iStart = null;
+            
+            Integer searchIndexStart = 0;
+            Integer searchIndexEnd = _activeColNodesInTree.size() - 1;
+            
+            Float startViewIndexInTree = _activeColNodesInTree.get(searchIndexStart).getViewIndex();
+            Float endViewIndexInTree = _activeColNodesInTree.get(searchIndexEnd).getViewIndex();
+            
+            Integer searchIndexMiddle = null;
+            Float viewIndexMiddle;
+            
+            
+            if (fromViewIndex <= startViewIndexInTree) {
+                iStart = 0;
+            }
+            else if(fromViewIndex >= endViewIndexInTree) {
+                iStart = null;
+            }
+            else{
+                
+                while(searchIndexStart != searchIndexEnd-1 && searchIndexStart != searchIndexEnd){
+                    
+                    searchIndexMiddle = (searchIndexStart + searchIndexEnd)/2;
+                    viewIndexMiddle = _activeColNodesInTree.get(searchIndexMiddle).getViewIndex();
+                    
+                    if(viewIndexMiddle <= fromViewIndex){
+                        searchIndexStart = searchIndexMiddle;
+                    }
+                    else{
+                        searchIndexEnd = searchIndexMiddle; 
+                    }
+                    
+                    
+                }
+                
+                iStart = searchIndexStart;
+
+            }
+
+            //now iStart was determined
+            if(iStart == null)
+                return null;
+            
+            searchIndexEnd = _activeColNodesInTree.size() - 1;
+            ArrayList<VNode> nodesToReturn = new ArrayList<VNode>();
+            for(int i = iStart; i <= searchIndexEnd; i++){
+                VNode node = _activeColNodesInTree.get(i);
+                if(node == null || node.getViewIndex() == null){
+                }
+                else{
+                    if(node.getViewIndex() > toViewIndex){
+                        break; //immediately return
+                    }
+                    else{
+                        nodesToReturn.add(node);
+                    }
+                }
+            }
+            
+//            System.out.println(nodesToReturn);
+            
+            return nodesToReturn;
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.err.println("Search error when trying to look for column tree nodes");
+        }
+                
         return null;
     }
-    
-    
-    
-    
 
     private void _rebuildActiveColumnNameToNodeMap() {
         _activeColumnNameToNodeMap.clear();

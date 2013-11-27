@@ -16,15 +16,16 @@ public class VNodeIndexComparator implements Comparator<VNode> {
     @Override
     public int compare(VNode t1, VNode t2) {
 
-        if(t1 == null || t1.getViewIndex() == null){
+        if (t1 != null && t1.getViewIndex() == null && t2 != null && t2.getViewIndex() == null){
+            return 0;
+        }
+        if (t1 == null || t1.getViewIndex() == null) {
             return 1;
-        }
-        else if(t2 == null || t2.getViewIndex() == null){
+        } else if (t2 == null || t2.getViewIndex() == null) {
             return -1;
-        }
-        else{
+        } else {
             return t1.getViewIndex().compareTo(t2.getViewIndex());
         }
     }
-    
+
 }

@@ -14,6 +14,7 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.state.CoolMapState;
+import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -21,6 +22,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -47,6 +49,9 @@ import javax.swing.event.PopupMenuListener;
  */
 public class RowTree extends RowMap implements MouseListener, MouseMotionListener {
 
+    private Rectangle _screenRegion;
+    private boolean _isSelecting;
+
     @Override
     public void nameChanged(CoolMapObject object) {
     }
@@ -67,8 +72,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private int[] _heightMultiples = new int[]{2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 80, 100};
     private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<JCheckBoxMenuItem>();
     private JMenuItem _expandOne, _expandToAll, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
-
-    ;
 
     private void _selectSubTree() {
         if (_activeNode == null || !_activeNode.isGroupNode() || !_activeNode.isExpanded() || !isDataViewValid()) {
@@ -123,6 +126,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     public void viewFilterChanged(CoolMapObject object) {
     }
 
+    private final Color[] labelColors;
+
     public RowTree(CoolMapObject object) {
         super(object);
         setName("Row Ontology");
@@ -132,6 +137,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         getViewPanel().addMouseMotionListener(this);
         _hoverFont = UI.fontMono.deriveFont(Font.BOLD).deriveFont(11f);
         _initPopupMenu();
+
+        CImageGradient gradient = new CImageGradient(10);
+        gradient.addColor(new Color(245, 245, 245), 0f);
+        gradient.addColor(UI.colorWhite, 1f);
+        labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
     }
 
     private void _initPopupMenu() {
@@ -433,6 +443,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         if (!_selectedNodes.isEmpty()) {
             g2D.setFont(_hoverFont);
             g2D.setColor(UI.colorBlack3);
+            int index = 0;
             for (VNode node : _selectedNodes) {
                 Point p = _getNodePositionInView(node);
                 if (p == null) {
@@ -452,12 +463,23 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 g2D.setColor(UI.colorBlack5);
                 g2D.fillRoundRect(x + 2, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
-                g2D.setColor(UI.colorWhite);
+//                g2D.setColor(UI.colorWhite);
+                if (_selectedNodes.size() > 1) {
+                    int ci = (int) (labelColors.length * 1.0f * index / _selectedNodes.size());
+                    if (ci == labelColors.length) {
+                        ci = labelColors.length - 1;
+                    }
+
+                    g2D.setColor(labelColors[ci]);
+                } else {
+                    g2D.setColor(Color.WHITE);
+                }
                 g2D.fillRoundRect(x + 2, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
 
                 g2D.setColor(UI.colorBlack2);
                 g2D.drawString(label, x + 4, y - 5);
 
+                index++;
             }
         }
 
@@ -482,6 +504,15 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
             g2D.setColor(UI.colorBlack2);
             g2D.drawString(label, x + 4, y - 5);
+        }
+
+        if (_isSelecting && _selectionStartPoint != null && _selectionEndPoint != null && _screenRegion != null) {
+
+            g2D.setColor(UI.colorOrange0);
+
+            g2D.setStroke(UI.strokeDash1_5);
+            g2D.drawRect(_screenRegion.x, _screenRegion.y, _screenRegion.width, _screenRegion.height);
+
         }
     }
     private final LinkedHashSet<VNode> _selectedNodes = new LinkedHashSet<VNode>();
@@ -526,9 +557,23 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
     @Override
     protected void render(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
-        _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
-        super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+        try {
+            _renderTreeNodes(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+            super.render(g2D, object, fromRow, toRow, fromCol, toCol, zoomX, zoomY, renderWidth, renderHeight);
+
+            //Now check to see whether it's correct
+            activeTreeNodes.clear();
+            activeTreeNodes.addAll(object.getViewNodesRowTree(fromRow, toRow));
+        } catch (Exception e) {
+
+        }
+
+//        System.err.println("=Row tree nodes=");
+//        System.err.println(rowTreeNodes);
+//        System.err.println("===========");
     }
+
+    private final ArrayList<VNode> activeTreeNodes = new ArrayList<VNode>();
 
     private Integer _getTreeNodeOffset(VNode treeNode, CoolMapObject object) {
         if (!treeNode.isExpanded()) {
@@ -701,6 +746,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 VNode node = _getActiveNode(me.getX(), me.getY());
                 if (node == null) {
                     _selectedNodes.clear();
+                    _screenRegion = null;
 
                 } else {
                     if (_selectedNodes.contains(node)) {
@@ -736,10 +782,85 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
     @Override
     public void mousePressed(MouseEvent me) {
+        if (SwingUtilities.isLeftMouseButton(me)) {
+            _selectionStartPoint = new Point(me.getX(), me.getY());
+            _isSelecting = true;
+
+            //Also index all the node positions cost 
+        }
     }
+
+    private Point _selectionStartPoint;
+    private Point _selectionEndPoint;
 
     @Override
     public void mouseReleased(MouseEvent me) {
+        if (SwingUtilities.isLeftMouseButton(me) && _isSelecting) {
+            _isSelecting = false;
+            _selectNodesInRegion(_screenRegion);
+            _selectionStartPoint = null;
+            _selectionEndPoint = null;
+        }
+        getViewPanel().repaint();
+    }
+
+    private void _selectNodesInRegion(Rectangle screenRegion) {
+        if (screenRegion == null) {
+            return;
+        }
+
+        _selectedNodes.clear();
+
+        int x = screenRegion.x;
+        int y = screenRegion.y;
+        int w = screenRegion.width;
+        int h = screenRegion.height;
+
+        JComponent panel = getViewPanel();
+        CoolMapView view = getCoolMapView();
+        int pWidth = panel.getWidth();
+        CoolMapObject object = getCoolMapObject();
+
+        if (x < _baseWidth) {
+            //find 
+            int minRow = view.getMinRowInView();
+            int maxRow = view.getMaxRowInView();
+            for (int i = minRow; i < maxRow; i++) {
+                VNode node = object.getViewNodeRow(i);
+                float nodeOffset = node.getrViewOffsetCenter(view.getZoomY()) + view.getMapAnchor().y - this.getAnchorY();
+                if (nodeOffset < y) {
+                    continue;
+                } else if (nodeOffset > y + h) {
+                    break;
+                } else {
+                    _selectedNodes.add(node);
+                }
+            }
+        }//
+
+        if (activeTreeNodes.isEmpty()) {
+            return;
+        }
+
+        //
+        for (VNode node : activeTreeNodes) {
+            if (node == null || node.getViewHeightInTree() == null) {
+                continue;
+            }
+
+            Integer offset = _getTreeNodeOffset(node, object);
+            if (offset == null) {
+                continue;
+            }
+
+            float nodeY = offset + view.getMapAnchor().y - getAnchorY();
+            float nodeX = (int) Math.round((_baseWidth + node.getViewHeightInTree() * _heightMultiple));
+
+            if (_screenRegion.contains(new Point.Float(nodeX, nodeY))) {
+                _selectedNodes.add(node);
+            }
+        }
+
     }
 
     @Override
@@ -758,6 +879,32 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseDragged(MouseEvent me) {
+        if (SwingUtilities.isLeftMouseButton(me) && _isSelecting) {
+            _selectionEndPoint = new Point(me.getX(), me.getY());
+            ///////////////////////// xyss
+            int x, y, swidth, sheight;
+
+            ///////////////////////// xyss
+            if (_selectionStartPoint.x < _selectionEndPoint.x) {
+                x = _selectionStartPoint.x;
+                swidth = _selectionEndPoint.x - _selectionStartPoint.x + 1;
+            } else {
+                x = _selectionEndPoint.x;
+                swidth = _selectionStartPoint.x - _selectionEndPoint.x;
+            }
+
+            ///////////////////////// xyss
+            if (_selectionStartPoint.y < _selectionEndPoint.y) {
+                y = _selectionStartPoint.y;
+                sheight = _selectionEndPoint.y - _selectionStartPoint.y + 1;
+            } else {
+                y = _selectionEndPoint.y;
+                sheight = _selectionStartPoint.y - _selectionEndPoint.y;
+            }
+            _screenRegion = new Rectangle(x, y, swidth, sheight);
+            getViewPanel().repaint();
+        }
+
     }
     private Point _activeNodePoint = null;
     private VNode _activeNode = null;
@@ -816,49 +963,58 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     }
 
     private VNode _getActiveNode(int screenX, int screenY) {
-        CoolMapView view = getCoolMapView();
-        JComponent panel = getViewPanel();
-        CoolMapObject object = getCoolMapObject();
-        int renderWidth = panel.getWidth();
+        try {
+            CoolMapView view = getCoolMapView();
+            JComponent panel = getViewPanel();
+            CoolMapObject object = getCoolMapObject();
+            int renderWidth = panel.getWidth();
 
-        if (screenX < _baseWidth) {
+            if (screenX < _baseWidth) {
             //search in baseNodes
-            //System.out.println(screenY);
-            Integer row = view.getCurrentRow(screenY + getAnchorY());
-            //System.out.println(row);
-            if (row != null) {
-                return getCoolMapObject().getViewNodeRow(row);
-            } else {
-                return null;
-            }
-        } else {
-            List<VNode> treeNodes = object.getViewTreeNodesRow();
-            for (VNode node : treeNodes) {
-                if (node == null || node.getViewHeightInTree() == null) {
-                    continue;
-                }
-
-                Float index = node.getViewIndex();
-                if (index < view.getMinRowInView() || index >= view.getMaxRowInView()) {
-                    continue; //not in view
+                //System.out.println(screenY);
+                Integer row = view.getCurrentRow(screenY + getAnchorY());
+                //System.out.println(row);
+                if (row != null) {
+                    return getCoolMapObject().getViewNodeRow(row);
                 } else {
-                    Integer offset = _getTreeNodeOffset(node, object);
-                    if (offset == null) {
-                        continue;
-                    }
-                    int nodeY = offset + view.getMapAnchor().y - getAnchorY();
-                    if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
-                        continue;
-                    }
-
-                    int nodeX = (int) Math.round((_baseWidth + node.getViewHeightInTree() * _heightMultiple));
-                    if (Math.abs(nodeX - screenX) > _ballOutterRadius) {
-                        continue;
-                    }
-
-                    return node;
+                    return null;
                 }
-            }//end of for all tree node
+            } else {
+//            List<VNode> treeNodes = object.getViewTreeNodesRow();
+                for (VNode node : activeTreeNodes) {
+                    if (node == null || node.getViewHeightInTree() == null) {
+                        continue;
+                    }
+
+                    Float index = node.getViewIndex(); //may cause a bug here?
+//                System.out.println("");
+                    if (view.getMinRowInView() == null || view.getMaxRowInView() == null) {
+                        return null;
+                    }
+
+                    if (index < view.getMinRowInView() || index >= view.getMaxRowInView()) {
+                        continue; //not in view
+                    } else {
+                        Integer offset = _getTreeNodeOffset(node, object);
+                        if (offset == null) {
+                            continue;
+                        }
+                        int nodeY = offset + view.getMapAnchor().y - getAnchorY();
+                        if (Math.abs(nodeY - screenY) > _ballOutterRadius) {
+                            continue;
+                        }
+
+                        int nodeX = (int) Math.round((_baseWidth + node.getViewHeightInTree() * _heightMultiple));
+                        if (Math.abs(nodeX - screenX) > _ballOutterRadius) {
+                            continue;
+                        }
+
+                        return node;
+                    }
+                }//end of for all tree node
+                return null;
+            }//end of get active node
+        } catch (Exception e) {
             return null;
         }
     }

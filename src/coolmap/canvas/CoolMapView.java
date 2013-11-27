@@ -248,6 +248,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     /**
      * update the currently selected rows and columns
+     * This is the way to merge and figure out the best rangeset for selections
      */
     private void _updateColRowRanges() {
         _selectedRows.clear();
@@ -1320,6 +1321,7 @@ public final class CoolMapView<BASE, VIEW> {
         //Error, nothing can be found.
         //Should not rech here.
         return null;
+        
     }
 
     public Integer getCurrentRowSearchAll(int screenY) {
@@ -1754,173 +1756,180 @@ public final class CoolMapView<BASE, VIEW> {
      */
     private synchronized boolean _computeSubMapParams(final MatrixCell subMapIndexMin, final MatrixCell subMapIndexMax, final Rectangle subMapDimension) {
 
-        //System.out.println(_coolMapObject.getViewNumRows() + "--" + _coolMapObject.getViewNumCols());
-        int viewportWidth = _canvas.getWidth();
-        int viewportHeight = _canvas.getHeight();
+        try {
+            //System.out.println(_coolMapObject.getViewNumRows() + "--" + _coolMapObject.getViewNumCols());
+            int viewportWidth = _canvas.getWidth();
+            int viewportHeight = _canvas.getHeight();
 
-        if (viewportHeight == 0 || viewportWidth == 0) {
-            return false;
-        }
-
-        if (_coolMapObject == null) {
-            return false;
-        }
-
-        //compute col params
-        if (_mapDimension.x >= -_subMapBufferSize && _mapDimension.x <= viewportWidth + _subMapBufferSize) {
-            //The first column is within view
-            subMapIndexMin.col(0);
-            boolean found = false;
-            VNode node;
-            for (int i = 1; i < _coolMapObject.getViewNumColumns(); i++) {
-                node = _coolMapObject.getViewNodeColumn(i);
-                if (node == null || node.getViewOffset() == null) {
-                    return false;
-                }
-                if (node.getViewOffset() + _mapDimension.x > _subMapBufferSize + viewportWidth) {
-                    found = true;
-                    subMapIndexMax.col(i);
-                    break;
-                }
+            if (viewportHeight == 0 || viewportWidth == 0) {
+                return false;
             }
-            if (!found) {
-                subMapIndexMax.col(_coolMapObject.getViewNumColumns());
+
+            if (_coolMapObject == null) {
+                return false;
             }
-        } else if (_mapDimension.x < -_subMapBufferSize) {
-            boolean foundStart = false;
-            boolean foundEnd = false;
-            VNode nodePrev, node;
-            for (int i = 1; i < _coolMapObject.getViewNumColumns(); i++) {
-                nodePrev = _coolMapObject.getViewNodeColumn(i - 1);
-                node = _coolMapObject.getViewNodeColumn(i);
-                if (node == null || nodePrev == null) {
-                    return false;
+
+            //compute col params
+            if (_mapDimension.x >= -_subMapBufferSize && _mapDimension.x <= viewportWidth + _subMapBufferSize) {
+                //The first column is within view
+                subMapIndexMin.col(0);
+                boolean found = false;
+                VNode node;
+                for (int i = 1; i < _coolMapObject.getViewNumColumns(); i++) {
+                    node = _coolMapObject.getViewNodeColumn(i);
+                    if (node == null || node.getViewOffset() == null) {
+                        return false;
+                    }
+                    if (node.getViewOffset() + _mapDimension.x > _subMapBufferSize + viewportWidth) {
+                        found = true;
+                        subMapIndexMax.col(i);
+                        break;
+                    }
                 }
-                if (!foundStart && _mapDimension.x + nodePrev.getViewOffset() < -_subMapBufferSize && _mapDimension.x + node.getViewOffset() >= -_subMapBufferSize) {
-                    subMapIndexMin.col(i - 1);
-                    foundStart = true;
+                if (!found) {
+                    subMapIndexMax.col(_coolMapObject.getViewNumColumns());
                 }
-                if (foundStart && !foundEnd && _mapDimension.x + node.getViewOffset() > viewportWidth + _subMapBufferSize) {
-                    subMapIndexMax.col(i);
-                    foundEnd = true;
-                    break;
+            } else if (_mapDimension.x < -_subMapBufferSize) {
+                boolean foundStart = false;
+                boolean foundEnd = false;
+                VNode nodePrev, node;
+                for (int i = 1; i < _coolMapObject.getViewNumColumns(); i++) {
+                    nodePrev = _coolMapObject.getViewNodeColumn(i - 1);
+                    node = _coolMapObject.getViewNodeColumn(i);
+                    if (node == null || nodePrev == null) {
+                        return false;
+                    }
+                    if (!foundStart && _mapDimension.x + nodePrev.getViewOffset() < -_subMapBufferSize && _mapDimension.x + node.getViewOffset() >= -_subMapBufferSize) {
+                        subMapIndexMin.col(i - 1);
+                        foundStart = true;
+                    }
+                    if (foundStart && !foundEnd && _mapDimension.x + node.getViewOffset() > viewportWidth + _subMapBufferSize) {
+                        subMapIndexMax.col(i);
+                        foundEnd = true;
+                        break;
+                    }
+                }//End of loop col nodes
+                if (!foundStart) {
+                    //Don't draw anything if it's null.
+                    subMapIndexMin.col(null);
+                    subMapIndexMax.col(null);
                 }
-            }//End of loop col nodes
-            if (!foundStart) {
-                //Don't draw anything if it's null.
+                if (foundStart && !foundEnd) {
+                    subMapIndexMax.col(_coolMapObject.getViewNumColumns());
+                }
+            } else {
+                //the map is to the rightmost
                 subMapIndexMin.col(null);
                 subMapIndexMax.col(null);
-            }
-            if (foundStart && !foundEnd) {
-                subMapIndexMax.col(_coolMapObject.getViewNumColumns());
-            }
-        } else {
-            //the map is to the rightmost
-            subMapIndexMin.col(null);
-            subMapIndexMax.col(null);
-        }//end of update min, max col
+            }//end of update min, max col
 
-        //update col dimension
-        if (subMapIndexMin.col != null && subMapIndexMax.col != null) {
-            VNode minColNode = _coolMapObject.getViewNodeColumn(subMapIndexMin.col.intValue());
-            VNode maxColNode = _coolMapObject.getViewNodeColumn(subMapIndexMax.col.intValue() - 1);
-            if (minColNode == null || maxColNode == null) {
-                subMapDimension.x = _mapDimension.x - 1;
-                subMapDimension.width = 0;
+            //update col dimension
+            if (subMapIndexMin.col != null && subMapIndexMax.col != null) {
+                VNode minColNode = _coolMapObject.getViewNodeColumn(subMapIndexMin.col.intValue());
+                VNode maxColNode = _coolMapObject.getViewNodeColumn(subMapIndexMax.col.intValue() - 1);
+                if (minColNode == null || maxColNode == null) {
+                    subMapDimension.x = _mapDimension.x - 1;
+                    subMapDimension.width = 0;
+                } else {
+                    subMapDimension.x = (int) (minColNode.getViewOffset() + _mapDimension.x);
+                    //_subMapDimension.width = (int)(maxColNode.getViewOffset() - minColNode.getViewOffset() + maxColNode.getViewSize(_zoom.x));
+                    subMapDimension.width = VNode.distanceInclusive(minColNode, maxColNode, _zoom.x);
+                }
             } else {
-                subMapDimension.x = (int) (minColNode.getViewOffset() + _mapDimension.x);
-                //_subMapDimension.width = (int)(maxColNode.getViewOffset() - minColNode.getViewOffset() + maxColNode.getViewSize(_zoom.x));
-                subMapDimension.width = VNode.distanceInclusive(minColNode, maxColNode, _zoom.x);
+                subMapDimension.x = _mapDimension.x - 1; //smaller than the minimal mapAnchor, invalid
+                subMapDimension.width = 0;
             }
-        } else {
-            subMapDimension.x = _mapDimension.x - 1; //smaller than the minimal mapAnchor, invalid
-            subMapDimension.width = 0;
-        }
 
 ////////////////////////////////////////////////////////////////////////////////
-        if (_mapDimension.y >= -_subMapBufferSize && _mapDimension.y <= viewportHeight + _subMapBufferSize) {
-            subMapIndexMin.row(0);
-            boolean found = false;
-            VNode node;
-            for (int i = 1; i < _coolMapObject.getViewNumRows(); i++) {
-                node = _coolMapObject.getViewNodeRow(i);
-                if (node == null || node.getViewOffset() == null) {
-                    return false;
+            if (_mapDimension.y >= -_subMapBufferSize && _mapDimension.y <= viewportHeight + _subMapBufferSize) {
+                subMapIndexMin.row(0);
+                boolean found = false;
+                VNode node;
+                for (int i = 1; i < _coolMapObject.getViewNumRows(); i++) {
+                    node = _coolMapObject.getViewNodeRow(i);
+                    if (node == null || node.getViewOffset() == null) {
+                        return false;
+                    }
+                    //System.out.println("node:" + node);
+                    if (node.getViewOffset() + _mapDimension.y > _subMapBufferSize + viewportHeight) {
+                        found = true;
+                        subMapIndexMax.row(i);
+                        break;
+                    }
                 }
-                //System.out.println("node:" + node);
-                if (node.getViewOffset() + _mapDimension.y > _subMapBufferSize + viewportHeight) {
-                    found = true;
-                    subMapIndexMax.row(i);
-                    break;
+                if (!found) {
+                    subMapIndexMax.row(_coolMapObject.getViewNumRows());
                 }
-            }
-            if (!found) {
-                subMapIndexMax.row(_coolMapObject.getViewNumRows());
-            }
-        } else if (_mapDimension.y < -_subMapBufferSize) {
-            boolean foundStart = false;
-            boolean foundEnd = false;
-            VNode nodePrev, node;
-            for (int i = 1; i < _coolMapObject.getViewNumRows(); i++) {
-                nodePrev = _coolMapObject.getViewNodeRow(i - 1);
-                node = _coolMapObject.getViewNodeRow(i);
-                if (node == null || nodePrev == null) {
-                    return false;
-                }
-                if (!foundStart && _mapDimension.y + nodePrev.getViewOffset() < -_subMapBufferSize && _mapDimension.y + node.getViewOffset() >= -_subMapBufferSize) {
-                    subMapIndexMin.row(i - 1);
-                    foundStart = true;
-                }
-                if (foundStart && !foundEnd && _mapDimension.y + node.getViewOffset() > viewportHeight + _subMapBufferSize) {
-                    subMapIndexMax.row(i);
-                    foundEnd = true;
-                    break;
-                }
-            }
+            } else if (_mapDimension.y < -_subMapBufferSize) {
+                boolean foundStart = false;
+                boolean foundEnd = false;
+                VNode nodePrev, node;
+                for (int i = 1; i < _coolMapObject.getViewNumRows(); i++) {
+                    nodePrev = _coolMapObject.getViewNodeRow(i - 1);
+                    node = _coolMapObject.getViewNodeRow(i);
+                //multiple  calls may result in exception
 
-            if (!foundStart) {
+                    if (node == null || nodePrev == null) {
+                        return false;
+                    }
+                    if (!foundStart && _mapDimension.y + nodePrev.getViewOffset() < -_subMapBufferSize && _mapDimension.y + node.getViewOffset() >= -_subMapBufferSize) {
+                        subMapIndexMin.row(i - 1);
+                        foundStart = true;
+                    }
+                    if (foundStart && !foundEnd && _mapDimension.y + node.getViewOffset() > viewportHeight + _subMapBufferSize) {
+                        subMapIndexMax.row(i);
+                        foundEnd = true;
+                        break;
+                    }
+                }
+
+                if (!foundStart) {
+                    subMapIndexMin.row(null);
+                    subMapIndexMax.row(null);
+                }
+
+                if (foundStart && !foundEnd) {
+                    subMapIndexMax.row(_coolMapObject.getViewNumRows());
+                }
+            } else {
                 subMapIndexMin.row(null);
                 subMapIndexMax.row(null);
             }
 
-            if (foundStart && !foundEnd) {
-                subMapIndexMax.row(_coolMapObject.getViewNumRows());
-            }
-        } else {
-            subMapIndexMin.row(null);
-            subMapIndexMax.row(null);
-        }
+            if (subMapIndexMin.row != null && subMapIndexMax.row != null) {
+                VNode minRowNode = _coolMapObject.getViewNodeRow(subMapIndexMin.row.intValue());
+                VNode maxRowNode = _coolMapObject.getViewNodeRow(subMapIndexMax.row.intValue() - 1);
+                if (minRowNode == null || maxRowNode == null) {
+                    subMapDimension.y = _mapDimension.y - 1; //make it invalid
+                    subMapDimension.height = 0;
+                } else {
 
-        if (subMapIndexMin.row != null && subMapIndexMax.row != null) {
-            VNode minRowNode = _coolMapObject.getViewNodeRow(subMapIndexMin.row.intValue());
-            VNode maxRowNode = _coolMapObject.getViewNodeRow(subMapIndexMax.row.intValue() - 1);
-            if (minRowNode == null || maxRowNode == null) {
+                    subMapDimension.y = (int) (minRowNode.getViewOffset() + _mapDimension.y);
+                    subMapDimension.height = VNode.distanceInclusive(minRowNode, maxRowNode, _zoom.y);
+                }
+            } else {
+                //The only time that the height is -1 is here.
                 subMapDimension.y = _mapDimension.y - 1; //make it invalid
                 subMapDimension.height = 0;
-            } else {
-
-                subMapDimension.y = (int) (minRowNode.getViewOffset() + _mapDimension.y);
-                subMapDimension.height = VNode.distanceInclusive(minRowNode, maxRowNode, _zoom.y);
             }
-        } else {
-            //The only time that the height is -1 is here.
-            subMapDimension.y = _mapDimension.y - 1; //make it invalid
-            subMapDimension.height = 0;
-        }
         //////////////////////////////////////////////////////////////////////////////////////
-        //submap dimension x, y, width, height, all updated.
+            //submap dimension x, y, width, height, all updated.
 //        System.out.println("Update params");
 //        System.out.println(subMapIndexMin);
 //        System.out.println(subMapIndexMax);
 
         //objects updated:
-        //subMapDimension
-        //subMapIndexMin
-        //subMapIndexMax
-        //System.out.println(subMapDimension + "-->" + _mapDimension);
-        //now, here the submapdimension is correct actually
+            //subMapDimension
+            //subMapIndexMin
+            //subMapIndexMax
+            //System.out.println(subMapDimension + "-->" + _mapDimension);
+            //now, here the submapdimension is correct actually
 //        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
-        return true;
+            return true;
+        } catch (Exception e) {
+            System.out.println("Minor exception @ rendering");
+            return false;
+        }
     }
 
     /**
@@ -4055,10 +4064,7 @@ public final class CoolMapView<BASE, VIEW> {
 
                     g2D.drawLine(colX, colY, columnLabelLeft + (i - fromCol) * labelSize + labelSize / 2, center.y - colLabelMargin);
                 }
-                
-                
-                
-                
+
                 g2D.setColor(_hoverTipBackgroundColor);
                 columnLabelHeight += 20;
 
@@ -4094,7 +4100,7 @@ public final class CoolMapView<BASE, VIEW> {
                 g2D.setColor(UI.colorBlack2);
                 g2D.drawString(value, center.x - vWidth / 2 + 10, rowLabelTop + rowLabelHeight + 23);
 
-                                //if it's aggregators
+                //if it's aggregators
                 try {
                     VNode rowNode = _coolMapObject.getViewNodeRow(_activeCell.row.intValue());
                     VNode colNode = _coolMapObject.getViewNodeColumn(_activeCell.col.intValue());
@@ -4105,18 +4111,17 @@ public final class CoolMapView<BASE, VIEW> {
 //                        g2D.setColor(_tipNameColor);
                         String aggrTip = _coolMapObject.getAggregator().getTipName();
                         int aggrTipWidth = g2D.getFontMetrics().stringWidth(aggrTip);
-                        
+
                         g2D.setColor(UI.colorGrey1);
                         g2D.fillRoundRect(center.x - vWidth / 2 - 10 - aggrTipWidth - 4, rowLabelTop + rowLabelHeight + 5, aggrTipWidth + 10, vHeight, 5, 5);
-                        
+
                         g2D.setColor(_tipNameColor);
                         g2D.drawString(aggrTip, center.x - vWidth / 2 - 5 - aggrTipWidth - 4, rowLabelTop + rowLabelHeight + 20);
-                        
+
                     }
                 } catch (Exception e) {
 
                 }
-
 
             } catch (Exception e) {
                 e.printStackTrace(); //debugging when error occurs

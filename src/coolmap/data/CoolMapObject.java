@@ -171,6 +171,26 @@ public final class CoolMapObject<BASE, VIEW> {
     public List<VNode> getViewNodesColumn(String nodeName) {
         return _vMatrix.getActiveColumnNodes(nodeName);
     }
+    
+    /**
+     * returns a subset of tree nodes that currently have view index between fromViewIndex and toViewIndex
+     * @param fromViewIndex
+     * @param toViewIndex
+     * @return 
+     */
+    public List<VNode> getViewNodesRowTree(float fromViewIndex, float toViewIndex){
+        return _vMatrix.getTreeNodesRow(fromViewIndex, toViewIndex);
+    }
+    
+    /**
+     * returns a subset of tree nodes that currently have view index between fromViewIndex and toViewIndex
+     * @param fromViewIndex
+     * @param toViewIndex
+     * @return 
+     */
+    public List<VNode> getViewNodesColumnTree(float fromViewIndex, float toViewIndex){
+        return _vMatrix.getTreeNodesColumn(fromViewIndex, toViewIndex);
+    }
 
     /**
      * saves the row/column layout
