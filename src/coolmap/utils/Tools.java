@@ -4,7 +4,11 @@
  */
 package coolmap.utils;
 
+import com.google.common.collect.Range;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 import javax.swing.Icon;
 import javax.swing.JColorChooser;
@@ -42,6 +46,34 @@ public class Tools {
 
         return label;
 
+    }
+
+    public static HashSet<Range<Integer>> createRangesFromIndices(ArrayList<Integer> indices) {
+        try {
+            
+            Collections.sort(indices);
+            int startIndex = indices.get(0);
+            int currentIndex = startIndex;
+            
+            HashSet<Range<Integer>> selectedRanges = new HashSet<Range<Integer>>();
+
+            for (Integer index : indices) {
+                if (index <= currentIndex + 1) {
+                    currentIndex = index;
+                    continue;
+                } else {
+                    selectedRanges.add(Range.closedOpen(startIndex, currentIndex + 1));
+                    currentIndex = index;
+                    startIndex = currentIndex;
+                }
+            }
+            selectedRanges.add(Range.closedOpen(startIndex, currentIndex + 1));
+            
+            return selectedRanges;
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static void initialize() {

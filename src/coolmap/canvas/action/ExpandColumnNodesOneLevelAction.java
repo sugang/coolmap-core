@@ -22,7 +22,8 @@ public class ExpandColumnNodesOneLevelAction extends AbstractAction{
     private final String id;
     
     public ExpandColumnNodesOneLevelAction(String objectID){
-        super("Expand columns to next level");
+        super("Expand all");
+        putValue(SHORT_DESCRIPTION, "Expand all column ontology nodes to next level");
         id = objectID;
     }
     

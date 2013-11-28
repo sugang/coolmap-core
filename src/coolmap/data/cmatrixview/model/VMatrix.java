@@ -255,7 +255,6 @@ public class VMatrix<BASE, VIEW> {
 
 //            System.out.println("row node size before removal:");
 //            System.out.println(_activeRowNodes.size());
-
             //why this step takes so long!
             LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>(_activeRowNodes);
             rowNodes.removeAll(nodes);
@@ -270,7 +269,6 @@ public class VMatrix<BASE, VIEW> {
 
 //            System.out.println("row node size after removal");
 //            System.out.println(_activeRowNodes.size());
-
             _updateActiveRowNodeViewIndices();
         }
     }
@@ -421,9 +419,14 @@ public class VMatrix<BASE, VIEW> {
         _updateActiveRowNodeViewIndices();
     }
 
+    /**
+     * collapse a column tree node
+     *
+     * @param node
+     */
     public synchronized void collapseTreeColNode(VNode node) {
 
-        if (node == null || !node.isGroupNode() || !node.isExpanded()) {
+        if (node == null || !node.isGroupNode() || !node.isExpanded() || node.getViewIndex() == null) {
             return;
         }
 
@@ -459,6 +462,15 @@ public class VMatrix<BASE, VIEW> {
         colNodes.addAll(_activeColNodesInTree);
         colNodes.removeAll(nodesToBeRemovedFromTree);
 
+        //ensure removed nodes have no view index
+        for (VNode n : nodesToBeRemovedFromBase) {
+            n.setViewIndex(null);
+        }
+
+        for (VNode n : nodesToBeRemovedFromTree) {
+            n.setViewIndex(null);
+        }
+
         _activeColNodesInTree.clear();
         _activeColNodesInTree.addAll(colNodes);
 
@@ -469,48 +481,6 @@ public class VMatrix<BASE, VIEW> {
     }
 
     public synchronized void collapseTreeColNodes(Collection<VNode> nodes) {
-        //when one node is collapsed,
-//        ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
-//        ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>();
-//
-//        for (VNode node : nodes) {
-//            if (node == null || !node.isGroupNode() || !node.isExpanded()) {
-//                return;
-//            }
-//            node.setExpanded(false);
-//            nodesToBeRemovedFromBase.clear();
-//            nodesToBeRemovedFromTree.clear();
-//            nodesToBeRemovedFromTree.add(node);
-//            _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);
-//            for (VNode n : nodesToBeRemovedFromBase) {
-//                n.setExpanded(false);
-//            }
-//
-//            for (VNode n : nodesToBeRemovedFromTree) {
-//                n.setExpanded(false);
-//            }
-//
-//            //actually inserting into any position should be fine
-////            int index = _activeColNodes.size();
-////            for (VNode baseNode : nodesToBeRemovedFromBase) {
-////                if (baseNode.getViewIndex() < index) {
-////                    index = baseNode.getViewIndex().intValue(); //could be null. should not though.
-////                }
-////            }
-//            int index = nodesToBeRemovedFromBase.get(0).getViewIndex().intValue();
-//            ArrayList<VNode> nodesToAdd = new ArrayList<VNode>(1);
-//            nodesToAdd.add(node);
-//            _replaceColNodes(nodesToBeRemovedFromBase, nodesToAdd, index);
-//
-//            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>();
-//            colNodes.addAll(_activeColNodesInTree);
-//            colNodes.removeAll(nodesToBeRemovedFromTree);
-//
-//        }
-//
-//        _updateActiveColNodeHeights();
-//        _updateActiveColNodeViewIndices();
-//        The index must be updated everytime
         for (VNode node : nodes) {
             collapseTreeColNode(node);
         }
@@ -523,8 +493,13 @@ public class VMatrix<BASE, VIEW> {
         }
     }
 
+    /**
+     * collapsae a row tree nodes
+     *
+     * @param node
+     */
     public synchronized void collapseTreeRowNode(VNode node) {
-        if (node == null) {
+        if (node == null || !node.isGroupNode() || !node.isExpanded() || node.getViewIndex() == null) {
             return;
         }
         ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
@@ -547,9 +522,17 @@ public class VMatrix<BASE, VIEW> {
 
         _activeRowNodesInTree.removeAll(nodesToBeRemovedFromTree);
 
+        for (VNode n : nodesToBeRemovedFromBase) {
+            n.setViewIndex(null);
+        }
+
+        for (VNode n : nodesToBeRemovedFromTree) {
+            n.setViewIndex(null);
+        }
+
         _updateActiveRowNodeHeights();
 
-        System.out.println("== collapse tree node called ==");
+//        System.out.println("== collapse tree node called ==");
         _updateActiveRowNodeViewIndices();
 
         node.setExpanded(false);
@@ -951,8 +934,41 @@ public class VMatrix<BASE, VIEW> {
     }
 
     /**
-     * get all leaf nodes associated with all the selected parent nodes visited -> for selections
-     * parent nodes will not be visited again
+     * get all nodes associated w/ selected nodes
+     *
+     * @param treeNodes
+     * @return
+     */
+    public List<VNode> getChildNodesInViewColumnAll(Collection<VNode> treeNodes) {
+        try {
+            if (treeNodes == null || treeNodes.isEmpty()) {
+                return null;
+            } else {
+                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
+                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+
+                for (VNode treeNode : treeNodes) {
+                    //fetch a tree node
+                    if (treeNode == null || !_activeColNodesInTree.contains(treeNode) || !treeNode.isExpanded() || visitedNodes.contains(treeNode)) {
+                        continue;
+                    }
+                    _getAllNodesFromTreeNodes(treeNode, childNodesInView, visitedNodes);
+                }
+
+                //msut be sorted
+                Collections.sort(childNodesInView, new VNodeIndexComparator());
+
+                return childNodesInView;
+            }
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * get all leaf nodes associated with all the selected parent nodes visited
+     * -> for selections parent nodes will not be visited again
      *
      * @param treeNodes
      * @return
@@ -972,10 +988,10 @@ public class VMatrix<BASE, VIEW> {
                     }
                     _getLeafNodesFromTreeNodes(treeNode, childNodesInView, visitedNodes);
                 }
-                
+
                 //msut be sorted
                 Collections.sort(childNodesInView, new VNodeIndexComparator());
-                
+
                 return childNodesInView;
             }
 
@@ -983,15 +999,14 @@ public class VMatrix<BASE, VIEW> {
             return null;
         }
     }
-    
 
-    
     /**
-     * get all left nodes associated with the selected parent nodes -> for selections
+     * get all left nodes associated with the selected parent nodes -> for
+     * selections
+     *
      * @param treeNodes
-     * @return 
+     * @return
      */
-    
     public List<VNode> getChildNodesInViewRow(Collection<VNode> treeNodes) {
         try {
             if (treeNodes == null || treeNodes.isEmpty()) {
@@ -1007,10 +1022,10 @@ public class VMatrix<BASE, VIEW> {
                     }
                     _getLeafNodesFromTreeNodes(treeNode, childNodesInView, visitedNodes);
                 }
-                
+
                 //must be sorted
                 Collections.sort(childNodesInView, new VNodeIndexComparator());
-                
+
                 return childNodesInView;
             }
 
@@ -1018,26 +1033,75 @@ public class VMatrix<BASE, VIEW> {
             e.printStackTrace();
             return null;
         }
-    }    
-    
-    
-    
-    
-    
+    }
 
-    private void _getLeafNodesFromTreeNodes(VNode node, List<VNode> childNodesInView, HashSet<VNode> visitedNodes) {
-        if(node == null){
+    /**
+     * get all leaf nodes associated with the selected parent nodes
+     *
+     * @param treeNodes
+     * @return
+     */
+    public List<VNode> getChildNodesInViewRowAll(Collection<VNode> treeNodes) {
+        try {
+            if (treeNodes == null || treeNodes.isEmpty()) {
+                return null;
+            } else {
+                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
+                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+
+                for (VNode treeNode : treeNodes) {
+                    //fetch a tree node and begin from the first one
+                    if (treeNode == null || !_activeRowNodesInTree.contains(treeNode) || !treeNode.isExpanded() || visitedNodes.contains(treeNode)) {
+                        continue;
+                    }
+                    _getAllNodesFromTreeNodes(treeNode, childNodesInView, visitedNodes);
+                }
+
+                //must be sorted
+                Collections.sort(childNodesInView, new VNodeIndexComparator());
+
+                return childNodesInView;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void _getAllNodesFromTreeNodes(VNode node, List<VNode> childNodesInView, HashSet<VNode> visitedNodes) {
+        if (node == null) {
             return;
         }
-        
+//        System.out.println("Added node:" + node);
         //put nodes to visited nodes
         visitedNodes.add(node);
-        if(node.isSingleNode() || node.isGroupNode() && !node.isExpanded()){
+        childNodesInView.add(node); //the only difference is intermediate nodes are also added
+
+        if (node.isSingleNode() || node.isGroupNode() && !node.isExpanded()) {
+            //add
+            return;
+        } else if (node.isGroupNode() && node.isExpanded()) {
+            List<VNode> children = node.getChildNodes();
+            for (VNode cNode : children) {
+                _getAllNodesFromTreeNodes(cNode, childNodesInView, visitedNodes);
+            }
+        }
+    }
+
+    private void _getLeafNodesFromTreeNodes(VNode node, List<VNode> childNodesInView, HashSet<VNode> visitedNodes) {
+        if (node == null) {
+            return;
+        }
+
+        //put nodes to visited nodes
+        visitedNodes.add(node);
+        if (node.isSingleNode() || node.isGroupNode() && !node.isExpanded()) {
             //add
             childNodesInView.add(node);
         } else if (node.isGroupNode() && node.isExpanded()) {
             List<VNode> children = node.getChildNodes();
-            for(VNode cNode : children){
+            for (VNode cNode : children) {
                 _getLeafNodesFromTreeNodes(cNode, childNodesInView, visitedNodes);
             }
         }
@@ -1051,7 +1115,7 @@ public class VMatrix<BASE, VIEW> {
             }
             if (cnode.isSingleNode() || cnode.isGroupNode() && !cnode.isExpanded()) {
                 childNodesInView.add(cnode);
-            } else if (cnode.isGroupNode() && cnode.isExpanded()){
+            } else if (cnode.isGroupNode() && cnode.isExpanded()) {
                 _getChildNodesInView(cnode, childNodesInView);
             }
         }

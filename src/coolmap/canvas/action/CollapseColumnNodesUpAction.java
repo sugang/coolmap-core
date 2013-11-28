@@ -21,7 +21,8 @@ public class CollapseColumnNodesUpAction extends AbstractAction{
         private final String id;
     
     public CollapseColumnNodesUpAction(String objectID){
-        super("Collapse columns to previous level");
+        super("Collapse all");
+        putValue(SHORT_DESCRIPTION, "Collapse all column nodes to previous level");
         id = objectID;
     }
     

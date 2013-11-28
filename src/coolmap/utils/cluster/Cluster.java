@@ -448,7 +448,7 @@ public class Cluster {
 //
 //            //create row nodes to make it work
 //            HashMultimap<COntology, String> map = HashMultimap.create();
-//            for (VNode node : object.getViewNodesRow()) {
+//            for (VNode node : object.getViewNodesRowFromTreeNodes()) {
 //                if (node.getCOntology() != null) {
 //                    map.put(node.getCOntology(), node.getName());
 //                }
@@ -652,7 +652,7 @@ public class Cluster {
 
         for (COntology otherOntology : map.keySet()) {
             Set<String> termsToMerge = map.get(otherOntology);
-            System.out.println("Terms to merge:" + termsToMerge);
+//            System.out.println("Terms to merge:" + termsToMerge);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
@@ -783,7 +783,7 @@ public class Cluster {
 //        HashSet<COntology> previousOntologies = new HashSet<COntology>();
 //
 //
-//        for (VNode node : object.getViewNodesColumn()) {
+//        for (VNode node : object.getViewNodesColumnFromTreeNodes()) {
 //            if (node.getCOntology() != null) {
 //                //for now just copy everything?
 //                //ontology.mergeCOntologyTo(node.getCOntology());
@@ -806,7 +806,7 @@ public class Cluster {
 
         for (COntology otherOntology : map.keySet()) {
             Set<String> termsToMerge = map.get(otherOntology);
-            System.out.println("Terms to merge:" + termsToMerge);
+//            System.out.println("Terms to merge:" + termsToMerge);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 

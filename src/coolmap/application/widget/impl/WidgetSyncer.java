@@ -262,6 +262,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         if (_selectionColumn.isSelected()) {
             //find the selected anchor names
             //if itself is not checked, return
+            
 
             HashSet<String> nodeNames = new HashSet<String>();
             ArrayList<Range<Integer>> selectedColumns = object.getCoolMapView().getSelectedColumns();

@@ -10,6 +10,7 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ public class CoolMapState {
     private final boolean _logSelections;
     private final JSONObject _configurations; //Not mutable! the _configurations can be changed theoretically
     private final String _operationName;
+    private final Object[] _otherParameters;
 
     private final long _createdTime;
 
@@ -86,6 +88,15 @@ public class CoolMapState {
         _logSelections = oldState._logSelections;
         //but it could be null
         _operationName = oldState._operationName;
+        //refer to other parameters
+        if(oldState._otherParameters == null){
+            _otherParameters = null;
+        }
+        else{
+            _otherParameters = Arrays.copyOf(oldState._otherParameters, oldState._otherParameters.length);
+        }
+        
+        
 
         if (_logRowNodes) {
             //duplicate the rowNodes
@@ -210,11 +221,12 @@ public class CoolMapState {
         _createdTime = oldState._createdTime;
     }
 
-    private CoolMapState(String operationName, CoolMapObject object, boolean logRowNodes, boolean logColNodes, boolean logSelections, JSONObject otherConfig) {
+    private CoolMapState(String operationName, CoolMapObject object, boolean logRowNodes, boolean logColNodes, boolean logSelections, JSONObject otherConfig, Object... otherParameters) {
         _objectID = object.getID();
         _logRowNodes = logRowNodes;
         _logColNodes = logColNodes;
         _logSelections = logSelections;
+        _otherParameters = otherParameters;
 
         //
         if (operationName != null) {

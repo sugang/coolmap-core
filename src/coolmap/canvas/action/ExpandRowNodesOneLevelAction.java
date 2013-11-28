@@ -21,7 +21,8 @@ public class ExpandRowNodesOneLevelAction extends AbstractAction {
         private final String id;
     
     public ExpandRowNodesOneLevelAction(String objectID){
-        super("Expand rows to next level");
+        super("Expand all");
+        putValue(SHORT_DESCRIPTION, "Expand all row ontology nodes to next level");
         id = objectID;
     }
       

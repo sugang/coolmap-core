@@ -1387,7 +1387,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public synchronized boolean collapseColumnNodes(Collection<VNode> nodes) {
+    public synchronized boolean collapseColumnNodes(Collection<VNode> nodes, boolean select) {
         if (nodes == null || nodes.isEmpty() || getCoolMapView() == null) {
             return false;
         }
@@ -1401,31 +1401,33 @@ public final class CoolMapObject<BASE, VIEW> {
         getCoolMapView().updateCanvasEnforceAll();
         notifyColumnsChanged();
 
-        ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
+        if (select) {
 
-        for (VNode node : nodes) {
-            if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
-                try {
-                    retainedIndices.add(node.getViewIndex().intValue());
-                } catch (Exception e) {
+            ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
+            for (VNode node : nodes) {
+                if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
+                    try {
+                        retainedIndices.add(node.getViewIndex().intValue());
+                    } catch (Exception e) {
+
+                    }
                 }
             }
-        }
-        HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
+            HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
 
-        if (columnSelections != null) {
-            getCoolMapView().setSelectionsColumn(columnSelections);
-            getCoolMapView().centerToSelections();
+            if (columnSelections != null) {
+                getCoolMapView().setSelectionsColumn(columnSelections);
+                getCoolMapView().centerToSelections();
+            }
         }
-
         //
 //        Collections.sort(retainedIndices, new VNodeIndexComparator());
         //then set selection 
         return true;
     }
 
-    public synchronized boolean collapseRowNodes(Collection<VNode> nodes) {
+    public synchronized boolean collapseRowNodes(Collection<VNode> nodes, boolean select) {
         if (nodes == null || nodes.isEmpty() || getCoolMapView() == null) {
             return false;
         }
@@ -1438,26 +1440,27 @@ public final class CoolMapObject<BASE, VIEW> {
         getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
-        
-        ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
-        for (VNode node : nodes) {
-            if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
-                try {
-                    retainedIndices.add(node.getViewIndex().intValue());
-                } catch (Exception e) {
+        if (select) {
+            ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
+            for (VNode node : nodes) {
+                if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
+                    try {
+                        retainedIndices.add(node.getViewIndex().intValue());
+                    } catch (Exception e) {
+
+                    }
                 }
             }
-        }
-        HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(retainedIndices);
+            HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(retainedIndices);
 
-        if (rowSelections != null) {
-            getCoolMapView().setSelectionsRow(rowSelections);
-            getCoolMapView().centerToSelections();
-        }        
-        
-        
+            if (rowSelections != null) {
+                getCoolMapView().setSelectionsRow(rowSelections);
+                getCoolMapView().centerToSelections();
+            }
+        }
+
         return true;
     }
 
@@ -1507,9 +1510,8 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-
         if (!onlyLevelOneParents.isEmpty()) {
-            return collapseColumnNodes(onlyLevelOneParents);
+            return collapseColumnNodes(onlyLevelOneParents, false);
         }
         return false;
     }
@@ -1552,9 +1554,8 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-
         if (!onlyLevelOneParents.isEmpty()) {
-            return collapseRowNodes(onlyLevelOneParents);
+            return collapseRowNodes(onlyLevelOneParents, false);
         }
         return false;
     }

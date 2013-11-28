@@ -799,8 +799,8 @@ public final class CoolMapView<BASE, VIEW> {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
 
-        System.out.println("Selected columns:" + selectedColumns);
-        System.out.println("Selected rows:" + selectedRows);
+//        System.out.println("Selected columns:" + selectedColumns);
+//        System.out.println("Selected rows:" + selectedRows);
 
         ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
@@ -810,7 +810,7 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
 //        System.out.println("New selections:" + newSelections);
-        System.out.println("New selections" + newSelections);
+//        System.out.println("New selections" + newSelections);
 
         setSelections(newSelections);
     }
