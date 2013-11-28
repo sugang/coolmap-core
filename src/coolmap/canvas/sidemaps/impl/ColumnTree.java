@@ -40,8 +40,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 /**
  *
@@ -176,42 +174,47 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     //This is only selecting the active nodes. need to select from selected nodes -> require efficient algorithms. Also will require merges
     private void _selectSubTree() {
-        if (_activeNode == null || !_activeNode.isGroupNode() || !_activeNode.isExpanded() || !isDataViewValid()) {
-            return;
-        }
-
-        List<VNode> childNodeInTree = getCoolMapObject().getViewNodesColumn(_activeNode);
-        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-            return;
-        }
-
-        //must sort with 
-        HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
-
-        VNode firstNode = childNodeInTree.get(0);
-        if (firstNode.getViewIndex() == null) {
-            return;
-        }
-        int startIndex = firstNode.getViewIndex().intValue();
-        int currentIndex = startIndex;
-
-        for (VNode node : childNodeInTree) {
-            if (node.getViewIndex() == null) {
-                return;//should not happen
+        try {
+            if (_selectedNodes.isEmpty()) {
+                return;
             }
-            if (node.getViewIndex().intValue() <= currentIndex + 1) {
-                currentIndex = node.getViewIndex().intValue();
-                continue;
-            } else {
-                //add last start and current
-                selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
-                currentIndex = node.getViewIndex().intValue();
-                startIndex = currentIndex;
-            }
-        }
 
-        selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
-        getCoolMapView().setSelectionsColumn(selectedColumns);
+            //childNodesInTree
+            List<VNode> childNodeInTree = getCoolMapObject().getViewNodesColumn(_selectedNodes);
+            if (childNodeInTree == null || childNodeInTree.isEmpty()) {
+                return;
+            }
+
+            //must sort with 
+            HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
+
+            VNode firstNode = childNodeInTree.get(0);
+            if (firstNode.getViewIndex() == null) {
+                return;
+            }
+            int startIndex = firstNode.getViewIndex().intValue();
+            int currentIndex = startIndex;
+
+            for (VNode node : childNodeInTree) {
+                if (node.getViewIndex() == null) {
+                    return;//should not happen
+                }
+                if (node.getViewIndex().intValue() <= currentIndex + 1) {
+                    currentIndex = node.getViewIndex().intValue();
+                    continue;
+                } else {
+                    //add last start and current
+                    selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+                    currentIndex = node.getViewIndex().intValue();
+                    startIndex = currentIndex;
+                }
+            }
+
+            selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+            getCoolMapView().setSelectionsColumn(selectedColumns);
+        } catch (Exception e) {
+
+        }
 
     }
 
@@ -377,48 +380,48 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         }
 
-        ////
-        _popupMenu.addPopupMenuListener(new PopupMenuListener() {
-
-            @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent pme) {
-                _expandOne.setEnabled(false);
-                _expandToAll.setEnabled(false);
-                _collapse.setEnabled(false);
-                _colorTree.setEnabled(false);
-                _colorChild.setEnabled(false);
-                _clearColor.setEnabled(false);
-                _selectSubtree.setEnabled(false);
-                if (_activeNode != null) {
-                    _colorTree.setEnabled(true);
-                    _colorChild.setEnabled(true);
-                    _clearColor.setEnabled(true);
-                }
-
-                if (_activeNode != null && _activeNode.isExpanded() && _activeNode.isGroupNode()) {
-                    _collapse.setEnabled(true);
-                    _selectSubtree.setEnabled(true);
-                }
-                if (_activeNode != null && !_activeNode.isExpanded() && _activeNode.isGroupNode()) {
-                    _expandOne.setEnabled(true);
-                    _expandToAll.setEnabled(true);
-                }
-//                getViewPanel().removeMouseListener(ColumnTree.this);
-//                getViewPanel().removeMouseMotionListener(ColumnTree.this);
-            }
-
-            @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent pme) {
-//                getViewPanel().addMouseListener(ColumnTree.this);
-//                getViewPanel().addMouseMotionListener(ColumnTree.this);
-            }
-
-            @Override
-            public void popupMenuCanceled(PopupMenuEvent pme) {
-//                getViewPanel().addMouseListener(ColumnTree.this);
-//                getViewPanel().addMouseMotionListener(ColumnTree.this);
-            }
-        });
+        //// no need to add a pop up menu listener
+//        _popupMenu.addPopupMenuListener(new PopupMenuListener() {
+//
+//            @Override
+//            public void popupMenuWillBecomeVisible(PopupMenuEvent pme) {
+//                _expandOne.setEnabled(false);
+//                _expandToAll.setEnabled(false);
+//                _collapse.setEnabled(false);
+//                _colorTree.setEnabled(false);
+//                _colorChild.setEnabled(false);
+//                _clearColor.setEnabled(false);
+//                _selectSubtree.setEnabled(false);
+//                if (_activeNode != null) {
+//                    _colorTree.setEnabled(true);
+//                    _colorChild.setEnabled(true);
+//                    _clearColor.setEnabled(true);
+//                }
+//
+//                if (_activeNode != null && _activeNode.isExpanded() && _activeNode.isGroupNode()) {
+//                    _collapse.setEnabled(true);
+//                    _selectSubtree.setEnabled(true);
+//                }
+//                if (_activeNode != null && !_activeNode.isExpanded() && _activeNode.isGroupNode()) {
+//                    _expandOne.setEnabled(true);
+//                    _expandToAll.setEnabled(true);
+//                }
+////                getViewPanel().removeMouseListener(ColumnTree.this);
+////                getViewPanel().removeMouseMotionListener(ColumnTree.this);
+//            }
+//
+//            @Override
+//            public void popupMenuWillBecomeInvisible(PopupMenuEvent pme) {
+////                getViewPanel().addMouseListener(ColumnTree.this);
+////                getViewPanel().addMouseMotionListener(ColumnTree.this);
+//            }
+//
+//            @Override
+//            public void popupMenuCanceled(PopupMenuEvent pme) {
+////                getViewPanel().addMouseListener(ColumnTree.this);
+////                getViewPanel().addMouseMotionListener(ColumnTree.this);
+//            }
+//        });
 
     }
 

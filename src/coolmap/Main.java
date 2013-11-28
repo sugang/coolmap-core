@@ -90,9 +90,9 @@ public class Main {
 // /Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt
 //            "/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"
 //            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
-            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
+//            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
             
-//            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 //            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();
@@ -140,11 +140,11 @@ public class Main {
             onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
             
-//            object.insertRowNodes(onto.getRootNodesOrdered());
-//            object.insertColumnNodes(onto.getRootNodesOrdered());
+            object.insertRowNodes(onto.getRootNodesOrdered());
+            object.insertColumnNodes(onto.getRootNodesOrdered());
 //            
-//            object.expandColumnNodesOneLayer();
-//            object.expandRowNodesOneLayer();
+            object.expandColumnNodesOneLayer();
+            object.expandRowNodesOneLayer();
             
 //            ArrayList l = new ArrayList();
 //            List<VNode> l2 = onto.getRootNodesOrdered();

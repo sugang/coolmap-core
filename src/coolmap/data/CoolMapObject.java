@@ -1759,6 +1759,25 @@ public final class CoolMapObject<BASE, VIEW> {
     public List<VNode> getViewNodesColumn(VNode parentNode) {
         return _vMatrix.getChildNodesInViewColumn(parentNode);
     }
+    
+    /**
+     * get leaft nodes from seleted tree nodes in row
+     * @param treeNodes
+     * @return 
+     */
+    public List<VNode> getViewNodesColumn(Collection<VNode> treeNodes){
+        return _vMatrix.getChildNodesInViewColumn(treeNodes);
+    }
+    
+    /**
+     * get all leaf nodes from selected tree nodes in row
+     * @param treeNodes
+     * @return 
+     */
+    public List<VNode> getViewNodesRow(Collection<VNode> treeNodes){
+        return _vMatrix.getChildNodesInViewRow(treeNodes);
+    }
+    
 
     public List<VNode> getViewNodesRow(VNode parentNode) {
         return _vMatrix.getChildNodesInViewRow(parentNode);
