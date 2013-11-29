@@ -13,7 +13,7 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import coolmap.module.Module;
 import coolmap.utils.Tools;
-import coolmap.utils.cluster.Cluster;
+import coolmap.utils.statistics.cluster.Cluster;
 import coolmap.utils.graphics.UI;
 import edu.ucla.sspace.clustering.ClusteringByCommittee;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;

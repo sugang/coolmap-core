@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package coolmap.utils.cluster;
+package coolmap.utils.statistics.cluster;
 
 import com.google.common.collect.HashMultimap;
 import coolmap.application.CoolMapMaster;

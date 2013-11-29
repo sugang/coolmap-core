@@ -4,16 +4,16 @@
  * and open the template in the editor.
  */
 
-package coolmap.utils.cluster;
+package coolmap.utils.statistics.cluster;
 
 /**
  *
  * @author sugang
  */
-public class CoolMapClusterInterruptedException extends InterruptedException{
+public class CoolMapObjectInputException extends Exception{
 
-    public CoolMapClusterInterruptedException(String message) {
-        super("Clustering interrupted " + message);
+    public CoolMapObjectInputException() {
+        super("Input CoolMapObject Error");
     }
     
 }

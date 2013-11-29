@@ -4,16 +4,12 @@
  * and open the template in the editor.
  */
 
-package coolmap.utils.cluster;
+package coolmap.utils.statistics.test;
 
 /**
  *
  * @author sugang
  */
-public class CoolMapObjectInputException extends Exception{
-
-    public CoolMapObjectInputException() {
-        super("Input CoolMapObject Error");
-    }
+public class TTest {
     
 }

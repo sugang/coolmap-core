@@ -659,6 +659,10 @@ public class NumberToSortedBar extends ViewRenderer<Double> {
     public Image getSubTip(CoolMapObject object, VNode rowNode, VNode columnNode, float percentX, float PercentY, int cellWidth, int cellHeight
     ) {
         try {
+            if(rowNode.isSingleNode() && columnNode.isSingleNode()){
+                return null;
+            }
+            
             List<CMatrix> matrices = object.getBaseCMatrices();
             int matIndex = (int) (percentX * matrices.size());
 
