@@ -8,6 +8,7 @@ package coolmap.application.widget.impl.console;
 import coolmap.application.widget.Widget;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
@@ -26,7 +27,6 @@ public class WidgetConsole extends Widget {
 
     private final JPanel _container = new JPanel();
     private JTextPane consolePane = new JTextPane();
-    
 
     public WidgetConsole() {
         super("Console", W_DATA, L_DATAPORT, UI.getImageIcon("console"), "Displays console information");
@@ -37,13 +37,13 @@ public class WidgetConsole extends Widget {
 
         //
         consolePane.setFont(UI.fontMono.deriveFont(12f));
-        
+        consolePane.setBackground(new Color(255, 255, 204));
+
 //        for (int i = 0; i < 100; i++) {
 //            logError("abcdefgh\n");
 //            logInfo("ABCDEFGH\n");
 //            log("DEFGHIJKL\n");
 //        }
-        
         JPopupMenu popupMenu = new JPopupMenu();
         consolePane.setComponentPopupMenu(popupMenu);
         JMenuItem item = new JMenuItem("Clear", UI.getImageIcon("trashBin"));
@@ -69,6 +69,15 @@ public class WidgetConsole extends Widget {
     public void logInfo(String message) {
         message = "> " + message.trim();
         message += "\n";
+        SimpleAttributeSet aset = new SimpleAttributeSet();
+        StyleConstants.setForeground(aset, UI.colorMIDORI);
+        StyleConstants.setBold(aset, true);
+        appendToPane(message, aset);
+    }
+
+    public void logData(String message) {
+        message = "> " + message.trim();
+        message += "\n\n";
         SimpleAttributeSet aset = new SimpleAttributeSet();
         StyleConstants.setForeground(aset, UI.colorMIDORI);
         StyleConstants.setBold(aset, true);

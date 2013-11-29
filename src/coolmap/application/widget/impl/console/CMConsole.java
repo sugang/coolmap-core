@@ -30,7 +30,7 @@ public class CMConsole {
 
     }
 
-    public static void logInfo(String message) {
+    public static void logInSuccess(String message) {
         if(instance == null){
             try{
                 instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
@@ -43,6 +43,24 @@ public class CMConsole {
         
         instance.logInfo(message);
     }
+    
+    
+    public static void logData(String message){
+        if(instance == null){
+            try{
+                instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            }
+            catch(Exception e){
+                instance = null;
+                return;
+            }
+        }
+        
+        instance.logData(message);
+    }
+    
+    
+    
 
     public static void log(String message) {
         if(instance == null){
