@@ -205,6 +205,12 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
         float mapWidth = view.getMapWidth() * percentage;
         float mapHeight = view.getMapHeight() * percentage;
+        
+        if(mapWidth <= 0)
+            mapWidth = 1;
+        
+        if(mapHeight <=0)
+            mapHeight =1;
 
         BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
 

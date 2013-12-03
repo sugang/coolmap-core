@@ -18,11 +18,13 @@ import coolmap.data.listeners.CObjectListener;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
@@ -361,11 +363,19 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             int previewWidth = Math.round(mapWidth * percentage);
             int previewHeight = Math.round(mapHeight * percentage);
 
-            if (previewWidth < margin * 2 || previewHeight < margin * 2) {
+            //it's a bit interesting here
+            if (previewWidth < 1 || previewHeight < 1) {
                 bufferedImage = null;
                 busy = false;
                 return;
             }
+//            if(previewWidth < margin * 2){
+//                previewWidth = margin * 2;
+//            }
+//            
+//            if(previewHeight < margin * 2){
+//                previewHeight = margin * 2;
+//            }
 
             //bufferedImage = _graphicsConfiguration.createCompatibleImage( previewWidth, 
             //        previewHeight);
@@ -377,8 +387,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //            float zoomX = object.getCoolMapView().getZoomX();
 //            float zoomY = object.getCoolMapView().getZoomY();
             //percentage 
-            zoomX = zoomX * percentage;
-            zoomY = zoomY * percentage;
+//            zoomX = zoomX * percentage;
+//            zoomY = zoomY * percentage;
 
             //Fork... the offsets are not adjusted ...
             //could be quite slow to generate preview
@@ -397,6 +407,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 //            }
             //This is the function that created the problem
             image = renderer.getRenderedFullMap(object, percentage);
+            
+//            System.out.println("updated radar image:" + image);
+            
 
             if (Thread.interrupted()) {
                 return;
@@ -473,28 +486,32 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     @Override
     public void aggregatorUpdated(CoolMapObject object) {
         //update image -> this can be very slow
-        updateBufferedImage();
+//        updateBufferedImage();
+        fitView();
     }
 
     @Override
     public void rowsChanged(CoolMapObject object) {
 //        System.out.println("Active rows changed");
         //update image
-        updateBufferedImage();
+//        updateBufferedImage();
+        fitView();
     }
 
     @Override
     public void columnsChanged(CoolMapObject object) {
 //        System.out.println("Active cols changed");
         //update image
-        updateBufferedImage();
+//        updateBufferedImage();
+        fitView();
     }
 
     @Override
     public void baseMatrixChanged(CoolMapObject object) {
-        System.out.println("base matrix changed");
+//        System.out.println("base matrix changed");
         //update image
-        updateBufferedImage();
+//        updateBufferedImage();
+        fitView();
     }
 
 //    @Override
@@ -505,7 +522,8 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     public void viewRendererChanged(CoolMapObject object) {
 //        System.out.println("View renderer changed");
         //update image
-        updateBufferedImage();
+//        updateBufferedImage();
+        fitView();
     }
 
     @Override
@@ -515,8 +533,9 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     @Override
     public void gridChanged(CoolMapObject object) {
-        System.out.println("Grid changed");
-        updateBufferedImage();
+//        System.out.println("Grid changed");
+//        updateBufferedImage();
+        fitView();
     }
 
     @Override
@@ -525,10 +544,14 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
 
     private class RadarPanel extends JPanel {
 
+        private Font defaultFont;
+        private String message = "Preview not available";
+        
         public RadarPanel() {
             MouseTracker tracker = new MouseTracker();
             addMouseListener(tracker);
             addMouseMotionListener(tracker);
+            defaultFont = UI.fontPlain.deriveFont(11f).deriveFont(Font.BOLD);
         }
 
         @Override
@@ -547,6 +570,15 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
             if (bufferedImage != null) {
                 g2D.drawRoundRect((int) mapAnchor.x, (int) mapAnchor.y, bufferedImage.getWidth(), bufferedImage.getHeight(), 5, 5);
                 g2D.drawImage(bufferedImage, (int) mapAnchor.x, (int) mapAnchor.y, null);
+            }
+            else if (!busy){
+//                g2D.setFont(UI);
+                g2D.setColor(UI.colorWhite);
+                g2D.setFont(defaultFont);
+                int stringW = g2D.getFontMetrics().stringWidth(message);
+                g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2D.drawString(message, getWidth()/2 - stringW/2, getHeight()/2 + 5);
+                return;
             }
 
             if (region != null) {
