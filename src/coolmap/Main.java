@@ -69,7 +69,9 @@ public class Main {
                 //then restore workspace
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
-                loadSampleCoolMapProject();
+                CMConsole.log("CoolMap initialized.");
+                
+//                loadSampleCoolMapProject();
 
 //                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
             }
@@ -187,11 +189,10 @@ public class Main {
             
             
             
-            CMConsole.log("Loaded coolmap");
-            
-            
-            CTest.ttest(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1));
-            CTest.anova(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1), object.getViewNodeRow(2));
+            CMConsole.log("");
+                       
+//            CTest.ttest(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1));
+//            CTest.anova(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1), object.getViewNodeRow(2));
             
             
         } catch (Exception ex) {
