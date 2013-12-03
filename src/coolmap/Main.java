@@ -19,7 +19,6 @@ import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.DoubleSnippet1_3;
 import coolmap.data.snippet.SnippetMaster;
 import coolmap.utils.Config;
-import coolmap.utils.statistics.test.CTest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -71,7 +70,7 @@ public class Main {
 
                 CMConsole.log("CoolMap initialized.");
                 
-//                loadSampleCoolMapProject();
+                loadSampleCoolMapProject();
 
 //                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
             }
