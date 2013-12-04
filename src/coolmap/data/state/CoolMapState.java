@@ -544,6 +544,11 @@ public class CoolMapState {
     public String toString() {
         return "Operation Name: " + _operationName + "\n" + "Rows-base: " + _rowBaseNodes + "\n" + "Rows-tree: " + _rowTreeNodes + "\n" + "Cols-base: " + _colBaseNodes + "\n" + "Cols-tree: " + _colTreeNodes + "\n" + "Selections: " + _selections + "\n" + "Row selections: " + _rowSelections + "\n" + "Col selections: " + _colSelections + "\n" + "+Options: " + _configurations;
     }
+    
+    
+    public String toSynopsis() {
+        return _operationName + ", ||Row base: " + (_rowBaseNodes==null?null:_rowBaseNodes.size()) + " Row tree: " + (_rowTreeNodes==null?null:_rowTreeNodes.size()) + " " + " | Column base: " + (_colBaseNodes==null?null:_colBaseNodes.size()) + " Column tree: " + (_colTreeNodes==null?null:_colTreeNodes.size());
+    }
 
     /**
      * returns the name of this operation

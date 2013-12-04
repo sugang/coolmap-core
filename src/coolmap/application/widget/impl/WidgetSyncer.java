@@ -529,7 +529,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             return;
         }
 
-        System.out.println("Rows changed");
+//        System.out.println("Rows changed");
         if (_rowLayout.isSelected()) {
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);

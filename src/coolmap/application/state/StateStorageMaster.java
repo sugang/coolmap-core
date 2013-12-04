@@ -38,9 +38,9 @@ public class StateStorageMaster {
         _saveStateOperation.addActionListener(new SaveStateAction());
         _loadStateOperation.addActionListener(new LoadStateAction());
         _undoOperation.addActionListener(new UndoAction());
-        _redoOperation.addActionListener(new RedoAction());
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false, false);
-        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false, true);
+//        _redoOperation.addActionListener(new RedoAction());
+        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _undoOperation, false, true);
+//        CoolMapMaster.getCMainFrame().addMenuItem("Edit", _redoOperation, false, true);
         CoolMapMaster.getCMainFrame().addMenuItem("Edit", _saveStateOperation, false, false);
         CoolMapMaster.getCMainFrame().addMenuItem("Edit", _loadStateOperation, false, false);
 
@@ -139,6 +139,11 @@ public class StateStorageMaster {
         }
         
         CoolMapState state = stateQueues.redo();
+        
+        System.out.println("");
+        System.out.println("restore to state:" + state.toSynopsis());
+        System.out.println("");
+        
         object.restoreState(state);
         
         updateMenus(object);

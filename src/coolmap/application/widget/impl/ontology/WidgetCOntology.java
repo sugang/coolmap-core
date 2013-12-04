@@ -178,7 +178,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         _ontologyTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         _ontologyTable.addHighlighter(new ColorHighlighter(new HighlightPredicate.ColumnHighlightPredicate(0),
-                null, UI.colorMIDORI));
+                UI.colorKAMENOZOKI, null));
         _ontologyTable.addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
                 null, UI.colorKARAKURENAI));
 
@@ -452,9 +452,63 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //        });
 //        toolBar.add(new DeleteCOntologyAction());
         toolBar.addSeparator();
+
+        button = new JButton(UI.getImageIcon("baseRow"));
+        toolBar.add(button);
+        button.setToolTipText("Reset view rows to original data rows");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                    return;
+                }
+
+                CMatrix mx = (CMatrix) obj.getBaseCMatrices().get(0);
+
+                ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+                for (Object label : mx.getRowLabelsAsList()) {
+                    rowNodes.add(new VNode(label.toString()));
+                }
+
+                CoolMapState state = CoolMapState.createStateRows("Row reset", obj, null);
+                obj.replaceRowNodes(rowNodes, null);
+                StateStorageMaster.addState(state);
+
+            }
+        });
+
+        button = new JButton(UI.getImageIcon("baseColumn"));
+        toolBar.add(button);
+        button.setToolTipText("Rest view columns to original data columns");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                    return;
+                }
+
+                CMatrix mx = (CMatrix) obj.getBaseCMatrices().get(0);
+
+                ArrayList<VNode> colNodes = new ArrayList<VNode>();
+                for (Object label : mx.getColLabelsAsList()) {
+                    colNodes.add(new VNode(label.toString()));
+                }
+
+                CoolMapState state = CoolMapState.createStateColumns("Column reset", obj, null);
+                obj.replaceColumnNodes(colNodes, null);
+                StateStorageMaster.addState(state);
+
+            }
+        });
+
+        toolBar.addSeparator();
         button = new JButton(UI.getImageIcon("prependRow"));
         toolBar.add(button);
-        button.setToolTipText("Add selected nodes to rows in the active CoolMap, at the beginning");
+        button.setToolTipText("Prepend selected ontology nodes to rows");
         button.addActionListener(new ActionListener() {
 
             @Override
@@ -464,29 +518,47 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
 
         button = new JButton(UI.getImageIcon("appendRow"));
+        button.setToolTipText("Append selected ontology nodes to rows");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                _appendRows();
             }
         });
 
         button = new JButton(UI.getImageIcon("replaceRow"));
+        button.setToolTipText("Replace rows with selected row nodes");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                _replaceRows();
             }
         });
 
         button = new JButton(UI.getImageIcon("rootRow"));
+        button.setToolTipText("Replace rows with the root ontology nodes");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                    return;
+                }
+
+                COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+                if (ontology == null) {
+                    return;
+                }
+
+                CoolMapState state = CoolMapState.createStateRows("Row replacement", obj, null);
+                obj.replaceRowNodes(ontology.getRootNodesOrdered(), null);
+                StateStorageMaster.addState(state);
             }
         });
 
@@ -494,6 +566,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         button = new JButton(UI.getImageIcon("prependColumn"));
         button.setToolTipText("Add selected nodes to columns in the active CoolMap, at the beginning");
+        button.setToolTipText("Prepend selected ontology nodes to columns");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
@@ -504,29 +577,47 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
 
         button = new JButton(UI.getImageIcon("appendColumn"));
+        button.setToolTipText("Append selected ontology nodes to columns");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                _appendColumns();
             }
         });
 
         button = new JButton(UI.getImageIcon("replaceColumn"));
+        button.setToolTipText("Replace columns with selected column nodes");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                _replaceColumns();
             }
         });
 
         button = new JButton(UI.getImageIcon("rootColumn"));
+        button.setToolTipText("Replace columns with the root ontology nodes");
         toolBar.add(button);
         button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                    return;
+                }
+
+                COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+                if (ontology == null) {
+                    return;
+                }
+
+                CoolMapState state = CoolMapState.createStateColumns("Column replacement", obj, null);
+                obj.replaceColumnNodes(ontology.getRootNodesOrdered(), null);
+                StateStorageMaster.addState(state);
             }
         });
 
@@ -976,9 +1067,179 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             centerTo.x = ((Range<Integer>) (obj.getCoolMapView().getSelectedColumns().get(0))).lowerEndpoint();
         }
 
-        CoolMapState state = CoolMapState.createStateRows("Insert nodes to row", obj, null);
+        CoolMapState state = CoolMapState.createStateRows("Prepend nodes to row", obj, null);
         obj.insertRowNodes(0, newNodes, true);
-        obj.getCoolMapView().centerToRegion(centerTo);
+//        obj.getCoolMapView().centerToRegion(centerTo);
+        obj.getCoolMapView().centerToSelections();
+        StateStorageMaster.addState(state);
+
+    }
+
+    private void _appendRows() {
+        CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+        if (obj == null) {
+            return;
+        }
+
+        int[] rows = _ontologyTable.getSelectedRows();
+        if (rows == null || rows.length == 0) {
+            return;
+        }
+
+        COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+        if (ontology == null) {
+            return;
+        }
+
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+
+        for (int row : rows) {
+            row = _ontologyTable.convertRowIndexToModel(row);
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
+        }
+
+        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        for (String n : nodes) {
+            newNodes.add(new VNode(n, ontology));
+        }
+
+//        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+//        if (obj.getCoolMapView().getSelectedColumns() != null && !obj.getCoolMapView().getSelectedColumns().isEmpty()) {
+//            centerTo.x = ((Range<Integer>) (obj.getCoolMapView().getSelectedColumns().get(0))).lowerEndpoint();
+//        }
+        CoolMapState state = CoolMapState.createStateRows("Append nodes to row", obj, null);
+        obj.insertRowNodes(obj.getViewNumRows(), newNodes, true);
+        obj.getCoolMapView().centerToSelections();
+        StateStorageMaster.addState(state);
+
+    }
+
+    private void _replaceRows() {
+        CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+        if (obj == null) {
+            return;
+        }
+
+        int[] rows = _ontologyTable.getSelectedRows();
+        if (rows == null || rows.length == 0) {
+            return;
+        }
+
+        COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+        if (ontology == null) {
+            return;
+        }
+
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+
+        for (int row : rows) {
+            row = _ontologyTable.convertRowIndexToModel(row);
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
+        }
+
+        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        for (String n : nodes) {
+            newNodes.add(new VNode(n, ontology));
+        }
+
+//        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+//        if (obj.getCoolMapView().getSelectedColumns() != null && !obj.getCoolMapView().getSelectedColumns().isEmpty()) {
+//            centerTo.x = ((Range<Integer>) (obj.getCoolMapView().getSelectedColumns().get(0))).lowerEndpoint();
+//        }
+        CoolMapState state = CoolMapState.createStateRows("Replace row nodes", obj, null);
+        int index = 0;
+        try {
+            index = ((Range<Integer>) obj.getCoolMapView().getSelectedRows().get(0)).lowerEndpoint();
+        } catch (Exception e) {
+
+        }
+
+        obj.replaceRowNodes(newNodes, null);
+        obj.getCoolMapView().centerToSelections();
+        StateStorageMaster.addState(state);
+
+    }
+
+    private void _replaceColumns() {
+
+        CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+        if (obj == null) {
+            return;
+        }
+
+        int[] rows = _ontologyTable.getSelectedRows();
+        if (rows == null || rows.length == 0) {
+            return;
+        }
+
+        COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+        if (ontology == null) {
+            return;
+        }
+
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+
+        for (int row : rows) {
+            row = _ontologyTable.convertRowIndexToModel(row);
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
+        }
+
+        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        for (String n : nodes) {
+            newNodes.add(new VNode(n, ontology));
+        }
+
+//        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+//        if (obj.getCoolMapView().getSelectedRows() != null && !obj.getCoolMapView().getSelectedRows().isEmpty()) {
+//            centerTo.y = ((Range<Integer>) (obj.getCoolMapView().getSelectedRows().get(0))).lowerEndpoint();
+//        }
+        CoolMapState state = CoolMapState.createStateColumns("Replace column nodes", obj, null);
+        obj.replaceColumnNodes(newNodes, null);
+        obj.getCoolMapView().centerToSelections();
+        StateStorageMaster.addState(state);
+
+    }
+
+    private void _appendColumns() {
+
+        CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+        if (obj == null) {
+            return;
+        }
+
+        int[] rows = _ontologyTable.getSelectedRows();
+        if (rows == null || rows.length == 0) {
+            return;
+        }
+
+        COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+        if (ontology == null) {
+            return;
+        }
+
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+
+        for (int row : rows) {
+            row = _ontologyTable.convertRowIndexToModel(row);
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
+        }
+
+        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        for (String n : nodes) {
+            newNodes.add(new VNode(n, ontology));
+        }
+
+//        Rectangle centerTo = new Rectangle(0, 0, 1, 1);
+//        if (obj.getCoolMapView().getSelectedRows() != null && !obj.getCoolMapView().getSelectedRows().isEmpty()) {
+//            centerTo.y = ((Range<Integer>) (obj.getCoolMapView().getSelectedRows().get(0))).lowerEndpoint();
+//        }
+        CoolMapState state = CoolMapState.createStateColumns("Append nodes to column", obj, null);
+        obj.insertColumnNodes(obj.getViewNumColumns(), newNodes, true);
+        obj.getCoolMapView().centerToSelections();
         StateStorageMaster.addState(state);
 
     }
@@ -1018,9 +1279,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             centerTo.y = ((Range<Integer>) (obj.getCoolMapView().getSelectedRows().get(0))).lowerEndpoint();
         }
 
-        CoolMapState state = CoolMapState.createStateColumns("Insert nodes to column", obj, null);
+        CoolMapState state = CoolMapState.createStateColumns("Prepend nodes to column", obj, null);
         obj.insertColumnNodes(0, newNodes, true);
-        obj.getCoolMapView().centerToRegion(centerTo);
+//        obj.getCoolMapView().centerToRegion(centerTo);
+        obj.getCoolMapView().centerToSelections();
         StateStorageMaster.addState(state);
 
     }

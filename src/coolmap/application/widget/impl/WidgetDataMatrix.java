@@ -325,7 +325,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
             _dataTable.setModel(model);
 
-        //Remove
+            //Remove
 //        _dataTable.getColumnModel().removeColumn(_dataTable.getColumn("Row Nodes"));
             //add
             _dataTable.getRowSorter().addRowSorterListener(new RowSorterListener() {
@@ -728,8 +728,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
             return;
         }
 
-        System.out.println("Was row change because of sort?" + _sorterTrigger);
-
+//        System.out.println("Was row change because of sort?" + _sorterTrigger);
         if (_sorterTrigger) {
             _sorterTrigger = false;
         } else {
@@ -768,15 +767,19 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //                _dataTable.getSelectionModel().
 
 //                System.err.println("Selection:" + selection);
-
                 _dataTable.setColumnSelectionInterval(selection.x + 1, selection.x + selection.width);
-                _dataTable.setRowSelectionInterval(selection.y, selection.y + selection.height - 1);
+
+                try {
+                    _dataTable.setRowSelectionInterval(selection.y, selection.y + selection.height - 1);
 
 //                _dataTable.getCellRect(W_DATA, W_DATA, true)
-                Rectangle rect = _dataTable.getCellRect((selection.y * 2 + selection.height) / 2, (selection.x * 2 + selection.width) / 2, true);
-                rect.x += 100;
+                    Rectangle rect = _dataTable.getCellRect((selection.y * 2 + selection.height) / 2, (selection.x * 2 + selection.width) / 2, true);
+                    rect.x += 100;
 
-                _dataTable.scrollRectToVisible(rect);
+                    _dataTable.scrollRectToVisible(rect);
+                } catch (Exception e) {
+                    _dataTable.clearSelection();
+                }
 
             }
         }

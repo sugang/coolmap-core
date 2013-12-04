@@ -37,6 +37,8 @@ public class StateQueues {
 
             _redoQueue.clear();
             _undoQueue.addLast(state);
+            
+            //when a new state is added, current state turns to null.
             _currentState = null;
         }
     }
@@ -83,13 +85,16 @@ public class StateQueues {
         if (_currentState == null) {
             //should capture the current state, using last state parameters
             //This function
+            
+            //a state is created based on undo
             _currentState = CoolMapState.createFromStateConfig("HEAD", object, lastState);
             
-            
-            
         }
+        
+        
 
-        _redoQueue.add(lastState);
+        //add undoQueue last state
+        _redoQueue.addLast(lastState);
 
         //object.restoreState(lastState);
         //State was restored
@@ -100,28 +105,45 @@ public class StateQueues {
         if (_redoQueue.isEmpty() || _currentState == null) {
             return null;
         }
+        
+        System.out.println("Current redoQueue:");
+        for(CoolMapState state : _redoQueue){
+            System.out.println("  " +state.toSynopsis());
+        }
+        System.out.println("  === ===");
+        
 
         CoolMapObject object = CoolMapMaster.getCoolMapObjectByID(coolMapObjectID);
         if (object == null) {
             return null;
         }
 
+        //System.out.println(_redoQueue);
+        
+        
+        
         CoolMapState redoState = _redoQueue.pollLast(); //poll last added
         _undoQueue.add(redoState);
         CoolMapState restoreToState;
+        
+        
 
         //System.out.println("_redoQueue is Empty? " + _redoQueue);
         //System.out.println("Current State? " + _currentState);
         
         
         if (_redoQueue.isEmpty()) {
-            System.err.println("Restore to: current State, this part has a bug:" + _currentState);
+//            System.err.println("Restore to: current State, this part has a bug:" + _currentState);
             restoreToState = _currentState;
         } else {
-            restoreToState = _redoQueue.getLast();
+            restoreToState = _redoQueue.getLast(); //_redoQueue.getLast(); //get the second last
         }
 
         //object.restoreState(redoState);
+        
+//        System.out.println("redo queue size:" + _redoQueue.size());
+
+        
         return restoreToState;
     }
 

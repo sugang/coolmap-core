@@ -353,7 +353,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void setViewRenderer(ViewRenderer<VIEW> viewRenderer, boolean initialize) {
         _viewRenderer = viewRenderer;
         if (_viewRenderer != null) {
-            System.out.println("Set the view renderer to: " + initialize);
+//            System.out.println("Set the view renderer to: " + initialize);
             _viewRenderer.setCoolMapObject(this, initialize);
             notifyViewRendererUpdated();
         }
@@ -480,7 +480,7 @@ public final class CoolMapObject<BASE, VIEW> {
             return;
         }
 
-        System.out.println(System.currentTimeMillis());
+//        System.out.println(System.currentTimeMillis());
 
         HashSet<VNode> nodesToBeRemoved = new HashSet<VNode>(nodes.size());
         for (VNode node : nodes) {
@@ -488,12 +488,12 @@ public final class CoolMapObject<BASE, VIEW> {
                 nodesToBeRemoved.add(node);
             }
         }
-        System.out.println(System.currentTimeMillis());
+//        System.out.println(System.currentTimeMillis());
 
         //slow
         _vMatrix.removeActiveRowNodes(nodesToBeRemoved);
 
-        System.out.println(System.currentTimeMillis());
+//        System.out.println(System.currentTimeMillis());
 
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
