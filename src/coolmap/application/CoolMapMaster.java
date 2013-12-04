@@ -31,7 +31,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import quicktime.util.QTUtils;
 
 /**
  *
@@ -356,7 +355,4 @@ public final class CoolMapMaster {
         ontology.destroy();
     }
 
-    public static void main(String args[]) {
-        System.out.println("CoolMap2 Launched");
-    }
 }

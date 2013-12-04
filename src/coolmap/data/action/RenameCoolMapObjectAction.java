@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
 public class RenameCoolMapObjectAction extends AbstractAction{
 
     public RenameCoolMapObjectAction() {
-        super("Rename CoolMap");
+        super("Rename view");
         putValue(SHORT_DESCRIPTION, "Change the name of the active CoolMap in view");
     }
     

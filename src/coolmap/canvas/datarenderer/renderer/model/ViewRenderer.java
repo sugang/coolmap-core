@@ -280,7 +280,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
     public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
         if (data == null || data.getViewNumColumns() == 0 || data.getViewNumRows() == 0 || fromRow < 0 || fromRow > data.getViewNumRows() || fromCol < 0 || fromCol > data.getViewNumColumns()) {
             //System.out.println("Error occured");
-            System.out.println("Render exception occured. Check render range and data");
+//            System.out.println("Render exception occured. Check render range and data");
             return null;
         } else {
 

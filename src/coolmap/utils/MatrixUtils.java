@@ -5,7 +5,6 @@
 package coolmap.utils;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 
 /**
  *
@@ -28,7 +27,7 @@ public class MatrixUtils {
 
             transpose(x);
             
-            System.out.println((System.nanoTime() - t1) / 1000000f);
+//            System.out.println((System.nanoTime() - t1) / 1000000f);
 
             //printMatrix();
             
@@ -187,7 +186,7 @@ public class MatrixUtils {
             for (int j = 0; j < mx[0].length; j++) {
                 System.out.print(mx[i][j] + " ");
             }
-            System.out.println();
+//            System.out.println();
         }
     }
 

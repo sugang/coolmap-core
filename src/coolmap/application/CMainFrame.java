@@ -19,6 +19,7 @@ import com.javadocking.visualizer.SingleMaximizer;
 import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.WidgetViewport;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.utils.Config;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,7 +44,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -178,7 +178,8 @@ public class CMainFrame extends JFrame {
 
         DockModelPropertiesDecoder dockModelDecoder = new DockModelPropertiesDecoder();
         //Need to load all the current dockables
-        System.out.println("Loading from:" + fileUrlString);
+//        System.out.println("Loading from:" + fileUrlString);
+        CMConsole.logInSuccess("Workspace restored from: " + fileUrlString);
 
         //This works
         Map dockableMap = new HashMap();
@@ -514,7 +515,7 @@ public class CMainFrame extends JFrame {
         Menu searchMenu = null;
         MenuItem searchItem = null;
 
-        System.out.println(Arrays.toString(ele));
+//        System.out.println(Arrays.toString(ele));
 
         for (int i = 0; i < ele.length; i++) {
             menuLabel = ele[i].trim();
@@ -615,7 +616,8 @@ public class CMainFrame extends JFrame {
             //Here -> CoolMap will be closed
             CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
 
-            System.out.println("CoolMap Application will be closed.");
+//            System.out.println("CoolMap Application will be closed.");
+            CMConsole.log("CoolMap Application will be closed");
             System.exit(0);
         }
     }

@@ -111,9 +111,9 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
         selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
 
-        for (Range range : selectedRows) {
-            System.out.println(range);
-        }
+//        for (Range range : selectedRows) {
+//            System.out.println(range);
+//        }
 
         getCoolMapView().setSelectionsRow(selectedRows);
 
@@ -128,9 +128,14 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     }
 
     private final Color[] labelColors;
+    
+    public RowTree(){
+        this(null);
+    }
 
     public RowTree(CoolMapObject object) {
         super(object);
+//        setCoolMapObject(object);
         setName("Row Ontology");
         _leafColor = UI.colorGrey3;
         _leafBorderColor = UI.colorBlack5;

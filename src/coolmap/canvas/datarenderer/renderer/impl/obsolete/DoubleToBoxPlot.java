@@ -74,7 +74,7 @@ public class DoubleToBoxPlot extends ViewRenderer<Double> {
                                     }
                                 }
                             } catch (Exception e) {
-                                System.out.println(e);
+//                                System.out.println(e);
                             }
                         }
 

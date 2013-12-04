@@ -53,7 +53,7 @@ public class ImageTest extends ViewRenderer<Object> {
             }
         }
 
-        System.out.println("Preloaded map size: " + maps.size());
+//        System.out.println("Preloaded map size: " + maps.size());
     }
 
     @Override

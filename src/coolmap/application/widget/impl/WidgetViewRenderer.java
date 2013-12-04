@@ -7,6 +7,7 @@ package coolmap.application.widget.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.utils.Config;
@@ -167,7 +168,8 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
                         registerViewRenderer(rendererClass);
                     }
                     catch(JSONException exception){
-                        System.out.println("parsing error");
+//                        System.out.println("parsing error");
+                        CMConsole.logError("Error loading built in renderer: " + rendererToLoad.getString(i));
                     }
                 }
             }

@@ -26,12 +26,12 @@ public class SaveStateAction extends AbstractAction{
             return;
         
         
-        System.out.println("");
+//        System.out.println("");
 //        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
         CoolMapState state = CoolMapState.createState("Capture", object, null);
-        System.out.println("Captured state::");
-        System.out.println(state);
-        System.out.println("");
+//        System.out.println("Captured state::");
+//        System.out.println(state);
+//        System.out.println("");
         
         StateStorageMaster.quickSave(object);
         

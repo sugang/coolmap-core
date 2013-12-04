@@ -6,6 +6,7 @@
 package coolmap.canvas.datarenderer.renderer.impl;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
@@ -113,7 +114,7 @@ public class NumberComposite extends ViewRenderer<Double> {
     public NumberComposite() {
 
         setName("Number to Composite");
-        System.out.println("Created a new NumberComposite");
+//        System.out.println("Created a new NumberComposite");
         setDescription("A renderer that can be used to assign renderers to different aggregations");
 
         configUI.setLayout(new GridBagLayout());
@@ -390,7 +391,8 @@ public class NumberComposite extends ViewRenderer<Double> {
                         }
 
                     } catch (JSONException exception) {
-                        System.out.println("parsing error");
+//                        System.out.println("parsing error");
+                        CMConsole.logError("Error: failed to load built in renderers to composite color renderer.");
                     }
                 }
             } catch (Exception e) {

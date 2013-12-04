@@ -22,7 +22,7 @@ public class CanvasWidgetPropertyChangedListener implements PropertyChangeListen
         if (Dockable.class.isAssignableFrom(
                 evt.getSource().getClass()) && evt.getPropertyName().equals("state") ) {
             //System.out.println("Dockable state changed");
-            System.out.println(((Dockable)evt.getSource()).getTitle());
+//            System.out.println(((Dockable)evt.getSource()).getTitle());
             
             if(evt.getNewValue().equals(DockableState.MAXIMIZED)){
                 //disable a menu

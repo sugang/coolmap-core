@@ -1492,7 +1492,7 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-        System.out.println("Level one parents:" + levelOneParents);
+//        System.out.println("Level one parents:" + levelOneParents);
 
 //        must check to ensure that all level one parents children are also level one
         HashSet<VNode> onlyLevelOneParents = new HashSet<VNode>();
@@ -1536,7 +1536,7 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-        System.out.println("Level one parents:" + levelOneParents);
+//        System.out.println("Level one parents:" + levelOneParents);
 
 //        must check to ensure that all level one parents children are also level one
         HashSet<VNode> onlyLevelOneParents = new HashSet<VNode>();

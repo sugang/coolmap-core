@@ -80,7 +80,7 @@ public class ZoomTracker implements CObjectStateStoreListener {
 
             config.put(this.getClass().getName(), keyVal);
         } catch (Exception e) {
-            System.out.println("Exception occurred when trying to restore state zoom");
+//            System.out.println("Exception occurred when trying to restore state zoom");
         }
 
     }

@@ -80,17 +80,17 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         _description = description;
     }
 
-    private RowMap() {
-        this(null);
-    }
-
-    public RowMap(CoolMapObject<BASE, VIEW> coolMapObject) {
-        _coolMapObject = coolMapObject;
+    public RowMap(CoolMapObject object) {
+        _coolMapObject = object;
         _icon = UI.getImageIcon("infoBW");
         AffineTransform rotationTransform = new AffineTransform();
         rotationTransform.rotate(-Math.PI / 2);
         _messageFont = UI.fontPlain.deriveFont(12f);
     }
+    
+//    public void setCoolMapObject(CoolMapObject obj){
+//        _coolMapObject = obj;
+//    }
 
     public JComponent getViewPanel() {
         return _viewPanel;
@@ -210,7 +210,12 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
     public abstract void justifyView();
 
     public CoolMapView<BASE, VIEW> getCoolMapView() {
+        try{
         return _coolMapObject.getCoolMapView();
+        }
+        catch(Exception e){
+            return null;
+        }
     }
 
     public final synchronized void updateBuffer() {

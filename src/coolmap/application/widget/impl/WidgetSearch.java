@@ -160,7 +160,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         }
 
         if (!rowIndices.isEmpty()) {
-            System.out.println("Select rows:" + rowIndices);
+//            System.out.println("Select rows:" + rowIndices);
             obj.getCoolMapView().setSelectionRowIndices(rowIndices);
         }
         if (!columnIndices.isEmpty()) {

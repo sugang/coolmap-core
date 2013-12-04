@@ -540,7 +540,7 @@ public class Cluster {
             return;
         }
 
-        System.out.println("Clustering started:" + linkage + " " + simType);
+//        System.out.println("Clustering started:" + linkage + " " + simType);
 
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumRows(), object.getViewNumColumns());
         for (int i = 0; i < object.getViewNumRows(); i++) {
@@ -634,11 +634,11 @@ public class Cluster {
         //List<String> roots = ontology.getRootNamesOrdered();
         //also copy the originals?
         if (Thread.interrupted()) {
-            System.out.println("Clustering Aborted");
+//            System.out.println("Clustering Aborted");
             return;
         }
 
-        System.out.println("Clustering Ended Successfully");
+//        System.out.println("Clustering Ended Successfully");
         CoolMapMaster.addNewCOntology(ontology);
 
         //HashSet<COntology> previousOntologies = new HashSet<COntology>();
@@ -656,7 +656,7 @@ public class Cluster {
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
-        System.out.println("+++ check point +++");
+//        System.out.println("+++ check point +++");
 //        System.out.println(ontology.getRootNamesOrdered());
 
 //        Why this step go it dead completely?
@@ -668,7 +668,7 @@ public class Cluster {
         //This is when problem occurs right here!
         object.expandRowNodeToBottom(object.getViewNodeRow(0));
 
-        System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");
+//        System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");
 
     }
 
@@ -678,7 +678,7 @@ public class Cluster {
             return;
         }
 
-        System.out.println("Clustering started:" + linkage + " " + simType);
+//        System.out.println("Clustering started:" + linkage + " " + simType);
 
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumColumns(), object.getViewNumRows());
         for (int i = 0; i < object.getViewNumRows(); i++) {
@@ -772,11 +772,11 @@ public class Cluster {
         //List<String> roots = ontology.getRootNamesOrdered();
         //also copy the originals?
         if (Thread.interrupted()) {
-            System.out.println("Clustering Aborted");
+//            System.out.println("Clustering Aborted");
             return;
         }
 
-        System.out.println("Clustering Ended Successfully");
+//        System.out.println("Clustering Ended Successfully");
         CoolMapMaster.addNewCOntology(ontology);
 
 //        

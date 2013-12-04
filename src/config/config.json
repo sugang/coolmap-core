@@ -37,7 +37,8 @@
     "module": {
         "load": [ 
             "coolmap.module.impl.ClusterModule",
-            "coolmap.module.impl.SideMapModule"
+            "coolmap.module.impl.SideMapModule",
+            "coolmap.module.impl.QuickStatModule"
             ],
         "config": {
             "coolmap.module.impl.SideMapModule":{

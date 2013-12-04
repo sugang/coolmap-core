@@ -222,7 +222,7 @@ public class NumberToBar extends ViewRenderer<Double> {
 
     @Override
     protected void initialize() {
-        System.out.println("Number to Bar initalized");
+//        System.out.println("Number to Bar initalized");
         CoolMapObject obj = getCoolMapObject();
         if (!canRender(obj.getViewClass())) {
             return;

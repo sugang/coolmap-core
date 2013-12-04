@@ -275,7 +275,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
                     if (!e.getValueIsAdjusting()) {
 
-                        System.out.println("Selection changed");
+//                        System.out.println("Selection changed");
 //                        int firstIndex = e.getFirstIndex();
 //                        int lastIndex = e.getLastIndex();
 //                        System.out.println(firstIndex + " " + lastIndex);
@@ -309,7 +309,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                         rowLabel = rowLabel.replaceAll(" || .*$", "");
                         colLabel = colLabel.replaceAll(" || .*$", "");
 
-                        System.out.println(rowLabel + " " + colLabel);
+//                        System.out.println(rowLabel + " " + colLabel);
 
 //                        }
                         //now need to get active nodes
@@ -353,7 +353,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                                 return;
                             }
 
-                            System.out.println("Map to center to: " + rowNodeToSelect + " " + colNodeToSelect);
+//                            System.out.println("Map to center to: " + rowNodeToSelect + " " + colNodeToSelect);
 
                             try {
                                 Rectangle r = new Rectangle(colNodeToSelect.getViewIndex().intValue(), rowNodeToSelect.getViewIndex().intValue(), 1, 1);
@@ -440,7 +440,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                         Object rowOntologyID = annotationTable.getModel().getValueAt(row, 3);
                         Object colOntologyID = annotationTable.getModel().getValueAt(row, 4);
 
-                        System.out.println(rowKey + " " + colKey + " " + newAnnotation);
+//                        System.out.println(rowKey + " " + colKey + " " + newAnnotation);
 
                         rowKey = rowKey.replaceAll(" || .*$", "");
                         colKey = colKey.replaceAll(" || .*$", "");

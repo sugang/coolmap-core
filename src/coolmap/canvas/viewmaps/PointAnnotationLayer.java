@@ -182,7 +182,7 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
                         tipAnchorY = anchorY - tipHeight - 5;
                     }
                     
-                    System.out.println(fromRow + " " + toRow + " " + fromCol + " " + toCol + " " + zoomX + " " + zoomY + " " + width + " " + height);
+//                    System.out.println(fromRow + " " + toRow + " " + fromCol + " " + toCol + " " + zoomX + " " + zoomY + " " + width + " " + height);
 //                    System.out.println(tipAnchorX + " " + tipAnchorY + " " + tipWidth + " " + tipHeight + " " + width + " " + height);
 //                    System.out.println();
 

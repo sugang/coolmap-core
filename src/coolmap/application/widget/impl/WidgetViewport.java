@@ -20,20 +20,24 @@ import coolmap.application.utils.viewportActions.ToggleTooltipAction;
 import coolmap.application.utils.viewportActions.ZoomInAction;
 import coolmap.application.utils.viewportActions.ZoomOutAction;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
 import coolmap.canvas.action.PasteColumnNodesAction;
 import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
 import coolmap.data.action.RenameCoolMapObjectAction;
+import coolmap.utils.BrowserLauncher;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
@@ -71,17 +75,84 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         getContentPane().setBackground(UI.colorBlack3);
 
         JMenuItem renameAction = new JMenuItem(new RenameCoolMapObjectAction());
-        addPopupMenuItem("Edit",renameAction , false);
-        
+        addPopupMenuItem("Edit", renameAction, false);
+
         JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
         addPopupMenuItem("Paste nodes", pasteItem, false);
         pasteItem.addActionListener(new PasteColumnNodesAction());
-        
+
         pasteItem = new JMenuItem("To Row", UI.getImageIcon("insertColumn"));
         addPopupMenuItem("Paste nodes", pasteItem, false);
         pasteItem.addActionListener(new PasteRowNodesAction());
-        
-        
+
+        addPopupMenuSeparator(null);
+
+        JMenuItem searchItem = new JMenuItem("Pubmed", UI.getImageIcon("pubmed"));
+        addPopupMenuItem("Search selected...", searchItem, false);
+        searchItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+
+                    Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
+
+                    ArrayList<String> terms = new ArrayList<String>();
+                    for (int i = sel.y; i < sel.y + sel.height; i++) {
+                        terms.add(obj.getViewNodeRow(i).getName());
+                    }
+                    for (int i = sel.x; i < sel.x + sel.width; i++) {
+                        terms.add(obj.getViewNodeColumn(i).getName());
+                    }
+                    BrowserLauncher.search(BrowserLauncher.pubmedURL, terms.toArray());
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
+        searchItem = new JMenuItem("Google Scholar", UI.getImageIcon("googleScholar"));
+        addPopupMenuItem("Search selected...", searchItem, false);
+        searchItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+
+                Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
+
+                ArrayList<String> terms = new ArrayList<String>();
+                for (int i = sel.y; i < sel.y + sel.height; i++) {
+                    terms.add(obj.getViewNodeRow(i).getName());
+                }
+                for (int i = sel.x; i < sel.x + sel.width; i++) {
+                    terms.add(obj.getViewNodeColumn(i).getName());
+                }
+                BrowserLauncher.search(BrowserLauncher.googleScholarURL, terms.toArray());
+            }
+        });
+
+        searchItem = new JMenuItem("Google", UI.getImageIcon("google"));
+        addPopupMenuItem("Search selected...", searchItem, false);
+        searchItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+
+                Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
+
+                ArrayList<String> terms = new ArrayList<String>();
+                for (int i = sel.y; i < sel.y + sel.height; i++) {
+                    terms.add(obj.getViewNodeRow(i).getName());
+                }
+                for (int i = sel.x; i < sel.x + sel.width; i++) {
+                    terms.add(obj.getViewNodeColumn(i).getName());
+                }
+                BrowserLauncher.search(BrowserLauncher.googleSearchURL, terms.toArray());
+            }
+        });
 
     }
 
@@ -156,6 +227,59 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         //addPopupMenuItem("View", toggleRows, false);
     }
 
+    public void addPopupMenuSeparator(String parentPath) {
+        if ((parentPath == null || parentPath.equals(""))) {
+            _popupMenu.addSeparator();
+        } else {
+            String ele[] = parentPath.split("/");
+            JMenu currentMenu = null;
+            String menuLabel = null;
+            JMenu searchMenu = null;
+            JMenuItem searchItem = null;
+
+            for (int i = 0; i < ele.length; i++) {
+                menuLabel = ele[i].trim();
+                if (currentMenu == null) {
+                    //search root
+                    boolean found = false;
+                    for (int j = 0; j < _popupMenu.getComponentCount(); j++) {
+                        if (_popupMenu.getComponent(j) instanceof JPopupMenu.Separator) {
+                            continue;
+                        }
+
+                        searchMenu = (JMenu) _popupMenu.getComponent(j);
+                        if (searchMenu.getText().equalsIgnoreCase(menuLabel)) {
+                            currentMenu = searchMenu;
+                            found = true;
+                            break;
+                        }
+                    }//end of search all items, not found, add new entry
+                    if (found == false) {
+                        currentMenu = new JMenu(menuLabel);
+                        _popupMenu.add((JMenu) currentMenu);
+                    }
+                } else {
+                    boolean found = false;
+                    for (int j = 0; j < currentMenu.getItemCount(); j++) {
+                        searchItem = currentMenu.getItem(j);
+                        if (searchItem instanceof JMenu && ((JMenu) searchItem).getText().equalsIgnoreCase(menuLabel)) {
+                            currentMenu = (JMenu) searchItem;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found == false) {
+                        JMenu newMenu = new JMenu(menuLabel);
+                        currentMenu.add(newMenu);
+                        currentMenu = newMenu;
+                    }
+                }
+            }
+
+            currentMenu.addSeparator();
+        }
+    }
+
     public void addPopupMenuItem(String parentPath, JMenuItem item, boolean sepBefore) {
         if (item == null) {
             return;
@@ -180,6 +304,10 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     //search root
                     boolean found = false;
                     for (int j = 0; j < _popupMenu.getComponentCount(); j++) {
+                        if (_popupMenu.getComponent(j) instanceof JPopupMenu.Separator) {
+                            continue;
+                        }
+
                         searchMenu = (JMenu) _popupMenu.getComponent(j);
                         if (searchMenu.getText().equalsIgnoreCase(menuLabel)) {
                             currentMenu = searchMenu;
@@ -242,7 +370,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             frame.requestFocus();
             frame.grabFocus();
         } catch (Exception e) {
-            System.out.println(e);
+//            System.out.println(e);
+            CMConsole.logError("Error: could not add new coolmap view.");
         }
     }
     private JToggleButton _toggleZoomSubBar;
@@ -590,7 +719,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             super.internalFrameClosing(ife);
             CoolMapMaster.destroyCoolMapObject(_object);
             _object = null;
-            if(_desktop.getAllFrames().length == 0){
+            if (_desktop.getAllFrames().length == 0) {
 //                System.out.println("No more active cool map objects");
                 CoolMapMaster.setActiveCoolMapObject(null);
             }

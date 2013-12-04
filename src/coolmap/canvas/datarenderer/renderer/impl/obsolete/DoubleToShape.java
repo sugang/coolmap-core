@@ -65,7 +65,7 @@ public class DoubleToShape extends ViewRenderer<Double> {
             }
         }
 
-        System.out.println("Min/Max:" + _minValue + ":" + _maxValue);
+//        System.out.println("Min/Max:" + _minValue + ":" + _maxValue);
 //        _gradient.reset();
 //        _gradient.addColor(_minColor, 0.0);
 //        _gradient.addColor(_mediumColor, 0.5);

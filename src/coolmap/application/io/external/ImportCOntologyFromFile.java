@@ -29,7 +29,7 @@ public class ImportCOntologyFromFile {
                     ontology.setEdgeAttribute(elements[1], elements[0], new COntologyEdgeAttributeImpl(Float.parseFloat(elements[2])));
                 }
             } catch (Exception e) {
-                System.out.println(line + " malformed");
+//                System.out.println(line + " malformed");
             }
         }
         reader.close();

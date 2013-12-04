@@ -265,7 +265,7 @@ public class NetworkCMatrix extends CMatrix<Double> {
 
         mx.printMatrix();
         
-        System.out.println("Index map:" + mx.getIndexOfColName("RN1"));
+//        System.out.println("Index map:" + mx.getIndexOfColName("RN1"));
 
         ArrayList<Integer> rowIndices = new ArrayList<Integer>();
         ArrayList<Integer> colIndices = new ArrayList<Integer>();
@@ -280,8 +280,8 @@ public class NetworkCMatrix extends CMatrix<Double> {
 
         LNetwork network = mx.getLNetwork(rowIndices, colIndices);
 
-        System.out.println(network.getNodeCount());
-        System.out.println(network.getEdgeCount());
+//        System.out.println(network.getNodeCount());
+//        System.out.println(network.getEdgeCount());
 
         network.recomputeLayout(50);
         BufferedImage img = network.drawNetwork(80, 60);

@@ -122,15 +122,17 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
             int[] rows = _dataTable.getSelectedRows();
 
             //these are the column and row indices
-            System.out.println(Arrays.toString(columns));
-            System.out.println(Arrays.toString(rows));
-
+//            System.out.println(Arrays.toString(columns));
+//            System.out.println(Arrays.toString(rows));
             Arrays.sort(columns);
             Arrays.sort(rows);
 
             //inclusive
             content.append("Row Nodes/Column Nodes");
             for (int j = columns[0] - 1; j <= columns[columns.length - 1] - 1; j++) {
+                if (j < 0) {
+                    continue;
+                }
                 content.append("\t");
                 content.append(_activeObject.getViewNodeColumn(j));
             }
@@ -334,7 +336,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
                 public void sorterChanged(RowSorterEvent e) {
 //                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                     if (e.getType() == RowSorterEvent.Type.SORTED) {
-                        System.out.println("sort changed");
+//                        System.out.println("sort changed");
 
                         rowHeader.repaint();
 
@@ -660,61 +662,6 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //        }
     }
 
-    //This is where it was broken!
-    private void _updateDataOld() {
-
-        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-        if (object == null) {
-            _dataTable.setModel(new DefaultTableModel());
-        } else {
-
-//            Rectangle selection = object.getCoolMapPanel().getSelectedRegion();
-            Rectangle selection = object.getCoolMapView().getSelectionsUnion();
-            if (selection == null) {
-                _dataTable.setModel(new DefaultTableModel());
-                return;
-            }
-
-            System.out.println("Selection in data matrix widget" + selection);
-
-            Object[][] actualView = new Object[selection.height + 1][selection.width + 1];
-
-            actualView[0][0] = "Rows\\Cols";
-
-            for (int i = selection.y; i < selection.y + selection.height; i++) {
-                actualView[i - selection.y + 1][0] = object.getViewNodeRow(i);
-                for (int j = selection.x; j < selection.x + selection.width; j++) {
-                    //actualView[i - selection.y][j - selection.x + 1] = view[i][j];
-                    actualView[i - selection.y + 1][j - selection.x + 1] = object.getViewValue(i, j);
-                }
-            }
-
-            Object[] colNames = new Object[selection.width + 1];
-//            colNames[0] = "Rows\\Cols";
-
-            for (int i = 1; i < colNames.length; i++) {
-                actualView[0][i] = object.getViewNodeColumn(i + selection.x - 1);
-                colNames[i] = "";
-            }
-            colNames[0] = "Data";
-
-            System.out.println("Finished loading actual view");
-
-            DefaultTableModel tableModel = new DefaultTableModel(actualView, colNames);
-            _dataTable.setModel(tableModel);
-
-            System.out.println("End of setting table model");
-
-            System.out.println("End of setting table renderer");
-
-            _dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            _dataTable.getTableHeader().setReorderingAllowed(false);
-
-            System.out.println("End of updating data table");
-
-        }
-
-    }
 
     @Override
     public void aggregatorUpdated(CoolMapObject object) {
@@ -767,8 +714,6 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //                _dataTable.getSelectionModel().
 
 //                System.err.println("Selection:" + selection);
-                
-
                 try {
                     _dataTable.setColumnSelectionInterval(selection.x + 1, selection.x + selection.width);
                     _dataTable.setRowSelectionInterval(selection.y, selection.y + selection.height - 1);

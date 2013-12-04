@@ -6,14 +6,12 @@
 
 package temp;
 
-import edu.ucla.sspace.clustering.GapStatistic;
-
 /**
  *
  * @author sugang
  */
 public class Tester {
     public static void main(String args[]){
-        System.out.println(GapStatistic.PROPERTY_PREFIX + GapStatistic.NUM_REFERENCE_DATA_SETS);
+//        System.out.println(GapStatistic.PROPERTY_PREFIX + GapStatistic.NUM_REFERENCE_DATA_SETS);
     }
 }

@@ -389,7 +389,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         _ontologyTable.setComponentPopupMenu(_popupMenu);
 
-        JMenuItem item = new JMenuItem("Copy selected nodes to clipboard");
+        JMenuItem item = new JMenuItem("Copy selected nodes to clipboard", UI.getImageIcon("duplicate"));
         item.addActionListener(new ActionListener() {
 
             @Override

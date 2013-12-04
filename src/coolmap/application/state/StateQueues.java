@@ -106,11 +106,11 @@ public class StateQueues {
             return null;
         }
         
-        System.out.println("Current redoQueue:");
-        for(CoolMapState state : _redoQueue){
-            System.out.println("  " +state.toSynopsis());
-        }
-        System.out.println("  === ===");
+//        System.out.println("Current redoQueue:");
+//        for(CoolMapState state : _redoQueue){
+//            System.out.println("  " +state.toSynopsis());
+//        }
+//        System.out.println("  === ===");
         
 
         CoolMapObject object = CoolMapMaster.getCoolMapObjectByID(coolMapObjectID);

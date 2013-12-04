@@ -94,7 +94,7 @@ public class Config {
             catch (JSONException ejson){
                 workspaceDirectory = workingDirectory + File.separator + "workspace";
             }
-            System.out.println(workspaceDirectory);
+//            System.out.println(workspaceDirectory);
             configHash.put(WORKSPACE_DIRECTORY, workspaceDirectory);
             
             //if successful intialized
@@ -115,11 +115,11 @@ public class Config {
     }
     
     public static void printAttributes(){
-        System.out.println("Printing config attributes:");
+//        System.out.println("Printing config attributes:");
         for(Map.Entry<String, String> entry : configHash.entrySet()){
             System.out.println( entry.getKey() + ": " + entry.getValue());
         }
-        System.out.println("");
+//        System.out.println("");
     }
     
 

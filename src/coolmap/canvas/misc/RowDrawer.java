@@ -8,13 +8,33 @@ import coolmap.canvas.CoolMapView;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 
@@ -603,7 +623,7 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
 //                System.out.println(maxWidth + " " + this.getX());
 
 
-                System.out.println(this.getX() + " " + maxWidth);
+//                System.out.println(this.getX() + " " + maxWidth);
 
                 if (this.getX() >= maxWidth - _drawerHandleWidth - 10) {
                     __toggleDrawerAnimator.startReverse();

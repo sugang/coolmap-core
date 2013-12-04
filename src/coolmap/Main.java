@@ -108,13 +108,13 @@ public class Main {
             for (Object label : matrix.getRowLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertRowNodes(nodes);
+//            object.insertRowNodes(nodes);
 
             nodes.clear();
             for (Object label : matrix.getColLabelsAsList()) {
                 nodes.add(new VNode(label.toString()));
             }
-            object.insertColumnNodes(nodes);
+//            object.insertColumnNodes(nodes);
 
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,6 @@ public class Main {
 
                     //import sample
                     //CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
-                    System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
                     object = new CoolMapObject();
                     object.addBaseCMatrix(matrix);

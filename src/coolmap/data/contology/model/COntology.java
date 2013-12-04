@@ -7,6 +7,7 @@ package coolmap.data.contology.model;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeNameComparator;
@@ -125,7 +126,8 @@ public final class COntology {
 
             return true;
         } catch (Exception e) {
-            System.out.println("Error occured. Merge not successful. Possibly due to loops");
+//            System.out.println("Error occured. Merge not successful. Possibly due to loops");
+            CMConsole.logError("Merging ontology '" + this.getName() + "' to '" + targetOntology.getName() + "' failed." );
             return false;
         }
     }
@@ -508,7 +510,7 @@ public final class COntology {
         try {
             children = new ArrayList<String>(_childMap.get(parent));
         } catch (Exception e) {
-            System.out.println(parent);
+//            System.out.println(parent);
             return null;
         }
         return children;

@@ -7,8 +7,6 @@ package coolmap.data.filter.impl;
 import coolmap.data.CoolMapObject;
 import coolmap.data.filter.ViewFilter;
 import coolmap.utils.graphics.UI;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -32,7 +30,7 @@ public class DoubleAboveFilter extends ViewFilter<Double> {
             _threshold = Double.parseDouble(text);
             _field.setBackground(UI.colorWhite);
             
-            System.out.println("New threshold" + _threshold);
+//            System.out.println("New threshold" + _threshold);
         }
         catch(Exception e){
             _threshold = - Double.MAX_VALUE;

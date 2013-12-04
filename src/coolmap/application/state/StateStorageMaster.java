@@ -140,9 +140,9 @@ public class StateStorageMaster {
         
         CoolMapState state = stateQueues.redo();
         
-        System.out.println("");
-        System.out.println("restore to state:" + state.toSynopsis());
-        System.out.println("");
+//        System.out.println("");
+//        System.out.println("restore to state:" + state.toSynopsis());
+//        System.out.println("");
         
         object.restoreState(state);
         

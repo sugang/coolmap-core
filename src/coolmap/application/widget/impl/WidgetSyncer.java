@@ -621,7 +621,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                         continue;
                     }
 
-                    System.out.println(otherObject + " " + zIndexX + " " + zIndexY);
+//                    System.out.println(otherObject + " " + zIndexX + " " + zIndexY);
                     otherObject.getCoolMapView().setZoomIndices(zIndexX, zIndexY);
                 }
             }
@@ -721,7 +721,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                 activeCellChanged(activeObject, null, null);
                 _updateSyncStatus(_object);
             } else {
-                System.out.println("Deselect item:" + _object);
+//                System.out.println("Deselect item:" + _object);
                 if (_object != null) {
                     _object.getCoolMapView().deSyncAll();
                 }

@@ -219,8 +219,8 @@ public class DoubleToColor extends ViewRenderer<Double> {
                 g2D.setColor(c);
                 g2D.fillRect((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _colors);
-                e.printStackTrace();
+//                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _colors);
+//                e.printStackTrace();
             }
         }
 

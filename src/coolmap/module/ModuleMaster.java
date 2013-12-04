@@ -41,7 +41,7 @@ public class ModuleMaster{
         //addModule(new ClusterModule());
         //addModule(new StateModule());
         if(Config.isInitialized()){
-            System.out.println("!!! Config file loading successful, loading modules based on config file definitions");
+//            System.out.println("!!! Config file loading successful, loading modules based on config file definitions");
             
             try{
                 JSONArray modulesToLoad = Config.getJSONConfig().getJSONObject("module").getJSONArray("load");

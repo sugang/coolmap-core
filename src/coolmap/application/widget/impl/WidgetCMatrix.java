@@ -87,7 +87,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
             public void itemStateChanged(ItemEvent ie) {
                 if (ie.getStateChange() == ItemEvent.SELECTED) {
 //                    DefaultComboBoxModel model = new DefaultComboBoxModel();
-                    System.out.println("ItemStatedChanged");
+//                    System.out.println("ItemStatedChanged");
                     if (_aggregators.getSelectedItem() == null || !(_aggregators.getSelectedItem() instanceof CAggregator)) {
                         _renderer.setModel(new DefaultComboBoxModel());
                         return;
@@ -102,7 +102,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                                 model.addElement(renderer);
                             }
                         }
-                        System.out.println("Renderer set model");
+//                        System.out.println("Renderer set model");
                         _renderer.setModel(model);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -204,7 +204,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                     }
                 }
 
-                System.out.println("Create new CoolMapObject");
+//                System.out.println("Create new CoolMapObject");
 
                 JPanel panel = new JPanel();
                 panel.setLayout(new GridBagLayout());

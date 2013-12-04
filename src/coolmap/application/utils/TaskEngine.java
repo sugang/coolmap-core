@@ -141,7 +141,7 @@ public class TaskEngine {
         if (_tasks.size() > 0) {
             try {
                 LongTask nextTask = _tasks.pollFirst();
-                System.out.println("Worker thread started");
+//                System.out.println("Worker thread started");
                 _workerThread = new WorkerThread(nextTask);
                 _workerThread.start();
 

@@ -620,7 +620,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                 }
 
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
+//                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
                 //e.printStackTrace();
             }
         }
@@ -835,7 +835,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                 }
 
             } catch (Exception e) {
-                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
+//                System.out.println("Null pointer exception:" + v + "," + _minValue + "," + _maxValue + "," + _gradientColors + " " + getName() + "" + this);
                 //e.printStackTrace();
 
             }

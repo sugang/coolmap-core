@@ -394,7 +394,7 @@ public final class CoolMapView<BASE, VIEW> {
                 }
             }
             //get a node region //node regions
-            System.out.println("Node region:" + area.getBounds());
+//            System.out.println("Node region:" + area.getBounds());
             centerToRegion(area.getBounds());
         }
     }
@@ -615,7 +615,7 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public void setZoomLevels(float zoomX, float zoomY) {
-        System.out.println("Loaded zoom levels:" + zoomX + " " + zoomY);
+//        System.out.println("Loaded zoom levels:" + zoomX + " " + zoomY);
         setZoomIndices(_zoomControlX.getNearestZoomIndex(zoomX), _zoomControlY.getNearestZoomIndex(zoomY));
     }
 
@@ -686,7 +686,7 @@ public final class CoolMapView<BASE, VIEW> {
             _zoom.y = _zoomControlY.getPreviousZoom();
         }
 
-        System.out.println("Current zooms are set to:" + _zoom);
+//        System.out.println("Current zooms are set to:" + _zoom);
 
         //force update
         //node sizes can't be smaller than 1
@@ -1032,7 +1032,7 @@ public final class CoolMapView<BASE, VIEW> {
 //            _hoverLayer.setVisible(false);
 //        }
         } catch (Exception e) {
-            System.out.println("Update active cell exception");
+//            System.out.println("Update active cell exception");
         }
     }
 
@@ -1927,7 +1927,7 @@ public final class CoolMapView<BASE, VIEW> {
 //        System.out.println(subMapIndexMin + "===" + subMapIndexMax + "===" + subMapDimension);
             return true;
         } catch (Exception e) {
-            System.out.println("Minor exception @ rendering");
+//            System.out.println("Minor exception @ rendering");
             return false;
         }
     }
@@ -3396,7 +3396,7 @@ public final class CoolMapView<BASE, VIEW> {
                     return;
                 }
 
-                if (me.isControlDown()) {
+                if (me.isControlDown() || me.isMetaDown()) {
                     StateStorageMaster.addState(CoolMapState.createStateSelections("Selection change", _coolMapObject, null));
                     clearSelection();
                     return;
@@ -3542,10 +3542,10 @@ public final class CoolMapView<BASE, VIEW> {
                     _hilightLayer.highlight();
                 }
             } catch (InterruptedException ei) {
-                System.out.println();
+//                System.out.println();
             } catch (Exception e) {
                 //All exceptions related to render are thrown here.
-                e.printStackTrace();
+//                e.printStackTrace();
 
             }
         }
@@ -3646,7 +3646,7 @@ public final class CoolMapView<BASE, VIEW> {
                 boolean success = _computeSubMapParams(subMapIndexMin, subMapIndexMax, subMapDimension);
 
 //                should be success -> however, this was done in the enforce all i think, as it's a MOVE.
-                System.out.println("Force update overlay called. ");
+//                System.out.println("Force update overlay called. ");
 
                 _overlayContainer.updateMapBuffers(_subMapIndexMin, _subMapIndexMax, _subMapDimension);
 
@@ -3778,7 +3778,7 @@ public final class CoolMapView<BASE, VIEW> {
                     _hoverBounds.width = (int) colNode.getViewSizeInMap(_zoom.x);
                     _hoverBounds.height = (int) rowNode.getViewSizeInMap(_zoom.y);
                 } catch (Exception e) {
-                    System.out.println("Set active cell error.........");
+//                    System.out.println("Set active cell error.........");
                 }
             }
 

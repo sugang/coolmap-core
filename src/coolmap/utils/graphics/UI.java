@@ -122,11 +122,11 @@ public class UI {
     }
 
     public static void initialize() {
-        System.out.println("Initailizing UI Constants...");
+//        System.out.println("Initailizing UI Constants...");
         _loadFonts();
         _loadImages();
         _loadImageIcons();
-        System.out.println("Done");
+//        System.out.println("Done");
     }
 
     private static void _loadFonts() {
@@ -183,8 +183,8 @@ public class UI {
         _iconStash.put("cd", new ImageIcon(UI.class.getResource("/resources/iconCD.png")));
         _iconStash.put("search", new ImageIcon(UI.class.getResource("/resources/iconSearch.png")));
         _iconStash.put("binocular", new ImageIcon(UI.class.getResource("/resources/iconBinocular.png")));
-        _iconStash.put("google", new ImageIcon(UI.class.getResource("/resources/iconGoogle.png")));
-        _iconStash.put("googleScholar", new ImageIcon(UI.class.getResource("/resources/iconScholar.png")));
+        _iconStash.put("google", new ImageIcon(UI.class.getResource("/resources/iconGoogle3.png")));
+        _iconStash.put("googleScholar", new ImageIcon(UI.class.getResource("/resources/iconBook.png")));
         _iconStash.put("pubmed", new ImageIcon(UI.class.getResource("/resources/iconPubmed.png")));
         _iconStash.put("refresh", new ImageIcon(UI.class.getResource("/resources/iconRefresh.png")));
         _iconStash.put("insertColumn", new ImageIcon(UI.class.getResource("/resources/iconDownload2.png")));

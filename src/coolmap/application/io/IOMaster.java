@@ -5,26 +5,19 @@
 package coolmap.application.io;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.io.actions.ImportTSVAction;
 import coolmap.application.io.external.ImportCOntologyFromFile;
-import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
-import coolmap.canvas.sidemaps.impl.ColumnLabels;
-import coolmap.canvas.sidemaps.impl.ColumnTree;
-import coolmap.canvas.sidemaps.impl.RowLabels;
-import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
-import coolmap.data.aggregator.impl.DoubleDoubleMean;
 import coolmap.data.aggregator.impl.PassThrough;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
-import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
-import coolmap.data.snippet.SnippetMaster;
 import coolmap.utils.Tools;
 import java.awt.Color;
 import java.awt.MenuItem;
@@ -137,12 +130,12 @@ public class IOMaster {
                         String io = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_ICMATRIXIO);
                         String cmatrixClassString = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_CLASS);
 
-                        System.out.println(cmatrixID + " " + cmatrixName + " " + numRow + " " + numColumn + " " + datatype + " " + io);
+//                        System.out.println(cmatrixID + " " + cmatrixName + " " + numRow + " " + numColumn + " " + datatype + " " + io);
 
                         Class loaderClass = Class.forName(io);
                         ICMatrixIO loader = (ICMatrixIO) loaderClass.newInstance();
                         Class cmatrixClass = Class.forName(cmatrixClassString);
-                        System.out.println("cmatrixClass:" + cmatrixClassString);
+//                        System.out.println("cmatrixClass:" + cmatrixClassString);
 
                         File directory = new File(cmatrixDirectory + File.separator + cmatrixID);
 
@@ -152,7 +145,7 @@ public class IOMaster {
                         //System.out.println("Loaded matrix:" + matrix.getName() + "\n");
                     }
 
-                    System.out.println("Loaded CMatrices Num:" + CoolMapMaster.getLoadedCMatrices().size());
+//                    System.out.println("Loaded CMatrices Num:" + CoolMapMaster.getLoadedCMatrices().size());
 
 
                     //////////////////////////////////////////////////////////////////////////
@@ -373,56 +366,9 @@ public class IOMaster {
             }
         });
 
-        menuItem = new MenuItem("Numeric Table from .tsv");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false, false);
-        menuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                JFileChooser chooser = Tools.getCustomFileChooser(new FileNameExtensionFilter(".tsv", "txt", "tsv"));
-                int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
-                if (returnVal != JFileChooser.APPROVE_OPTION) {
-                    return;
-                }
-                File f = chooser.getSelectedFile();
-                if (f.isFile() && f.exists()) {
-                    try {
-                        CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(f);
-                        CoolMapObject object = new CoolMapObject();
-                        object.addBaseCMatrix(matrix);
-
-                        ArrayList<VNode> nodes = new ArrayList<VNode>();
-                        for (Object label : matrix.getRowLabelsAsList()) {
-                            nodes.add(new VNode(label.toString()));
-                        }
-                        object.insertRowNodes(nodes);
-
-                        nodes.clear();
-                        for (Object label : matrix.getColLabelsAsList()) {
-                            nodes.add(new VNode(label.toString()));
-                        }
-                        object.insertColumnNodes(nodes);
-
-                        object.setAggregator(new DoubleDoubleMean());
-//                        object.setViewRenderer(new DoubleToColor(), true);
-                        object.setSnippetConverter(SnippetMaster.getConverter("D13"));
-                        object.getCoolMapView().addRowMap(new RowLabels(object));
-                        object.getCoolMapView().addRowMap(new RowTree(object));
-                        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
-                        object.getCoolMapView().addColumnMap(new ColumnTree(object));
-                        CoolMapMaster.addNewBaseMatrix(matrix);
-                        CoolMapMaster.addNewCoolMapObject(object);
-
-//                        object.clearStateStorage(); //why this is needed is not clear
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-        });
+        menuItem = new MenuItem("Numeric from .tsv");
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import data", menuItem, false, false);
+        menuItem.addActionListener(new ImportTSVAction());
 
 
         menuItem = new MenuItem("Ontology from .tsv");
@@ -462,7 +408,7 @@ public class IOMaster {
 
 
         menuItem = new MenuItem("view to TSV file");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
+//        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -508,6 +454,10 @@ public class IOMaster {
                 }
             }
         });
+        
+        
+        
+        
 
         menuItem = new MenuItem("view to Excel file");
         CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
@@ -817,4 +767,6 @@ public class IOMaster {
             }
         });
     }
+    
+
 }

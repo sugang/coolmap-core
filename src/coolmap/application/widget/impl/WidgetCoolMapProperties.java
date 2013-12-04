@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -149,13 +148,13 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
                 JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), new JScrollPane(_allCMatrixList), "Choose CMatrices to Add", JOptionPane.INFORMATION_MESSAGE);
 
                 Object[] matrix = _allCMatrixList.getSelectedValues();
-                System.out.println("To be added:" + Arrays.toString(matrix));
+//                System.out.println("To be added:" + Arrays.toString(matrix));
                 for (Object m : matrix) {
                     try {
                         CMatrix mat = (CMatrix) m;
                         object.addBaseCMatrix(mat);
                     } catch (Exception e) {
-                        System.out.println(m + " was not added.");
+//                        System.out.println(m + " was not added.");
                     }
                 }
 
@@ -256,7 +255,7 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
             model.addElement(matrix);
         }
 
-        System.out.println("Model updated:" + model);
+//        System.out.println("Model updated:" + model);
 
         _cmatrixList.setModel(model);
     }
