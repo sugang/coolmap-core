@@ -1241,6 +1241,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         obj.insertColumnNodes(obj.getViewNumColumns(), newNodes, true);
         obj.getCoolMapView().centerToSelections();
         StateStorageMaster.addState(state);
+        
+        //
 
     }
 
