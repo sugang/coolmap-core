@@ -111,20 +111,21 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
     public void updateRenderer() {
         updateRendererChanges();
-        if(getConfigUI() != null){
+        if (getConfigUI() != null) {
             getConfigUI().repaint();
         }
-        
+
         try {
             getCoolMapObject().getCoolMapView().updateCanvasEnforceAll();
             getCoolMapObject().notifyViewRendererUpdated();
         } catch (Exception e) {
-            System.err.println("Update renderer failed");
+//            System.err.println("Update renderer failed");
         }
     }
 
     /**
-     * update parameters changes for the render; will be called in the updateRenderer function
+     * update parameters changes for the render; will be called in the
+     * updateRenderer function
      */
     public abstract void updateRendererChanges();
 
@@ -148,9 +149,10 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
     public abstract void renderCellSD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
     public abstract void renderCellHD(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight);
-    
+
     /**
      * a built in method to mark Null
+     *
      * @param v
      * @param rowNode
      * @param columnNode
@@ -158,10 +160,10 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
      * @param anchorX
      * @param anchorY
      * @param cellWidth
-     * @param cellHeight 
+     * @param cellHeight
      */
-    protected void _markNull(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight){
-        if(v == null){
+    protected void _markNull(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
+        if (v == null) {
             g2D.setColor(UI.colorBlack2);
             int anchorXI = Math.round(anchorY);
             int anchorYI = Math.round(anchorY);
@@ -170,11 +172,10 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             g2D.setStroke(UI.stroke1_5);
             g2D.fillRect(anchorXI, anchorYI, widthI, heightI);
             g2D.setColor(UI.colorSHOJYOHI);
-            g2D.drawLine(anchorXI, anchorYI, anchorXI+widthI, anchorYI+heightI);
+            g2D.drawLine(anchorXI, anchorYI, anchorXI + widthI, anchorYI + heightI);
             g2D.drawLine(anchorXI + widthI, anchorYI, anchorXI, anchorYI + heightI);
         }
     }
-    
 
 //    protected abstract void _renderCellAnnotationLD();
 //    
@@ -205,12 +206,14 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
         float mapWidth = view.getMapWidth() * percentage;
         float mapHeight = view.getMapHeight() * percentage;
-        
-        if(mapWidth <= 0)
+
+        if (mapWidth <= 0) {
             mapWidth = 1;
-        
-        if(mapHeight <=0)
-            mapHeight =1;
+        }
+
+        if (mapHeight <= 0) {
+            mapHeight = 1;
+        }
 
         BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
 
@@ -231,8 +234,6 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //        catch(Exception e){
 //            
 //        }
-        
-        
 //        Thread.sleep(1000);
         //then render
         for (int i = 0; i < data.getViewNumRows(); i++) {
@@ -468,13 +469,13 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
                         value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
 
-                        anchorX = (int)Math.round(colNode.getViewOffset() - offsetX);
+                        anchorX = (int) Math.round(colNode.getViewOffset() - offsetX);
 
                         //sometimes error here.
-                        anchorY = (int)Math.round(rowNode.getViewOffset() - offsetY);
+                        anchorY = (int) Math.round(rowNode.getViewOffset() - offsetY);
 
-                        cellWidth = (int)Math.round(colNode.getViewSizeInMap(__zoomX));
-                        cellHeight = (int)Math.round(rowNode.getViewSizeInMap(__zoomY));
+                        cellWidth = (int) Math.round(colNode.getViewSizeInMap(__zoomX));
+                        cellHeight = (int) Math.round(rowNode.getViewSizeInMap(__zoomY));
 
                         //System.out.println(cellWidth + " " + cellHeight);
                         //each cell can take a different size. Therefore need to 
@@ -500,8 +501,9 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                         }
 
 //                    System.out.println(cellWidth + " " + cellHeight);
-                        
-                    if(_clipCell)g2D.setClip((int)anchorX, (int)anchorY, (int)cellWidth, (int)cellHeight);
+                        if (_clipCell) {
+                            g2D.setClip((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+                        }
 //                    System.out.println("Render SD row:" + i + " col:" + j);
                         switch (__mode) {
                             case LD:
@@ -548,13 +550,12 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
         }
     }
-    
+
     protected boolean _clipCell = true;
-    
-    protected void setClipCell(boolean clip){
+
+    protected void setClipCell(boolean clip) {
         _clipCell = clip;
     }
-    
 
     protected final boolean getAntiAliasing() {
         return _antiAliasing;
@@ -562,29 +563,28 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //    protected final void setAntiAliasing(boolean antiAliasing){
 //        _antiAliasing = antiAliasing;
 //    }
-    public static BufferedImage createToolTipFromJLabel(JLabel label){
+
+    public static BufferedImage createToolTipFromJLabel(JLabel label) {
         label.setSize(label.getPreferredSize());
         Font font = label.getFont();
         label.setSize(label.getPreferredSize()); //make sure it is the preferred size.
-        
+
         BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(label.getWidth(), label.getHeight());
         Graphics2D g2D = (Graphics2D) image.createGraphics();
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         label.paint(g2D);
         g2D.dispose();
-        
+
         //return label paint as
         return image;
     }
-    
-    
-    
-    
-    public static BufferedImage createToolTipFromString(String tipString, Font font){
-        if(tipString == null || tipString.length() == 0)
+
+    public static BufferedImage createToolTipFromString(String tipString, Font font) {
+        if (tipString == null || tipString.length() == 0) {
             return null;
-        
+        }
+
         int width = 2, height = 2;
 //        Font font = UI.fontMono.deriveFont(12f).deriveFont(Font.BOLD);
         Color fontColor = UI.colorBlack4;
@@ -595,47 +595,45 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         FontMetrics fMetrics = g2D.getFontMetrics();
         int marginLR = 10;
         int marginTB = 4;
-        
+
         String[] lines = tipString.split("\\n");
-        
-        for(String line : lines){
+
+        for (String line : lines) {
             int w = fMetrics.stringWidth(line);
-            if(width < w){
+            if (width < w) {
                 width = w;
             }
         }
-        
-        width += marginLR*2;
-        
+
+        width += marginLR * 2;
+
         height = lines.length * (font.getSize() + marginTB * 2);
-        
-        
-        
+
         image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(width, height, Transparency.TRANSLUCENT);
         g2D = image.createGraphics();
         g2D.setFont(font);
         g2D.setColor(backgroundColor);
         g2D.fillRoundRect(0, 0, width, height, 5, 5);
-        
+
         g2D.setColor(fontColor);
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         int descent = fMetrics.getMaxDescent();
-        
-        
+
         g2D.translate(marginLR, 0);
-        for(String line : lines){
+        for (String line : lines) {
             g2D.translate(0, marginTB + font.getSize());
-            g2D.drawString(line, 0, -font.getSize()/2 + descent);
+            g2D.drawString(line, 0, -font.getSize() / 2 + descent);
             g2D.translate(0, marginTB);
         }
-    
+
         return image;
-    } 
+    }
 
     /**
      * override this to save state to JSON
-     * @return 
+     *
+     * @return
      */
     @Override
     public JSONObject saveState() {
@@ -644,15 +642,13 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
     /**
      * override this to make this restorable
+     *
      * @param savedState
-     * @return 
+     * @return
      */
     @Override
     public boolean restoreState(JSONObject savedState) {
         return false;
     }
-    
-    
-    
-    
+
 }

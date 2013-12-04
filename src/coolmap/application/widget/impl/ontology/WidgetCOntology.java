@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -70,7 +71,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -667,7 +667,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                         return;
                     }
 
-                    ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
+                    ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
 
                 } else {
                     try {
@@ -683,17 +683,20 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                         }
 
 //                        RowFilter.andFilter(filters);
-                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
+                        ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
 
 //                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
                     } catch (Exception e) {
+                        
+                        //e.printStackTrace();
+                        
                         _searchField.setBackground(UI.colorRedWarning);
 
                         //e.printStackTrace();
                         if (_ontologyTable.getRowSorter() == null) {
                             return;
                         }
-                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
+                        ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(null);
 
                     }
                 }
@@ -1198,7 +1201,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //        }
         CoolMapState state = CoolMapState.createStateColumns("Replace column nodes", obj, null);
         obj.replaceColumnNodes(newNodes, null);
-        obj.getCoolMapView().centerToSelections();
+//        obj.getCoolMapView().centerToSelections();
         StateStorageMaster.addState(state);
 
     }

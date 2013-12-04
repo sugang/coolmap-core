@@ -24,6 +24,7 @@
                         "load": [
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToColor",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToLine",
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberToSeries",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToBar",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToSortedBar",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot",
@@ -35,11 +36,16 @@
     },
     "module": {
         "load": [ 
-            "coolmap.module.impl.ClusterModule"
-            
+            "coolmap.module.impl.ClusterModule",
+            "coolmap.module.impl.SideMapModule"
             ],
         "config": {
-            
+            "coolmap.module.impl.SideMapModule":{
+                "load": {
+                    "row" : ["coolmap.canvas.sidemaps.impl.RowLabels","coolmap.canvas.sidemaps.impl.RowTree"],
+                    "column" : ["coolmap.canvas.sidemaps.impl.ColumnLabels","coolmap.canvas.sidemaps.impl.ColumnTree"]
+                }
+            }
         }
     }
 }

@@ -767,9 +767,10 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 //                _dataTable.getSelectionModel().
 
 //                System.err.println("Selection:" + selection);
-                _dataTable.setColumnSelectionInterval(selection.x + 1, selection.x + selection.width);
+                
 
                 try {
+                    _dataTable.setColumnSelectionInterval(selection.x + 1, selection.x + selection.width);
                     _dataTable.setRowSelectionInterval(selection.y, selection.y + selection.height - 1);
 
 //                _dataTable.getCellRect(W_DATA, W_DATA, true)

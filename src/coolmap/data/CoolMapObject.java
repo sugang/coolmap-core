@@ -560,6 +560,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public void replaceRowNodes(List<VNode> nodes, List<VNode> treeNodes) {
 
         //This is only used here
+        getCoolMapView().clearSelection();
         _vMatrix.removeActiveRowNodes(); //treenodes are also removed
         nodes.removeAll(Collections.singletonList(null));
         _vMatrix.insertActiveRowNodes(0, nodes, treeNodes);
@@ -569,6 +570,8 @@ public final class CoolMapObject<BASE, VIEW> {
         //No update yet
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
+        
+        getCoolMapView().centerToPercentage(0.5f, 0.5f);
 
     }
 
@@ -577,6 +580,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //        getStateStorage().addState(snapshot);
 //        notifyStateStorageUpdated();
 
+        getCoolMapView().clearSelection();
         _vMatrix.removeActiveColNodes();
         nodes.removeAll(Collections.singletonList(null));
         _vMatrix.insertActiveColNodes(0, nodes, treeNodes);
@@ -585,6 +589,8 @@ public final class CoolMapObject<BASE, VIEW> {
         //No update yet
         getCoolMapView().updateCanvasEnforceAll();
         notifyColumnsChanged();
+        
+        getCoolMapView().centerToPercentage(0.5f, 0.5f);
     }
 
     //insertRowNodes without updating view

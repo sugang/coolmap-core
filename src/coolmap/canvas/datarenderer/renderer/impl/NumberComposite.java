@@ -21,6 +21,8 @@ import java.awt.Insets;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
@@ -148,6 +150,16 @@ public class NumberComposite extends ViewRenderer<Double> {
         configUI.add(label, c);
         c.gridx = 1;
         configUI.add(singleComboBox, c);
+        singleComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    updateRenderer();
+                }
+            }
+        });
+
         c.gridx = 2;
         JButton config = new JButton(UI.getImageIcon("gear"));
         configUI.add(config, c);
@@ -198,6 +210,15 @@ public class NumberComposite extends ViewRenderer<Double> {
 
             }
         });
+        rowComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    updateRenderer();
+                }
+            }
+        });
 
         c.gridx = 1;
         c.gridy++;
@@ -234,6 +255,15 @@ public class NumberComposite extends ViewRenderer<Double> {
         c.gridy++;
         c.gridwidth = 1;
         configUI.add(columnLegend, c);
+        columnComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    updateRenderer();
+                }
+            }
+        });
 
         c.gridx = 0;
         c.gridy++;
@@ -256,6 +286,15 @@ public class NumberComposite extends ViewRenderer<Double> {
 //                JOptionPane.showmess
                 int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), rowColumnGroupRenderer.getConfigUI(), "Row + Column Group Renderer Config", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (returnVal == JOptionPane.OK_OPTION) {
+                    updateRenderer();
+                }
+            }
+        });
+        rowColumnComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
                     updateRenderer();
                 }
             }

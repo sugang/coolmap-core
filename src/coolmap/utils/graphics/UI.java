@@ -76,6 +76,8 @@ public class UI {
     public static Color colorUSUKI = new Color(250, 214, 137);
     public static Color colorRURI = new Color(0, 92, 175);
     public static Color colorKAMENOZOKI = new Color(165, 222, 228);
+    public static Color colorNAE = new Color(134, 193, 102);
+    public static Color colorKUCHINASHI = new Color(246, 197, 85);
 
 //    private static final HashMap<String, Color> _colorPalette = new HashMap<String, Color>();
     //dash can be quite expensive to redraw for some reason.

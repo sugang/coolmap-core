@@ -4,7 +4,7 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.ImportCOntologyFromFile;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.application.widget.impl.console.CMConsole;
-import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToSeries;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
 import coolmap.canvas.sidemaps.impl.RowLabels;
@@ -155,22 +155,23 @@ public class Main {
             object.insertRowNodes(onto.getRootNodesOrdered());
             object.insertColumnNodes(onto.getRootNodesOrdered());
 //            
-            object.expandColumnNodesOneLayer();
-            object.expandRowNodesOneLayer();
+//            object.expandColumnNodesOneLayer();
+//            object.expandRowNodesOneLayer();
 
 //            ArrayList l = new ArrayList();
 //            List<VNode> l2 = onto.getRootNodesOrdered();
 //            l.add(l2.get(0));
-//            
 //            object.insertRowNodes(l);
+////            
 //            l.clear();
 //            l2 = onto.getRootNodesOrdered();
 //            l.add(l2.get(0));
+//            object.insertColumnNodes(l);
 //            
 //            object.insertColumnNodes(l);
             object.setAggregator(new DoubleDoubleMean());
 
-            object.setViewRenderer(new NumberToColor(), true);
+            object.setViewRenderer(new NumberToSeries(), true);
             //object.setViewRenderer(new NumberComposite(), false);
 
             object.setSnippetConverter(new DoubleSnippet1_3());
@@ -180,6 +181,10 @@ public class Main {
             object.getCoolMapView().addRowMap(new RowTree(object));
             object.getCoolMapView().addColumnMap(new ColumnLabels(object));
             object.getCoolMapView().addColumnMap(new ColumnTree(object));
+//            object.getCoolMapView().addColumnMap(new ColumnTree(object));
+            
+            
+            
             CoolMapMaster.addNewBaseMatrix(matrix);
             CoolMapMaster.addNewCoolMapObject(object);
 

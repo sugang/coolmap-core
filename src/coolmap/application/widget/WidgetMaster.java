@@ -7,7 +7,6 @@ package coolmap.application.widget;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.widget.impl.WidgetAggregator;
 import coolmap.application.widget.impl.WidgetCMatrix;
-//import coolmap.application.widget.impl.WidgetCOntology;
 import coolmap.application.widget.impl.WidgetDataMatrix;
 import coolmap.application.widget.impl.WidgetSearch;
 import coolmap.application.widget.impl.WidgetSyncer;
@@ -55,7 +54,7 @@ public class WidgetMaster {
 
         if (Config.isInitialized()) {
 
-            System.out.println("!!! Config file loading successful, loading widgets based on config file definitions");
+//            System.out.println("!!! Config file loading successful, loading widgets based on config file definitions");
             try {
                 JSONArray widgetsToLoad = Config.getJSONConfig().getJSONObject("widget").getJSONArray("load");
                 String[] widgetsNames = new String[widgetsToLoad.length()];
