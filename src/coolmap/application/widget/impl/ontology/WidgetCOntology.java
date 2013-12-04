@@ -20,7 +20,9 @@ import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -38,10 +40,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -49,14 +56,25 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.ListCellRenderer;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.json.JSONObject;
 
 /**
@@ -66,7 +84,7 @@ import org.json.JSONObject;
 public class WidgetCOntology extends Widget implements DataStorageListener {
 
     private JPanel _container = new JPanel();
-    private JTable _ontologyTable = new JTable();
+    private JXTable _ontologyTable = new JXTable();
     private JComboBox _ontologyCombo = new JComboBox();
     private JPopupMenu _popupMenu = new JPopupMenu();
     private JTextField _searchField = new JTextField();
@@ -77,7 +95,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         @Override
         public void activeTermChanged(String term, COntology ontology) {
-            System.out.println("Term changed");
+//            System.out.println("Term changed");
             if (ontology != (COntology) _ontologyCombo.getSelectedItem()) { //this should change later -> to a private one
                 return;
             }
@@ -88,7 +106,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             }
 
             int viewRow = _ontologyTable.convertRowIndexToView(modelRow);
-            System.out.println(viewRow);
+//            System.out.println(viewRow);
 
             _ontologyTable.getSelectionModel().setSelectionInterval(viewRow, viewRow); //This does not fire the list selection listener. great! otherwise it would be a pain
             //This will fire back; however when the two terms are equal the cicular thing is broken on the other side
@@ -98,11 +116,195 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
     }
 
+    private class CheckListItem {
+
+        private boolean _isSelected = false;
+        String label;
+
+        public CheckListItem(String label) {
+            this.label = label;
+        }
+
+        public boolean isSelected() {
+            return _isSelected;
+        }
+
+        public void setSelected(boolean isSelected) {
+            _isSelected = isSelected;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+
+    }
+
+    private class CheckListRenderer extends JCheckBox
+            implements ListCellRenderer {
+
+        public Component getListCellRendererComponent(
+                JList list, Object value, int index,
+                boolean isSelected, boolean hasFocus) {
+            setEnabled(list.isEnabled());
+            setSelected(((CheckListItem) value).isSelected());
+            setFont(list.getFont());
+
+            if (isSelected) {
+                setBackground(list.getSelectionBackground());
+            } else {
+                setBackground(list.getBackground());
+            }
+            setForeground(list.getForeground());
+            setText(value.toString());
+            return this;
+        }
+    }
+
     private JPopupMenu configPopupMenu = new JPopupMenu();
 
+//    private class ColumnDialog extends JDialog{
+//        public ColumnDialog(){
+//            setTitle("Configure Ontology Table Columns");
+//            setLayout(new GridBagLayout());
+//        }
+//        
+//        public boolean showDialog
+//    }
     public WidgetCOntology() {
 
         super("Ontology Table", W_DATA, L_DATAPORT, UI.getImageIcon("textList"), null);
+
+        _ontologyTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        _ontologyTable.addHighlighter(new ColorHighlighter(new HighlightPredicate.ColumnHighlightPredicate(0),
+                null, UI.colorMIDORI));
+        _ontologyTable.addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                null, UI.colorKARAKURENAI));
+
+//        this fails on JXTable
+//        _ontologyTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+//
+//            @Override
+//            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+//                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); //To change body of generated methods, choose Tools | Templates.
+//
+//                if (!isSelected) {
+//                    int modelIndex = table.convertColumnIndexToModel(column);
+//                    System.out.println(modelIndex + " " + row + "," + column + " " + value);
+////                    label.setBackground(Color.BLUE);
+//                    
+//                    //Why the fuck this does not fucking work?
+////                    if (modelIndex == 0) {
+////                        label.setBackground(UI.colorLightGreen0);
+////                    }
+//                    
+////                    if(hasFocus)
+////                        label.setBackground(Color.RED);
+//                    
+////                    
+//////                        label.setBackground(UI.colorLightGreen0);
+////                    } else {
+//////                        System.out.println("setting column bg to white");
+////                        //why the fuck this does not work?
+////                        label.setBackground(Color.BLUE);
+////                    }
+//                }
+//
+//                return label;
+//            }
+//
+//        });
+        final JButton columnCtrl = new JButton(UI.getImageIcon("gear"));
+        _ontologyTable.setColumnControl(columnCtrl);
+        columnCtrl.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final JList visibleColumns = new JList();
+                visibleColumns.setCellRenderer(new CheckListRenderer());
+                DefaultListModel model = new DefaultListModel();
+                visibleColumns.setModel(model);
+
+//                model.addElement(new CheckListItem("ABC"));
+                //get all base columns
+                for (int i = 0; i < _ontologyTable.getModel().getColumnCount(); i++) {
+                    CheckListItem item = new CheckListItem(_ontologyTable.getModel().getColumnName(i));
+                    TableColumnExt ext = _ontologyTable.getColumnExt(item.toString());
+                    if (ext != null && ext.isVisible()) {
+                        item.setSelected(true);
+                    }
+                    model.addElement(item);
+                }
+
+                visibleColumns.addMouseListener(new MouseAdapter() {
+
+                    public void mouseClicked(MouseEvent event) {
+
+                        if (SwingUtilities.isLeftMouseButton(event)) {
+                            JList list = (JList) event.getSource();
+
+                            // Get index of item clicked
+                            int index = list.locationToIndex(event.getPoint());
+                            CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
+
+                            // Toggle selected state
+                            item.setSelected(!item.isSelected());
+
+                            // Repaint cell
+                            list.repaint(list.getCellBounds(index, index));
+
+                        }
+
+                    }
+                });
+
+                //int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), new JScrollPane(visibleColumns), "Toggle visible ontology columns", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                JOptionPane pane = new JOptionPane(new JScrollPane(visibleColumns), JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null);
+                JDialog dialog = pane.createDialog(CoolMapMaster.getCMainFrame(), "Configure Columns");
+
+                Point pt = columnCtrl.getLocationOnScreen();
+                pt.x -= dialog.getSize().width + 10;
+                pt.y -= dialog.getSize().height + 10;
+                dialog.setLocation(pt);
+                dialog.setVisible(true);
+
+                //System.out.println("selected:" + pane.getValue());
+                try {
+                    Object val = pane.getValue();
+                    if (Integer.parseInt(val.toString()) == JOptionPane.OK_OPTION) {
+                        //YEAH!
+                        //System.out.println("Hide/show columns");
+                        for (int i = 0; i < model.getSize(); i++) {
+                            CheckListItem item = (CheckListItem) model.getElementAt(i);
+                            //System.out.println("Table column:" + _ontologyTable.getColumnExt(item.toString()).getIdentifier());
+
+                            TableColumnExt ext = _ontologyTable.getColumnExt(item.toString());
+
+//                            System.out.println(item); //why interspaced?
+                            if (ext == null) {
+                                //why this is even happening
+                                continue;
+                            }
+
+                            if (!item.isSelected()) {
+                                ext.setVisible(false);
+                            } else {
+                                ext.setVisible(true);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        JButton button;
+
+        _ontologyTable.setColumnControlVisible(true);
+
+//        _ontologyTable.getColumnModel().addColumnModelListener(columnListener);
         _ontologyCombo.setEnabled(false);
 //        System.err.println("Ontology module updated");
 
@@ -126,11 +328,12 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                 if (!e.getValueIsAdjusting()) {
 
                     int[] rowIndices = _ontologyTable.getSelectedRows();
+
                     if (rowIndices.length == 1) {
                         int row = _ontologyTable.convertRowIndexToModel(rowIndices[0]); //This could yeild arrayIndex out of bounds exception
                         //System.out.println("Node:" + _ontologyTable.getModel().getValueAt(row, 0));
                         String node = (String) _ontologyTable.getModel().getValueAt(row, 0);
-                        System.out.println("Table Selection changed");
+//                        System.out.println("Table Selection changed");
                         _ontologyBrowswer.jumpToActiveTerm(node);
 
                     } else {
@@ -161,8 +364,6 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         configPopupMenu.add(new RenameCOntologyAction());
         configPopupMenu.add(new DeleteCOntologyAction());
-        
-        
 
         ontologyButton.addMouseListener(new MouseAdapter() {
 
@@ -250,9 +451,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //            }
 //        });
 //        toolBar.add(new DeleteCOntologyAction());
-        
         toolBar.addSeparator();
-        JButton button = new JButton(UI.getImageIcon("prependRow"));
+        button = new JButton(UI.getImageIcon("prependRow"));
         toolBar.add(button);
         button.setToolTipText("Add selected nodes to rows in the active CoolMap, at the beginning");
         button.addActionListener(new ActionListener() {
@@ -335,13 +535,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
         label.setToolTipText("\"<html>Type in terms in the current active view.<br/>Use <strong>|</strong> as 'OR' operator to separate terms</html>\"");
 
-        
-        
-        
         toolBar.add(label);
 
 //        toolBar = new JToolBar();
-
         label = new JLabel(UI.getImageIcon("search"));
         toolBar.add(label);
 //        getContentPane().add(toolBar, BorderLayout.SOUTH);
@@ -413,7 +609,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             }
         });
 
+        //add a default header
     }
+
+    private ArrayList<String> tableHeaders = new ArrayList<String>();
 
     @Override
     public void coolMapObjectAdded(CoolMapObject newObject) {
@@ -458,9 +657,76 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                 }
                 COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
 
+                //make sure the setting new model won't affect the last recorded state
+//                _ontologyTable.getColumnModel().removeColumnModelListener(columnListener);
                 DefaultTableModel model = _getOntologyAsTableModel(ontology);
+                //maintain the same column model layout if the last one has
+                TableColumnModel columnModel = _ontologyTable.getColumnModel();
+                TableModel currentTableModel = _ontologyTable.getModel();
+
+                ArrayList<String> order = new ArrayList<String>();
+                for (int i = 0; i < columnModel.getColumnCount(); i++) {
+                    TableColumn col = columnModel.getColumn(i);
+//                        System.out.println(col + cold);
+                    order.add(col.getIdentifier().toString());
+                }
+
+                HashSet<String> visibles = new HashSet<String>();
+                visibles.addAll(order);
+
+                //This would contain everything
                 _ontologyTable.setModel(model);
+
                 _ontologyBrowswer.setActiveCOntology(ontology);
+
+                _ontologyTable.setColumnModel(columnModel); //use the same column model OH I C!
+
+                if (currentTableModel.getColumnCount() >= 1) {
+                    //ensure it's a valid model esp for the first time
+                    //obtain an order
+
+//                    System.out.println(order);
+//                    TableColumnModel newModel = _ontologyTable.getColumnModel();
+//                    System.out.println("Visible columns:" + visibles);
+                    HashSet<TableColumnExt> toBeHidden = new HashSet<TableColumnExt>();
+                    for (int i = 0; i < _ontologyTable.getColumnCount(true); i++) {
+                        TableColumnExt colExt = _ontologyTable.getColumnExt(i);
+
+                        if (!visibles.contains(colExt.getIdentifier())) {
+                            //colExt.setVisible(false);
+                            toBeHidden.add(colExt);
+                        }
+                    }
+
+                    for (TableColumnExt ext : toBeHidden) {
+                        ext.setVisible(false);
+                    }
+
+                    HashMap<String, TableColumn> columns = new HashMap<String, TableColumn>();
+//                    columns.put(colExt.getIdentifier().toString(), _ontologyTable.getColumn(i));
+                    while (_ontologyTable.getColumnCount() > 0) {
+                        TableColumn col = _ontologyTable.getColumn(0);
+                        columns.put(col.getIdentifier().toString(), col);
+                        _ontologyTable.removeColumn(col);
+                    }
+////
+////                    //add these ones back
+                    for (String label : order) {
+                        _ontologyTable.addColumn(columns.get(label));
+                    }
+
+                    //This works, but the hidden ones are gone           
+                }
+
+//                for(int i=0; i<_ontologyTable.getColumnCount(); i++){
+//                    TableColumnExt column = _ontologyTable.getColumnExt(i);
+//                    if(columnListener.hiddenColumns.contains(column.getIdentifier())){
+//                        column.setVisible(false); //make it invisible if it was invisible previously
+//                    }
+//                }
+                //set it back
+//                _ontologyTable.getColumnModel().addColumnModelListener(columnListener);
+//                _ontologyTable.getColumnExt(0).setVisible(false); //this is the way to hide it
             }
         });
 
@@ -522,6 +788,68 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //        });
     }
 
+    private OntologyTableColumnListener columnListener = new OntologyTableColumnListener();
+
+    private class OntologyTableColumnListener implements TableColumnModelListener {
+
+//        public HashSet<String> hiddenColumns = new HashSet<String>();
+        @Override
+        public void columnAdded(TableColumnModelEvent e) {
+//            System.out.println("column added: " + e.getFromIndex() + " " + e.getToIndex());
+
+//            hiddenColumns.clear();
+//            HashSet<String> modelColumns = new HashSet<String>();
+//            for(int i=0; i<_ontologyTable.getModel().getColumnCount(); i++){
+//                modelColumns.add(_ontologyTable.getModel().getColumnName(i));
+//            }
+//            
+//            HashSet<String> viewColumns = new HashSet<String>();
+//            for(int i=0; i<_ontologyTable.getColumnModel().getColumnCount(); i++){
+//                viewColumns.add(_ontologyTable.getColumnModel().getColumn(i).getHeaderValue().toString());
+//            }
+//            
+//            modelColumns.removeAll(viewColumns);
+//            
+//            hiddenColumns.addAll(modelColumns);
+//            System.out.println("column added: hidden ones:" + modelColumns);
+        }
+
+        @Override
+        public void columnRemoved(TableColumnModelEvent e) {
+//            System.out.println("column removed: " + e.getFromIndex() + " " + e.getToIndex());
+//            hiddenColumns.clear();
+//                        hiddenColumns.clear();
+//            HashSet<String> modelColumns = new HashSet<String>();
+//            for(int i=0; i<_ontologyTable.getModel().getColumnCount(); i++){
+//                modelColumns.add(_ontologyTable.getModel().getColumnName(i));
+//            }
+//            
+//            HashSet<String> viewColumns = new HashSet<String>();
+//            for(int i=0; i<_ontologyTable.getColumnModel().getColumnCount(); i++){
+//                viewColumns.add(_ontologyTable.getColumnModel().getColumn(i).getHeaderValue().toString());
+//            }
+//            
+//            modelColumns.removeAll(viewColumns);
+//            
+//            hiddenColumns.addAll(modelColumns);
+//            System.out.println("column removed: hidden ones" + modelColumns);
+
+        }
+
+        @Override
+        public void columnMoved(TableColumnModelEvent e) {
+        }
+
+        @Override
+        public void columnMarginChanged(ChangeEvent e) {
+        }
+
+        @Override
+        public void columnSelectionChanged(ListSelectionEvent e) {
+        }
+
+    }
+
     private class OntologyTableModel extends DefaultTableModel {
 
         @Override
@@ -563,8 +891,22 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         sortedNodes.addAll(nodes);
         Collections.sort(sortedNodes);
 
-        String[] headers = new String[]{NODE_NAME, CHILD_COUNT, CHILD_NODES, PARENT_COUNT, PARENT_NODES, DEPTH};
-        Object[][] data = new Object[nodes.size()][6];
+        tableHeaders.clear();
+        tableHeaders.add(NODE_NAME);
+        tableHeaders.add(CHILD_COUNT);
+        tableHeaders.add(CHILD_NODES);
+        tableHeaders.add(PARENT_COUNT);
+        tableHeaders.add(PARENT_NODES);
+        tableHeaders.add(DEPTH);
+
+        List<String> attributeNames = COntology.getAttributeNames();
+        tableHeaders.addAll(attributeNames);
+
+        String[] headers = new String[tableHeaders.size()];
+        tableHeaders.toArray(headers);
+
+        //String[] headers = new String[]{NODE_NAME, CHILD_COUNT, CHILD_NODES, PARENT_COUNT, PARENT_NODES, DEPTH};
+        Object[][] data = new Object[nodes.size()][tableHeaders.size()];
         for (int i = 0; i < data.length; i++) {
             String node = sortedNodes.get(i);
             List<String> child = ontology.getImmediateChildren(node);
@@ -576,6 +918,19 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             data[i][3] = parent == null ? 0 : parent.size();
             data[i][4] = (parent == null || parent.isEmpty()) ? "" : Arrays.toString(parent.toArray());
             data[i][5] = ontology.getMinimalDepthFromLeaves(node);
+
+            if (attributeNames == null || attributeNames.isEmpty()) {
+                continue;
+            }
+
+            int offset = 6;
+            for (int k = 0; k < attributeNames.size(); k++) {
+                Object value = COntology.getAttribute(node, attributeNames.get(k));
+                if (value != null) {
+                    data[i][k + 6] = value;
+                }
+            }
+
             nodeToTableRowHash.put(node, i);
         }
 
@@ -603,12 +958,12 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             return;
         }
 
-        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
         ArrayList<String> nodes = new ArrayList<String>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
-            nodes.add((String) _ontologyTable.getModel().getValueAt(row, col));
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
         ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
@@ -645,12 +1000,12 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             return;
         }
 
-        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
+//        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
         ArrayList<String> nodes = new ArrayList<String>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
-            nodes.add((String) _ontologyTable.getModel().getValueAt(row, col));
+            nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
         ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());

@@ -24,7 +24,6 @@ import coolmap.data.cmatrixview.utils.VNodeColumnSorter;
 import coolmap.data.cmatrixview.utils.VNodeRowSorter;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.contology.utils.COntologyUtils;
-import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import coolmap.data.filter.CombinationFilter;
 import coolmap.data.filter.ViewFilter;
 import coolmap.data.listeners.CObjectListener;
@@ -2007,8 +2006,8 @@ public final class CoolMapObject<BASE, VIEW> {
 //        coolMapObject.setViewRenderer(new DoubleToBoxPlot(), true);
         node1.setViewColor(Color.RED);
 
-        colOnto.setEdgeAttribute("CG1", "C3", new COntologyEdgeAttributeImpl(7.5f));
-        colOnto.setEdgeAttribute("CG00", "CG0", new COntologyEdgeAttributeImpl(2.5f));
+//        colOnto.setEdgeAttribute("CG1", "C3", new COntologyEdgeAttributeImpl(7.5f));
+//        colOnto.setEdgeAttribute("CG00", "CG0", new COntologyEdgeAttributeImpl(2.5f));
 
         //coolMapObject.setName("Sample Object");
         coolMapObject.setName("M" + System.currentTimeMillis());

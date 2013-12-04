@@ -69,7 +69,7 @@ public class Main {
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
                 CMConsole.log("CoolMap initialized.");
-                
+
                 loadSampleCoolMapProject();
 
 //                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
@@ -93,13 +93,13 @@ public class Main {
 //            "/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"
 //            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
 //            CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
-            
+
             CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 //            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 
             object = new CoolMapObject();
             object.addBaseCMatrix(matrix);
-            
+
             CMatrix matrix2 = ImportDoubleCMatrixFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 //            object.addBaseCMatrix(matrix2);
 
@@ -139,15 +139,25 @@ public class Main {
 //            nodes.add(new VNode("CGG1", onto));
 //
 //            object.insertColumnNodes(nodes);
+            //There are two more nodes here
+            COntology.setAttribute("Node1", "Name", "Attr1");
+            COntology.setAttribute("Node2", "Weight", "Attr2");
+
+//            for(int i=0; i<100; i++){
+//                COntology.setAttribute("Node2", "Weight"+i, "Attr");
+//            }
             onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
-            
+
+            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
+            CoolMapMaster.addNewCOntology(onto);
+
             object.insertRowNodes(onto.getRootNodesOrdered());
             object.insertColumnNodes(onto.getRootNodesOrdered());
 //            
             object.expandColumnNodesOneLayer();
             object.expandRowNodesOneLayer();
-            
+
 //            ArrayList l = new ArrayList();
 //            List<VNode> l2 = onto.getRootNodesOrdered();
 //            l.add(l2.get(0));
@@ -158,14 +168,11 @@ public class Main {
 //            l.add(l2.get(0));
 //            
 //            object.insertColumnNodes(l);
-            
-
             object.setAggregator(new DoubleDoubleMean());
-            
+
             object.setViewRenderer(new NumberToColor(), true);
             //object.setViewRenderer(new NumberComposite(), false);
-            
-            
+
             object.setSnippetConverter(new DoubleSnippet1_3());
 
 //            object.setSnippetConverter(SnippetMaster.getConverter("D13"));//
@@ -177,23 +184,17 @@ public class Main {
             CoolMapMaster.addNewCoolMapObject(object);
 
             CoolMapMaster.setActiveCoolMapObject(object);
-            
-//            object.setName("Sample");
 
+//            object.setName("Sample");
             //No need for point nanotation for now
             //try to add some annotations
 //            PointAnnotation annotation = new PointAnnotation(object.getViewNodeRow(0), object.getViewNodeColumn(object.getViewNumColumns()-1), "This is annotation test\nWith two lines\nMore lines!\nMore more lines!");
 //            object.getAnnotationStorage().addAnnotation(annotation);
 //            CoolMapMaster.getCMainFrame().showBusyDialog(true);
-            
-            
-            
             CMConsole.log("");
-                       
+
 //            CTest.ttest(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1));
 //            CTest.anova(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1), object.getViewNodeRow(2));
-            
-            
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }

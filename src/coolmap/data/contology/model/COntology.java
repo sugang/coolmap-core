@@ -30,6 +30,12 @@ import java.util.Set;
  */
 public final class COntology {
 
+    
+    
+    
+    
+    
+    
     public static final Integer ROW = 0;
     public static final Integer COLUMN = 1;
     private String _ID;
@@ -39,81 +45,36 @@ public final class COntology {
     private final ArrayListMultimap<String, String> _parentMap = ArrayListMultimap.create();
     private final HashMap<String, Integer> _depth = new HashMap<String, Integer>();
     private final COntologyToCMatrixMap _indexMap;
-    //private final List<String> _visitedNodes = Collections.synchronizedList(new ArrayList<String>());
-    //private final ArrayList<String> _visitedNodes = new ArrayList<String>();
     private HashBasedTable<String, String, COntologyEdgeAttributeImpl> _edgeAttrTable = HashBasedTable.create();
     private Color _viewColor = null;
     private Class _ontologyAttributeClass = COntologyEdgeAttributeImpl.class;
 
-//    private HashBasedTable<String, String, Object> _nodeAttrTable = HashBasedTable.create();
-//    public Class getEdgetAttributeClass(){
-//        return _ontologyAttributeClass;
-//    }
-//    
-//    public void setEdgetAttributeClass(Class cls){
-//        if(cls != null && COntologyEdgeAttribute.class.isAssignableFrom(cls)){
-//            _ontologyAttributeClass = cls;
-//        }
-//    }
     private boolean _isDestroyed = false;
 
-//    public ArrayList<String> getAttributeHeadersSorted(){
-//        
-//       try{ 
-////       ArrayList<String> columns = new ArrayList<String>(_nodeAttrTable.columnKeySet());
-//       Collections.sort(columns);
-//       return columns;
-//       }
-//       catch(Exception e){
-//           return new ArrayList<String>();
-//       }
-//    }
-//    
-//    public Set<String> getAttributeHeadersSet(){
-//        try{
-//        return new HashSet<String>(_nodeAttrTable.columnKeySet());
-//        }
-//        catch(Exception e){
-//            return new HashSet<>();
-//        }
-//    }
-    //worry about attribute classes later.
-//    public void addAttribute(String node, String attributeName, Object value){
-//        _nodeAttrTable.put(node, attributeName, value);
-//    }
-//    
-//    public void clearAttributes(){
-//        _nodeAttrTable.clear();
-//    }
-//    merge them
-    /**
-     * used only temporarily! also need method to merge only at a certain level
-     *
-     * @param ontology
-     */
-//    public void mergeCOntologyTo(COntology ontology) {
-//        
-//        
-//        
-//        for (Entry<String, String> entry : _childMap.entries()) {
-//            
-//            ontology.addRelationshipNoUpdateDepth(entry.getKey(), entry.getValue());
-//            
-//            COntologyEdgeAttributeImpl attr = getEdgeAttribute(entry.getKey(), entry.getValue());
-//            if (attr != null) {
-//                ontology.addEdgeAttribute(entry.getKey(), entry.getValue(), attr);
-//            }
-//        }
-//        
-//        //COntologyUtils.printOntology(ontology);
-//        
-//        
-//        //System.out.println("Before validation");
-//        
-////        ontology.validate();
-//        
-//        //System.out.println("After validation");
-//    }
+    
+    //These are used for handling attribute. all static
+    private static HashBasedTable<String, String, Object> _attributeTable = HashBasedTable.create();
+    private static HashMap<String, Class> _attributeType = new HashMap<String, Class>();
+    
+    public static Object getAttribute(String nodeName, String attrName){
+        return _attributeTable.get(attrName, nodeName);
+    }
+    
+    public static List<String> getAttributeNames(){
+        ArrayList<String> names = new ArrayList<String>(_attributeTable.columnKeySet());
+        Collections.sort(names);
+        return names;
+    }
+    
+    public static void setAttribute(String nodeName, String attrName, Object attribute){
+        _attributeTable.put(nodeName, attrName, attribute);
+    }
+
+    public static void setAttributeType(String attrName, Class cls){
+        _attributeType.put(attrName, cls);
+    }
+    //These are used for handlilng attribute, all static
+    
     /**
      * merge the terms from other ontology, to the current ontology. Child terms
      * of the given terms will also be merged over
