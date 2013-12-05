@@ -6,6 +6,7 @@
 package coolmap.application.io.external;
 
 import com.google.common.collect.HashMultimap;
+import coolmap.application.io.external.interfaces.ImportCOntology;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.contology.model.COntology;
 import coolmap.utils.Tools;
@@ -13,6 +14,8 @@ import coolmap.utils.bioparser.simpleobo.SimpleOBOEntry;
 import coolmap.utils.bioparser.simpleobo.SimpleOBOTree;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Collection;
+import java.util.HashSet;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -22,30 +25,38 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class ImportCOntologyFromOBO implements ImportCOntology {
 
     @Override
-    public COntology importFromFile(File file) throws Exception {
-        try {
-            SimpleOBOTree tree = SimpleOBOTree.parse(Tools.removeFileExtension(file.getName()), new FileInputStream(file));
+    public Collection<COntology> importFromFile(File... files) throws Exception {
 
-        //tree.printEntries();
-            //Then add them:
-            COntology ontology = new COntology(Tools.removeFileExtension(file.getName()), null);
-            ontology.addRelationshipUpdateDepth(tree.getTree());
+            //tree.printEntries();
+        //Then add them:
+        HashSet<COntology> ontologies = new HashSet<COntology>();
+        for (File file : files) {
+
+            try {
+                SimpleOBOTree tree = SimpleOBOTree.parse(Tools.removeFileExtension(file.getName()), new FileInputStream(file));
+                COntology ontology = new COntology(Tools.removeFileExtension(file.getName()), null);
+                ontology.addRelationshipUpdateDepth(tree.getTree());
 
 //            also add attributes
-            for(SimpleOBOEntry entry : tree.getAllEntries()){
-                COntology.setAttribute(entry.getID(), "OBO.Name", entry.getName());
-                COntology.setAttribute(entry.getID(), "OBO.Namespace", entry.getNamespace());
-                HashMultimap<String, String> otherAttr = entry.getOtherAttributes();
-                for(String key : otherAttr.keySet()){
-                    COntology.setAttribute(entry.getID(), "OBO." +key, otherAttr.get(key).toString());
+                for (SimpleOBOEntry entry : tree.getAllEntries()) {
+                    COntology.setAttribute(entry.getID(), "OBO.Name", entry.getName());
+                    COntology.setAttribute(entry.getID(), "OBO.Namespace", entry.getNamespace());
+                    HashMultimap<String, String> otherAttr = entry.getOtherAttributes();
+                    for (String key : otherAttr.keySet()) {
+                        COntology.setAttribute(entry.getID(), "OBO." + key, otherAttr.get(key).toString());
+                    }
                 }
+                ontology.validate();
+                ontology.setName(Tools.removeFileExtension(file.getName()));
+                ontologies.add(ontology);
+
+            } catch (Exception e) {
+                CMConsole.logError(" failed to import ontology from: " + file);
+                return null;
             }
-            
-            return ontology;
-        } catch (Exception e) {
-            CMConsole.logError(" failed to import ontology from: " + file);
-            return null;
         }
+        return ontologies;
+
     }
 
     @Override

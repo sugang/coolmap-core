@@ -11,10 +11,6 @@ import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
-import coolmap.canvas.sidemaps.impl.ColumnLabels;
-import coolmap.canvas.sidemaps.impl.ColumnTree;
-import coolmap.canvas.sidemaps.impl.RowLabels;
-import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
@@ -235,15 +231,16 @@ public final class CoolMapMaster {
             return;
         }
         _coolMapObjects.add(object);
+        addNewBaseMatrix(object.getBaseCMatrices());
 
         //bunch of other listeners need to be added.
         //by default, the are added here.
         //There's then an opportunity to add it to the syncer directly.
         //but when it is removed, how do we remove them easily?
-        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
-        object.getCoolMapView().addColumnMap(new ColumnTree(object));
-        object.getCoolMapView().addRowMap(new RowLabels(object));
-        object.getCoolMapView().addRowMap(new RowTree(object));
+//        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+//        object.getCoolMapView().addColumnMap(new ColumnTree(object));
+//        object.getCoolMapView().addRowMap(new RowLabels(object));
+//        object.getCoolMapView().addRowMap(new RowTree(object));
 //
 //        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
 //        object.getCoolMapView().addColumnMap(new ColumnTree(object));
@@ -260,6 +257,9 @@ public final class CoolMapMaster {
         //double check base matrix
         //double check to see whether new cmatrices were created. This should not actually happen.
         //addNewBaseMatrix(object.getBaseMatrices());
+        
+        //check to add cmatricdes
+
     }
 
     public static void addNewBaseMatrix(Collection<CMatrix> matrices) {

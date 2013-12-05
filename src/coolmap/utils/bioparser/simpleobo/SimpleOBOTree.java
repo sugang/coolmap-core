@@ -29,13 +29,13 @@ public class SimpleOBOTree {
 
     /**
      * returns the go tree - not a copy, for efficiency and economy concerns
-     * @return 
+     *
+     * @return
      */
-    public HashMultimap<String, String> getTree(){
+    public HashMultimap<String, String> getTree() {
         return goTree;
     }
-    
-    
+
     public void addTreeBranch(String parent, String child) {
         goTree.put(parent, child);
     }
@@ -49,6 +49,9 @@ public class SimpleOBOTree {
         SimpleOBOTree simpleOboTree = new SimpleOBOTree();
 
         while ((line = reader.readLine()) != null) {
+            if (Thread.interrupted()) {
+                return null;
+            }
             line = line.trim();
 
             if (line.length() == 0) {
@@ -158,7 +161,5 @@ public class SimpleOBOTree {
         entries.addAll(goTermHash.values());
         return entries;
     }
-    
-    
 
 }

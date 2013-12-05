@@ -96,6 +96,9 @@ public class GmtEntry {
         String ele[];
         GmtEntry gmtObject = new GmtEntry(name, idType);
         while ((line = reader.readLine()) != null) {
+            if(Thread.interrupted()){
+                return null;
+            }
             line = line.trim();
             ele = line.split("\\t", -1);
             if (ele.length <= 2) {

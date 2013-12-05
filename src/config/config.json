@@ -56,6 +56,12 @@
                 "coolmap.application.io.external.ImportCOntologyFromGMT",
                 "coolmap.application.io.external.ImportCOntologyFromOBO"
             ]
+        },
+        "data-importer":{
+            "load":[
+                "coolmap.application.io.external.ImportDataFromTSV",
+                "coolmap.application.io.external.ImportDataFromGEOSOFT"
+            ]
         }
         
     }

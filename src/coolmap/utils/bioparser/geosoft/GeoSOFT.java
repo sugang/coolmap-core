@@ -16,39 +16,43 @@ import java.util.LinkedHashSet;
  * @author sugang
  */
 public class GeoSOFT {
+
     private final Database database;
     private final Dataset dataset;
     private final LinkedHashSet<Subset> subsets = new LinkedHashSet<>();
     private final ArrayTable arrayTable;
     private final Annotation annotation;
-    
-    private GeoSOFT(){
+
+    private GeoSOFT() {
         this(null, null, null, null, null);
     }
-    
-    public GeoSOFT(Database database, Dataset dataset, Collection<Subset> subsets, ArrayTable arrayTable, Annotation annotation){
+
+    public ArrayTable getArrayTable() {
+        return arrayTable;
+    }
+
+    public GeoSOFT(Database database, Dataset dataset, Collection<Subset> subsets, ArrayTable arrayTable, Annotation annotation) {
         this.database = database;
         this.dataset = dataset;
         this.subsets.addAll(subsets);
         this.arrayTable = arrayTable;
         this.annotation = annotation;
     }
-    
-    public void printContents(){
+
+    public void printContents() {
         System.out.println(database);
         System.out.println(dataset);
-        for(Subset subset : subsets){
+        for (Subset subset : subsets) {
             System.out.println("  " + subset);
         }
         System.out.println(arrayTable);
-        System.out.println(annotation == null? "No annotation" : annotation);
+        System.out.println(annotation == null ? "No annotation" : annotation);
     }
-    
+
     public static GeoSOFT parse(File file) {
         if (!file.exists() || !file.isFile()) {
             return null;
         }
-
 
         try {
             LineNumberReader reader = new LineNumberReader(new FileReader(file));
@@ -67,13 +71,14 @@ public class GeoSOFT {
             String[] dataAttributes = null;
             Annotation annotation = null;
 
-
             while ((line = reader.readLine()) != null) {
+                if (Thread.interrupted()) {
+                    return null;
+                }
                 //skip blank lines
                 if (line.trim().equals("")) {
                     continue;
                 }
-
 
                 //push to current subset
                 if (line.startsWith("^") && currentField != null && currentField.equals(FieldConstants.SUBSET)
@@ -97,8 +102,6 @@ public class GeoSOFT {
                         }
 
 //                        System.out.println(database);
-
-
                     } else if (line.startsWith("^" + FieldConstants.DATASET)) {
                         currentField = FieldConstants.DATASET;
                         String[] keyVal = line.split(" = ", -1);
@@ -111,7 +114,6 @@ public class GeoSOFT {
                         }
 
 //                        System.out.println(dataset);
-
                     } else if (line.startsWith("^" + FieldConstants.SUBSET)) {
                         //start a new subset
                         currentField = FieldConstants.SUBSET;
@@ -123,15 +125,12 @@ public class GeoSOFT {
                         }
 
 //                        System.out.println(currentSubset);
-
-                    } else if (line.startsWith("^" + FieldConstants.ANNOTATION)){
+                    } else if (line.startsWith("^" + FieldConstants.ANNOTATION)) {
                         currentField = FieldConstants.ANNOTATION;
-                        if(annotation == null){
+                        if (annotation == null) {
                             annotation = new Annotation();
                         }
                     }
-                    
-                    
 
                 } else if (line.startsWith("!")) {
 
@@ -145,7 +144,6 @@ public class GeoSOFT {
                         } else {
                             arrayTable = null;
                         }
-
 
                     } else if (line.startsWith("!" + FieldConstants.dataset_table_end)) {
                         //dataset ended, no need to parse again
@@ -192,8 +190,6 @@ public class GeoSOFT {
 //                    if(line.startsWith("^dataset_feature_count")){
 //                        
 //                    }
-
-
                 } else if (line.startsWith("#")) {
                     line = line.substring(1);
                     String ele[] = line.split(" = ", -1);
@@ -225,9 +221,8 @@ public class GeoSOFT {
                                 //This will be extended to load additional attributes
                                 /////////////////////////////////////////////////////
                                 //place holders
-                                
+
 //                                System.out.println("Additional Annotation spotted: this is a full soft file");
-                                
 //                                additional data attributes
                                 dataAttributes = new String[headers.length - 2 - columnCount];
                                 //System.out.println(dataAttributes.length);
@@ -262,16 +257,13 @@ public class GeoSOFT {
                                     //has attributes
                                     for (int j = columnCount + 2; j < dataLine.length; j++) {
                                         try {
-                                            arrayTable.addAttribute(dataLine[0].trim(), dataAttributes[j-columnCount-2], dataLine[j]);
+                                            arrayTable.addAttribute(dataLine[0].trim(), dataAttributes[j - columnCount - 2], dataLine[j]);
                                         } catch (Exception e) {
                                             //anything wrong with the loop itself
                                         }
                                     }
 
-
                                 }
-
-
 
                             } catch (Exception e) {
                                 //skip a line if line is malformed
@@ -282,10 +274,6 @@ public class GeoSOFT {
                         }
                     }
                 }
-
-
-
-
 
             }
             //End of iterate the entire file
@@ -298,10 +286,8 @@ public class GeoSOFT {
 //            for(Subset subset : subsets){
 //                subset.printDetails();
 //            }
-
-            
             GeoSOFT soft = new GeoSOFT(database, dataset, subsets, arrayTable, annotation);
-            
+
             return soft;
         } catch (Exception e) {
             //System.out.println("Error @ line" + reader.getLineNumber());

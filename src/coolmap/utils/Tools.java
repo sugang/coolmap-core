@@ -50,11 +50,11 @@ public class Tools {
 
     public static HashSet<Range<Integer>> createRangesFromIndices(ArrayList<Integer> indices) {
         try {
-            
+
             Collections.sort(indices);
             int startIndex = indices.get(0);
             int currentIndex = startIndex;
-            
+
             HashSet<Range<Integer>> selectedRanges = new HashSet<Range<Integer>>();
 
             for (Integer index : indices) {
@@ -68,7 +68,7 @@ public class Tools {
                 }
             }
             selectedRanges.add(Range.closedOpen(startIndex, currentIndex + 1));
-            
+
             return selectedRanges;
 
         } catch (Exception e) {
@@ -134,12 +134,24 @@ public class Tools {
         return _folderChooser;
     }
 
-    public static JFileChooser getCustomFileChooser(FileFilter filter) {
+    public static JFileChooser getCustomMultiFileChooser(FileFilter filter) {
         FileFilter[] filters = _fileChooser.getChoosableFileFilters();
-        for(FileFilter f : filters){
+        _fileChooser.setMultiSelectionEnabled(true);
+        for (FileFilter f : filters) {
             _fileChooser.removeChoosableFileFilter(f);
         }
-        
+
+        _fileChooser.setFileFilter(filter);
+        return _fileChooser;
+    }
+
+    public static JFileChooser getCustomSingleFileChooser(FileFilter filter) {
+        FileFilter[] filters = _fileChooser.getChoosableFileFilters();
+        _fileChooser.setMultiSelectionEnabled(false);
+        for (FileFilter f : filters) {
+            _fileChooser.removeChoosableFileFilter(f);
+        }
+
         _fileChooser.setFileFilter(filter);
         return _fileChooser;
     }

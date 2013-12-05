@@ -4,11 +4,16 @@
  */
 package coolmap.application.io.external;
 
+import coolmap.application.io.external.interfaces.ImportCOntology;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
+import coolmap.utils.Tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Collection;
+import java.util.HashSet;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -17,28 +22,38 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
 
-    public COntology importFromFile(File file) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = null;
-        COntology ontology = new COntology(file.getName(), null);
-        while ((line = reader.readLine()) != null) {
-            //System.out.println(line);
+    public Collection<COntology> importFromFile(File... files) throws Exception {
+        HashSet<COntology> ontologies = new HashSet<COntology>();
+        for (File file : files) {
             try {
-                String[] elements = line.split("\t", -1);
-                ontology.addRelationshipNoUpdateDepth(elements[1], elements[0]);
-                if (elements.length > 2 && elements[2].length() > 0) {
-                    ontology.setEdgeAttribute(elements[1], elements[0], new COntologyEdgeAttributeImpl(Float.parseFloat(elements[2])));
-                    if(Thread.interrupted()){
-                        return null;
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line = null;
+                COntology ontology = new COntology(file.getName(), null);
+                while ((line = reader.readLine()) != null) {
+                    //System.out.println(line);
+                    try {
+                        String[] elements = line.split("\t", -1);
+                        ontology.addRelationshipNoUpdateDepth(elements[1], elements[0]);
+                        if (elements.length > 2 && elements[2].length() > 0) {
+                            ontology.setEdgeAttribute(elements[1], elements[0], new COntologyEdgeAttributeImpl(Float.parseFloat(elements[2])));
+                            if (Thread.interrupted()) {
+                                return null;
+                            }
+                        }
+                    } catch (Exception e) {
+//                System.out.println(line + " malformed");
                     }
                 }
+                reader.close();
+                ontology.validate();
+                ontology.setName(Tools.removeFileExtension(file.getName()));
+                ontologies.add(ontology);
+
             } catch (Exception e) {
-//                System.out.println(line + " malformed");
+                CMConsole.logError("failed to load ontology from " + file);
             }
         }
-        reader.close();
-        ontology.validate();
-        return ontology;
+        return ontologies;
     }
 
     @Override

@@ -27,11 +27,19 @@ public class ArrayTable {
         this(null, null);
     }
 
-    @Override
-    public String toString(){
-        return "Rows: " + rowCount + " Columns:" + columnCount + " Attributes?" + (attributes.isEmpty()?"No":"Yes");
+    public String[] getRowNames() {
+        return rowNames;
     }
-    
+
+    public String[] getColumnNames() {
+        return columnNames;
+    }
+
+    @Override
+    public String toString() {
+        return "Rows: " + rowCount + " Columns:" + columnCount + " Attributes?" + (attributes.isEmpty() ? "No" : "Yes");
+    }
+
     public ArrayTable(Integer rowCount, Integer columnCount) {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
@@ -68,7 +76,6 @@ public class ArrayTable {
         }
         System.out.println();
 
-
         for (int i = 0; i < rowCount; i++) {
 
             System.out.print(rowNames[i]);
@@ -86,6 +93,14 @@ public class ArrayTable {
         }
     }
 
+    public Double getValue(int row, int column) {
+        try {
+            return data[row][column];
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public void printAttribute() {
         Object[] attributeColumnNames = attributes.columnKeySet().toArray();
         Object[] attributeRowNames = attributes.rowKeySet().toArray();
@@ -94,6 +109,7 @@ public class ArrayTable {
         System.out.print("R/C");
         for (Object column : attributeColumnNames) {
             System.out.print("\t" + column);
+
         }
 
         System.out.println();
@@ -107,10 +123,13 @@ public class ArrayTable {
 //            }
 //            System.out.println();
 //        }
-        for(Object rLabel : attributeRowNames){
+        for (Object rLabel : attributeRowNames) {
             System.out.print(rLabel);
-            for(Object cLabel : attributeColumnNames){
+            for (Object cLabel : attributeColumnNames) {
                 System.out.print("\t" + attributes.get(rLabel.toString(), cLabel.toString()));
+                if (Thread.interrupted()) {
+                    return;
+                }
             }
             System.out.println();
         }
