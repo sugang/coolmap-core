@@ -60,6 +60,11 @@ public class ImportDataTSVAction extends AbstractAction {
             public void run() {
                 try {
                     CMatrix matrix = ImportDoubleCMatrixFromFile.importFromFile(f);
+                    if(matrix == null){
+                        return;
+                    }
+                    
+                    
                     CoolMapObject object = new CoolMapObject();
                     object.addBaseCMatrix(matrix);
                     ArrayList<VNode> nodes = new ArrayList<VNode>();
@@ -86,6 +91,11 @@ public class ImportDataTSVAction extends AbstractAction {
                     object.getCoolMapView().addColumnMap(new ColumnTree(object));
 
                     object.setName(Tools.removeFileExtension(f.getName()));
+                    
+                    if(Thread.interrupted()){
+                        return;
+                    }
+                    
                     
                     CoolMapMaster.addNewBaseMatrix(matrix);
                     CoolMapMaster.addNewCoolMapObject(object);

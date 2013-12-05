@@ -40,6 +40,9 @@ public class ImportCOntologyFromGMT {
             
             for(String gene : genes){
                 ontology.addRelationshipNoUpdateDepth(geneSetString, gene);
+                if(Thread.interrupted()){
+                    return null;
+                }
             }
             
             COntology.setAttribute(geneSetString, "Description", obj.getDescription(geneSetString));

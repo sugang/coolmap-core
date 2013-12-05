@@ -27,6 +27,9 @@ public class ImportCOntologyFromSimpleTwoColumn {
                 ontology.addRelationshipNoUpdateDepth(elements[1], elements[0]);
                 if (elements.length > 2 && elements[2].length() > 0) {
                     ontology.setEdgeAttribute(elements[1], elements[0], new COntologyEdgeAttributeImpl(Float.parseFloat(elements[2])));
+                    if(Thread.interrupted()){
+                        return null;
+                    }
                 }
             } catch (Exception e) {
 //                System.out.println(line + " malformed");

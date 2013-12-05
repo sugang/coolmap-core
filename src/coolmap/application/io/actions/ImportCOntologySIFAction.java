@@ -47,6 +47,9 @@ public class ImportCOntologySIFAction extends AbstractAction {
                     try {
                         COntology ontology = ImportCOntologyFromSimpleTwoColumn.importFromFile(f);
                         ontology.setName(Tools.removeFileExtension(f.getName()));
+                        if(ontology == null)
+                            return;
+                        
                         CoolMapMaster.addNewCOntology(ontology);
 
                         CMConsole.logInSuccess("Ontology imported from " + f.getPath());

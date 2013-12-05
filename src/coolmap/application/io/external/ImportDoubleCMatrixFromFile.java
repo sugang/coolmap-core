@@ -53,6 +53,9 @@ public class ImportDoubleCMatrixFromFile {
                     value = null;
                 }
                 matrix.setValue(counter, i - 1, value);
+                if(Thread.interrupted()){
+                    return null;
+                }
             }
 
             counter++;

@@ -45,6 +45,9 @@ public class ImportCOntologyGMTAction extends AbstractAction {
             public void run() {
                 try {
                     COntology ontology = ImportCOntologyFromGMT.importFromFile(f);
+                    if(ontology == null)
+                        return;
+                    
                     CoolMapMaster.addNewCOntology(ontology);
                     
                     CMConsole.logInSuccess("Ontology imported from " + f.getPath());
