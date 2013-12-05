@@ -30,7 +30,8 @@ public class SideMapModule extends Module {
 
     public SideMapModule() {
 //        System.out.println("Side maps initialized");
-//        
+      CoolMapMaster.getCMainFrame().addMenuSeparator("View/Canvas config/");
+        
         try {
             if (Config.isInitialized()) {
                 JSONObject obj = Config.getJSONConfig().getJSONObject("module").getJSONObject("config").getJSONObject(this.getClass().getName()).getJSONObject("load");

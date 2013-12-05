@@ -72,4 +72,10 @@ public class SimpleOBOEntry {
         }
         System.out.println("");
     }
+    
+    public HashMultimap<String, String> getOtherAttributes(){
+        return otherAttributes;
+    }
+    
+    
 }

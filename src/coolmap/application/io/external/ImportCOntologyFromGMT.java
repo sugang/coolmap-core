@@ -7,23 +7,22 @@
 package coolmap.application.io.external;
 
 import coolmap.data.contology.model.COntology;
-import coolmap.data.contology.utils.COntologyUtils;
 import coolmap.utils.Tools;
 import coolmap.utils.bioparser.gseagmt.GmtEntry;
 import java.io.File;
 import java.io.FileInputStream;
-import static java.lang.System.in;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author sugang
  */
-public class ImportCOntologyFromGMT {
+public class ImportCOntologyFromGMT implements ImportCOntology{
 
-    public static COntology importFromFile(File file) throws Exception {
+    public COntology importFromFile(File file) throws Exception {
         
         GmtEntry obj = GmtEntry.parse(file.getName(), GmtEntry.ID_TYPE.ENTREZ_ID, new FileInputStream(file));
         
@@ -45,7 +44,7 @@ public class ImportCOntologyFromGMT {
                 }
             }
             
-            COntology.setAttribute(geneSetString, "Description", obj.getDescription(geneSetString));
+            COntology.setAttribute(geneSetString, "GMT.Description", obj.getDescription(geneSetString));
             
         }
         
@@ -54,5 +53,15 @@ public class ImportCOntologyFromGMT {
         
 //        COntologyUtils.printOntology(ontology);  
         return ontology;
+    }
+
+    @Override
+    public String getLabel() {
+        return "GSEA gmt";
+    }
+
+    @Override
+    public FileNameExtensionFilter getFileNameExtensionFilter() {
+        return new FileNameExtensionFilter("GSEA gmt", "gmt", "txt");
     }
 }

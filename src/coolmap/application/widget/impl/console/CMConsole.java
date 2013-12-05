@@ -16,63 +16,59 @@ public class CMConsole {
     private static WidgetConsole instance = null;
 
     public static void logError(String message) {
-        if(instance == null){
-            try{
-                instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
-            }
-            catch(Exception e){
+        if (instance == null) {
+            try {
+                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            } catch (Exception e) {
                 instance = null;
                 return;
             }
         }
-        
-        instance.logError(message);
+
+        if (instance != null) {
+            instance.logError("Error: " + message);
+        } else {
+            System.err.println("Error: " + message);
+        }
 
     }
 
     public static void logInSuccess(String message) {
-        if(instance == null){
-            try{
-                instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
-            }
-            catch(Exception e){
+        if (instance == null) {
+            try {
+                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            } catch (Exception e) {
                 instance = null;
                 return;
             }
         }
-        
+
         instance.logInfo(message);
     }
-    
-    
-    public static void logData(String message){
-        if(instance == null){
-            try{
-                instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
-            }
-            catch(Exception e){
+
+    public static void logData(String message) {
+        if (instance == null) {
+            try {
+                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            } catch (Exception e) {
                 instance = null;
                 return;
             }
         }
-        
+
         instance.logData(message);
     }
-    
-    
-    
 
     public static void log(String message) {
-        if(instance == null){
-            try{
-                instance =(WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
-            }
-            catch(Exception e){
+        if (instance == null) {
+            try {
+                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            } catch (Exception e) {
                 instance = null;
                 return;
             }
         }
-        
+
         instance.log(message);
     }
 }

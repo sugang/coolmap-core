@@ -9,14 +9,15 @@ import coolmap.data.contology.utils.edgeattributes.COntologyEdgeAttributeImpl;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author gangsu
  */
-public class ImportCOntologyFromSimpleTwoColumn {
+public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
 
-    public static COntology importFromFile(File file) throws Exception {
+    public COntology importFromFile(File file) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
         COntology ontology = new COntology(file.getName(), null);
@@ -38,5 +39,15 @@ public class ImportCOntologyFromSimpleTwoColumn {
         reader.close();
         ontology.validate();
         return ontology;
+    }
+
+    @Override
+    public String getLabel() {
+        return "Simple two column (sif)";
+    }
+
+    @Override
+    public FileNameExtensionFilter getFileNameExtensionFilter() {
+        return new FileNameExtensionFilter("Simple two column (sif) tsv", "tsv", "txt");
     }
 }

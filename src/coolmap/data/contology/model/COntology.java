@@ -31,19 +31,13 @@ import java.util.Set;
  */
 public final class COntology {
 
-    
-    
-    
-    
-    
-    
     public static final Integer ROW = 0;
     public static final Integer COLUMN = 1;
     private String _ID;
     private String _name;
     private String _description;
-    private final ArrayListMultimap<String, String> _childMap = ArrayListMultimap.create();
-    private final ArrayListMultimap<String, String> _parentMap = ArrayListMultimap.create();
+    private final ArrayListMultimap<String, String> parentToChildMap = ArrayListMultimap.create();
+    private final ArrayListMultimap<String, String> childToParentMap = ArrayListMultimap.create();
     private final HashMap<String, Integer> _depth = new HashMap<String, Integer>();
     private final COntologyToCMatrixMap _indexMap;
     private HashBasedTable<String, String, COntologyEdgeAttributeImpl> _edgeAttrTable = HashBasedTable.create();
@@ -52,31 +46,39 @@ public final class COntology {
 
     private boolean _isDestroyed = false;
 
-    
     //These are used for handling attribute. all static
     private static HashBasedTable<String, String, Object> _attributeTable = HashBasedTable.create();
     private static HashMap<String, Class> _attributeType = new HashMap<String, Class>();
-    
-    public static Object getAttribute(String nodeName, String attrName){
+
+    public static Object getAttribute(String nodeName, String attrName) {
         return _attributeTable.get(nodeName, attrName);
     }
-    
-    public static List<String> getAttributeNames(){
+
+    public static List<String> getAttributeNames() {
         ArrayList<String> names = new ArrayList<String>(_attributeTable.columnKeySet());
         Collections.sort(names);
         return names;
     }
-    
-    public static void setAttribute(String nodeName, String attrName, Object attribute){
+
+    public static void setAttribute(String nodeName, String attrName, Object attribute) {
         _attributeTable.put(nodeName, attrName, attribute);
 //        System.out.println(nodeName + " " + attrName + " " + attribute);
     }
 
-    public static void setAttributeType(String attrName, Class cls){
+    public static void setAttributeType(String attrName, Class cls) {
         _attributeType.put(attrName, cls);
     }
     //These are used for handlilng attribute, all static
-    
+
+    public static COntology mergeCOntologies(String name, COntology... ontologies) {
+        COntology ontology = new COntology(name, null);
+        for (COntology onto : ontologies) {
+            ontology.addRelationshipNoUpdateDepth(onto.parentToChildMap);
+        }
+        ontology.validate();
+        return ontology;
+    }
+
     /**
      * merge the terms from other ontology, to the current ontology. Child terms
      * of the given terms will also be merged over
@@ -128,7 +130,7 @@ public final class COntology {
             return true;
         } catch (Exception e) {
 //            System.out.println("Error occured. Merge not successful. Possibly due to loops");
-            CMConsole.logError("Merging ontology '" + this.getName() + "' to '" + targetOntology.getName() + "' failed." );
+            CMConsole.logError("Merging ontology '" + this.getName() + "' to '" + targetOntology.getName() + "' failed.");
             return false;
         }
     }
@@ -164,8 +166,8 @@ public final class COntology {
 //        
 //    }
     public void destroy() {
-        _childMap.clear();
-        _parentMap.clear();
+        parentToChildMap.clear();
+        childToParentMap.clear();
         _indexMap.clear();
         _edgeAttrTable.clear();
         _isDestroyed = true;
@@ -317,8 +319,8 @@ public final class COntology {
      */
     public HashSet<String> getLeafNames() {
         HashSet<String> leaves = new HashSet<String>();
-        leaves.addAll(_parentMap.keySet());
-        leaves.removeAll(_childMap.keySet());
+        leaves.addAll(childToParentMap.keySet());
+        leaves.removeAll(parentToChildMap.keySet());
         return leaves;
     }
 
@@ -336,8 +338,8 @@ public final class COntology {
      */
     public HashSet<String> getRootNames() {
         HashSet<String> roots = new HashSet<String>();
-        roots.addAll(_childMap.keySet());
-        roots.removeAll(_parentMap.keySet());
+        roots.addAll(parentToChildMap.keySet());
+        roots.removeAll(childToParentMap.keySet());
         return roots;
     }
 
@@ -366,7 +368,7 @@ public final class COntology {
     }
 
     public HashSet<String> getAllNodesWithChildren() {
-        HashSet<String> c = new HashSet<String>(_childMap.keySet());
+        HashSet<String> c = new HashSet<String>(parentToChildMap.keySet());
         return c;
     }
 
@@ -383,14 +385,14 @@ public final class COntology {
     }
 
     public HashSet<String> getAllNodesWithParents() {
-        HashSet<String> c = new HashSet<String>(_parentMap.keySet());
+        HashSet<String> c = new HashSet<String>(childToParentMap.keySet());
         return c;
     }
 
     public Set<String> getAllNodes() {
         HashSet<String> allNodes = new HashSet<String>();
-        allNodes.addAll(_childMap.keySet());
-        allNodes.addAll(_parentMap.keySet());
+        allNodes.addAll(parentToChildMap.keySet());
+        allNodes.addAll(childToParentMap.keySet());
         return allNodes;
     }
 
@@ -427,7 +429,7 @@ public final class COntology {
     }
 
     public boolean isLeaf(String node) {
-        if (!_childMap.containsKey(node) && _parentMap.containsKey(node)) {
+        if (!parentToChildMap.containsKey(node) && childToParentMap.containsKey(node)) {
             return true;
         } else {
             return false;
@@ -435,7 +437,7 @@ public final class COntology {
     }
 
     public boolean isRoot(String node) {
-        if (!_parentMap.containsKey(node) && _childMap.containsKey(node)) {
+        if (!childToParentMap.containsKey(node) && parentToChildMap.containsKey(node)) {
             return true;
         } else {
             return false;
@@ -509,7 +511,7 @@ public final class COntology {
         //System.out.println(parent);
         ArrayList<String> children;
         try {
-            children = new ArrayList<String>(_childMap.get(parent));
+            children = new ArrayList<String>(parentToChildMap.get(parent));
         } catch (Exception e) {
 //            System.out.println(parent);
             return null;
@@ -518,16 +520,16 @@ public final class COntology {
     }
 
     public int getImmediateChildrenCount(String parent) {
-        return _childMap.get(parent).size();
+        return parentToChildMap.get(parent).size();
     }
 
     public ArrayList<String> getImmediateParents(String child) {
-        ArrayList<String> parents = new ArrayList<String>(_parentMap.get(child));
+        ArrayList<String> parents = new ArrayList<String>(childToParentMap.get(child));
         return parents;
     }
 
     public int getImmediateParentsCount(String child) {
-        return _parentMap.get(child).size();
+        return childToParentMap.get(child).size();
     }
 
     public ArrayList<String> getImmediateChildrenOrdered(String parent) {
@@ -562,11 +564,11 @@ public final class COntology {
     }
 
     public boolean hasChildren(String node) {
-        return _childMap.containsKey(node);
+        return parentToChildMap.containsKey(node);
     }
 
     public boolean hasParents(String node) {
-        return _parentMap.containsKey(node);
+        return childToParentMap.containsKey(node);
     }
 
 //    recompute all the depth
@@ -588,7 +590,7 @@ public final class COntology {
 
     private void _recomputeDepthFromLeaves(String node) {
 
-        List<String> parents = _parentMap.get(node);
+        List<String> parents = childToParentMap.get(node);
         Integer nodeDepth = _depth.get(node);
 //        if(nodeDepth == null){
 //            //Should not happen. all nodes should have been assigned depth on the base level.
@@ -607,16 +609,16 @@ public final class COntology {
         /**
          * must not add duplicates
          */
-        if (parent != null && child != null && !_childMap.containsEntry(parent, child) && !_parentMap.containsEntry(child, parent)) {
-            _childMap.put(parent, child);
-            _parentMap.put(child, parent);
+        if (parent != null && child != null && !parentToChildMap.containsEntry(parent, child) && !childToParentMap.containsEntry(child, parent)) {
+            parentToChildMap.put(parent, child);
+            childToParentMap.put(child, parent);
         }
     }
 
     private void _removeRelationship(String parent, String child) {
         if (parent != null && child != null) {
-            _childMap.remove(parent, child);
-            _parentMap.remove(child, parent);
+            parentToChildMap.remove(parent, child);
+            childToParentMap.remove(child, parent);
         }
     }
 
@@ -658,6 +660,17 @@ public final class COntology {
         _recomputeDepthFromLeaves();
     }
 
+    private void addRelationshipNoUpdateDepth(Multimap<String, String> parentToChild) {
+        if (parentToChild == null || parentToChild.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, String> entry : parentToChild.entries()) {
+            _addRelationship(entry.getKey(), entry.getValue());
+        }
+//        _recomputeDepthFromLeaves();
+    }
+
     public void validate() {
 //        _removeLoops();
         removeAllLoops();
@@ -678,8 +691,8 @@ public final class COntology {
     }
 
     public void removeAll() {
-        _childMap.clear();
-        _parentMap.clear();
+        parentToChildMap.clear();
+        childToParentMap.clear();
         _depth.clear();
     }
 
@@ -705,10 +718,10 @@ public final class COntology {
 //            _exportFromRoot(root, childMap, parentMap);
 //        }
 //
-//        _childMap.clear();
-//        _parentMap.clear();
-//        _childMap.putAll(childMap);
-//        _parentMap.putAll(parentMap);
+//        parentToChildMap.clear();
+//        childToParentMap.clear();
+//        parentToChildMap.putAll(childMap);
+//        childToParentMap.putAll(parentMap);
 //
 //    }
     private void _exportFromRoot(String node, ArrayListMultimap<String, String> childMap, ArrayListMultimap<String, String> parentMap) {
@@ -768,7 +781,7 @@ public final class COntology {
     }
 
     public boolean hasRelationship(String parent, String child) {
-        if (_childMap.containsEntry(parent, child) && _parentMap.containsEntry(child, parent)) {
+        if (parentToChildMap.containsEntry(parent, child) && childToParentMap.containsEntry(child, parent)) {
             return true;
         } else {
             return false;
@@ -827,12 +840,12 @@ public final class COntology {
             _getAllChildren(term, childMap);
         }
         _getAllChildren(_name, childMap);
-        _childMap.clear();
-        _parentMap.clear();
-        
-        for(String parent : childMap.keySet()){
+        parentToChildMap.clear();
+        childToParentMap.clear();
+
+        for (String parent : childMap.keySet()) {
             List<String> children = childMap.get(parent);
-            for(String child : children){
+            for (String child : children) {
                 _addRelationship(parent, child);
             }
         }
@@ -840,8 +853,8 @@ public final class COntology {
     }
 
     private void replaceNodesFrom(COntology sourceOntology) {
-        _childMap.clear();
-        _parentMap.clear();
+        parentToChildMap.clear();
+        childToParentMap.clear();
         _edgeAttrTable.clear();
         _depth.clear();
         _indexMap.clear();

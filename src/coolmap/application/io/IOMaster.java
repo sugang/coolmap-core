@@ -5,12 +5,14 @@
 package coolmap.application.io;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.io.actions.ImportCOntologyGMTAction;
-import coolmap.application.io.actions.ImportCOntologySIFAction;
 import coolmap.application.io.actions.ImportDataTSVAction;
+import coolmap.application.io.external.ImportCOntology;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
+import coolmap.application.utils.LongTask;
+import coolmap.application.utils.TaskEngine;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
@@ -19,6 +21,7 @@ import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
+import coolmap.utils.Config;
 import coolmap.utils.Tools;
 import java.awt.Color;
 import java.awt.MenuItem;
@@ -35,6 +38,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -52,20 +56,73 @@ import org.json.JSONObject;
  */
 public class IOMaster {
 
+    private static LinkedHashSet<Class<ImportCOntology>> _ontologyImporters = new LinkedHashSet<Class<ImportCOntology>>();
+
+    public static void registerOntologyImporter(final Class<ImportCOntology> importer) {
+        if (importer == null) {
+            return;
+        }
+
+        _ontologyImporters.add(importer);
+        try {
+
+            MenuItem menuItem = new MenuItem(importer.newInstance().getLabel());
+            CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
+            menuItem.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    final ImportCOntology importerInstance;
+                    try {
+                        importerInstance = importer.newInstance();
+                    } catch (Exception ex) {
+                        CMConsole.logError("failed to initialize ontology importer :" + importer);
+                        return;
+                    }
+                    JFileChooser chooser = Tools.getCustomFileChooser(importerInstance.getFileNameExtensionFilter());
+                    int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                    if (returnVal != JFileChooser.APPROVE_OPTION) {
+                        return;
+                    }
+
+                    final File f = chooser.getSelectedFile();
+                    if (f != null && f.isFile() && f.exists()) {
+
+                        LongTask task = new LongTask("import ontology...") {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    COntology ontology = importerInstance.importFromFile(f);
+                                    ontology.setName(Tools.removeFileExtension(f.getName()));
+                                    if (ontology == null) {
+                                        return;
+                                    }
+
+                                    CoolMapMaster.addNewCOntology(ontology);
+
+                                    CMConsole.logInSuccess("Ontology imported from " + f.getPath());
+                                } catch (Exception ex) {
+                                    CMConsole.logError("failed to import ontology from " + f.getName());
+                                }
+                            }
+                        };
+
+                        TaskEngine.getInstance().submitTask(task);
+                    }
+
+                }
+            });
+
+        } catch (Exception e) {
+            CMConsole.logError("failed to initialize ontology importer :" + importer);
+        }
+
+    }
+
     private static void _initActions() {
-        MenuItem menuItem = new MenuItem("New project", new MenuShortcut(KeyEvent.VK_N, true));
-        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, false, false);
-        menuItem.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                //check whether need to save current session.
-
-                CoolMapMaster.newSession("");
-            }
-        });
-
-        menuItem = new MenuItem("Open project", new MenuShortcut(KeyEvent.VK_O, false));
+        MenuItem menuItem = new MenuItem("Open project", new MenuShortcut(KeyEvent.VK_O, false));
         CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, true, false);
         menuItem.addActionListener(new ActionListener() {
 
@@ -78,9 +135,7 @@ public class IOMaster {
 
                     System.out.println("opening session");
 
-
                     //File projectDirectory = new File("/Users/gangsu/Dropbox/gdscluster");
-
                     JFileChooser fileChooser = Tools.getFolderChooser();
                     int returnValue = fileChooser.showOpenDialog(CoolMapMaster.getCMainFrame());
                     if (returnValue != JFileChooser.APPROVE_OPTION) {
@@ -89,11 +144,7 @@ public class IOMaster {
 
                     File projectDirectory = fileChooser.getSelectedFile();
 
-
-
-
                     //File projectDirectory = new File("/Users/gangsu/000");
-
                     if (projectDirectory == null || !projectDirectory.isDirectory()) {
                         //returns
                         //throws exception
@@ -108,16 +159,12 @@ public class IOMaster {
                         sb.append(line);
                     }
 
-
                     JSONObject projectInfo = new JSONObject(sb.toString());
 
                     //System.out.println(projectInfo);
-
                     String cmatrixDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CMATRIX;
 
-
                     //restore cmatrices
-
                     JSONObject cmatrices = projectInfo.getJSONObject(IOTerm.OBJECT_CMATRIX);
                     Iterator<String> iter = cmatrices.keys();
                     while (iter.hasNext()) {
@@ -132,7 +179,6 @@ public class IOMaster {
                         String cmatrixClassString = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_CLASS);
 
 //                        System.out.println(cmatrixID + " " + cmatrixName + " " + numRow + " " + numColumn + " " + datatype + " " + io);
-
                         Class loaderClass = Class.forName(io);
                         ICMatrixIO loader = (ICMatrixIO) loaderClass.newInstance();
                         Class cmatrixClass = Class.forName(cmatrixClassString);
@@ -147,11 +193,8 @@ public class IOMaster {
                     }
 
 //                    System.out.println("Loaded CMatrices Num:" + CoolMapMaster.getLoadedCMatrices().size());
-
-
                     //////////////////////////////////////////////////////////////////////////
                     //finished restoring matrices
-
                     //restore ontologies
                     String contologyDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CONTOLOGY;
 
@@ -196,8 +239,6 @@ public class IOMaster {
                         CoolMapMaster.addNewCOntology(ontology);
                     }
 
-
-
 //                    for(COntology ontology : CoolMapMaster.getLoadedCOntologies()){
 //                        COntologyUtils.printOntology(ontology);
 //                        if(ontology.getName().equals("SCO")){
@@ -237,10 +278,6 @@ public class IOMaster {
                         object.setName(name);
 
                         //set zoom only valid when the views are loaded
-
-
-
-
                         JSONArray cmatrixIDs = entry.optJSONArray(IOTerm.FIELD_COOLMAPOBJECT_LINKEDCMATRICES);
                         ArrayList<CMatrix> matrices = new ArrayList<CMatrix>();
                         for (int i = 0; i < cmatrixIDs.length(); i++) {
@@ -272,28 +309,21 @@ public class IOMaster {
 //                        if (object.getViewRenderer() != null) {
 //                            jobject.put(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER, object.getViewRenderer().getClass());
 //                        }
-
-
-
                         //Then load snapshots
                         System.out.println("Loaded base matrices:" + object.getBaseCMatrices());
-
 
                         //System.out.println(object.getBaseCMatrices());
                         File entryFolder = new File(coolmapObjectDirectory + File.separator + id);
                         PrivateCoolMapObjectIO io = new PrivateCoolMapObjectIO();
-                        
+
 //                        StateSnapshot rowSnapshot = io.getSnapshot(entryFolder, COntology.ROW);
 //                        StateSnapshot columnSnapshot = io.getSnapshot(entryFolder, COntology.COLUMN);
-
 //                        System.out.println(rowSnapshot.getBaseNodes());
 //                        System.out.println(rowSnapshot.getTreeNodes());
 //                        System.out.println(columnSnapshot.getBaseNodes());
 //                        System.out.println(columnSnapshot.getTreeNodes());
-
 //                        object.restoreSnapshot(rowSnapshot, false);
 //                        object.restoreSnapshot(columnSnapshot, false);
-
                         object.getCoolMapView().setZoomLevels(zoomX, zoomY);
                         object.getCoolMapView().moveMapTo(mX, mY);
 //                        
@@ -316,8 +346,6 @@ public class IOMaster {
                             object.setAggregator(new PassThrough());
                             e.printStackTrace();
                         }
-
-
 
                         //object.setAggregator(new DoubleDoubleMax(object));
                         String viewRendererString = entry.optString(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER);
@@ -358,29 +386,24 @@ public class IOMaster {
                         }
                     }
 
-
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
 
+        //import 
         menuItem = new MenuItem("Numeric tab delimited (tsv)");
         CoolMapMaster.getCMainFrame().addMenuItem("File/Import data", menuItem, false, false);
         menuItem.addActionListener(new ImportDataTSVAction());
 
-
-        menuItem = new MenuItem("Simple two column(sif)");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
-        menuItem.addActionListener(new ImportCOntologySIFAction());
-        
-        menuItem = new MenuItem("GSEA gmt");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
-        menuItem.addActionListener(new ImportCOntologyGMTAction());
-
-
+//        menuItem = new MenuItem("Simple two column(sif)");
+//        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
+//        menuItem.addActionListener(new ImportCOntologySIFAction());
+//
+//        menuItem = new MenuItem("GSEA gmt");
+//        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
+//        menuItem.addActionListener(new ImportCOntologyGMTAction());
         menuItem = new MenuItem("view to TSV file");
 //        CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
         menuItem.addActionListener(new ActionListener() {
@@ -402,9 +425,6 @@ public class IOMaster {
                     if (object == null) {
                         return;
                     }
-
-
-
 
                     BufferedWriter writer = new BufferedWriter(new FileWriter(f));
                     //writer.write("Writing to file");
@@ -428,10 +448,6 @@ public class IOMaster {
                 }
             }
         });
-        
-        
-        
-        
 
         menuItem = new MenuItem("view to Excel file");
         CoolMapMaster.getCMainFrame().addMenuItem("File/Export", menuItem, false, false);
@@ -456,70 +472,88 @@ public class IOMaster {
                     if (object == null) {
                         return;
                     }
-                    
+
                     HSSFWorkbook workbook = new HSSFWorkbook();
                     HSSFSheet sheet = workbook.createSheet("Sample sheet");
-                    
+
                     Row header = sheet.createRow(0);
                     Cell cell = header.createCell(0);
                     cell.setCellValue("Row/Column");
-                    
-                    
-                    
-                    for(int i=0;i<object.getViewNumColumns();i++){
+
+                    for (int i = 0; i < object.getViewNumColumns(); i++) {
                         cell = header.createCell(i + 1);
                         cell.setCellValue(object.getViewNodeColumn(i).getName());
-    
+
                     }
-                    
-                    for(int j=0;j<object.getViewNumRows();j++){
-                        Row row = sheet.createRow(j+1);
+
+                    for (int j = 0; j < object.getViewNumRows(); j++) {
+                        Row row = sheet.createRow(j + 1);
                         cell = row.createCell(0);
                         cell.setCellValue(object.getViewNodeRow(j).getName());
-                        for(int i=0;i<object.getViewNumColumns();i++){
-                            cell = row.createCell(i+1);
+                        for (int i = 0; i < object.getViewNumColumns(); i++) {
+                            cell = row.createCell(i + 1);
                             cell.setCellValue(object.getViewValue(j, i).toString());
                         }
                     }
-                    
-                    
+
                     //writer.flush();
                     //writer.close();
                     FileOutputStream out = new FileOutputStream(f);
                     workbook.write(out);
                     out.close();
-                    
+
                     //have to check - may need to save as string
-                    
-                    
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
         });
 
+    }
 
+    private static void initializeOntologyImporters() {
+        if (Config.isInitialized()) {
+            try {
+                JSONArray importers = Config.getJSONConfig().getJSONObject("io").getJSONObject("ontology-importer").getJSONArray("load");
 
+                for (int i = 0; i < importers.length(); i++) {
 
+//                    System.out.println(importers.getString(i));
+                    try {
+                        Class<ImportCOntology> importerClass = (Class<ImportCOntology>) Class.forName(importers.getString(i));
+                        registerOntologyImporter(importerClass);
+                    } catch (Exception e) {
+                        CMConsole.logError("failed to initialize IO from config file." + importers.optString(i));
+                    }
+                }
+            } catch (Exception e) {
+                CMConsole.logError("failed to initialize IO from config file.");
+            }
+        }
+    }
+
+    private static void initializeCreateNew() {
+        MenuItem menuItem = new MenuItem("New project", new MenuShortcut(KeyEvent.VK_N, true));
+        CoolMapMaster.getCMainFrame().addMenuItem("File", menuItem, false, true);
+        menuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                //check whether need to save current session.
+
+                CoolMapMaster.newSession("");
+            }
+        });
 
     }
 
     public static void initialize() {
 
-        _initActions();
+        initializeCreateNew();
+        initializeOntologyImporters();
 
-
-
-
-
-
-
-
-
-
-        System.out.println("Initialize IO Master..");
-
-
+//        _initActions();
+//        System.out.println("Initialize IO Master");
         MenuItem item = new MenuItem("Save Project", new MenuShortcut(KeyEvent.VK_S));
 //        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
         item.addActionListener(new ActionListener() {
@@ -536,12 +570,7 @@ public class IOMaster {
 
                 File rootDirectory = fileChooser.getSelectedFile();
 
-
                 //File rootDirectory = new File("/Users/gangsu/000");
-
-
-
-
                 try {
                     FileUtils.deleteDirectory(rootDirectory);
                 } catch (Exception e) {
@@ -562,10 +591,8 @@ public class IOMaster {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
                         //String
                         String exporter = "coolmap.application.io.internal.cmatrix.PrivateDoubleCMatrixIO";
-
 
                         //Write project files
                         JSONObject projectInfo = new JSONObject();
@@ -585,12 +612,10 @@ public class IOMaster {
                             cmatrix.put(IOTerm.FIELD_CMATRIX_MEMBERCLASS, matrix.getMemberClass());
                             cmatrix.put(IOTerm.FIELD_CMATRIX_CLASS, matrix.getClass().getName());
 
-
                             if (exporter != null) {
                                 cmatrix.put(IOTerm.FIELD_CMATRIX_ICMATRIXIO, exporter);
                             }
                         }
-
 
                         //obtain contologies
                         JSONObject jcontologies = new JSONObject();
@@ -614,10 +639,7 @@ public class IOMaster {
 //                            if(ontology.getEdgetAttributeClass() != null){
 //                                jontology.put(IOTerm.FIELD_CONTOLOGY_EDGETATTRIBUTECLASS, ontology.getEdgetAttributeClass().getName());
 //                            }
-
                         }
-
-
 
                         //obtain coolmap objects
                         //under each object
@@ -649,11 +671,10 @@ public class IOMaster {
                             if (object.getAggregator() != null) {
                                 jobject.put(IOTerm.FIELD_COOLMAPOBJECT_AGGREGATOR, object.getAggregator().getClass().getName());
                             }
-                            
+
 //                            if (object.getAnnotationRenderer() != null) {
 //                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER, object.getAnnotationRenderer().getClass().getName());
 //                            }
-                            
                             if (object.getViewRenderer() != null) {
                                 jobject.put(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER, object.getViewRenderer().getClass().getName());
                             }
@@ -662,7 +683,6 @@ public class IOMaster {
                             }
 
                         }
-
 
                         //write to 
                         System.out.println(projectInfo.toString(2));
@@ -723,24 +743,15 @@ public class IOMaster {
 
                         }
 
-
-
                         //dump widgets and other info
-
-
-
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-
                 }
-
 
             }
         });
     }
-    
 
 }

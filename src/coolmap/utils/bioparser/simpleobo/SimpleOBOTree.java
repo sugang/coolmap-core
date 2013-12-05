@@ -27,6 +27,15 @@ public class SimpleOBOTree {
         goTermHash.put(entry.getID(), entry);
     }
 
+    /**
+     * returns the go tree - not a copy, for efficiency and economy concerns
+     * @return 
+     */
+    public HashMultimap<String, String> getTree(){
+        return goTree;
+    }
+    
+    
     public void addTreeBranch(String parent, String child) {
         goTree.put(parent, child);
     }
@@ -82,10 +91,8 @@ public class SimpleOBOTree {
                     //add attributes
 
                     //System.out.println(line);
-
                     String ele[] = line.split(": ", 2); //why limit is 2?
                     currentEntry.addAttribute(ele[0], ele[1]);
-
 
                 }
             }
@@ -93,54 +100,65 @@ public class SimpleOBOTree {
 
         return simpleOboTree;
     }
-    
-    public void printEntries(){
+
+    public void printEntries() {
         System.out.println("Printing " + goTermHash.size() + " entries");
-        for(SimpleOBOEntry entry : goTermHash.values()){
+        for (SimpleOBOEntry entry : goTermHash.values()) {
             entry.print();
+            if (Thread.interrupted()) {
+                System.err.println("print canceled");
+                return;
+            }
         }
     }
-    
-    public void printBranches(){
+
+    public void printBranches() {
         System.out.println("Printing tree structure between terms:");
-        for(String parent : goTree.keySet()){
+        for (String parent : goTree.keySet()) {
             System.out.print(parent + " -> ");
             Set<String> children = goTree.get(parent);
             System.out.println(children);
+            if (Thread.interrupted()) {
+                System.err.println("print canceled");
+                return;
+            }
         }
-        
+
     }
-    
+
     /**
      * return all nodeIDs that have children
-     * @return 
+     *
+     * @return
      */
-    public Set<String> getParentNodeIDs(){
+    public Set<String> getParentNodeIDs() {
         return goTree.keySet();
     }
-    
+
     /**
      * return all nodeIDs that are children of the given parentNodeID
+     *
      * @param parentNodeID
-     * @return 
+     * @return
      */
-    public Set<String> getChildNodes(String parentNodeID){
+    public Set<String> getChildNodes(String parentNodeID) {
         return goTree.get(parentNodeID);
     }
-    
-    public SimpleOBOEntry getEntry(String id){
+
+    public SimpleOBOEntry getEntry(String id) {
         return goTermHash.get(id);
     }
-    
-    public Set<String> getAllNodeIDs(){
+
+    public Set<String> getAllNodeIDs() {
         return goTermHash.keySet();
     }
-    
-    public Set<SimpleOBOEntry> getAllEntries(){
+
+    public Set<SimpleOBOEntry> getAllEntries() {
         HashSet<SimpleOBOEntry> entries = new HashSet<>();
         entries.addAll(goTermHash.values());
         return entries;
     }
     
     
+
 }

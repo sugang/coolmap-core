@@ -1,7 +1,6 @@
 package coolmap;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.io.external.ImportCOntologyFromGMT;
 import coolmap.application.io.external.ImportCOntologyFromSimpleTwoColumn;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.application.widget.impl.console.CMConsole;
@@ -12,25 +11,16 @@ import coolmap.canvas.sidemaps.impl.RowLabels;
 import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.DoubleDoubleMean;
-import coolmap.data.aggregator.impl.DoubleToNetwork;
 import coolmap.data.cmatrix.model.CMatrix;
-import coolmap.data.cmatrix.model.NetworkCMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.DoubleSnippet1_3;
-import coolmap.data.snippet.SnippetMaster;
 import coolmap.utils.Config;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import org.json.JSONObject;
-import rcaller.RCaller;
-import rcaller.RCode;
 
 
 /*
@@ -73,11 +63,11 @@ public class Main {
 
                 loadSampleCoolMapProject();
                 
-                try {
-//                    ImportCOntologyFromGMT.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/msigdb.v4.0.symbols.gmt"));
-                } catch (Exception ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//                try {
+////                    ImportCOntologyFromGMT.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/msigdb.v4.0.symbols.gmt"));
+//                } catch (Exception ex) {
+//                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+//                }
 
             }
         });
@@ -152,10 +142,13 @@ public class Main {
 //            for(int i=0; i<100; i++){
 //                COntology.setAttribute("Node2", "Weight"+i, "Attr");
 //            }
-            onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+            
+            ImportCOntologyFromSimpleTwoColumn ip = new ImportCOntologyFromSimpleTwoColumn();
+            
+            onto = ip.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
 
-            onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
+            onto = ip.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
             CoolMapMaster.addNewCOntology(onto);
 
             object.insertRowNodes(onto.getRootNodesOrdered());
@@ -211,6 +204,7 @@ public class Main {
         }
     }
 
+    /*
     public static void main3(String args[]) {
         CoolMapMaster.initialize();
         //Use this mechanism to determine which widgets should be loaded.
@@ -261,7 +255,7 @@ public class Main {
                     object.getCoolMapView().addColumnMap(new ColumnTree(object));
                     CoolMapMaster.addNewBaseMatrix(matrix);
                     CoolMapMaster.addNewCoolMapObject(object);
-                    onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+                    //onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
                     CoolMapMaster.addNewCOntology(onto);
                 }
 
@@ -780,4 +774,5 @@ public class Main {
 //
 //
 //    }
+    */
 }

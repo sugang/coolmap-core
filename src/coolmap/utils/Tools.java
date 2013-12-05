@@ -135,6 +135,11 @@ public class Tools {
     }
 
     public static JFileChooser getCustomFileChooser(FileFilter filter) {
+        FileFilter[] filters = _fileChooser.getChoosableFileFilters();
+        for(FileFilter f : filters){
+            _fileChooser.removeChoosableFileFilter(f);
+        }
+        
         _fileChooser.setFileFilter(filter);
         return _fileChooser;
     }

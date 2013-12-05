@@ -48,5 +48,15 @@
                 }
             }
         }
+    },
+    "io":{
+        "ontology-importer":{
+            "load":[
+                "coolmap.application.io.external.ImportCOntologyFromSimpleTwoColumn",
+                "coolmap.application.io.external.ImportCOntologyFromGMT",
+                "coolmap.application.io.external.ImportCOntologyFromOBO"
+            ]
+        }
+        
     }
 }

@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultRowSorter;
@@ -171,9 +173,13 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 //        
 //        public boolean showDialog
 //    }
+    private final Executor executor;
+
     public WidgetCOntology() {
 
         super("Ontology Table", W_DATA, L_DATAPORT, UI.getImageIcon("textList"), null);
+
+        executor = Executors.newSingleThreadExecutor();
 
         _ontologyTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -381,7 +387,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
             @Override
             public void itemStateChanged(ItemEvent ie) {
-                if (ie.getStateChange() == ItemEvent.SELECTED) {
+                if (ie.getStateChange() == ItemEvent.SELECTED) {      
+                    _searchField.setText("");
+                    _searchField.setBackground(Color.WHITE);
                     _updateTable();
                 }
             }
@@ -639,18 +647,29 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
             @Override
             public void insertUpdate(DocumentEvent de) {
-                _filterTable();
+                _searchField.setBackground(UI.colorLightYellow);
             }
 
             @Override
             public void removeUpdate(DocumentEvent de) {
-                _filterTable();
+                _searchField.setBackground(UI.colorLightYellow);
             }
 
             @Override
             public void changedUpdate(DocumentEvent de) {
             }
         });
+        
+        _searchField.setToolTipText("Hit the Enter key to update the ontology table based on the current search terms\nWhen the search box is yellow, an update is required by the user");
+        
+        _searchField.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                _filterTable();
+            }
+        });
+        
         _ontologyTable.setAutoCreateRowSorter(true);
     }
 
@@ -674,22 +693,23 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
                         //Some more work with the filter for multiple terms
                         _searchField.setBackground(Color.WHITE);
-
-                        HashSet<RowFilter<Object, Object>> filters = new HashSet<>();
-
                         String ele[] = text.trim().split("\\s+");
-                        for (String term : ele) {
-                            filters.add(RowFilter.regexFilter("(?i)" + term)); //apply to all indices
+                        if (ele.length == 1) {
+                            ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + ele[0]));
+                        } else {
+
+                            HashSet<RowFilter<Object, Object>> filters = new HashSet<>();
+
+                            for (String term : ele) {
+                                filters.add(RowFilter.regexFilter("(?i)" + term));
+                            }
+
+                            ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
                         }
 
-//                        RowFilter.andFilter(filters);
-                        ((DefaultRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.andFilter(filters));
-
-//                        ((TableRowSorter) _ontologyTable.getRowSorter()).setRowFilter(RowFilter.regexFilter("(?i)" + text));
                     } catch (Exception e) {
-                        
+
                         //e.printStackTrace();
-                        
                         _searchField.setBackground(UI.colorRedWarning);
 
                         //e.printStackTrace();
@@ -1244,9 +1264,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         obj.insertColumnNodes(obj.getViewNumColumns(), newNodes, true);
         obj.getCoolMapView().centerToSelections();
         StateStorageMaster.addState(state);
-        
-        //
 
+        //
     }
 
     private void _prependColumns() {
