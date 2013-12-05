@@ -8,13 +8,32 @@ import coolmap.canvas.CoolMapView;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 
@@ -24,9 +43,6 @@ import org.jdesktop.core.animation.timing.TimingTarget;
  */
 public class ColDrawer extends JLayeredPane implements ComponentListener {
 
-    
-    
-    
     //private int _defaultHeight = 200;
     //private int _drawerContainerHeight = _defaultHeight; //actual height
     //private int __lastHeight = __defaultHeight; //records the last height before collapse
@@ -47,23 +63,19 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             //Graphics2D g2D = (Graphics2D) grphcs;
             //Graphics newGraphics = g2D.create(0, 0, getWidth(), getHeight());
 
-
             //newGraphics.setClip(new RoundRectangle2D.Double(-12, -12, getWidth() + 12, getHeight() + 12, 12, 12));
-
             super.paintComponent(grphcs);
         }
     };
     private final Point _colRowDimensions;
     private final int _defaultInitialHeight = 120;
     private int _initialHeight = _defaultInitialHeight;
-    
-    public void clearBuffers(){
-        for(ColumnMap map : _columnMaps){
+
+    public void clearBuffers() {
+        for (ColumnMap map : _columnMaps) {
             map.clearBuffer();
         }
     }
-    
-    
 
     public void justifyView() {
         for (ColumnMap map : _columnMaps) {
@@ -132,6 +144,15 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
 
     }
 
+    public ColumnMap getColumnMap(String className){
+        for (ColumnMap map : _columnMaps) {
+            if (map.getClass().getName().equals(className)) {
+                return map;
+            }
+        }
+        return null;
+    }
+
     public void addColumnMap(ColumnMap columnMap, int initialHeight) {
         if (columnMap == null) {
             return;
@@ -140,9 +161,9 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         if (_columnMaps.contains(columnMap)) {
             return;
         }
-        
-        for(ColumnMap exisitingColumnMap : _columnMaps){
-            if(exisitingColumnMap.getClass().equals(columnMap.getClass())){
+
+        for (ColumnMap exisitingColumnMap : _columnMaps) {
+            if (exisitingColumnMap.getClass().equals(columnMap.getClass())) {
                 return;
             }
         }
@@ -153,8 +174,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         //int lastHeight = _columnMaps.get(_columnMaps.size() - 1).getViewPanel().getHeight();
         //System.out.println(lastHeight);
         //}
-
-
 
         if (initialHeight < 0) {
             initialHeight = 0;
@@ -169,7 +188,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         _columnMaps.add(columnMap);
 
         //int index = _drawerHandles.size() - 1;
-
         //In order to remove 
         add(panel, _stackCounter++);
         add(handle, _stackCounter++);
@@ -191,7 +209,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         columnMap.getCoolMapView().addCViewListener(columnMap);
         columnMap.getCoolMapObject().addCObjectDataListener(columnMap);
 //        System.out.println(getBounds());
-
 
 //      Should fix the problem here later.
         if (ColDrawer.this.getBounds().getHeight() > 0) {
@@ -278,8 +295,8 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             columnMap.updateBuffer(minRow, maxRow, minCol, maxCol, dimension);
         }
     }
-    
-    public void updateDrawerBuffers(){
+
+    public void updateDrawerBuffers() {
         for (ColumnMap columnMap : _columnMaps) {
             columnMap.updateBuffer();
         }
@@ -351,7 +368,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         _colRowDimensions.y = getHeight();
 
         //System.out.println(ColDrawer.this.getBounds());
-
     }
 
     @Override
@@ -473,10 +489,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             //Extra work is needed to check height!
             //makesure it's smaller 
 
-
-
-
-
             int index = _drawerHandles.indexOf(this);
             if (__drawerHeight + index * _drawerHandleHeight > bounds.height - _drawerContainerHandleHeight - _drawerHandleHeight) {
                 __drawerHeight = bounds.height - index * _drawerHandleHeight - _drawerContainerHandleHeight - _drawerHandleHeight;
@@ -486,13 +498,10 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
                 __drawerHeight = (_drawerHandles.size() - index - 1) * _drawerHandleHeight;
             }
 
-
-
             //Extra work is needed to check height yeah!
             bounds.height = __drawerHeight;
 
             //System.out.println(bounds);
-
             __contentPane.setBounds(bounds);
             setBounds(0, bounds.height, bounds.width, _drawerHandleHeight);
 
@@ -523,7 +532,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             }
 
             //System.out.println(maxHeight + " " + minHeight);
-
             if (height < minHeight) {
                 height = minHeight;
             }
@@ -615,7 +623,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
 
                 //no other maxibility
                 //System.out.println(this.getY() + " " + maxHeight + " " + __drawerHeight);
-
                 if (this.getY() <= maxHeight + 10) {
                     __toggleDrawerAnimator.startReverse();
                 } else {
@@ -624,7 +631,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
                 }
 
             }
-
 
         }
         private int _paneHeight;
@@ -704,7 +710,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
 
             g2D.setColor(UI.colorGrey1);
 
-
             g2D.drawString(label, 5, 10);
         }
 
@@ -730,10 +735,8 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             //g2D.setColor(Color.RED);
             //g2D.fillRect(0, 0, getWidth(), getHeight());
 
-
             Graphics2D g2D = (Graphics2D) g;
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
 
             g2D.setColor(UI.colorGrey4);
             g2D.fillRoundRect(-6, -6, this.getWidth() + 5, this.getHeight() - 1 + 5, 10, 10);
@@ -755,7 +758,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         @Override
         public void mouseClicked(MouseEvent me) {
             if (SwingUtilities.isLeftMouseButton(me) && me.getClickCount() >= 1) {
-
 
                 //setDrawerHeight(200);
                 if (_toggleAnimator.isRunning()) {
@@ -794,14 +796,6 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
 
 //                        }
 //                    });
-
-
-
-
-
-
-
-
                 } else {
                     _targetToggle.setLastHeight((int) _colRowDimensions.y); //record height
                     for (CDrawerHandle handle : _drawerHandles) {

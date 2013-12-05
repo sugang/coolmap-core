@@ -235,6 +235,20 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             handle.updateDrawerBoundsWithContainer(RowDrawer.this.getBounds());
         }
     }
+    
+    public RowMap getRowMap(String className){
+        try{
+            for(RowMap map : _rowMaps){
+                if(map.getClass().getName().equals(className))
+                    return map;
+            }
+            return null;
+        }
+        catch(Exception e){
+            return null;
+        }
+    }
+    
 
     public void addRowMap(RowMap rowMap, int initialWidth) {
         if (rowMap == null) {

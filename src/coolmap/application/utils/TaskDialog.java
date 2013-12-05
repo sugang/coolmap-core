@@ -41,7 +41,7 @@ public class TaskDialog extends JDialog {
         panel.add(button, BorderLayout.SOUTH);
         this.getContentPane().add(panel);
         setSize(new Dimension(250, 140));
-        setAlwaysOnTop(true);
+//        setAlwaysOnTop(true);
         setUndecorated(true);
         setLocationRelativeTo(CoolMapMaster.getCMainFrame());
         button.addActionListener(new TaskCancellationListener());

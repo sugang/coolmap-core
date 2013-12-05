@@ -93,7 +93,7 @@ public class TaskEngine {
         public void run() {
 //            super.run();
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
                 if (_workerThread != null && _workerThread.isAlive()) {
                     CoolMapMaster.getCMainFrame().showBusyDialog(_taskName);
                     while (!Thread.currentThread().isInterrupted()) {
@@ -104,7 +104,7 @@ public class TaskEngine {
                             CoolMapMaster.getCMainFrame().showBusyDialog(_taskName);
                         }
 
-                        Thread.sleep(200);
+                        Thread.sleep(500);
                     }
                     CoolMapMaster.getCMainFrame().hideBusyDialog();
                 }

@@ -660,7 +660,13 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
             }
         });
         
-        _searchField.setToolTipText("Hit the Enter key to update the ontology table based on the current search terms\nWhen the search box is yellow, an update is required by the user");
+        //_searchField.setToolTipText("Hit the Enter key to update the ontology table based on the current search terms\nWhen the search box is yellow, an update is required by the user");
+        
+        _searchField.setToolTipText("<html>Type in terms and hit <strong>Enter</strong> to search.<br/> "
+                + "A yellow background indicates that an update is required (<strong>Enter</strong>) <br/>"
+                + "Use spaces for multiple terms"
+                + "Use | for OR, example: <strong>term1|term2</strong>"
+                + "</html>");
         
         _searchField.addActionListener(new ActionListener() {
 

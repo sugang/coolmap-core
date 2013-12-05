@@ -134,6 +134,14 @@ public final class CoolMapView<BASE, VIEW> {
     public void addColumnMap(ColumnMap map) {
         _colDrawer.addColumnMap(map);
     }
+    
+    public ColumnMap getColumnMap(String className){
+       return _colDrawer.getColumnMap(className);
+    }
+    
+    public RowMap getRowMap(String className){
+        return _rowDrawer.getRowMap(className);
+    }
 
     public void addRowMap(RowMap map) {
         _rowDrawer.addRowMap(map);
@@ -150,6 +158,8 @@ public final class CoolMapView<BASE, VIEW> {
     public boolean isGridMode() {
         return _gridLayer.isVisible();
     }
+    
+    
 
 //    public void addViewAnchorMovedListener(CViewAnchorMovedListener lis) {
 //        _viewAnchorMovedListeners.add(lis);

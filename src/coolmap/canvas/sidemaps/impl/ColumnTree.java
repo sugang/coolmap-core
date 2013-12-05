@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -974,6 +975,16 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
             getViewPanel().repaint();
         }
+    }
+    
+    public void setSelectedTreeNodes(Set<VNode> treeNodes){
+//        System.out.println("Setting selected nodes to:" + treeNodes);
+        _selectedNodes.clear();
+        treeNodes.retainAll(getCoolMapObject().getViewTreeNodesColumn());
+        
+        _selectedNodes.addAll(treeNodes);
+        
+        getViewPanel().repaint();
     }
 
     private void _selectNodesInRegion(Rectangle screenRegion) {

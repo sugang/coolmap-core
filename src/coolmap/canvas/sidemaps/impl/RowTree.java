@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -72,6 +73,16 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
     private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<JCheckBoxMenuItem>();
     private JMenuItem _expandOne, _expandToAll, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
+
+    public void setSelectedTreeNodes(Set<VNode> treeNodes) {
+//        System.out.println("Setting selected nodes to:" + treeNodes);
+        _selectedNodes.clear();
+        treeNodes.retainAll(getCoolMapObject().getViewTreeNodesRow());
+
+        _selectedNodes.addAll(treeNodes);
+
+        getViewPanel().repaint();
+    }
 
     private void _selectSubTree() {
 
@@ -114,7 +125,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //        for (Range range : selectedRows) {
 //            System.out.println(range);
 //        }
-
         getCoolMapView().setSelectionsRow(selectedRows);
 
     }
@@ -128,8 +138,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     }
 
     private final Color[] labelColors;
-    
-    public RowTree(){
+
+    public RowTree() {
         this(null);
     }
 
@@ -287,7 +297,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //                }
 //            }
 //        });
-
         _clearColor = new JMenuItem("Clear subtree color");
         _popupMenu.add(_clearColor);
         _clearColor.addActionListener(new ActionListener() {
