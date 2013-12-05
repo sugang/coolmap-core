@@ -165,10 +165,11 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
     protected void _markNull(VIEW v, VNode rowNode, VNode columnNode, Graphics2D g2D, int anchorX, int anchorY, int cellWidth, int cellHeight) {
         if (v == null) {
             g2D.setColor(UI.colorBlack2);
-            int anchorXI = Math.round(anchorY);
+            int anchorXI = Math.round(anchorX);
             int anchorYI = Math.round(anchorY);
             int widthI = Math.round(cellWidth);
             int heightI = Math.round(cellHeight);
+            
             g2D.setStroke(UI.stroke1_5);
             g2D.fillRect(anchorXI, anchorYI, widthI, heightI);
             g2D.setColor(UI.colorSHOJYOHI);

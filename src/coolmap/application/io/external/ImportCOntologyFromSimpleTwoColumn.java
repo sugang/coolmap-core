@@ -14,7 +14,7 @@ import java.io.FileReader;
  *
  * @author gangsu
  */
-public class ImportCOntologyFromFile {
+public class ImportCOntologyFromSimpleTwoColumn {
 
     public static COntology importFromFile(File file) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(file));

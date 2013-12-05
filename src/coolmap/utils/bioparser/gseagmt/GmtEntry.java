@@ -55,6 +55,10 @@ public class GmtEntry {
     public void addDescription(String genesetString, String descriptionString) {
         descriptions.put(genesetString, descriptionString);
     }
+    
+    public String getDescription(String genesetString){
+        return descriptions.get(genesetString);
+    }
 
     public void printStructure() {
         System.out.println(name + ":" + idType);

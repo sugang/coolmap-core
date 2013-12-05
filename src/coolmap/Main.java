@@ -1,7 +1,8 @@
 package coolmap;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.io.external.ImportCOntologyFromFile;
+import coolmap.application.io.external.ImportCOntologyFromGMT;
+import coolmap.application.io.external.ImportCOntologyFromSimpleTwoColumn;
 import coolmap.application.io.external.ImportDoubleCMatrixFromFile;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.impl.NumberToSeries;
@@ -71,8 +72,13 @@ public class Main {
                 CMConsole.log("CoolMap initialized.");
 
                 loadSampleCoolMapProject();
+                
+                try {
+//                    ImportCOntologyFromGMT.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/msigdb.v4.0.symbols.gmt"));
+                } catch (Exception ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
-//                System.err.println(CoolMapMaster.getCMainFrame().findMenu("Edit"));
             }
         });
 
@@ -146,10 +152,10 @@ public class Main {
 //            for(int i=0; i<100; i++){
 //                COntology.setAttribute("Node2", "Weight"+i, "Attr");
 //            }
-            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+            onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(onto);
 
-            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
+            onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
             CoolMapMaster.addNewCOntology(onto);
 
             object.insertRowNodes(onto.getRootNodesOrdered());
@@ -255,7 +261,7 @@ public class Main {
                     object.getCoolMapView().addColumnMap(new ColumnTree(object));
                     CoolMapMaster.addNewBaseMatrix(matrix);
                     CoolMapMaster.addNewCoolMapObject(object);
-                    onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+                    onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
                     CoolMapMaster.addNewCOntology(onto);
                 }
 

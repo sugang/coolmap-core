@@ -5,8 +5,9 @@
 package coolmap.application.io;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.io.actions.ImportTSVAction;
-import coolmap.application.io.external.ImportCOntologyFromFile;
+import coolmap.application.io.actions.ImportCOntologyGMTAction;
+import coolmap.application.io.actions.ImportCOntologySIFAction;
+import coolmap.application.io.actions.ImportDataTSVAction;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
@@ -366,45 +367,18 @@ public class IOMaster {
             }
         });
 
-        menuItem = new MenuItem("Numeric from .tsv");
+        menuItem = new MenuItem("Numeric tab delimited (tsv)");
         CoolMapMaster.getCMainFrame().addMenuItem("File/Import data", menuItem, false, false);
-        menuItem.addActionListener(new ImportTSVAction());
+        menuItem.addActionListener(new ImportDataTSVAction());
 
 
-        menuItem = new MenuItem("Ontology from .tsv");
-        CoolMapMaster.getCMainFrame().addMenuItem("File/Import", menuItem, false, false);
-        menuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                JFileChooser chooser = Tools.getCustomFileChooser(new FileNameExtensionFilter(".tsv", "txt", "tsv"));
-                int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
-
-
-                if (returnVal != JFileChooser.APPROVE_OPTION) {
-                    return;
-                }
-
-                File f = chooser.getSelectedFile();
-                if (f.isFile() && f.exists()) {
-                    try {
-                        COntology ontology = ImportCOntologyFromFile.importFromFile(f);
-                        CoolMapMaster.addNewCOntology(ontology);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-
-
-            }
-        });
-
-
-
-        ///////////////////////////////////////////////////////////////////////
-        ///
+        menuItem = new MenuItem("Simple two column(sif)");
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
+        menuItem.addActionListener(new ImportCOntologySIFAction());
+        
+        menuItem = new MenuItem("GSEA gmt");
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology", menuItem, false, false);
+        menuItem.addActionListener(new ImportCOntologyGMTAction());
 
 
         menuItem = new MenuItem("view to TSV file");

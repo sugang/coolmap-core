@@ -58,7 +58,7 @@ public final class COntology {
     private static HashMap<String, Class> _attributeType = new HashMap<String, Class>();
     
     public static Object getAttribute(String nodeName, String attrName){
-        return _attributeTable.get(attrName, nodeName);
+        return _attributeTable.get(nodeName, attrName);
     }
     
     public static List<String> getAttributeNames(){
@@ -69,6 +69,7 @@ public final class COntology {
     
     public static void setAttribute(String nodeName, String attrName, Object attribute){
         _attributeTable.put(nodeName, attrName, attribute);
+//        System.out.println(nodeName + " " + attrName + " " + attribute);
     }
 
     public static void setAttributeType(String attrName, Class cls){
@@ -659,7 +660,7 @@ public final class COntology {
 
     public void validate() {
 //        _removeLoops();
-
+        removeAllLoops();
         _recomputeDepthFromLeaves();
     }
 
