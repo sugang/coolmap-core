@@ -89,10 +89,10 @@ public class OntologyBrowser {
      */
     public void jumpToActiveTerm(String term) {
 
-        if(term == activeTerm){
+        if (term == activeTerm) {
             return;
         }
-        
+
         parents = activeOntology.getImmediateParentsOrdered(term);
         children = activeOntology.getImmediateChildrenOrdered(term);
         siblings = null;
@@ -106,7 +106,7 @@ public class OntologyBrowser {
 
         visualizer.resetAnchors();
         activeNodeName = null;
-        
+
         fireActiveTermChanged();
     }
 
@@ -201,7 +201,7 @@ public class OntologyBrowser {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g); //To change body of generated methods, choose Tools | Templates.
-            Graphics2D g2D = (Graphics2D)(((Graphics2D) g).create());
+            Graphics2D g2D = (Graphics2D) (((Graphics2D) g).create());
             g2D.setFont(labelFontBold);
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //            g2D.setColor(UI.colorBlack2);
@@ -229,6 +229,7 @@ public class OntologyBrowser {
 
                 fontDescent = g2D.getFontMetrics().getMaxDescent();
 
+//                performance can be bad for large number of nodes. won't be very helpful
                 //paint sibling line
                 if (siblings != null && !siblings.isEmpty()) {
                     g2D.setColor(UI.colorRedWarning);
@@ -238,17 +239,31 @@ public class OntologyBrowser {
                     if (ci >= 0 && activeParentIndex != null) {
 
                         for (int i = 0; i < siblings.size(); i++) {
-                            g2D.drawLine(getWidth() / 3 - marginLR, anchorParents.y + cellHeight / 2 + activeParentIndex * cellHeight, getWidth() / 3 + marginLR, anchorCenter.y + cellHeight / 2 - ci * cellHeight + i * cellHeight);
+                            int anchorParent = anchorParents.y + cellHeight / 2 + activeParentIndex * cellHeight;
+                            if (anchorParent < 0) {
+                                continue;
+                            }
+                            if (anchorParent > getHeight()) {
+                                break;
+                            }
+                            g2D.drawLine(getWidth() / 3 - marginLR, anchorParent, getWidth() / 3 + marginLR, anchorCenter.y + cellHeight / 2 - ci * cellHeight + i * cellHeight);
                         }
                     }
                 }
 
-                //paint lines
+//                paint lines
                 g2D.setColor(UI.colorBlack4);
                 g2D.setStroke(UI.stroke1);
                 if (children != null && !children.isEmpty()) {
                     for (int i = 0; i < children.size(); i++) {
-                        g2D.drawLine(getWidth() * 2 / 3 - marginLR, anchorCenter.y + cellHeight / 2, anchorChildren.x + marginLR, anchorChildren.y + i * cellHeight + cellHeight / 2);
+                        int anchorChild = anchorChildren.y + i * cellHeight + cellHeight / 2;
+                        if (anchorChild < 0) {
+                            continue;
+                        }
+                        if (anchorChild > getHeight()) {
+                            break;
+                        }
+                        g2D.drawLine(getWidth() * 2 / 3 - marginLR, anchorCenter.y + cellHeight / 2, anchorChildren.x + marginLR, anchorChild);
                     }
                 }
 
@@ -493,7 +508,7 @@ public class OntologyBrowser {
         private int paddingL = 10;
 
         private void paintCell(Graphics2D g2D, Point anchor, int width, int height, String label, nodeType type, Shape defaultClip) {
-            
+
             if (anchor.y + height < 0 || anchor.y > getHeight()) {
                 return; //only paint those 
             }
@@ -529,10 +544,10 @@ public class OntologyBrowser {
 
             g2D.setColor(Color.BLACK);
 //            g2D.drawRect(anchor.x, anchor.y, width, height);
-            
+
             if (activeTerm != null) {
                 //g2D.setClip(new Rectangle());
-                
+
                 g2D.setClip(defaultClip);
                 g2D.clip(new Rectangle(cellx + marginTB, celly, cellWidth - 2 * marginTB, cellHeight));
                 g2D.drawString(label, cellx + marginTB, celly + fontSize / 2 + fontDescent + 1);
@@ -981,7 +996,7 @@ public class OntologyBrowser {
                             activeNodeName = activeTerm;
                         }
                     } else {
-                        
+
                         int index = (int) Math.floor(1.0 * (y - visualizer.anchorCenter.y) / cellHeight) + siblings.indexOf(activeTerm);
 
 //                    System.out.println(index);

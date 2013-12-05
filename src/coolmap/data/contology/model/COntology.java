@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,17 @@ public final class COntology {
     //These are used for handling attribute. all static
     private static HashBasedTable<String, String, Object> _attributeTable = HashBasedTable.create();
     private static HashMap<String, Class> _attributeType = new HashMap<String, Class>();
+    
+    private final LinkedHashSet<COntologyPreset> presets = new LinkedHashSet<COntologyPreset>();
+    
+    public void addPreset(COntologyPreset preset){
+        presets.add(preset);
+    }
+    
+    public Collection<COntologyPreset> getPresets(){
+        return new ArrayList<COntologyPreset>(presets);
+    }
+    
 
     public static Object getAttribute(String nodeName, String attrName) {
         return _attributeTable.get(nodeName, attrName);

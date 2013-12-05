@@ -5,10 +5,31 @@
  */
 package coolmap.application.io.external;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Table;
 import coolmap.application.io.external.interfaces.ImportData;
+import coolmap.application.widget.impl.console.CMConsole;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
+import coolmap.data.aggregator.impl.DoubleDoubleMean;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.contology.model.COntologyPreset;
+import coolmap.data.snippet.DoubleSnippet1_3;
+import coolmap.utils.Tools;
+import coolmap.utils.bioparser.geosoft.ArrayTable;
+import coolmap.utils.bioparser.geosoft.GeoSOFT;
+import coolmap.utils.bioparser.geosoft.Subset;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -18,31 +39,233 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class ImportDataFromGEOSOFT implements ImportData {
 
+    private HashSet<CoolMapObject> objects = new HashSet<CoolMapObject>();
+    private HashSet<COntology> ontologies = new HashSet<COntology>();
+
+    private final String subset_dataset_id = "subset_dataset_id";
+    private final String subset_description = "subset_description";
+    private final String subset_sample_id = "subset_sample_id";
+    private final String subset_type = "subset_type";
+
+    private final String gene_title = "Gene title";
+    private final String gene_symbol = "Gene symbol";
+    private final String gene_ID = "Gene ID";
+    private final String uniGene_title = "UniGene title";
+    private final String uniGene_symbol = "UniGene symbol";
+    private final String uniGene_ID = "UniGene ID";
+    private final String nucleotide_title = "Nucleotide Title";
+    private final String gi = "GI";
+    private final String genBank_Accession = "GenBank Accession";
+    private final String platform_CLONEID = "Platform_CLONEID";
+    private final String platform_ORF = "Platform_ORF";
+    private final String platform_SPOTID = "Platform_SPOTID";
+    private final String chromosome_location = "Chromosome location";
+    private final String chromosome_annotation = "Chromosome annotation";
+    private final String go_function = "GO:Function";
+    private final String go_process = "GO:Process";
+    private final String go_component = "GO:Component";
+    private final String go_function_ID = "GO:Function ID";
+    private final String go_process_ID = "GO:Process ID";
+    private final String go_component_ID = "GO:Component ID";
+
     @Override
-    public void importFromFile(File... file) throws Exception {
-//        try {
-//            GeoSOFT geoEntry = GeoSOFT.parse(file[0]);
+    public void importFromFile(File... files) throws Exception {
+        for (File file : files) {
+            try {
+                GeoSOFT geoEntry = GeoSOFT.parse(file);
+                Collection<Subset> subsets = geoEntry.getSubsets();
+
+                String namePrefix = Tools.removeFileExtension(file.getName());
+
+//                Import all the subsets
+                COntology ontology = new COntology(namePrefix + " Subsets", "All sample subsets in " + namePrefix);
+                for (Subset subset : subsets) {
+//                    subset.printDetails();
+                    String parentTerm = subset.getID();
+                    String childTerms = subset.getAttribute(subset_sample_id);
+                    String description = subset.getAttribute(subset_description);
+                    String type = subset.getAttribute(subset_type);
+
+                    if (parentTerm == null || parentTerm.length() == 0 || childTerms == null || childTerms.length() == 0) {
+                        continue;
+                    }
+
+                    COntology.setAttribute(parentTerm, "GEO.Description", description);
+                    COntology.setAttribute(parentTerm, "GEO.Type", type);
+
+                    String[] cTerms = childTerms.split(",");
+                    for (String term : cTerms) {
+                        ontology.addRelationshipNoUpdateDepth(parentTerm, term.trim());
+                    }
+
+                }//end of all subsets
+
+                //This should be fast enough
+                ontology.validate(); //also attempt to remove loops
+                ontologies.add(ontology);
+
+//                Import attributes
+                ArrayTable arrayTable = geoEntry.getArrayTable();
+                String rowNames[] = arrayTable.getRowNames();
+                String columnNames[] = arrayTable.getColumnNames();
+                String rowSymbols[] = arrayTable.getRowSymbols();
+                LinkedHashMultimap<String, String> mapping = arrayTable.getGeneSymbolToProbeIDMapping();
+                COntology geneOntology = new COntology(namePrefix + " Genes", "GO terms, Gene Symbols to ProbeID");
+
+                geneOntology.addRelationshipUpdateDepth(mapping); //add all
+
+//              Then need to add GO terms  
+                Table<String, String, String> attributes = arrayTable.getAttributes();
+//                for (String probeID : attributes.rowKeySet()) {
+////                    for(String attrName : attributes.columnKeySet()){
+////                        COntology.setAttribute(probeID, "GEO." + attrName, attributes.get(probeID, attrName));
+////                    }
 //
-//            ArrayTable arrayTable = geoEntry.getArrayTable();
+//                    //Also add:
+////                    String symbol = attributes.get(probeID, "Gene symbol");
+//                    COntology.setAttribute(probeID, probeID, attributes);
 //
-////        arrayTable.printAttribute();
-//            //This would also create a new COntology and add
-//            String rowNames[] = arrayTable.getRowNames();
-//            String columnNames[] = arrayTable.getColumnNames();
-//
-//            DoubleCMatrix matrix = new DoubleCMatrix(Tools.removeFileExtension(file.getName()), rowNames.length, columnNames.length);
-//
-//            matrix.setColLabels(columnNames);
-//            matrix.setRowLabels(rowNames);
-//
-//            for (int i = 0; i < rowNames.length; i++) {
-//                for (int j = 0; j < columnNames.length; j++) {
-//                    matrix.setValue(i, j, arrayTable.getValue(i, j));
-//                    if (Thread.interrupted()) {
-//                        return null;
-//                    }
 //                }
-//            }
+                LinkedHashSet<String> genes = new LinkedHashSet<String>();
+                
+                String probeID, symbol;
+                for (int i = 0; i < rowNames.length; i++) {
+                    probeID = rowNames[i];
+                    
+                    COntology.setAttribute(probeID, "GEO. nucleotide title", attributes.get(probeID, nucleotide_title));
+                    
+                    
+                    symbol = rowSymbols[i];
+
+                    if (symbol == null || symbol.length() == 0) {
+                        continue;
+                    }
+                    
+                    genes.add(symbol);
+                    
+                    COntology.setAttribute(symbol, "GEO. gene title", attributes.get(probeID, gene_title));
+                    
+                    try {
+
+                        String[] GOFunctionIDs = attributes.get(probeID, go_function_ID).split("///", -1);
+                        String[] GOFunctions = attributes.get(probeID, go_function).split("///", -1);
+
+                        for (int j = 0; j < GOFunctionIDs.length; j++) {
+                            COntology.setAttribute(GOFunctionIDs[j], "GEO.Go function", GOFunctions[j]);
+                            String parentTerm = GOFunctionIDs[j];
+                            if (parentTerm == null || parentTerm.length() == 0) {
+                                continue;
+                            }
+                            geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
+                        }
+
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+
+                    try {
+
+                        String[] GOComponentIDs = attributes.get(probeID, go_component_ID).split("///", -1);
+                        String[] GOComponents = attributes.get(probeID, go_component).split("///", -1);
+
+                        for (int j = 0; j < GOComponentIDs.length; j++) {
+                            COntology.setAttribute(GOComponentIDs[j], "GEO.Go component", GOComponents[j]);
+                            String parentTerm = GOComponentIDs[j];
+                            if (parentTerm == null || parentTerm.length() == 0) {
+                                continue;
+                            }
+                            geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
+                        }
+
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+
+                    try {
+
+                        String[] GOComponentIDs = attributes.get(probeID, go_process_ID).split("///", -1);
+                        String[] GOComponents = attributes.get(probeID, go_process).split("///", -1);
+
+                        for (int j = 0; j < GOComponentIDs.length; j++) {
+                            COntology.setAttribute(GOComponentIDs[j], "GEO.Go process", GOComponents[j]);
+                            String parentTerm = GOComponentIDs[j];
+                            if (parentTerm == null || parentTerm.length() == 0) {
+                                continue;
+                            }
+                            geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
+                        }
+
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                    }
+
+                }
+
+                geneOntology.validate();
+                
+                //add presets
+                COntologyPreset preset = new COntologyPreset("Genes", genes, null);
+                
+                geneOntology.addPreset(preset);
+                
+                
+                ontologies.add(geneOntology);
+
+                DoubleCMatrix matrix = new DoubleCMatrix(Tools.removeFileExtension(file.getName()), rowNames.length, columnNames.length);
+
+                //
+//                System.out.println(Arrays.toString(rowNames));
+                //If soft file is full then it becomes null??
+//                System.out.println(Arrays.toString(columnNames));
+                matrix.setColLabels(columnNames);
+                matrix.setRowLabels(rowNames);
+                
+                for (int i = 0; i < rowNames.length; i++) {
+                    for (int j = 0; j < columnNames.length; j++) {
+                        matrix.setValue(i, j, arrayTable.getValue(i, j));
+                        if (Thread.interrupted()) {
+                            objects.clear();
+                            ontologies.clear();
+                            return;
+                        }
+                    }
+                }
+
+                //replace these with genes later, intialize ontology first
+                CoolMapObject object = new CoolMapObject();
+                object.setName(Tools.removeFileExtension(file.getName()));
+                object.addBaseCMatrix(matrix);
+
+                ArrayList<VNode> nodes = new ArrayList<VNode>();
+                for (String label : preset.getLabels()) {
+                    nodes.add(new VNode(label.toString(), geneOntology));
+                }
+                object.insertRowNodes(nodes);
+                /////////////////////////////////////////////////////////
+
+                nodes.clear();
+                for (Object label : matrix.getColLabelsAsList()) {
+                    nodes.add(new VNode(label.toString()));
+                }
+                object.insertColumnNodes(nodes);
+
+                object.setAggregator(new DoubleDoubleMean());
+                object.setSnippetConverter(new DoubleSnippet1_3());
+                object.setViewRenderer(new NumberToColor(), true);
+
+                object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+                object.getCoolMapView().addColumnMap(new ColumnTree(object));
+                object.getCoolMapView().addRowMap(new RowLabels(object));
+                object.getCoolMapView().addRowMap(new RowTree(object));
+
+                objects.add(object);
+
+            } catch (Exception e) {
+                CMConsole.logError(" failed to import numeric matrix data from: " + file);
+                e.printStackTrace();
+            }
+        }
+
 //
 //            if (Thread.interrupted()) {
 //                return null;
@@ -66,14 +289,12 @@ public class ImportDataFromGEOSOFT implements ImportData {
 
     @Override
     public Set<CoolMapObject> getImportedCoolMapObjects() {
-        return null;
+        return objects;
     }
 
     @Override
     public Set<COntology> getImportedCOntology() {
-        return null;
+        return ontologies;
     }
-
-
 
 }

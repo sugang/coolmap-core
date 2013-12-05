@@ -6,6 +6,7 @@ package coolmap.utils.bioparser.geosoft;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Table;
 import java.util.Arrays;
 
 /**
@@ -19,16 +20,33 @@ public class ArrayTable {
     private LinkedHashMultimap<String, String> symbolToID;
     private Double[][] data;
     private String[] rowNames;
+    private String[] rowSymbols;
     private String[] columnNames;
     //The attributes can also be loaded as a two-way table
-    private HashBasedTable<String, String, Object> attributes;
+    private HashBasedTable<String, String, String> attributes;
 
+    public LinkedHashMultimap<String, String> getGeneSymbolToProbeIDMapping(){
+        return symbolToID;
+    }
+    
+//    public String getAttribute(String rowKey, String columnKey){
+//        return attributes.get(rowKey, columnKey);
+//    }
+  
+    public Table<String, String, String> getAttributes(){
+        return attributes;
+    }
+    
     private ArrayTable() {
         this(null, null);
     }
 
     public String[] getRowNames() {
         return rowNames;
+    }
+    
+    public String[] getRowSymbols(){
+        return rowSymbols;
     }
 
     public String[] getColumnNames() {
@@ -46,6 +64,7 @@ public class ArrayTable {
         symbolToID = LinkedHashMultimap.create();
         data = new Double[rowCount][columnCount];
         rowNames = new String[rowCount];
+        rowSymbols = new String[rowCount];
         columnNames = new String[columnCount];
         attributes = HashBasedTable.create();
     }
@@ -64,8 +83,9 @@ public class ArrayTable {
         columnNames[column] = name;
     }
 
-    public void setRowNames(int row, String name) {
+    public void setRowNames(int row, String name, String symbol) {
         rowNames[row] = name;
+        rowSymbols[row] = symbol;
     }
 
     public void printData() {
@@ -136,7 +156,7 @@ public class ArrayTable {
 
     }
 
-    public void addAttribute(String probeName, String attributeName, Object value) {
+    public void addAttribute(String probeName, String attributeName, String value) {
         if (probeName != null && probeName.length() > 0
                 && attributeName != null && attributeName.length() > 0
                 && value != null) {

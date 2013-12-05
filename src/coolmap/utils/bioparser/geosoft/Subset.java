@@ -54,4 +54,14 @@ public class Subset {
         }
         System.out.println();
     }
+    
+    public String getAttribute(String key){
+        return attributes.get(key);
+    }
+    
+    public String getID(){
+        return subsetID;
+    }
+    
+    
 }

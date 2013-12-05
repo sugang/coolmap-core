@@ -438,6 +438,16 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             //System.out.println("zoomX:" + __zoomX);
             int subMapWidth = VNode.distanceInclusive(colStartNode, colEndNode, __zoomX);
             int subMapHeight = VNode.distanceInclusive(rowStartNode, rowEndNode, __zoomY);
+            
+            //ensure it's at least 1 px 
+            if(subMapWidth <= 0){
+                subMapWidth = 1;
+            }
+            
+            //ensure it's at least 1 px
+            if(subMapHeight <= 0){
+                subMapHeight = 1;
+            }
 
             //System.out.println(subMapWidth + " " + subMapHeight);
             final BufferedImage subMap = _graphicsConfiguration.createCompatibleImage(subMapWidth, subMapHeight, Transparency.OPAQUE);

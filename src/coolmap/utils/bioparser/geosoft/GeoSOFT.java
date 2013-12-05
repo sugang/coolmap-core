@@ -23,6 +23,10 @@ public class GeoSOFT {
     private final ArrayTable arrayTable;
     private final Annotation annotation;
 
+    public Collection<Subset> getSubsets() {
+        return subsets;
+    }
+
     private GeoSOFT() {
         this(null, null, null, null, null);
     }
@@ -216,12 +220,16 @@ public class GeoSOFT {
                                 }
                                 //just continue
                             } else {
+
+                                for (int i = 2; i < columnCount + 2; i++) {
+                                    arrayTable.setColumnName(i - 2, headers[i]);
+                                }
+
                                 //also parse the additional attributes; 
                                 //
                                 //This will be extended to load additional attributes
                                 /////////////////////////////////////////////////////
                                 //place holders
-
 //                                System.out.println("Additional Annotation spotted: this is a full soft file");
 //                                additional data attributes
                                 dataAttributes = new String[headers.length - 2 - columnCount];
@@ -235,13 +243,13 @@ public class GeoSOFT {
                             //These are data lines
                             String[] dataLine = line.split("\t", -1);
                             try {
-                                //add row name
-                                arrayTable.setRowNames(dataRowIndex, dataLine[0].trim());
-
                                 //add mapping
                                 if (dataLine[1] != null && dataLine[1].trim().length() > 0) {
                                     arrayTable.addMapping(dataLine[1].trim(), dataLine[0].trim());
                                 }
+
+                                //add row name
+                                arrayTable.setRowNames(dataRowIndex, dataLine[0].trim(), dataLine[1].trim());
 
                                 for (int j = 0; j < columnCount; j++) {
                                     try {
