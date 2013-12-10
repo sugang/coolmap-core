@@ -127,68 +127,94 @@ public class ImportDataFromGEOSOFT implements ImportData {
 //
 //                }
                 LinkedHashSet<String> genes = new LinkedHashSet<String>();
-                
-                String probeID, symbol;
+                LinkedHashSet<String> goFunctionsPreset = new LinkedHashSet<String>();
+                LinkedHashSet<String> goComponentsPreset = new LinkedHashSet<String>();
+                LinkedHashSet<String> goProcessesPreset = new LinkedHashSet<String>();
+
+                String probeID, symbol, nucleotideTitleData, geneTitleData, goFunctionIDString, goFunctionString, goComponentIDString, goComponentString, goProcessIDString, goProcessString;
                 for (int i = 0; i < rowNames.length; i++) {
                     probeID = rowNames[i];
-                    
-                    COntology.setAttribute(probeID, "GEO. nucleotide title", attributes.get(probeID, nucleotide_title));
-                    
-                    
+
                     symbol = rowSymbols[i];
 
                     if (symbol == null || symbol.length() == 0) {
                         continue;
                     }
-                    
+
                     genes.add(symbol);
-                    
-                    COntology.setAttribute(symbol, "GEO. gene title", attributes.get(probeID, gene_title));
-                    
+
+                    nucleotideTitleData = attributes.get(probeID, nucleotide_title);
+                    geneTitleData = attributes.get(probeID, gene_title);
+
+                    if (nucleotideTitleData != null) {
+                        COntology.setAttribute(probeID, "GEO." + nucleotide_title, nucleotideTitleData);
+                    }
+                    if (geneTitleData != null) {
+                        COntology.setAttribute(symbol, "GEO." + gene_title, attributes.get(probeID, geneTitleData));
+                    }
+
+//                  //These attributes may not exist  
                     try {
 
-                        String[] GOFunctionIDs = attributes.get(probeID, go_function_ID).split("///", -1);
-                        String[] GOFunctions = attributes.get(probeID, go_function).split("///", -1);
+                        goFunctionIDString = attributes.get(probeID, go_function_ID);
+                        goFunctionString = attributes.get(probeID, go_function);
 
-                        for (int j = 0; j < GOFunctionIDs.length; j++) {
-                            COntology.setAttribute(GOFunctionIDs[j], "GEO.Go function", GOFunctions[j]);
-                            String parentTerm = GOFunctionIDs[j];
-                            if (parentTerm == null || parentTerm.length() == 0) {
-                                continue;
+                        if (goFunctionIDString != null) {
+
+                            String[] GOFunctionIDs = goFunctionIDString.split("///", -1);
+                            String[] GOFunctions = goFunctionString.split("///", -1);
+
+                            for (int j = 0; j < GOFunctionIDs.length; j++) {
+
+                                COntology.setAttribute(GOFunctionIDs[j], "GEO.Go function", GOFunctions[j]);
+
+                                String parentTerm = GOFunctionIDs[j];
+                                if (parentTerm == null || parentTerm.length() == 0) {
+                                    continue;
+                                }
+                                geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
+
                             }
-                            geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
                         }
 
                     } catch (Exception e) {
-//                        e.printStackTrace();
+
                     }
 
                     try {
 
-                        String[] GOComponentIDs = attributes.get(probeID, go_component_ID).split("///", -1);
-                        String[] GOComponents = attributes.get(probeID, go_component).split("///", -1);
+                        goComponentIDString = attributes.get(probeID, go_component_ID);
+                        goComponentString = attributes.get(probeID, go_component);
 
-                        for (int j = 0; j < GOComponentIDs.length; j++) {
-                            COntology.setAttribute(GOComponentIDs[j], "GEO.Go component", GOComponents[j]);
-                            String parentTerm = GOComponentIDs[j];
-                            if (parentTerm == null || parentTerm.length() == 0) {
-                                continue;
+                        if (goComponentIDString != null) {
+                            String[] GOComponentIDs = goComponentIDString.split("///", -1);
+                            String[] GOComponents = goComponentString.split("///", -1);
+
+                            for (int j = 0; j < GOComponentIDs.length; j++) {
+                                COntology.setAttribute(GOComponentIDs[j], "GEO.Go component", GOComponents[j]);
+                                String parentTerm = GOComponentIDs[j];
+                                if (parentTerm == null || parentTerm.length() == 0) {
+                                    continue;
+                                }
+                                geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
+
                             }
-                            geneOntology.addRelationshipNoUpdateDepth(parentTerm, symbol);
                         }
 
                     } catch (Exception e) {
-//                        e.printStackTrace();
+
                     }
 
                     try {
+                        goProcessIDString = attributes.get(probeID, go_process_ID);
+                        goProcessString = attributes.get(probeID, go_process);
 
-                        String[] GOComponentIDs = attributes.get(probeID, go_process_ID).split("///", -1);
-                        String[] GOComponents = attributes.get(probeID, go_process).split("///", -1);
+                        String[] GOProcessIDs = goProcessIDString.split("///", -1);
+                        String[] GOProcesses = goProcessString.split("///", -1);
 
-                        for (int j = 0; j < GOComponentIDs.length; j++) {
-                            COntology.setAttribute(GOComponentIDs[j], "GEO.Go process", GOComponents[j]);
-                            String parentTerm = GOComponentIDs[j];
+                        for (int j = 0; j < GOProcessIDs.length; j++) {
+                            COntology.setAttribute(GOProcessIDs[j], "GEO.Go process", GOProcesses[j]);
+                            String parentTerm = GOProcessIDs[j];
                             if (parentTerm == null || parentTerm.length() == 0) {
                                 continue;
                             }
@@ -196,19 +222,18 @@ public class ImportDataFromGEOSOFT implements ImportData {
                         }
 
                     } catch (Exception e) {
-//                        e.printStackTrace();
+
                     }
 
                 }
 
                 geneOntology.validate();
-                
+
                 //add presets
-                COntologyPreset preset = new COntologyPreset("Genes", genes, null);
-                
+                COntologyPreset preset = new COntologyPreset("Genes", "Gene level view", genes, null);
+
                 geneOntology.addPreset(preset);
-                
-                
+
                 ontologies.add(geneOntology);
 
                 DoubleCMatrix matrix = new DoubleCMatrix(Tools.removeFileExtension(file.getName()), rowNames.length, columnNames.length);
@@ -219,7 +244,7 @@ public class ImportDataFromGEOSOFT implements ImportData {
 //                System.out.println(Arrays.toString(columnNames));
                 matrix.setColLabels(columnNames);
                 matrix.setRowLabels(rowNames);
-                
+
                 for (int i = 0; i < rowNames.length; i++) {
                     for (int j = 0; j < columnNames.length; j++) {
                         matrix.setValue(i, j, arrayTable.getValue(i, j));

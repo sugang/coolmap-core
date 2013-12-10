@@ -15,11 +15,13 @@ import java.util.Collection;
 public class COntologyPreset {
 
     private final String name;
+    private final String description;
     private final ArrayList<String> labels = new ArrayList<String>();
     private final ArrayList<Integer> toExpandedIndices = new ArrayList<Integer>();
 
-    public COntologyPreset(String name, Collection<String> labels, Collection<Integer> toBeExpanded) {
+    public COntologyPreset(String name, String description, Collection<String> labels, Collection<Integer> toBeExpanded) {
         this.name = name;
+        this.description = description;
 
         if (labels != null) {
             this.labels.addAll(labels);

@@ -1238,7 +1238,15 @@ public final class CoolMapObject<BASE, VIEW> {
                 return false;
             }
 
+//            long t1 = System.currentTimeMillis();
+//            System.out.println("Expanding column nodes all");
             _vMatrix.expandColNodeToChildNodes(nodes);
+//            System.out.println("Finished expanding");
+//            long t2 = System.currentTimeMillis();
+//            long time = t2 - t1;
+//            System.out.println("Elapsed time:" + (t2 - t1));
+            
+            
             getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
             _sortTracker.clearSortedRow();

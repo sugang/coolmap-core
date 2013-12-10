@@ -169,7 +169,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             int anchorYI = Math.round(anchorY);
             int widthI = Math.round(cellWidth);
             int heightI = Math.round(cellHeight);
-            
+
             g2D.setStroke(UI.stroke1_5);
             g2D.fillRect(anchorXI, anchorYI, widthI, heightI);
             g2D.setColor(UI.colorSHOJYOHI);
@@ -195,39 +195,40 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //        return null;
 //    }
     public BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
-        if (data == null) {
-            return null;
-        }
-        CoolMapView view = data.getCoolMapView();
-        if (view == null) {
-            return null;
-        }
-        float zoomX = view.getZoomX();
-        float zoomY = view.getZoomY();
+        try {
+            if (data == null) {
+                return null;
+            }
+            CoolMapView view = data.getCoolMapView();
+            if (view == null) {
+                return null;
+            }
+            float zoomX = view.getZoomX();
+            float zoomY = view.getZoomY();
 
-        float mapWidth = view.getMapWidth() * percentage;
-        float mapHeight = view.getMapHeight() * percentage;
+            float mapWidth = view.getMapWidth() * percentage;
+            float mapHeight = view.getMapHeight() * percentage;
 
-        if (mapWidth <= 0) {
-            mapWidth = 1;
-        }
+            if (mapWidth <= 0) {
+                mapWidth = 1;
+            }
 
-        if (mapHeight <= 0) {
-            mapHeight = 1;
-        }
+            if (mapHeight <= 0) {
+                mapHeight = 1;
+            }
 
-        BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
+            BufferedImage image = _graphicsConfiguration.createCompatibleImage(Math.round(mapWidth), Math.round(mapHeight));
 
-        Graphics2D g2D = image.createGraphics();
-        g2D.setColor(Color.BLACK);
+            Graphics2D g2D = image.createGraphics();
+            g2D.setColor(Color.BLACK);
 
-        g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
+            g2D.fillRect(0, 0, image.getWidth(), image.getHeight());
 
-        //anchorage
-        float currentAnchorX = 0;
-        float currentAnchorY = 0;
-        float currentWidth = 0;
-        float currentHeight = 0;
+            //anchorage
+            float currentAnchorX = 0;
+            float currentAnchorY = 0;
+            float currentWidth = 0;
+            float currentHeight = 0;
 
 //        try{
 //            Thread.sleep(5000);
@@ -236,27 +237,27 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //            
 //        }
 //        Thread.sleep(1000);
-        //then render
-        for (int i = 0; i < data.getViewNumRows(); i++) {
-            VNode rowNode = data.getViewNodeRow(i);
-            currentAnchorY = rowNode.getViewOffset() * percentage;
-            currentHeight = rowNode.getViewSizeInMap(zoomY) * percentage;
-            if (currentHeight < 1) {
-                currentHeight = 1;
-            }
-
-            for (int j = 0; j < data.getViewNumColumns(); j++) {
-                VNode colNode = data.getViewNodeColumn(j);
-                currentAnchorX = colNode.getViewOffset() * percentage;
-                currentWidth = colNode.getViewSizeInMap(zoomX) * percentage;
-                if (currentWidth < 1) {
-                    currentWidth = 1;
+            //then render
+            for (int i = 0; i < data.getViewNumRows(); i++) {
+                VNode rowNode = data.getViewNodeRow(i);
+                currentAnchorY = rowNode.getViewOffset() * percentage;
+                currentHeight = rowNode.getViewSizeInMap(zoomY) * percentage;
+                if (currentHeight < 1) {
+                    currentHeight = 1;
                 }
 
-                VIEW v = data.getViewValue(i, j);
+                for (int j = 0; j < data.getViewNumColumns(); j++) {
+                    VNode colNode = data.getViewNodeColumn(j);
+                    currentAnchorX = colNode.getViewOffset() * percentage;
+                    currentWidth = colNode.getViewSizeInMap(zoomX) * percentage;
+                    if (currentWidth < 1) {
+                        currentWidth = 1;
+                    }
 
-                //use low definition mode
-                renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
+                    VIEW v = data.getViewValue(i, j);
+
+                    //use low definition mode
+                    renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
 //                try{
 //                    Thread.sleep(50);
 //                }
@@ -265,17 +266,20 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //                    throw e;
 //                }
 
-                if (Thread.interrupted()) {
-                    return null;
+                    if (Thread.interrupted()) {
+                        return null;
+                    }
                 }
             }
-        }
 
-        if (Thread.interrupted()) {
+            if (Thread.interrupted()) {
+                return null;
+            }
+
+            return image;
+        } catch (Exception e) {
             return null;
         }
-
-        return image;
     }
 
     public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
@@ -438,14 +442,14 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             //System.out.println("zoomX:" + __zoomX);
             int subMapWidth = VNode.distanceInclusive(colStartNode, colEndNode, __zoomX);
             int subMapHeight = VNode.distanceInclusive(rowStartNode, rowEndNode, __zoomY);
-            
+
             //ensure it's at least 1 px 
-            if(subMapWidth <= 0){
+            if (subMapWidth <= 0) {
                 subMapWidth = 1;
             }
-            
+
             //ensure it's at least 1 px
-            if(subMapHeight <= 0){
+            if (subMapHeight <= 0) {
                 subMapHeight = 1;
             }
 

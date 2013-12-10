@@ -118,65 +118,10 @@ public class IOMaster {
                                     return;
                                 }
 
-                                if (objects != null) {
-                                    for (CoolMapObject object : objects) {
-                                        CoolMapMaster.addNewCoolMapObject(object);
-                                    }
-                                }
 
+                                CoolMapMaster.addNewCoolMapObject(objects);
                                 CoolMapMaster.addNewCOntology(ontologies);
 
-//                                CMatrix matrix = importerClass.newInstance().importFromFile(f);
-//                                if (matrix == null) {
-//                                    return;
-//                                }
-//
-//                                CoolMapObject object = new CoolMapObject();
-//                                object.setName(Tools.removeFileExtension(f.getName()));
-//                                object.addBaseCMatrix(matrix);
-//
-//                                ArrayList<VNode> nodes = new ArrayList<VNode>();
-//                                for (Object label : matrix.getRowLabelsAsList()) {
-//                                    nodes.add(new VNode(label.toString()));
-//                                }
-//                                object.insertRowNodes(nodes);
-//
-//                                nodes.clear();
-//                                for (Object label : matrix.getColLabelsAsList()) {
-//                                    nodes.add(new VNode(label.toString()));
-//                                }
-//                                object.insertColumnNodes(nodes);
-//                                
-//                                object.setAggregator(((Class<ViewRenderer>)importerInstance.getViewRendererClass()).newInstance());
-//                                object.setSnippetConverter(new DoubleSnippet1_3());
-//                                
-//                                object.setViewRenderer(new NumberToColor(), true); //This must be done after addeing aggregator or view would be empty
-//                                
-//                                Class[] rowMapClasses = importerInstance.getRowMapClasses();
-//                                if(rowMapClasses != null && rowMapClasses.length > 0){
-//                                    for(Class<RowMap> rowMapClass : rowMapClasses){
-//                                       try{
-//                                           object.getCoolMapView().addRowMap(rowMapClass.getDeclaredConstructor(CoolMapObject.class).newInstance(object));
-//                                       }
-//                                       catch(Exception e){
-//                                           CMConsole.logError("failed to add rowMap: " + rowMapClass);
-//                                       }
-//                                    }
-//                                }
-//                                
-//                                Class[] columnMapClasses = importerInstance.getColumnMapClasses();
-//                                if(columnMapClasses != null && columnMapClasses.length > 0){
-//                                    for(Class<ColumnMap> columnMapClass : columnMapClasses){
-//                                       try{
-//                                           object.getCoolMapView().addColumnMap(columnMapClass.getDeclaredConstructor(CoolMapObject.class).newInstance(object));
-//                                       }
-//                                       catch(Exception e){
-//                                           CMConsole.logError("failed to add columnMap: " + columnMapClass);
-//                                       }
-//                                    }
-//                                }
-//                                CoolMapMaster.addNewBaseMatrix(matrix);
-//                                CoolMapMaster.addNewCoolMapObject(object);
                                 CMConsole.logInSuccess("Data imported from: " + Arrays.toString(f));
 
                             } catch (Exception ex2) {

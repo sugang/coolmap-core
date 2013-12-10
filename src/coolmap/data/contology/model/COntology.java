@@ -73,8 +73,12 @@ public final class COntology {
     }
 
     public static void setAttribute(String nodeName, String attrName, Object attribute) {
+//        try{
         _attributeTable.put(nodeName, attrName, attribute);
-//        System.out.println(nodeName + " " + attrName + " " + attribute);
+//        }
+//        catch(Exception e){
+//            System.err.println(nodeName + " " + attrName + " " + attribute);
+//        }
     }
 
     public static void setAttributeType(String attrName, Class cls) {

@@ -219,7 +219,7 @@ public class VMatrix<BASE, VIEW> {
 //            System.out.println(nodes);
 //            remove 
 
-            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes);
+            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes); //use hashset removes much faster
             colNodes.removeAll(nodes);
 
             _activeColNodes.clear();
@@ -301,6 +301,8 @@ public class VMatrix<BASE, VIEW> {
 
     public synchronized void expandColNodeToChildNodes(Collection<VNode> nodes) {
 
+        ArrayList<VNode> newChildNodes = new ArrayList<VNode>();
+        
         for (VNode node : nodes) {
             int index = _activeColNodes.indexOf(node);
             if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
@@ -314,10 +316,15 @@ public class VMatrix<BASE, VIEW> {
                 //Must set the node to expanded state.
                 node.setExpanded(true);
 //            node.setChildNodesFromBase(false); //nodes are not base nodes
-                _replaceColNodes(node, childNodes);
+//                _replaceColNodes(node, childNodes); //This should be why it is slow, it's replacing too many times
+                newChildNodes.addAll(childNodes);
                 _activeColNodesInTree.add(node);
             }
         }
+        
+        _activeColNodes.clear();
+        _activeColNodes.addAll(newChildNodes);
+        
         _updateActiveColNodeHeights();
         _updateActiveColNodeViewIndices();
 
@@ -397,9 +404,11 @@ public class VMatrix<BASE, VIEW> {
     }
 
     public synchronized void expandRowNodeToChildNodes(Collection<VNode> nodes) {
+        ArrayList<VNode> newNodes = new ArrayList<VNode>();
         for (VNode node : nodes) {
             int index = _activeRowNodes.indexOf(node);
             //System.out.println(index);
+            
             if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
                 List<VNode> childNodes = node.getChildNodes();
 
@@ -409,12 +418,15 @@ public class VMatrix<BASE, VIEW> {
                 }
                 node.setExpanded(true);
 //            node.setChildNodesFromBase(false);
-                _replaceRowNodes(node, childNodes);
+//                _replaceRowNodes(node, childNodes);
+                newNodes.addAll(childNodes);
                 _activeRowNodesInTree.add(node);
 
             }
-        }
-
+        }//end for
+        
+        _activeRowNodes.clear();
+        _activeRowNodes.addAll(newNodes);
         _updateActiveRowNodeHeights();
         _updateActiveRowNodeViewIndices();
     }
@@ -480,14 +492,18 @@ public class VMatrix<BASE, VIEW> {
         //node.setExpanded(false);
     }
 
+    //This definitely need to be fixed
     public synchronized void collapseTreeColNodes(Collection<VNode> nodes) {
+        
         for (VNode node : nodes) {
             collapseTreeColNode(node);
         }
 
     }
 
+    //this definitely need to be fixed
     public synchronized void collapseTreeRowNodes(Collection<VNode> nodes) {
+        
         for (VNode node : nodes) {
             collapseTreeRowNode(node);
         }

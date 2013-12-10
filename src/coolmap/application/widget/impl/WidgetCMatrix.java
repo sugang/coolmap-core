@@ -44,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -110,7 +111,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                 }
             }
         });
-
 
         _aggregators.setRenderer(new DefaultListCellRenderer() {
 
@@ -179,7 +179,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
             }
         });
 
-
         button.addActionListener(new ActionListener() {
 
             @Override
@@ -205,7 +204,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                 }
 
 //                System.out.println("Create new CoolMapObject");
-
                 JPanel panel = new JPanel();
                 panel.setLayout(new GridBagLayout());
                 panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -252,7 +250,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                     e.printStackTrace();
                 }
 
-
                 JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), panel);
                 CMatrix m0 = matrices[0];
                 ArrayList<VNode> nodes = new ArrayList<VNode>();
@@ -268,12 +265,10 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                 object.insertColumnNodes(0, nodes, false);
 
                 //need a dialog
-
-
                 try {
                     object.setAggregator((CAggregator) (_aggregators.getSelectedItem().getClass().newInstance()));
 //                    object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()), true);
-                    if(Double.class.isAssignableFrom(object.getViewClass())){
+                    if (Double.class.isAssignableFrom(object.getViewClass())) {
                         object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                     }
                 } catch (Exception e) {
@@ -286,12 +281,9 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                 object.getCoolMapView().addRowMap(new RowLabels(object));
                 object.getCoolMapView().addRowMap(new RowTree(object));
 
-
-
                 CoolMapMaster.addNewCoolMapObject(object);
             }
         });
-
 
         button = new JButton(UI.getImageIcon("trashBin"));
         button.setToolTipText("Remove selected CMatrices");
@@ -300,13 +292,10 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
             @Override
             public void actionPerformed(ActionEvent ae) {
 
-
                 Object[] cmatrices = _baseMatrices.getSelectedValues();
                 if (cmatrices == null || cmatrices.length == 0) {
                     return;
                 }
-
-
 
                 List<CoolMapObject> objs = CoolMapMaster.getCoolMapObjects();
                 if (objs != null && !objs.isEmpty()) {
@@ -323,12 +312,8 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
                     CoolMapMaster.destroyCMatrix((CMatrix) m);
                 }
 
-
             }
         });
-
-
-
 
         _toolBar.add(button);
     }
@@ -352,9 +337,16 @@ public class WidgetCMatrix extends Widget implements DataStorageListener {
     }
 
     private void _updateList() {
-        List<CMatrix> cMatrices = CoolMapMaster.getLoadedCMatrices();
-        DefaultComboBoxModel model = new DefaultComboBoxModel(cMatrices.toArray());
-        _baseMatrices.setModel(model);
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                List<CMatrix> cMatrices = CoolMapMaster.getLoadedCMatrices();
+                DefaultComboBoxModel model = new DefaultComboBoxModel(cMatrices.toArray());
+                _baseMatrices.setModel(model);
+            }
+        });
+
     }
 
     @Override

@@ -217,9 +217,6 @@ public final class CoolMapMaster {
 
     }
 
-//    public static JComponent getMainFrame() {
-//        return null;
-//    }
     /**
      * add a new coolmap object into store. This should be a newly imported
      * coolmap object, with empty side panels
@@ -230,37 +227,30 @@ public final class CoolMapMaster {
         if (object == null || _coolMapObjects.contains(object)) {
             return;
         }
+        
+        System.out.println("adding:" + object);
         _coolMapObjects.add(object);
         addNewBaseMatrix(object.getBaseCMatrices());
-
-        //bunch of other listeners need to be added.
-        //by default, the are added here.
-        //There's then an opportunity to add it to the syncer directly.
-        //but when it is removed, how do we remove them easily?
-//        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
-//        object.getCoolMapView().addColumnMap(new ColumnTree(object));
-//        object.getCoolMapView().addRowMap(new RowLabels(object));
-//        object.getCoolMapView().addRowMap(new RowTree(object));
-//
-//        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
-//        object.getCoolMapView().addColumnMap(new ColumnTree(object));
-//        object.getCoolMapView().addRowMap(new RowLabels(object));
-//        object.getCoolMapView().addRowMap(new RowTree(object));
-//        object.getCoolMapView().addRowMap(new RowSubSelectionIndicator(object));
 
         object.addCObjectDataListener(_activeCoolMapObjectListenerTunnel);
         object.getCoolMapView().addCViewListener(_activeCoolMapObjectListenerTunnel);
 
         getViewport().addCoolMapView(object);
         DataMaster.fireCoolMapObjectAdded(object);
-
-        //double check base matrix
-        //double check to see whether new cmatrices were created. This should not actually happen.
-        //addNewBaseMatrix(object.getBaseMatrices());
-        
-        //check to add cmatricdes
-
     }
+    
+    public static void addNewCoolMapObject(Collection<CoolMapObject> objects){
+        if(objects == null || objects.isEmpty()){
+            return;
+        }
+        
+        for(CoolMapObject object : objects){
+            addNewCoolMapObject(object);
+        }
+    }
+    
+    
+    
 
     public static void addNewBaseMatrix(Collection<CMatrix> matrices) {
         if (matrices == null || matrices.isEmpty()) {
@@ -270,6 +260,7 @@ public final class CoolMapMaster {
         for (CMatrix matrix : matrices) {
             if (!_cMatrices.values().contains(matrix)) {
                 _cMatrices.put(matrix.getID(), matrix);
+                
                 DataMaster.fireCMatrixAdded(matrix);
             }
         }

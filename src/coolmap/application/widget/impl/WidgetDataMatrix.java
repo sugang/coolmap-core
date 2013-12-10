@@ -257,13 +257,6 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
 
             @Override
             public void run() {
-                //_replaceTableModel(); //Put replace table model in swing utilies
-//                        if (_workerThread != null && _workerThread.isAlive()) {
-//                    _workerThread.interrupt();
-//                }
-//
-//                _workerThread = new UpdateDataThread();
-//                _workerThread.start();
                 _replaceTableModel(); //Let it call. Fuck. sutpid jTable
             }
         });
