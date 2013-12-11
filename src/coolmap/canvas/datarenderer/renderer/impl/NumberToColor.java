@@ -132,6 +132,7 @@ public class NumberToColor extends ViewRenderer<Double> {
 
                 try {
                     GradientItem item = (GradientItem) presetColorComboBox.getSelectedItem();
+                    presetColorComboBox.setToolTipText(item.getToolTip());
 
                     editor.clearColors();
 
@@ -156,10 +157,10 @@ public class NumberToColor extends ViewRenderer<Double> {
                             editor.setMaxValue(ranges[1].floatValue());
                         }
                     } catch (Exception ex) {
-                            minValueField.setText("-1");
-                            maxValueField.setText("1");
-                            editor.setMinValue(-1);
-                            editor.setMaxValue(1);
+                        minValueField.setText("-1");
+                        maxValueField.setText("1");
+                        editor.setMinValue(-1);
+                        editor.setMaxValue(1);
                     }
 
                 } catch (Exception ex) {
@@ -170,6 +171,7 @@ public class NumberToColor extends ViewRenderer<Double> {
             }
         });
 
+//       
         configUI.add(presetColorComboBox, c);
         presetColorComboBox.setRenderer(new GradientComboItemRenderer());
 
@@ -177,43 +179,45 @@ public class NumberToColor extends ViewRenderer<Double> {
                 new GradientItem(
                         new Color[]{DEFAULT_MIN_COLOR, Color.BLACK, DEFAULT_MAX_COLOR},
                         new float[]{0f, 0.5f, 1f},
-                        "Teal - Blk - Pink"));
+                        "TBP", "Teal - Black - Pink"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.GREEN, Color.RED},
                         new float[]{0f, 1f},
-                        "Green - Red"));
+                        "GR", "Green - Red"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.GREEN, Color.BLACK, Color.RED},
                         new float[]{0f, 0.5f, 1f},
-                        "Red - Blk - Green"));
+                        "RBG", "Red - Black - Green"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.ORANGE, Color.BLUE},
                         new float[]{0f, 1f},
-                        "Orange - Blue"));
+                        "OB", "Orange - Blue"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.ORANGE, Color.BLACK, Color.BLUE},
                         new float[]{0f, 0.5f, 1f},
-                        "Orange - Blk - Blue"));
+                        "OBB", "Orange - Black - Blue"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.BLACK, Color.GREEN},
                         new float[]{0f, 1f},
-                        "Blk - Green"));
+                        "BG", "Black - Green"));
 
         presetColorComboBox.addItem(
                 new GradientItem(
                         new Color[]{Color.RED, UI.colorAKABENI, Color.BLACK, Color.BLACK},
                         new float[]{0f, 0.05f, 0.051f, 1f},
-                        "P-value 0.05", 0d, 1d));
+                        "P.05", 0d, 1d, "P-value @ 0.05, Red to Black"));
+
+        presetColorComboBox.setToolTipText(((GradientItem) presetColorComboBox.getSelectedItem()).getToolTip());
 
         c.gridx = 0;
         c.gridy++;
@@ -934,8 +938,17 @@ public class NumberToColor extends ViewRenderer<Double> {
         private final float[] pos;
         private final BufferedImage preview;
         private final String name;
+        private final String toolTip;
 
-        public GradientItem(Color[] c, float[] pos, String name, Double low, Double high) {
+//        @Override
+//        public String toString(){
+//            return getToolTip();
+//        }
+        public String getToolTip() {
+            return toolTip;
+        }
+
+        public GradientItem(Color[] c, float[] pos, String name, Double low, Double high, String toolTip) {
             this.c = c;
             this.pos = pos;
 
@@ -953,11 +966,11 @@ public class NumberToColor extends ViewRenderer<Double> {
 
             this.low = low;
             this.high = high;
-
+            this.toolTip = toolTip;
         }
 
-        public GradientItem(Color[] c, float[] pos, String name) {
-            this(c, pos, name, null, null);
+        public GradientItem(Color[] c, float[] pos, String name, String toolTip) {
+            this(c, pos, name, null, null, toolTip);
         }
 
         public Image getPreview() {
@@ -966,7 +979,7 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         @Override
         public String toString() {
-            return name;//To change body of generated methods, choose Tools | Templates.
+            return name + getToolTip();//To change body of generated methods, choose Tools | Templates.
         }
 
         public Color[] getColors() {
@@ -998,6 +1011,7 @@ public class NumberToColor extends ViewRenderer<Double> {
             JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             l.setIcon(new ImageIcon(((GradientItem) value).getPreview()));
             l.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            l.setText(((GradientItem)value).name);
             return l;
         }
 

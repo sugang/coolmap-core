@@ -739,7 +739,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     }
 
                     //have to draw child nodes on top
-                    if (zoomX > 6) {
+                    if (zoomY > 6) {
                         //draw fixed ball.
                         g2D.setColor(_leafBorderColor);
                         g2D.fillOval(childX - _ballOutterRadius, childY - _ballOutterRadius, _ballOutterRadius * 2, _ballOutterRadius * 2);

@@ -150,7 +150,7 @@ public class ImportDataFromGEOSOFT implements ImportData {
                         COntology.setAttribute(probeID, "GEO." + nucleotide_title, nucleotideTitleData);
                     }
                     if (geneTitleData != null) {
-                        COntology.setAttribute(symbol, "GEO." + gene_title, attributes.get(probeID, geneTitleData));
+                        COntology.setAttribute(symbol, "GEO." + gene_title, geneTitleData);
                     }
 
 //                  //These attributes may not exist  

@@ -1,6 +1,7 @@
 package coolmap;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.io.external.ImportCOntologyFromSimpleTwoColumn;
 import coolmap.application.io.external.ImportDataFromTSV;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.CoolMapObject;
@@ -78,6 +79,8 @@ public class Main {
             CoolMapMaster.addNewCoolMapObject(tsvImport.getImportedCoolMapObjects());
             CoolMapMaster.addNewCOntology(tsvImport.getImportedCOntology());
             
+            ImportCOntologyFromSimpleTwoColumn importer = new ImportCOntologyFromSimpleTwoColumn();
+            CoolMapMaster.addNewCOntology(importer.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt")));
             
             
         } catch (Exception e) {

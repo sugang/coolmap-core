@@ -491,6 +491,10 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
                         cellWidth = (int) Math.round(colNode.getViewSizeInMap(__zoomX));
                         cellHeight = (int) Math.round(rowNode.getViewSizeInMap(__zoomY));
+                        
+                        //make it minimal 1 px for rendering
+                        if(cellWidth < 1)cellWidth = 1;
+                        if(cellHeight < 1)cellHeight = 1;
 
                         //System.out.println(cellWidth + " " + cellHeight);
                         //each cell can take a different size. Therefore need to 

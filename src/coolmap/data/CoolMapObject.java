@@ -1534,9 +1534,6 @@ public final class CoolMapObject<BASE, VIEW> {
             return false;
         }
 
-//        StateSnapshot snapshot = new StateSnapshot(this, COntology.ROW, StateSnapshot.ROWCOLLAPSE);
-//        notifyStateStorageUpdated();
-//        find the first level parents
         HashSet<VNode> levelOneParents = new HashSet<VNode>();
         for (VNode node : getViewNodesRow()) {
             if (node.getParentNode() != null) {
@@ -1544,9 +1541,6 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-//        System.out.println("Level one parents:" + levelOneParents);
-
-//        must check to ensure that all level one parents children are also level one
         HashSet<VNode> onlyLevelOneParents = new HashSet<VNode>();
         for (VNode node : levelOneParents) {
             if (!node.isGroupNode()) {
@@ -1570,8 +1564,30 @@ public final class CoolMapObject<BASE, VIEW> {
         if (!onlyLevelOneParents.isEmpty()) {
             return collapseRowNodes(onlyLevelOneParents, false);
         }
+        
+        //There are better ways to do this? 
+        //It's tricky because intermediate nodes need also to be removed
+        
+        
+        
         return false;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public synchronized boolean collapseRowNode(VNode node) {
         if (node != null && getCoolMapView() != null && node.isExpanded()) {

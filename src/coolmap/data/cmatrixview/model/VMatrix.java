@@ -299,35 +299,36 @@ public class VMatrix<BASE, VIEW> {
         }
     }
 
+    //This is not quite right
     public synchronized void expandColNodeToChildNodes(Collection<VNode> nodes) {
 
-        ArrayList<VNode> newChildNodes = new ArrayList<VNode>();
-        
-        for (VNode node : nodes) {
-            int index = _activeColNodes.indexOf(node);
-            if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
-
-                //not expanded
-                List<VNode> childNodes = node.getChildNodes();
-                if (childNodes == null || childNodes.isEmpty()) {
-                    return; //Nothing to expand to
-                }
-
-                //Must set the node to expanded state.
-                node.setExpanded(true);
-//            node.setChildNodesFromBase(false); //nodes are not base nodes
-//                _replaceColNodes(node, childNodes); //This should be why it is slow, it's replacing too many times
-                newChildNodes.addAll(childNodes);
-                _activeColNodesInTree.add(node);
-            }
-        }
-        
-        _activeColNodes.clear();
-        _activeColNodes.addAll(newChildNodes);
-        
-        _updateActiveColNodeHeights();
-        _updateActiveColNodeViewIndices();
-
+//        ArrayList<VNode> newChildNodes = new ArrayList<VNode>();
+//        
+//        for (VNode node : nodes) {
+//            int index = _activeColNodes.indexOf(node);
+//            if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
+//
+//                //not expanded
+//                List<VNode> childNodes = node.getChildNodes();
+//                if (childNodes == null || childNodes.isEmpty()) {
+//                    return; //Nothing to expand to
+//                }
+//
+//                //Must set the node to expanded state.
+//                node.setExpanded(true);
+////            node.setChildNodesFromBase(false); //nodes are not base nodes
+////                _replaceColNodes(node, childNodes); //This should be why it is slow, it's replacing too many times
+//                newChildNodes.addAll(childNodes);
+//                _activeColNodesInTree.add(node);
+//            }
+//        }
+//        
+//        _activeColNodes.clear();
+//        _activeColNodes.addAll(newChildNodes);
+//        
+//        _updateActiveColNodeHeights();
+//        _updateActiveColNodeViewIndices();
+        //BUG
     }
 
     public synchronized List<VNode> expandColNodeToChildNodesAll(VNode node) {
@@ -403,32 +404,90 @@ public class VMatrix<BASE, VIEW> {
         }
     }
 
-    public synchronized void expandRowNodeToChildNodes(Collection<VNode> nodes) {
-        ArrayList<VNode> newNodes = new ArrayList<VNode>();
-        for (VNode node : nodes) {
-            int index = _activeRowNodes.indexOf(node);
-            //System.out.println(index);
-            
-            if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
-                List<VNode> childNodes = node.getChildNodes();
+    public synchronized void expandRowNodeToChildNodes(Collection<VNode> originalNodes) {
 
-                //System.out.println(childNodes);
-                if (childNodes == null || childNodes.isEmpty()) {
+//        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+//        for (VNode node : originalNodes) {
+//            int index = _activeRowNodes.indexOf(node);
+//            //System.out.println(index);
+//            
+//            if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
+//                List<VNode> childNodes = node.getChildNodes();
+//
+//                //System.out.println(childNodes);
+//                if (childNodes == null || childNodes.isEmpty()) {
+//                    return;
+//                }
+//                node.setExpanded(true);
+////            node.setChildNodesFromBase(false);
+////                _replaceRowNodes(node, childNodes);
+//                newNodes.addAll(childNodes);
+//                _activeRowNodesInTree.add(node);
+//
+//            }
+//        }//end for
+//        
+//        _activeRowNodes.clear();
+//        _activeRowNodes.addAll(newNodes);
+//        
+//        _updateActiveRowNodeHeights();
+//        _updateActiveRowNodeViewIndices();
+
+        //multiple inserts in this thing
+        //
+        //several steps
+        //1 sort the originalNodes to be expanded into ordered list
+        for (VNode node : _activeRowNodes) {
+            node.mark(false);
+        }
+
+        ArrayList<VNode> nodesToExpand = new ArrayList<>();
+        for (VNode node : originalNodes) {
+            //sanity checks
+            if (node == null || !node.isGroupNode() || node.isExpanded() || node.getViewIndex() == null || node.getViewIndex() < 0) {
+                continue;
+            }
+            nodesToExpand.add(node);
+            node.mark(true);
+        }
+
+        Collections.sort(nodesToExpand, new VNodeIndexComparator());
+
+//        System.out.println(nodesToExpand);
+        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+
+        
+//        for (VNode node : _activeRowNodes) {
+//            node.mark(false);
+//        }
+        for(VNode node :_activeRowNodes){
+            if(node.isMarked()){
+                List<VNode> childNodes = node.getChildNodes();
+                if(childNodes == null || childNodes.isEmpty()){
+                    //no child nodes
+                    continue;
+                }
+                newNodes.addAll(childNodes); //replace with child nodes
+                
+                node.setExpanded(true); //set nodes to be expanded
+                node.mark(false); //visited
+                _activeRowNodesInTree.add(node); //move the node into tree
+                
+                //can actually return
+                if(Thread.interrupted()){
                     return;
                 }
-                node.setExpanded(true);
-//            node.setChildNodesFromBase(false);
-//                _replaceRowNodes(node, childNodes);
-                newNodes.addAll(childNodes);
-                _activeRowNodesInTree.add(node);
-
             }
-        }//end for
+            else{
+                newNodes.add(node);
+            }
+        }
         
         _activeRowNodes.clear();
         _activeRowNodes.addAll(newNodes);
-        _updateActiveRowNodeHeights();
-        _updateActiveRowNodeViewIndices();
+        
+         _updateActiveRowNodeHeights();
+         _updateActiveRowNodeViewIndices();
     }
 
     /**
@@ -494,7 +553,7 @@ public class VMatrix<BASE, VIEW> {
 
     //This definitely need to be fixed
     public synchronized void collapseTreeColNodes(Collection<VNode> nodes) {
-        
+
         for (VNode node : nodes) {
             collapseTreeColNode(node);
         }
@@ -503,10 +562,14 @@ public class VMatrix<BASE, VIEW> {
 
     //this definitely need to be fixed
     public synchronized void collapseTreeRowNodes(Collection<VNode> nodes) {
-        
+
+        //This is not the rightway
         for (VNode node : nodes) {
             collapseTreeRowNode(node);
         }
+
+        //Only need to track nodes need to be removed and remove only once
+        //This method can be quite tricky for very large network with many nodes to collapse
     }
 
     /**

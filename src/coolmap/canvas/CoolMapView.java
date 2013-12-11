@@ -620,6 +620,8 @@ public final class CoolMapView<BASE, VIEW> {
 
         updateCanvasEnforceAll();
 
+        
+        System.out.println("Zooms are:" + _zoom);
         _fireViewZoomChanged();
         return true;
     }
@@ -668,6 +670,8 @@ public final class CoolMapView<BASE, VIEW> {
 
         updateCanvasEnforceAll();
 
+//        System.out.println("Zoom set to:" + _zoom);
+        
         _fireViewZoomChanged();
 
     }
@@ -715,6 +719,7 @@ public final class CoolMapView<BASE, VIEW> {
         updateCanvasEnforceAll();
 
         _fireViewZoomChanged();
+        System.out.println("Zooms are:" + _zoom);
         return true;
     }
 

@@ -107,8 +107,8 @@ public class GradientEditorPanel extends JPanel {
             }
         });
         
-        this.setPreferredSize(new Dimension(300, 180));
-        this.setMinimumSize(new Dimension(100, 180));
+        this.setPreferredSize(new Dimension(150, 180));
+        this.setMinimumSize(new Dimension(150, 180));
     }
     
     public int getNumPoints() {

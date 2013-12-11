@@ -593,6 +593,21 @@ public class VNode {
     public float getDefaultViewMultiplier(){
         return _defaultMultiplier;
     }
+    
+    
+    private boolean mark;
+    
+    /**
+     * a boolean mark that can be used in various occasions - not threadsafe!
+     * @param mark 
+     */
+    public void mark(boolean mark){
+        this.mark = mark;
+    }
+    
+    public boolean isMarked(){
+        return mark;
+    }
 
 
 }
