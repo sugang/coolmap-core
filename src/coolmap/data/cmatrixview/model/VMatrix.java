@@ -5,12 +5,14 @@
 package coolmap.data.cmatrixview.model;
 
 import com.google.common.collect.HashMultimap;
+import coolmap.application.CoolMapMaster;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -300,35 +302,55 @@ public class VMatrix<BASE, VIEW> {
     }
 
     //This is not quite right
-    public synchronized void expandColNodeToChildNodes(Collection<VNode> nodes) {
+    public synchronized void expandColNodeToChildNodes(Collection<VNode> inputNodes) {
+        
+        
+        for (VNode node : _activeColNodes) {
+            node.mark(false);
+        }
 
-//        ArrayList<VNode> newChildNodes = new ArrayList<VNode>();
-//        
-//        for (VNode node : nodes) {
-//            int index = _activeColNodes.indexOf(node);
-//            if (node != null && node.isGroupNode() && !node.isExpanded() && index >= 0) {
-//
-//                //not expanded
-//                List<VNode> childNodes = node.getChildNodes();
-//                if (childNodes == null || childNodes.isEmpty()) {
-//                    return; //Nothing to expand to
-//                }
-//
-//                //Must set the node to expanded state.
-//                node.setExpanded(true);
-////            node.setChildNodesFromBase(false); //nodes are not base nodes
-////                _replaceColNodes(node, childNodes); //This should be why it is slow, it's replacing too many times
-//                newChildNodes.addAll(childNodes);
-//                _activeColNodesInTree.add(node);
-//            }
-//        }
-//        
-//        _activeColNodes.clear();
-//        _activeColNodes.addAll(newChildNodes);
-//        
-//        _updateActiveColNodeHeights();
-//        _updateActiveColNodeViewIndices();
-        //BUG
+        ArrayList<VNode> nodesToExpand = new ArrayList<>();
+        for (VNode node : inputNodes) {
+            //sanity checks
+            if (node == null || !node.isGroupNode() || node.isExpanded() || node.getViewIndex() == null || node.getViewIndex() < 0) {
+                continue;
+            }
+            nodesToExpand.add(node);
+            node.mark(true);
+        }
+
+        Collections.sort(nodesToExpand, new VNodeIndexComparator());
+
+        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+
+        for (VNode node : _activeColNodes) {
+            if (node.isMarked()) {
+                List<VNode> childNodes = node.getChildNodes();
+                if (childNodes == null || childNodes.isEmpty()) {
+                    //no child nodes
+                    continue;
+                }
+                newNodes.addAll(childNodes); //replace with child nodes
+
+                node.setExpanded(true); //set nodes to be expanded
+                node.mark(false); //visited
+                _activeColNodesInTree.add(node); //move the node into tree
+
+                //can actually return
+                if (Thread.interrupted()) {
+                    return;
+                }
+            } else {
+                newNodes.add(node);
+            }
+        }
+
+        _activeColNodes.clear();
+        _activeColNodes.addAll(newNodes);
+
+        _updateActiveColNodeHeights();
+        _updateActiveColNodeViewIndices();
+
     }
 
     public synchronized List<VNode> expandColNodeToChildNodesAll(VNode node) {
@@ -432,7 +454,6 @@ public class VMatrix<BASE, VIEW> {
 //        
 //        _updateActiveRowNodeHeights();
 //        _updateActiveRowNodeViewIndices();
-
         //multiple inserts in this thing
         //
         //several steps
@@ -456,38 +477,37 @@ public class VMatrix<BASE, VIEW> {
 //        System.out.println(nodesToExpand);
         ArrayList<VNode> newNodes = new ArrayList<VNode>();
 
-        
 //        for (VNode node : _activeRowNodes) {
 //            node.mark(false);
 //        }
-        for(VNode node :_activeRowNodes){
-            if(node.isMarked()){
+        for (VNode node : _activeRowNodes) {
+            if (node.isMarked()) {
                 List<VNode> childNodes = node.getChildNodes();
-                if(childNodes == null || childNodes.isEmpty()){
+                if (childNodes == null || childNodes.isEmpty()) {
                     //no child nodes
                     continue;
                 }
                 newNodes.addAll(childNodes); //replace with child nodes
-                
+
                 node.setExpanded(true); //set nodes to be expanded
                 node.mark(false); //visited
                 _activeRowNodesInTree.add(node); //move the node into tree
-                
+
                 //can actually return
-                if(Thread.interrupted()){
+                if (Thread.interrupted()) {
                     return;
                 }
-            }
-            else{
+            } else {
                 newNodes.add(node);
             }
         }
-        
+
         _activeRowNodes.clear();
         _activeRowNodes.addAll(newNodes);
-        
-         _updateActiveRowNodeHeights();
-         _updateActiveRowNodeViewIndices();
+
+        _updateActiveRowNodeHeights();
+        _updateActiveRowNodeViewIndices();
+
     }
 
     /**
@@ -561,15 +581,82 @@ public class VMatrix<BASE, VIEW> {
     }
 
     //this definitely need to be fixed
-    public synchronized void collapseTreeRowNodes(Collection<VNode> nodes) {
+    public synchronized void collapseTreeRowNodes(Collection<VNode> inputNodes) {
 
-        //This is not the rightway
-        for (VNode node : nodes) {
-            collapseTreeRowNode(node);
+        //This is not the rightway, way too slow
+//        for (VNode node : inputNodes) {
+//            collapseTreeRowNode(node);
+//        }
+        //Only need to track inputNodes need to be removed and remove only once
+        //This method can be quite tricky for very large network with many inputNodes to collapse
+        //first mark inputNodes
+        //make sure everynode is unmarked
+        //First determine which inputNodes to collapse
+        ArrayList<VNode> nodesToCollapse = new ArrayList<VNode>();
+
+        //only keep tree nodes
+        for (VNode node : inputNodes) {
+            if (node != null && node.isGroupNode() && node.isExpanded()) {
+                nodesToCollapse.add(node);
+            }
         }
 
-        //Only need to track nodes need to be removed and remove only once
-        //This method can be quite tricky for very large network with many nodes to collapse
+        for (VNode node : _activeRowNodesInTree) {
+            node.mark(false);
+            node.setViewColor(null);
+        }
+
+        for (VNode node : _activeRowNodes) {
+            node.mark(false);
+        }
+
+        for (VNode treeNode : nodesToCollapse) {
+            List<VNode> childNodes = treeNode.getChildNodes();
+            for (VNode childNode : childNodes) {
+                childNode.mark(true);
+            }
+        }
+
+        //then what's remaining unmarked is the highest in tree
+        for (VNode node : nodesToCollapse) {
+            if (!node.isMarked()) {
+                //unmarked nodes, top level
+                //node.setViewColor(Color.RED);
+
+                System.out.println(node.getName());
+                node.setViewColor(Color.RED);
+            }
+        }
+
+        CoolMapMaster.getActiveCoolMapObject().getCoolMapView().updateRowMapBuffersEnforceAll();
+
+    }
+
+    private void _markChildNodes(VNode node) {
+        if (node == null || node.isMarked()) {
+            return;//If a node is marked, its children are already marked
+        }
+
+        if (node.isSingleNode() || node.isGroupNode() && !node.isExpanded()) {
+            //reached bottom layer
+            //single or unexpanded ontological nodes
+            //stop at leaf layer
+            node.mark(true);
+            return;
+        }
+
+        if (node.isGroupNode() && node.isExpanded()) {
+            node.mark(true);
+            Collection<VNode> childNodes = node.getChildNodes();
+            for (VNode childNode : childNodes) {
+                _markChildNodes(node);
+            }
+        }
+
+//        if(node.getViewHeightInTree() != null && node.getViewHeightInTree().intValue() == 0 ){
+//            //reach bottom
+//            
+//        }
     }
 
     /**

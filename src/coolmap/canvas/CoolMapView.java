@@ -2302,13 +2302,31 @@ public final class CoolMapView<BASE, VIEW> {
         updateCanvas(null, true, false);
     }
 
+    //These are not called in a separate thread, may cause UI freeze
     public synchronized void updateRowMapBuffersEnforceAll() {
-        _rowDrawer.updateDrawerBuffers();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                _rowDrawer.updateDrawerBuffers();
+            }
+        });
+        
     }
 
+    //This function is not called in a separate thread, may cause UI freeze
     public synchronized void updateColumnMapBuffersEnforceAll() {
-        _colDrawer.updateDrawerBuffers();
+//        _colDrawer.updateDrawerBuffers();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                _colDrawer.updateDrawerBuffers();
+            }
+        });
     }
+    
+    
 
     /**
      * update all if needed, but enforce update the overlay layer (respond to
