@@ -1230,10 +1230,10 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public synchronized boolean expandColumnNodes(List<VNode> inputNodes, boolean select) {
+    public synchronized List<VNode> expandColumnNodes(List<VNode> inputNodes, boolean select) {
         try {
             if (inputNodes == null || inputNodes.isEmpty() || !isViewMatrixValid()) {
-                return false;
+                return null;
             }
 
             ArrayList<VNode> nodesToBeExpanded = new ArrayList<VNode>();
@@ -1282,19 +1282,19 @@ public final class CoolMapObject<BASE, VIEW> {
             }
 
             notifyColumnsChanged();
-            return true;
+            return nodesToBeExpanded;
 
         } catch (Exception e) {
             System.err.println("Minor issue: expand column error");
-            return false;
+            return null;
         }
     }
 
-    public synchronized boolean expandRowNodes(List<VNode> nodes, boolean select) {
+    public synchronized List<VNode> expandRowNodes(List<VNode> nodes, boolean select) {
         try {
 
             if (nodes == null || nodes.isEmpty() || !isViewMatrixValid()) {
-                return false;
+                return null;
             }
 
             //first need to remove nodes that are already expanded
@@ -1307,6 +1307,7 @@ public final class CoolMapObject<BASE, VIEW> {
             //add a filtering step
 
             _vMatrix.expandRowNodeToChildNodes(nodesToBeExpanded);
+            
             getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
             _sortTracker.clearSortedColumn();
@@ -1343,12 +1344,11 @@ public final class CoolMapObject<BASE, VIEW> {
             }
 
             notifyRowsChanged();
-            return true;
+            return nodesToBeExpanded;
 
         } catch (Exception e) {
             System.err.println("Minor issue: exapnd row error");
-            e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
@@ -1417,9 +1417,9 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public synchronized boolean collapseColumnNodes(Collection<VNode> inputNodes, boolean select) {
+    public synchronized List<VNode> collapseColumnNodes(Collection<VNode> inputNodes, boolean select) {
         if (inputNodes == null || inputNodes.isEmpty() || getCoolMapView() == null) {
-            return false;
+            return null;
         }
 
         List<VNode> nodesToCollapse = new ArrayList<VNode>();
@@ -1464,7 +1464,7 @@ public final class CoolMapObject<BASE, VIEW> {
         //
 //        Collections.sort(retainedIndices, new VNodeIndexComparator());
         //then set selection 
-        return true;
+        return nodesToCollapse;
     }
 
     /**
@@ -1526,11 +1526,11 @@ public final class CoolMapObject<BASE, VIEW> {
     }
 
     public boolean expandColumnNodesOneLayer() {
-        return expandColumnNodes(getViewNodesColumn(), false);
+        return expandColumnNodes(getViewNodesColumn(), false)==null?false:true;
     }
 
     public boolean expandRowNodesOneLayer() {
-        return expandRowNodes(getViewNodesRow(), false);
+        return expandRowNodes(getViewNodesRow(), false)==null?false:true;
     }
 
     public boolean collapseColumnNodesOneLayer() {
@@ -1571,7 +1571,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         if (!onlyLevelOneParents.isEmpty()) {
-            return collapseColumnNodes(onlyLevelOneParents, false);
+            return collapseColumnNodes(onlyLevelOneParents, false) == null?false:true;
         }
         return false;
     }

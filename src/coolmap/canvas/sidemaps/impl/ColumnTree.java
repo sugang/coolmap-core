@@ -7,8 +7,6 @@ package coolmap.canvas.sidemaps.impl;
 import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.action.CollapseColumnNodesUpAction;
-import coolmap.canvas.action.ExpandColumnNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
@@ -180,7 +178,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 return;
             }
 
-            
             //childNodesInTree
             List<VNode> childNodeInTree = getCoolMapObject().getViewNodesColumnFromTreeNodes(_selectedNodes);
             if (childNodeInTree == null || childNodeInTree.isEmpty()) {
@@ -214,7 +211,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
             selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
             getCoolMapView().setSelectionsColumn(selectedColumns);
-            
+
         } catch (Exception e) {
 
         }
@@ -248,28 +245,34 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //            }
 //        });
 //        _popupMenu.add(_expandOne);
-        _expandToAll = new JMenuItem("Expand");
-        _expandToAll.setToolTipText("Expand selected ontology nodes to next level");
+        _expandToAll = new JMenuItem("Expand selected");
+        _expandToAll.setToolTipText("Expand selected ontology nodes to the next level");
         _expandToAll.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
 //                getCoolMapObject().expandColumnNodeToBottom(_activeNode);
-                if (_selectedNodes.isEmpty()){
+                if (_selectedNodes.isEmpty()) {
                     return;
                 }
-                
+
                 CoolMapState state = CoolMapState.createStateColumns("Expand column nodes", getCoolMapObject(), null);
                 ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
                 Collections.sort(nodes, new VNodeHeightComparator());
-                getCoolMapObject().expandColumnNodes(new ArrayList(_selectedNodes), true);
-                StateStorageMaster.addState(state);
+                List<VNode> nodesToBeSelected = getCoolMapObject().expandColumnNodes(new ArrayList(_selectedNodes), true);
+                _selectedNodes.clear();
+                if(nodesToBeSelected != null){
+                    _selectedNodes.addAll(nodesToBeSelected);
+                }
+                getViewPanel().repaint();
                 
+                StateStorageMaster.addState(state);
+
             }
         });
         _popupMenu.add(_expandToAll);
 
-        _collapse = new JMenuItem("Collapse");
+        _collapse = new JMenuItem("Collapse selected");
         _collapse.setToolTipText("Collapse selected ontology nodes");
         _collapse.addActionListener(new ActionListener() {
 
@@ -279,15 +282,22 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     if (_selectedNodes.isEmpty()) {
                         return;
                     }
-                    
+
                     CoolMapState state = CoolMapState.createStateColumns("Collapse column nodes", getCoolMapObject(), null);
                     //make it more efficient by collapsing tallest nodes
                     ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
                     Collections.sort(nodes, new VNodeHeightComparator());
-                    getCoolMapObject().collapseColumnNodes(_selectedNodes, true);
+                    List<VNode> collapsedNodes = getCoolMapObject().collapseColumnNodes(_selectedNodes, true);
+
+                    _selectedNodes.clear();
+                    if (collapsedNodes != null) {
+                        _selectedNodes.addAll(collapsedNodes);
+                    }
+
+                    getViewPanel().repaint();
+
                     StateStorageMaster.addState(state);
-                    
-                    
+
                 } catch (Exception e) {
 
                 }
@@ -296,9 +306,23 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
 
-        _expandOneAll = new JMenuItem(new ExpandColumnNodesOneLevelAction(getCoolMapObject().getID()));
+        _expandOneAll = new JMenuItem("Expand one level");
+        _expandOneAll.setToolTipText("Expand all column ontology nodes to the next level");
+        _expandOneAll.addActionListener(new ActionListener() {
 
-        //_expandOneAll = new JMenuItem("Expand all one level"); //, UI.getImageIcon("plusSmall")
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = getCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+                CoolMapState state = CoolMapState.createStateColumns("Expand columns to the next level", obj, null);
+                obj.expandColumnNodesOneLayer();
+                _selectedNodes.clear();
+                StateStorageMaster.addState(state);
+            }
+        });
+
         _popupMenu.add(_expandOneAll);
 
 //        _expandOneAll.addActionListener(new ActionListener() {
@@ -309,7 +333,22 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //                getCoolMapObject().expandColumnNodesOneLayer();
 //            }
 //        });
-        _collapseOneAll = new JMenuItem(new CollapseColumnNodesUpAction(getCoolMapObject().getID())); //UI.getImageIcon("minusSmall")
+        _collapseOneAll = new JMenuItem("Collapse one level"); //UI.getImageIcon("minusSmall")
+        _collapseOneAll.setToolTipText("Collapse all column ontology nodes to the previous level");
+        _collapseOneAll.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = getCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+                CoolMapState state = CoolMapState.createStateColumns("Collapse columns to the previous level", obj, null);
+                obj.collapseColumnNodesOneLayer();
+                _selectedNodes.clear();
+                StateStorageMaster.addState(state);
+            }
+        });
         _popupMenu.add(_collapseOneAll);
 
 //        _collapseOneAll.addActionListener(new ActionListener() {
@@ -337,7 +376,9 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //                    }
                     try {
                         //
-                        if(_selectedNodes.isEmpty())return;
+                        if (_selectedNodes.isEmpty()) {
+                            return;
+                        }
                         List<VNode> nodes = getCoolMapObject().getViewNodesColumnFromTreeNodesAll(_selectedNodes);
                         for (VNode node : nodes) {
                             node.setViewColor(color);
@@ -705,18 +746,17 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
                     _renderLine(g2D, parentX - 1, parentY, childX - 1, childY, zoomX);
 
-                                        //don't draw base node twice
+                    //don't draw base node twice
                     if (child.isSingleNode() || !child.isExpanded()) {
                         continue;
                     }
-                    
+
                     //have to draw child node on top of the tree lines
                     if (child.getViewColor() != null) {
                         nodeColor = child.getViewColor();
                     } else {
                         nodeColor = child.getCOntology().getViewColor();
                     }
-
 
                     //have to draw child nodes on top
                     if (zoomX > 6) {
@@ -976,14 +1016,14 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             getViewPanel().repaint();
         }
     }
-    
-    public void setSelectedTreeNodes(Set<VNode> treeNodes){
+
+    public void setSelectedTreeNodes(Set<VNode> treeNodes) {
 //        System.out.println("Setting selected nodes to:" + treeNodes);
         _selectedNodes.clear();
         treeNodes.retainAll(getCoolMapObject().getViewTreeNodesColumn());
-        
+
         _selectedNodes.addAll(treeNodes);
-        
+
         getViewPanel().repaint();
     }
 

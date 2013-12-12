@@ -185,7 +185,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //        });
 //        _popupMenu.add(_expandOne);
         _expandToAll = new JMenuItem("Expand selected");
-        _expandToAll.setToolTipText("Expand selected ontology nodes to next level");
+        _expandToAll.setToolTipText("Expand selected ontology nodes to the next level");
         _expandToAll.addActionListener(new ActionListener() {
 
             @Override
@@ -195,10 +195,19 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 }
 
                 CoolMapState state = CoolMapState.createStateRows("Expand row nodes", getCoolMapObject(), null);
-                ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
-                Collections.sort(nodes, new VNodeHeightComparator());
-                getCoolMapObject().expandRowNodes(new ArrayList(_selectedNodes), true);
+//                System.out.println(_selectedNodes);
+                List<VNode> nodesToBeSelected = getCoolMapObject().expandRowNodes(new ArrayList(_selectedNodes), true);
+                
+//                System.out.println(_selectedNodes);
+                _selectedNodes.clear();
+                if(nodesToBeSelected != null){
+                    _selectedNodes.addAll(nodesToBeSelected);
+                }
+                
+                getViewPanel().repaint();
+                
                 StateStorageMaster.addState(state);
+                
             }
         });
         _popupMenu.add(_expandToAll);
@@ -227,7 +236,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     _selectedNodes.addAll(collapsedNodes);
                 }
 
-                RowTree.this.getViewPanel().repaint();
+                getViewPanel().repaint();
 
                 StateStorageMaster.addState(state);
             }
