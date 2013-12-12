@@ -1244,9 +1244,7 @@ public final class CoolMapObject<BASE, VIEW> {
             }
 
 //            System.out.println("Trying to expand" + nodesToBeExpanded);
-            
             _vMatrix.expandColNodeToChildNodes(nodesToBeExpanded);
-            
 
             getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
@@ -1419,11 +1417,20 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public synchronized boolean collapseColumnNodes(Collection<VNode> nodes, boolean select) {
-        if (nodes == null || nodes.isEmpty() || getCoolMapView() == null) {
+    public synchronized boolean collapseColumnNodes(Collection<VNode> inputNodes, boolean select) {
+        if (inputNodes == null || inputNodes.isEmpty() || getCoolMapView() == null) {
             return false;
         }
-        _vMatrix.collapseTreeColNodes(nodes);
+
+        List<VNode> nodesToCollapse = new ArrayList<VNode>();
+        for (VNode node : inputNodes) {
+            if (node != null && node.isGroupNode() && node.isExpanded()) {
+                nodesToCollapse.add(node);
+            }
+        }
+
+        _vMatrix.collapseTreeColNodes(nodesToCollapse);
+
         getCoolMapView().updateNodeDisplayParams();
         _sortTracker.clearSortedRow();
         if (_sortTracker.lastSortedColumn != null && !_vMatrix.getActiveColumnNodes().contains(_sortTracker.lastSortedColumn)) {
@@ -1437,7 +1444,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
             ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
-            for (VNode node : nodes) {
+            for (VNode node : nodesToCollapse) {
                 if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
                     try {
                         retainedIndices.add(node.getViewIndex().intValue());
@@ -1446,6 +1453,7 @@ public final class CoolMapObject<BASE, VIEW> {
                     }
                 }
             }
+            
             HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
 
             if (columnSelections != null) {
@@ -1459,16 +1467,37 @@ public final class CoolMapObject<BASE, VIEW> {
         return true;
     }
 
-    public synchronized boolean collapseRowNodes(Collection<VNode> nodes, boolean select) {
-        if (nodes == null || nodes.isEmpty() || getCoolMapView() == null) {
-            return false;
+    /**
+     * returns collapsed nodes
+     *
+     * @param inputNodes
+     * @param select
+     * @return
+     */
+    public synchronized List<VNode> collapseRowNodes(Collection<VNode> inputNodes, boolean select) {
+        if (inputNodes == null || inputNodes.isEmpty() || getCoolMapView() == null) {
+            return null;
         }
-        _vMatrix.collapseTreeRowNodes(nodes);
+
+        //again first check that inputNodes are actually tree inputNodes
+        //
+        ArrayList<VNode> nodesToCollapse = new ArrayList<VNode>();
+
+        //only keep tree nodes
+        for (VNode node : inputNodes) {
+            if (node != null && node.isGroupNode() && node.isExpanded()) {
+                nodesToCollapse.add(node);
+            }
+        }
+
+        _vMatrix.collapseTreeRowNodes(nodesToCollapse);
+
         getCoolMapView().updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
         if (_sortTracker.lastSortedRow != null && !_vMatrix.getActiveRowNodes().contains(_sortTracker.lastSortedRow)) {
             _sortTracker.clearSortedRow();//It's gone
         }
+
         getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
@@ -1476,7 +1505,7 @@ public final class CoolMapObject<BASE, VIEW> {
         if (select) {
             ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
-            for (VNode node : nodes) {
+            for (VNode node : inputNodes) {
                 if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
                     try {
                         retainedIndices.add(node.getViewIndex().intValue());
@@ -1493,7 +1522,7 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-        return true;
+        return nodesToCollapse;
     }
 
     public boolean expandColumnNodesOneLayer() {
@@ -1580,7 +1609,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         if (!onlyLevelOneParents.isEmpty()) {
-            return collapseRowNodes(onlyLevelOneParents, false);
+            return collapseRowNodes(onlyLevelOneParents, false) == null ? false : true;
         }
 
         //There are better ways to do this? 

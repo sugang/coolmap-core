@@ -5,14 +5,12 @@
 package coolmap.data.cmatrixview.model;
 
 import com.google.common.collect.HashMultimap;
-import coolmap.application.CoolMapMaster;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.Tools;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -303,8 +301,7 @@ public class VMatrix<BASE, VIEW> {
 
     //This is not quite right
     public synchronized void expandColNodeToChildNodes(Collection<VNode> inputNodes) {
-        
-        
+
         for (VNode node : _activeColNodes) {
             node.mark(false);
         }
@@ -572,16 +569,84 @@ public class VMatrix<BASE, VIEW> {
     }
 
     //This definitely need to be fixed
-    public synchronized void collapseTreeColNodes(Collection<VNode> nodes) {
+    public synchronized void collapseTreeColNodes(Collection<VNode> nodesToCollapse) {
 
-        for (VNode node : nodes) {
-            collapseTreeColNode(node);
+        //unmark everything
+        for (VNode node : _activeColNodesInTree) {
+            node.mark(false);
         }
+
+        for (VNode node : _activeColNodes) {
+            node.mark(false);
+        }
+
+        //first mark child nodes
+        for (VNode treeNode : nodesToCollapse) {
+            List<VNode> childNodes = treeNode.getChildNodes();
+            for (VNode childNode : childNodes) {
+                if (childNode.isMarked()) {
+                    continue;
+                }
+                _markChildNodes(childNode);
+            }
+        }
+
+        //find treeNodesToRemove
+        HashSet<VNode> treeNodesToRemove = new HashSet<VNode>();
+
+        for (VNode node : nodesToCollapse) {
+            if (!node.isMarked()) {
+//                node.setViewColor(Color.RED);
+
+                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
+                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>(); //these nodes are marked to be removed, so no worries
+                _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);
+
+                treeNodesToRemove.addAll(nodesToBeRemovedFromTree);//to be removed
+                treeNodesToRemove.add(node); //don't forget to add itself
+
+                int vIndex = nodesToBeRemovedFromBase.get(0).getViewIndex().intValue(); //assume this index should always exist
+
+                _activeColNodes.set(vIndex, node); //place nodes there - the first child
+                node.setExpanded(false);//
+
+            } else {
+                node.mark(false);
+            }
+        }
+
+        for (VNode treeNode : treeNodesToRemove) {
+            treeNode.mark(false);
+            treeNode.setExpanded(false);
+        }
+
+        //change treeNodes
+        HashSet<VNode> treeNodes = new HashSet<>(_activeColNodesInTree);
+        treeNodes.removeAll(treeNodesToRemove);
+        _activeColNodesInTree.clear();
+        _activeColNodesInTree.addAll(treeNodes);
+
+        //change base nodes
+        ArrayList<VNode> newBaseNodes = new ArrayList<VNode>();
+        for (VNode node : _activeColNodes) {
+            if (!node.isMarked()) {
+                newBaseNodes.add(node); //skp those marked to remove ones
+            } else {
+                //node is marked for removal
+                node.mark(false);
+            }
+        }
+
+        _activeColNodes.clear();
+        _activeColNodes.addAll(newBaseNodes);
+
+        _updateActiveColNodeHeights();
+        _updateActiveColNodeViewIndices();
 
     }
 
     //this definitely need to be fixed
-    public synchronized void collapseTreeRowNodes(Collection<VNode> inputNodes) {
+    public synchronized void collapseTreeRowNodes(Collection<VNode> nodesToCollapse) {
 
         //This is not the rightway, way too slow
 //        for (VNode node : inputNodes) {
@@ -592,44 +657,110 @@ public class VMatrix<BASE, VIEW> {
         //first mark inputNodes
         //make sure everynode is unmarked
         //First determine which inputNodes to collapse
-        ArrayList<VNode> nodesToCollapse = new ArrayList<VNode>();
-
-        //only keep tree nodes
-        for (VNode node : inputNodes) {
-            if (node != null && node.isGroupNode() && node.isExpanded()) {
-                nodesToCollapse.add(node);
-            }
-        }
-
+        //assume that filtering is already done, all nodes remainging are only tree nodes
         for (VNode node : _activeRowNodesInTree) {
             node.mark(false);
-            node.setViewColor(null);
+//            node.setViewColor(null);
         }
 
         for (VNode node : _activeRowNodes) {
             node.mark(false);
         }
 
+        //this is a relatively fast step
         for (VNode treeNode : nodesToCollapse) {
             List<VNode> childNodes = treeNode.getChildNodes();
             for (VNode childNode : childNodes) {
-                childNode.mark(true);
+                if (childNode.isMarked()) {
+                    continue;
+                }
+                _markChildNodes(childNode);
             }
         }
 
         //then what's remaining unmarked is the highest in tree
+        HashSet<VNode> treeNodesToRemove = new HashSet<VNode>();
+//        HashSet<VNode> baseNodesToRemove = new HashSet<VNode>();
+
+        //iterate all nodes to collapse
         for (VNode node : nodesToCollapse) {
             if (!node.isMarked()) {
                 //unmarked nodes, top level
                 //node.setViewColor(Color.RED);
 
-                System.out.println(node.getName());
-                node.setViewColor(Color.RED);
+//                System.out.println(node.getName());
+//                node.setViewColor(Color.RED);
+
+                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
+                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>(); //these nodes are marked to be removed, so no worries
+                _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);
+
+                treeNodesToRemove.addAll(nodesToBeRemovedFromTree);//to be removed
+                treeNodesToRemove.add(node); //don't forget to add itself
+
+//                for(VNode treeNode : nodesToBeRemovedFromTree){
+//                    treeNode.setViewColor(Color.YELLOW);
+//                }
+//                
+//                for(VNode baseNode : nodesToBeRemovedFromBase){
+//                    baseNode.setViewColor(Color.GREEN);
+////                    baseNode.mark(false);
+//                }
+//                nodesToBeRemovedFromBase.get(0).setViewColor(Color.BLUE);
+                //an easy way is:
+                //replace the
+                int vIndex = nodesToBeRemovedFromBase.get(0).getViewIndex().intValue(); //assume this index should always exist
+
+                _activeRowNodes.set(vIndex, node); //place nodes there
+                node.setExpanded(false);//
+
+                //set state
+//                for(VNode treeNode : nodesToBeRemovedFromTree){
+//                    treeNode.setExpanded(false);
+////                    treeNode.mark(false);
+//                }
+            } else {
+                node.mark(false);
             }
         }
 
-        CoolMapMaster.getActiveCoolMapObject().getCoolMapView().updateRowMapBuffersEnforceAll();
+        //set mode to not expanded | as it's tree node
+        //set mark to be false
+        for (VNode treeNode : treeNodesToRemove) {
+            treeNode.mark(false);
+            treeNode.setExpanded(false);
+        }
 
+        HashSet<VNode> treeNodes = new HashSet<>(_activeRowNodesInTree);
+        treeNodes.removeAll(treeNodesToRemove);
+
+        _activeRowNodesInTree.clear();
+        _activeRowNodesInTree.addAll(treeNodes);
+
+        ArrayList<VNode> newBaseNodes = new ArrayList<VNode>();
+        for (VNode node : _activeRowNodes) {
+            if (!node.isMarked()) {
+                newBaseNodes.add(node); //skp those marked to remove ones
+            } else {
+                //node is marked for removal
+                node.mark(false);
+            }
+        }
+
+        _activeRowNodes.clear();
+        _activeRowNodes.addAll(newBaseNodes);
+
+        //must reset all nodes
+        //
+//        for(VNode node : treeNodesToRemove){
+//            node.mark(false);
+//        }
+        _updateActiveRowNodeHeights();
+        _updateActiveRowNodeViewIndices();
+
+        //nodes to be removed are all childNodes from these nodes;
+        //basically get the smallest view Index
+//        CoolMapMaster.getActiveCoolMapObject().getCoolMapView().updateRowMapBuffersEnforceAll();
     }
 
     private void _markChildNodes(VNode node) {
@@ -637,26 +768,15 @@ public class VMatrix<BASE, VIEW> {
             return;//If a node is marked, its children are already marked
         }
 
-        if (node.isSingleNode() || node.isGroupNode() && !node.isExpanded()) {
-            //reached bottom layer
-            //single or unexpanded ontological nodes
-            //stop at leaf layer
-            node.mark(true);
-            return;
-        }
+        node.mark(true);
 
         if (node.isGroupNode() && node.isExpanded()) {
-            node.mark(true);
             Collection<VNode> childNodes = node.getChildNodes();
             for (VNode childNode : childNodes) {
-                _markChildNodes(node);
+                _markChildNodes(childNode);
             }
         }
 
-//        if(node.getViewHeightInTree() != null && node.getViewHeightInTree().intValue() == 0 ){
-//            //reach bottom
-//            
-//        }
     }
 
     /**
@@ -697,8 +817,6 @@ public class VMatrix<BASE, VIEW> {
         }
 
         _updateActiveRowNodeHeights();
-
-//        System.out.println("== collapse tree node called ==");
         _updateActiveRowNodeViewIndices();
 
         node.setExpanded(false);

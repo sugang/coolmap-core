@@ -7,8 +7,6 @@ package coolmap.canvas.sidemaps.impl;
 import com.google.common.collect.Range;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.action.CollapseRowNodesUpAction;
-import coolmap.canvas.action.ExpandRowNodesOneLevelAction;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
@@ -164,7 +162,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
 
-        _selectSubtree = new JMenuItem("Select");
+        _selectSubtree = new JMenuItem("Select leaf rows");
         _selectSubtree.setToolTipText("Select rows with selected ontology nodes");
         _popupMenu.add(_selectSubtree);
         _selectSubtree.addActionListener(new ActionListener() {
@@ -186,7 +184,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //            }
 //        });
 //        _popupMenu.add(_expandOne);
-        _expandToAll = new JMenuItem("Expand");
+        _expandToAll = new JMenuItem("Expand selected");
         _expandToAll.setToolTipText("Expand selected ontology nodes to next level");
         _expandToAll.addActionListener(new ActionListener() {
 
@@ -205,7 +203,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         });
         _popupMenu.add(_expandToAll);
 
-        _collapse = new JMenuItem("Collapse");
+        _collapse = new JMenuItem("Collapse selected");
         _collapse.setToolTipText("Collapse selected ontology nodes");
         _collapse.addActionListener(new ActionListener() {
 
@@ -218,15 +216,42 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 CoolMapState state = CoolMapState.createStateRows("Collapse row nodes", getCoolMapObject(), null);
                 ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
                 Collections.sort(nodes, new VNodeHeightComparator());
-                getCoolMapObject().collapseRowNodes(_selectedNodes, true);
+                List<VNode> collapsedNodes = getCoolMapObject().collapseRowNodes(_selectedNodes, true);
+
+//                LinkedHashSet<VNode> collapsedNodes = new LinkedHashSet<VNode>();
+//                for(VNode node : _selectedNodes){
+//                    if(node)
+//                }
+                _selectedNodes.clear();
+                if (collapsedNodes != null) {
+                    _selectedNodes.addAll(collapsedNodes);
+                }
+
+                RowTree.this.getViewPanel().repaint();
+
                 StateStorageMaster.addState(state);
             }
         });
         _popupMenu.add(_collapse);
         _popupMenu.addSeparator();
 
-        _expandOneAll = new JMenuItem(new ExpandRowNodesOneLevelAction(getCoolMapObject().getID()));
+        _expandOneAll = new JMenuItem("Expand one level");
         _popupMenu.add(_expandOneAll);
+        _expandOneAll.setToolTipText("Expand all row ontology nodes to the next level");
+        _expandOneAll.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = getCoolMapObject();
+                if(obj == null){
+                    return;
+                }
+                CoolMapState state = CoolMapState.createStateRows("Expand rows to the next level", obj, null);
+                obj.expandRowNodesOneLayer();
+                _selectedNodes.clear();
+                StateStorageMaster.addState(state);
+            }
+        });
 
 //        _expandOneAll.addActionListener(new ActionListener() {
 //
@@ -235,7 +260,24 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //                getCoolMapObject().expandRowNodesOneLayer();
 //            }
 //        });
-        _collapseOneAll = new JMenuItem(new CollapseRowNodesUpAction(getCoolMapObject().getID()));
+        _collapseOneAll = new JMenuItem("Collapse one level");
+        _collapseOneAll.setToolTipText("Collapse all row ontology nodes to the previous level");
+        _collapseOneAll.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = getCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+                CoolMapState state = CoolMapState.createStateRows("Collapse rows to the previous level", obj, null);
+                obj.collapseRowNodesOneLayer();
+                _selectedNodes.clear();
+                StateStorageMaster.addState(state);
+
+            }
+        });
+
         _popupMenu.add(_collapseOneAll);
 //        _collapseOneAll.addActionListener(new ActionListener() {
 //
