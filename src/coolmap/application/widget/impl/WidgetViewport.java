@@ -4,9 +4,11 @@
  */
 package coolmap.application.widget.impl;
 
+import com.google.common.collect.Range;
 import coolmap.application.CMainFrame;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.viewportActions.CascadeMapsAction;
 import coolmap.application.utils.viewportActions.CenterSelectionAction;
 import coolmap.application.utils.viewportActions.TileMapsAction;
@@ -26,6 +28,8 @@ import coolmap.canvas.action.PasteColumnNodesAction;
 import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
 import coolmap.data.action.RenameCoolMapObjectAction;
+import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import coolmap.utils.BrowserLauncher;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
@@ -38,6 +42,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
@@ -62,6 +67,100 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
     private final JPopupMenu _popupMenu = new JPopupMenu();
     private JToggleButton _gridMode;
 
+    private void initPopup() {
+        JMenuItem item = new JMenuItem("Selected Rows");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
+
+                    ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+
+                    if (selRows == null || selRows.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selRows) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            rowNodes.add(obj.getViewNodeRow(i));
+                        }
+                    }
+
+                    CoolMapState state = CoolMapState.createStateRows("Expand selected rows", obj, null);
+
+                    List expandedNodes = obj.expandRowNodes(rowNodes, true);
+
+                    if (expandedNodes == null || expandedNodes.isEmpty()) {
+                        return;
+                    }
+
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
+        item = new JMenuItem("Selected Columns");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
+
+                    ArrayList<VNode> columnNodes = new ArrayList<VNode>();
+
+                    if (selColumns == null || selColumns.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selColumns) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            columnNodes.add(obj.getViewNodeColumn(i));
+                        }
+                    }
+
+                    CoolMapState state = CoolMapState.createStateColumns("Expand selected columns", obj, null);
+                    List expandedNodes = obj.expandColumnNodes(columnNodes, true);
+                    
+                    if(expandedNodes == null || expandedNodes.isEmpty())
+                        return;
+                    
+                    
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
+        item = new JMenuItem("Selected Rows");
+        addPopupMenuItem("Collapse", item, false);
+        
+
+        item = new JMenuItem("Selected Columns");
+        addPopupMenuItem("Collapse", item, false);
+
+        addPopupMenuSeparator(null);
+
+        JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
+        addPopupMenuItem("Paste", pasteItem, false);
+        pasteItem.addActionListener(new PasteColumnNodesAction());
+
+        pasteItem = new JMenuItem("To Row", UI.getImageIcon("insertColumn"));
+        addPopupMenuItem("Paste", pasteItem, false);
+        pasteItem.addActionListener(new PasteRowNodesAction());
+    }
+
     public WidgetViewport() {
         super("Canvas", W_VIEWPORT, L_VIEWPORT, UI.getImageIcon("layers"), "Display area for CoolMaps");
         getContentPane().setPreferredSize(new Dimension(640, 480));
@@ -74,19 +173,14 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
         getContentPane().setBackground(UI.colorBlack3);
 
-        JMenuItem renameAction = new JMenuItem(new RenameCoolMapObjectAction());
-        addPopupMenuItem("Edit", renameAction, false);
-
-        JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
-        addPopupMenuItem("Paste nodes", pasteItem, false);
-        pasteItem.addActionListener(new PasteColumnNodesAction());
-
-        pasteItem = new JMenuItem("To Row", UI.getImageIcon("insertColumn"));
-        addPopupMenuItem("Paste nodes", pasteItem, false);
-        pasteItem.addActionListener(new PasteRowNodesAction());
+        initPopup();
 
         addPopupMenuSeparator(null);
 
+        JMenuItem renameAction = new JMenuItem(new RenameCoolMapObjectAction());
+        addPopupMenuItem("Edit", renameAction, false);
+
+//        addPopupMenuSeparator(null);
         JMenuItem searchItem = new JMenuItem("Pubmed", UI.getImageIcon("pubmed"));
         addPopupMenuItem("Search selected...", searchItem, false);
         searchItem.addActionListener(new ActionListener() {
