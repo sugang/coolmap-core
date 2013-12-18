@@ -36,6 +36,7 @@ public interface ImportData {
     public Set<CoolMapObject> getImportedCoolMapObjects();
     public Set<COntology> getImportedCOntology();
 
+    public void configure(File... file);
     
     
 }

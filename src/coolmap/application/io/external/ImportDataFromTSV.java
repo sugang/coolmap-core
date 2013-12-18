@@ -36,7 +36,7 @@ public class ImportDataFromTSV implements ImportData {
 
     public void importFromFile(File... files) throws Exception {
 
-        System.out.println("importing from files");
+//        System.out.println("importing from files");
         for (File file : files) {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -144,6 +144,10 @@ public class ImportDataFromTSV implements ImportData {
     @Override
     public Set<COntology> getImportedCOntology() {
         return null;
+    }
+
+    @Override
+    public void configure(File... file) {
     }
 
 }

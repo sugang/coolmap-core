@@ -101,6 +101,10 @@ public class IOMaster {
                         return;
                     }
 
+                    importerInstance.configure(f);
+                    
+                    
+                    
                     LongTask task = new LongTask("import data...") {
 
                         @Override
@@ -108,7 +112,6 @@ public class IOMaster {
                             try {
 
                                 System.out.println("Trying to import data");
-                                ImportData importerInstance = importerClass.newInstance();
                                 importerInstance.importFromFile(f);
 
                                 Set<CoolMapObject> objects = importerInstance.getImportedCoolMapObjects();
@@ -627,6 +630,9 @@ public class IOMaster {
                 CMConsole.logError("failed to initialize Data IO from config file.");
             }
         }
+        
+        //other importers with Configuration panels
+        
     }
 
     private static void initializeCreateNew() {

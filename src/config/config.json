@@ -60,7 +60,8 @@
         "data-importer":{
             "load":[
                 "coolmap.application.io.external.ImportDataFromTSV",
-                "coolmap.application.io.external.ImportDataFromGEOSOFT"
+                "coolmap.application.io.external.ImportDataFromGEOSOFT",
+                "coolmap.application.io.external.ImportDataFromXLS"
             ]
         }
         

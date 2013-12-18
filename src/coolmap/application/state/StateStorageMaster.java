@@ -148,6 +148,20 @@ public class StateStorageMaster {
         
         updateMenus(object);
     }
+    
+    private static CoolMapState copiedState = null;
+    
+    public synchronized static void setCopiedState(CoolMapState state){
+        copiedState = state;
+    }
+    
+    public synchronized static CoolMapState getCopiedState(){
+        return copiedState;
+    }
+    
+    
+    
+    
 
     public static void addState(CoolMapState state) {
 //        System.out.println("new state added:" + state);

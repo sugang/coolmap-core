@@ -12,7 +12,7 @@ import java.util.Collection;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- *
+ * This interface must be changed as well, may need to import from complex files like excel that requires config windows
  * @author sugang
  */
 public interface ImportCOntology {

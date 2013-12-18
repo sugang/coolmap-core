@@ -42,6 +42,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
@@ -130,11 +131,11 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                     CoolMapState state = CoolMapState.createStateColumns("Expand selected columns", obj, null);
                     List expandedNodes = obj.expandColumnNodes(columnNodes, true);
-                    
-                    if(expandedNodes == null || expandedNodes.isEmpty())
+
+                    if (expandedNodes == null || expandedNodes.isEmpty()) {
                         return;
-                    
-                    
+                    }
+
                     StateStorageMaster.addState(state);
 
                 } catch (Exception ex) {
@@ -145,18 +146,191 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
         item = new JMenuItem("Selected Rows");
         addPopupMenuItem("Collapse", item, false);
-        
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
+
+                    LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>();
+
+                    if (selRows == null || selRows.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selRows) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            VNode parentNode = obj.getViewNodeRow(i).getParentNode();
+                            if (parentNode != null) {
+                                rowNodes.add(parentNode);
+                            }
+                        }
+                    }
+
+                    if (selRows.isEmpty()) {
+                        return;
+                    }
+
+                    CoolMapState state = CoolMapState.createStateRows("Collapse rows", obj, null);
+                    List collapsedNodes = obj.collapseRowNodes(rowNodes, true);
+
+                    if (collapsedNodes == null || collapsedNodes.isEmpty()) {
+                        return;
+                    }
+
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
 
         item = new JMenuItem("Selected Columns");
         addPopupMenuItem("Collapse", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
+
+                    LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>();
+
+                    if (selColumns == null || selColumns.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selColumns) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            VNode parentNode = obj.getViewNodeColumn(i).getParentNode();
+                            if (parentNode != null) {
+                                colNodes.add(parentNode);
+                            }
+                        }
+                    }
+
+                    if (colNodes.isEmpty()) {
+                        return;
+                    }
+
+                    CoolMapState state = CoolMapState.createStateColumns("Collapse columns", obj, null);
+                    List collapsedNodes = obj.collapseColumnNodes(colNodes, true);
+
+                    if (collapsedNodes == null || collapsedNodes.isEmpty()) {
+                        return;
+                    }
+
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+
+            }
+        });
 
         addPopupMenuSeparator(null);
 
-        JMenuItem pasteItem = new JMenuItem("To Column", UI.getImageIcon("insertRow"));
-        addPopupMenuItem("Paste", pasteItem, false);
+        //add buttons to copy nodes
+        //if it's copying part of the nodes; 
+        JMenuItem copyItem = new JMenuItem("Row", UI.getImageIcon("insertRow"));
+        addPopupMenuItem("Copy layout", copyItem, false);
+        copyItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                CoolMapState rowState = CoolMapState.createStateRows("Copied rows", obj, null);
+
+                StateStorageMaster.setCopiedState(rowState);
+
+            }
+        });
+
+        copyItem = new JMenuItem("Column", UI.getImageIcon("insertColumn"));
+        addPopupMenuItem("Copy layout", copyItem, false);
+        copyItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if(obj == null){
+                    return;
+                }
+                
+                CoolMapState columnState = CoolMapState.createStateColumns("Copied columns", obj, null);
+                
+                StateStorageMaster.setCopiedState(columnState);
+            }
+        });
+        
+        
+
+        copyItem = new JMenuItem("Both", UI.getImageIcon("grid"));
+        addPopupMenuItem("Copy layout", copyItem, true);
+        
+        copyItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if(obj == null){
+                    return;
+                }
+                
+                CoolMapState bothState = CoolMapState.createState("Copied both", obj, null);
+                
+                StateStorageMaster.setCopiedState(bothState);
+            }
+        });
+        
+        
+        
+        
+
+        JMenuItem pasteLayoutItem = new JMenuItem("Paste layout", UI.getImageIcon("paintRoll"));
+        addPopupMenuItem("Paste", pasteLayoutItem, false);
+        pasteLayoutItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                CoolMapState state = StateStorageMaster.getCopiedState();
+                if (state == null) {
+                    return;
+                }
+
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                CoolMapState stateBeforePaste = CoolMapState.createState("Pasted state", obj, null);
+                //can save here
+                obj.restoreState(state);
+                
+                StateStorageMaster.addState(stateBeforePaste);
+            }
+        });
+        
+        
+        
+
+        //paste nodes from ontology browser
+        JMenuItem pasteItem = new JMenuItem("New nodes to column", UI.getImageIcon("insertRow"));
+        addPopupMenuItem("Paste", pasteItem, true);
         pasteItem.addActionListener(new PasteColumnNodesAction());
 
-        pasteItem = new JMenuItem("To Row", UI.getImageIcon("insertColumn"));
+        pasteItem = new JMenuItem("New nodes to row", UI.getImageIcon("insertColumn"));
         addPopupMenuItem("Paste", pasteItem, false);
         pasteItem.addActionListener(new PasteRowNodesAction());
     }
@@ -250,10 +424,9 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
     }
 
-    public void setEnabled(boolean enabled) {
-        _desktop.setVisible(enabled);
-    }
-
+//    public void setEnabled(boolean enabled) {
+//        _desktop.setVisible(enabled);
+//    }
 //    public void setSessionName(String name){
 //        if(name == null || name.length() == 0){
 //            name = "Untitled";
@@ -379,7 +552,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             return;
         }
 
-        if ((parentPath == null || parentPath.equals(""))) {
+        if ((parentPath == null || parentPath.length() == 0)) {
             if (item instanceof JMenu) {
                 _popupMenu.add((JMenu) item);
             } else {
@@ -468,7 +641,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             CMConsole.logError("Error: could not add new coolmap view.");
         }
     }
-    private JToggleButton _toggleZoomSubBar;
+//    private JToggleButton _toggleZoomSubBar;
     private JToolBar _zoomSubBar;
 
     private void _initToolbar() {
@@ -534,23 +707,22 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
         _toolBar.addSeparator();
 
-        _toggleZoomSubBar = new JToggleButton(UI.getImageIcon("gear"));
-        _toolBar.add(_toggleZoomSubBar);
-        _toggleZoomSubBar.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                if (_toggleZoomSubBar.isSelected()) {
-                    _zoomSubBar.setVisible(true);
-                } else {
-                    _zoomSubBar.setVisible(false);
-                }
-            }
-        });
-
+//        _toggleZoomSubBar = new JToggleButton(UI.getImageIcon("gear"));
+//        _toolBar.add(_toggleZoomSubBar);
+//        _toggleZoomSubBar.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                if (_toggleZoomSubBar.isSelected()) {
+//                    _zoomSubBar.setVisible(true);
+//                } else {
+//                    _zoomSubBar.setVisible(false);
+//                }
+//            }
+//        });
         _zoomSubBar = new JToolBar();
         _zoomSubBar.setFloatable(false);
-        _zoomSubBar.setVisible(false);
+        _zoomSubBar.setVisible(true);
 
         button = new JButton(UI.getImageIcon("zoomInX"));
         button.addActionListener(new ActionListener() {

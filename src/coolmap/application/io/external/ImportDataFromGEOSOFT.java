@@ -322,4 +322,8 @@ public class ImportDataFromGEOSOFT implements ImportData {
         return ontologies;
     }
 
+    @Override
+    public void configure(File... file) {
+    }
+
 }
