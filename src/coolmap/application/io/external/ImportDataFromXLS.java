@@ -5,21 +5,36 @@
  */
 package coolmap.application.io.external;
 
-import cern.colt.Arrays;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.interfaces.ImportData;
 import coolmap.application.widget.impl.console.CMConsole;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
+import coolmap.data.aggregator.impl.DoubleDoubleMean;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.contology.utils.COntologyUtils;
+import coolmap.data.snippet.DoubleSnippet1_3;
+import coolmap.utils.ColorLabel;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -57,12 +72,18 @@ public class ImportDataFromXLS implements ImportData {
 
     private File inFile;
     private int sheetIndex;
-    private int rowStart;
+    private int rowStart; //need to recompute this
     private int columnStart;
     private boolean importOntology;
 
+    private final HashSet<CoolMapObject> importedCoolMaps = new HashSet<CoolMapObject>();
+    private final HashSet<COntology> importedOntologies = new HashSet<COntology>();
+
     @Override
     public void importFromFile(File... file) throws Exception {
+
+        //Ignore the file, choose only a single file
+        //I actually don't know the row count
         if (!proceed) {
             throw new Exception("Import from excel was cancelled");
         } else {
@@ -75,40 +96,213 @@ public class ImportDataFromXLS implements ImportData {
                 } else if (fileNameString.toLowerCase().endsWith("xlsx")) {
                     workbook = new XSSFWorkbook(inStream);
                 }
-                
+
                 Sheet sheet = workbook.getSheetAt(sheetIndex);
-                
+
                 int rowCounter = 0;
-                
+
+                //need to first copy the file over
+                ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+
                 Iterator<Row> rowIterator = sheet.rowIterator();
-                
-                while(rowIterator.hasNext()){
+
+                while (rowIterator.hasNext()) {
                     Row row = rowIterator.next();
-                    
-                    
-                    if(rowCounter < rowStart){
-                        rowCounter++;
-                        continue;
-                        
-                        //skip first rows
-                    }
-                    
-                    
-                    
-                    
-                    for(int i=columnStart; i<row.getLastCellNum(); i++){
+
+//                    if (rowCounter < rowStart) {
+//                        rowCounter++;
+//                        //import ontology rows
+//                        
+//                        continue;
+//
+//                        //skip first rows
+//                    }
+                    ArrayList<Object> rowData = new ArrayList<Object>();
+
+                    for (int i = 0; i < row.getLastCellNum(); i++) {
                         Cell cell = row.getCell(i);
-                        System.out.print(cell + " ");
+//                        System.out.print(cell + " ");
+//                        now add data
+                        try {
+                            if (cell == null) {
+                                rowData.add(null);
+                            } else if (cell.getCellType() == Cell.CELL_TYPE_BLANK) {
+                                rowData.add(null);
+                            } else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+                                rowData.add(cell.getStringCellValue());
+                            } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                rowData.add(cell.getNumericCellValue());
+                            } else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+                                rowData.add(cell.getBooleanCellValue());
+                            } else {
+                                rowData.add(cell.toString());
+                            }
+                        } catch (Exception e) {
+                            //
+                            CMConsole.logError(" error parsing excel cell: " + cell + ", [" + row + "," + i + "]");
+                            rowData.add(null);
+                        }
+
+                    }
+
+//                    System.out.println("");
+                    data.add(rowData);
+
+                }
+
+                System.out.println("Row start:" + rowStart + " Column start:" + columnStart);
+
+                //now I have row data
+                int rowCount = data.size() - rowStart - 1;
+                int columnCount = data.get(0).size() - columnStart - 1;
+
+                DoubleCMatrix matrix = new DoubleCMatrix(Tools.removeFileExtension(inFile.getName()), rowCount, columnCount);
+                String[] rowNames = new String[rowCount];
+                String[] columnNames = new String[columnCount];
+
+                for (int i = rowStart; i < data.size(); i++) {
+                    ArrayList row = data.get(i);
+                    if (i == rowStart) {
+                        //first row contains names
+                        for (int j = columnStart + 1; j < row.size(); j++) {
+                            try {
+                                columnNames[j - columnStart - 1] = row.get(j).toString();
+                            } catch (Exception e) {
+                                columnNames[j - columnStart - 1] = "Untitled " + Tools.randomID();
+                            }
+                        }
+                        continue;
+                    }
+
+                    for (int j = columnStart; j < row.size(); j++) {
+                        Object cell = row.get(j);
+                        if (j == columnStart) {
+                            try {
+                                rowNames[i - rowStart - 1] = cell.toString();
+                            } catch (Exception e) {
+                                rowNames[i - rowStart - 1] = "Untitled" + Tools.randomID();
+                            }
+                        } else {
+                            //set values
+                            try {
+                                Object value = (Double) row.get(j);
+                                if (value == null) {
+                                    matrix.setValue(i - rowStart - 1, j - columnStart - 1, null);
+                                } else if (value instanceof Double) {
+                                    matrix.setValue(i - rowStart - 1, j - columnStart - 1, (Double) value);
+                                } else {
+                                    matrix.setValue(i - rowStart - 1, j - columnStart - 1, Double.NaN);
+                                }
+                            } catch (Exception e) {
+                                matrix.setValue(i - rowStart - 1, j - columnStart - 1, null);
+                            }
+
+                        }
+                    }//end of iterating columns
+
+                }//end of iterating rows
+
+                System.out.println(Arrays.toString(rowNames));
+                System.out.println(Arrays.toString(columnNames));
+
+//                matrix.printMatrix();
+
+                //
+                CoolMapObject object = new CoolMapObject();
+                object.setName(Tools.removeFileExtension(this.inFile.getName()));
+                object.addBaseCMatrix(matrix);
+                ArrayList<VNode> nodes = new ArrayList<VNode>();
+                for (Object label : matrix.getRowLabelsAsList()) {
+                    nodes.add(new VNode(label.toString()));
+                }
+                object.insertRowNodes(nodes);
+
+                nodes.clear();
+                for (Object label : matrix.getColLabelsAsList()) {
+                    nodes.add(new VNode(label.toString()));
+                }
+                object.insertColumnNodes(nodes);
+
+                object.setAggregator(new DoubleDoubleMean());
+                object.setSnippetConverter(new DoubleSnippet1_3());
+                object.setViewRenderer(new NumberToColor(), true);
+
+                object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+                object.getCoolMapView().addColumnMap(new ColumnTree(object));
+                object.getCoolMapView().addRowMap(new RowLabels(object));
+                object.getCoolMapView().addRowMap(new RowTree(object));
+
+                importedCoolMaps.clear();
+                importedCoolMaps.add(object);
+                ////////////////////////////////////////////////////////////////
+                ////////////////////////////////////////////////////////////////
+                //
+                //let's add COntologies
+                if(columnStart > 0){
+                    COntology columnOntology = new COntology(Tools.removeFileExtension(inFile.getName()) + " column ontology", null);
+                    ArrayList<Object> columnLabels = data.get(rowStart); //these are column labels
+                    
+                    for(int i=0; i<rowStart; i++){
+                        ArrayList ontologyColumn = data.get(i);
+                        for(int j=columnStart+1; j<columnLabels.size();j++){
+                            Object parent = ontologyColumn.get(j);
+                            Object child = columnLabels.get(j);
+                            
+                            if(parent != null && child != null){
+                                columnOntology.addRelationshipNoUpdateDepth(parent.toString(), child.toString());
+                            }
+                            
+                            //Also need to create presets
+                        }
                     }
                     
-                    System.out.println("");
+                    columnOntology.validate();
+//                    COntologyUtils.printOntology(columnOntology);
+                    importedOntologies.add(columnOntology);
                     
+//                    need to finish the preset 
                 }
                 
+                if(rowStart > 0){
+                    COntology rowOntology = new COntology(Tools.removeFileExtension(inFile.getName()) + " row ontology", null);
+                    
+                    List rowLabels = Arrays.asList(rowNames);
+                    
+                    for(int j=0; j < columnStart; j++){
+                    
+                        for(int i=rowStart+1; i < data.size(); i++){
+                            Object parent = data.get(i).get(j);
+                            Object child = rowLabels.get(i - rowStart -1);
+                            
+                            if(parent != null && child != null){
+                                rowOntology.addRelationshipNoUpdateDepth(parent.toString(), child.toString());
+                            }
+                        }
+                        
+                    }
+                    
+                    
+                    
+                    
+                    rowOntology.validate();
+                    
+                    COntologyUtils.printOntology(rowOntology);
+                    
+                    importedOntologies.add(rowOntology);
+                }
+                
+//                create row and column complex combinatorial ontology (intersections)
                 
                 
                 
                 
+                
+                
+                
+                
+                
+                
+
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new Exception("File error");
@@ -130,12 +324,14 @@ public class ImportDataFromXLS implements ImportData {
 
     @Override
     public Set<CoolMapObject> getImportedCoolMapObjects() {
-        return null;
+//        return null;
+        return importedCoolMaps;
     }
 
     @Override
     public Set<COntology> getImportedCOntology() {
-        return null;
+//        return null;
+        return importedOntologies;
     }
 
     @Override
@@ -182,12 +378,12 @@ public class ImportDataFromXLS implements ImportData {
                 //so only need to figure out how many rows to skip; which is nice
                 //columns, not the same though
                 Sheet sheet = workbook.getSheetAt(si);
-
                 Iterator<Row> rowIterator = sheet.rowIterator();
 
                 int ri = 0;
 
                 ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+
                 while (rowIterator.hasNext()) {
 
                     row = rowIterator.next();
@@ -219,6 +415,7 @@ public class ImportDataFromXLS implements ImportData {
                     }
 
                     data.add(rowData);
+
                     ri++;
 
                     if (ri == previewNum) {
@@ -237,7 +434,7 @@ public class ImportDataFromXLS implements ImportData {
 
             //int returnVal = JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), configPanel);
             int returnVal = JOptionPane.showConfirmDialog(
-                    CoolMapMaster.getCMainFrame(), configPanel, "Import from Excel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                    CoolMapMaster.getCMainFrame(), configPanel, "Import from Excel: " + inFile.getAbsolutePath(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (returnVal == JOptionPane.OK_OPTION) {
                 proceed = true;
@@ -388,7 +585,16 @@ public class ImportDataFromXLS implements ImportData {
 
                     component.setBackground(UI.colorWhite);
 
-                    if (isSelected || row + 1 < ((Integer) rowStartSpinner.getValue()).intValue() || column + 1 < ((Integer) columnStartSpinner.getValue()).intValue()) {
+                    if (isSelected || row + 1 < ((Integer) rowStartSpinner.getValue()).intValue() && column + 1 < ((Integer) columnStartSpinner.getValue()).intValue()) {
+
+                        return component;
+                    }
+
+                    if (row + 1 < ((Integer) rowStartSpinner.getValue()).intValue() && column + 1 >= ((Integer) columnStartSpinner.getValue()).intValue()
+                            || row + 1 >= ((Integer) rowStartSpinner.getValue()).intValue() && column + 1 < ((Integer) columnStartSpinner.getValue()).intValue()) {
+                        //ontology cells
+                        component.setBackground(UI.colorRedWarning);
+
                         return component;
                     }
 
@@ -426,21 +632,51 @@ public class ImportDataFromXLS implements ImportData {
                 }
             });
 
-            toolBar.add(new JLabel("Row start"));
-            toolBar.add(rowStartSpinner);
-            toolBar.addSeparator();
+            JLabel label = new JLabel("Row start");
+            label.setToolTipText("Index of the header row");
 
-            toolBar.add(new JLabel("Column start"));
-            toolBar.add(columnStartSpinner);
-
-            toolBar.addSeparator();
-
-            JLabel label = new JLabel("Ontology");
-            label.setToolTipText("Import rows and columns before starting locations as ontologies");
             toolBar.add(label);
+            toolBar.add(rowStartSpinner);
+            rowStartSpinner.setToolTipText("<html>Specifies the header row (row labels). <br/> Any rows before this row can be imported as ontological terms.</html>");
+            toolBar.addSeparator();
+
+            label = new JLabel("Column start");
+            label.setToolTipText("Index of the header column");
+            toolBar.add(label);
+            toolBar.add(columnStartSpinner);
+            columnStartSpinner.setToolTipText("<html>Specifies the header column (column labels). <br/> Any columns before this column can be imported as ontological terms.</html>");
+
+            toolBar.addSeparator();
+
+            label = new JLabel("Ontology");
+            label.setToolTipText("Import rows and columns before starting locations as ontologies");
+//            toolBar.add(label);
 
             ontologyImport.setSelected(false);
-            toolBar.add(ontologyImport);
+//            toolBar.add(ontologyImport);
+
+            JToolBar bottomBar = new JToolBar();
+
+            this.add(bottomBar, BorderLayout.SOUTH);
+            bottomBar.setFloatable(false);
+
+            ColorLabel cLabel = new ColorLabel(UI.colorLightBlue0);
+            cLabel.setText("Numeric Data");
+
+            bottomBar.add(cLabel);
+
+            cLabel = new ColorLabel(UI.colorLightGreen0);
+            cLabel.setText("Headers");
+            bottomBar.add(cLabel);
+
+            cLabel = new ColorLabel(UI.colorRedWarning);
+            cLabel.setText("Ontologies");
+            bottomBar.add(cLabel);
+
+            cLabel = new ColorLabel(Color.WHITE);
+            cLabel.setText("Etc");
+
+            bottomBar.add(cLabel);
 
         }//end of constructor
 
