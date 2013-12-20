@@ -80,7 +80,7 @@ public class ImportDataFromXLS implements ImportData {
 
     @Override
     public void importFromFile(File inFile) throws Exception {
-                //Ignore the file, choose only a single file
+        //Ignore the file, choose only a single file
         //I actually don't know the row count
         if (!proceed) {
             throw new Exception("Import from excel was cancelled");
@@ -200,11 +200,7 @@ public class ImportDataFromXLS implements ImportData {
 
                 }//end of iterating rows
 
-                System.out.println(Arrays.toString(rowNames));
-                System.out.println(Arrays.toString(columnNames));
-
 //                matrix.printMatrix();
-
                 //
                 CoolMapObject object = new CoolMapObject();
                 object.setName(Tools.removeFileExtension(inFile.getName()));
@@ -236,95 +232,72 @@ public class ImportDataFromXLS implements ImportData {
                 ////////////////////////////////////////////////////////////////
                 //
                 //let's add COntologies
-                if(columnStart > 0){
+                if (columnStart > 0) {
                     COntology columnOntology = new COntology(Tools.removeFileExtension(inFile.getName()) + " column ontology", null);
                     ArrayList<Object> columnLabels = data.get(rowStart); //these are column labels
-                    
-                    for(int i=0; i<rowStart; i++){
+
+                    for (int i = 0; i < rowStart; i++) {
                         ArrayList ontologyColumn = data.get(i);
-                        for(int j=columnStart+1; j<columnLabels.size();j++){
+                        for (int j = columnStart + 1; j < columnLabels.size(); j++) {
                             Object parent = ontologyColumn.get(j);
                             Object child = columnLabels.get(j);
-                            
-                            if(parent != null && child != null){
+
+                            if (parent != null && child != null) {
                                 columnOntology.addRelationshipNoUpdateDepth(parent.toString(), child.toString());
                             }
-                            
+
                             //Also need to create presets
                         }
                     }
-                    
+
                     columnOntology.validate();
 //                    COntologyUtils.printOntology(columnOntology);
                     importedOntologies.add(columnOntology);
-                    
+
 //                    need to finish the preset 
                 }
-                
-                if(rowStart > 0){
+
+                if (rowStart > 0) {
                     COntology rowOntology = new COntology(Tools.removeFileExtension(inFile.getName()) + " row ontology", null);
-                    
+
                     List rowLabels = Arrays.asList(rowNames);
-                    
-                    for(int j=0; j < columnStart; j++){
-                    
-                        for(int i=rowStart+1; i < data.size(); i++){
+
+                    for (int j = 0; j < columnStart; j++) {
+
+                        for (int i = rowStart + 1; i < data.size(); i++) {
                             Object parent = data.get(i).get(j);
-                            Object child = rowLabels.get(i - rowStart -1);
-                            
-                            if(parent != null && child != null){
+                            Object child = rowLabels.get(i - rowStart - 1);
+
+                            if (parent != null && child != null) {
                                 rowOntology.addRelationshipNoUpdateDepth(parent.toString(), child.toString());
                             }
                         }
-                        
+
                     }
-                    
-                    
-                    
-                    
+
                     rowOntology.validate();
-                    
+
                     COntologyUtils.printOntology(rowOntology);
-                    
+
                     importedOntologies.add(rowOntology);
                 }
-                
-//                create row and column complex combinatorial ontology (intersections)
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
 
+//                create row and column complex combinatorial ontology (intersections)
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 throw new Exception("File error");
             }
 
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
     @Override
     public void importFromFiles(File... file) throws Exception {
     }
 
     @Override
     public String getLabel() {
-        return "Numeric Microsoft Excel";
+        return "Numeric Microsoft Excel (xls, xlsx)";
     }
 
     @Override
@@ -370,11 +343,6 @@ public class ImportDataFromXLS implements ImportData {
 
                 sheetNames[i] = sheetName == null || sheetName.length() == 0 ? "Untitled" : sheetName;
             }
-
-            //get the sheet names
-            final JComboBox sheetNameCombo = new JComboBox(sheetNames);
-
-            System.out.println(Arrays.toString(sheetNames));
 
             //also need to get the top 100 rows + all columns
             DefaultTableModel tableModels[] = new DefaultTableModel[sheetCount];
@@ -477,7 +445,6 @@ public class ImportDataFromXLS implements ImportData {
 
     private class ConfigPanel extends JPanel {
 
-        private final String[] names;
         private final ArrayList<DefaultTableModel> models;
         private JTable table = new JTable();
         private JSpinner rowStartSpinner, columnStartSpinner;
@@ -502,13 +469,18 @@ public class ImportDataFromXLS implements ImportData {
 
         private ConfigPanel(String[] tableNames, ArrayList<ArrayList<ArrayList<Object>>> data) {
 
-            names = tableNames;
-
             models = new ArrayList<>();
 
             for (ArrayList<ArrayList<Object>> tableData : data) {
 
-                Object[][] rawData = new Object[tableData.size()][tableData.get(0).size()];
+                int maxSize = 0;
+                for (ArrayList row : tableData) {
+                    if (maxSize < row.size()) {
+                        maxSize = row.size();
+                    }
+                }
+
+                Object[][] rawData = new Object[tableData.size()][maxSize];
 
                 for (int i = 0; i < tableData.size(); i++) {
                     ArrayList row = tableData.get(i);
@@ -600,7 +572,7 @@ public class ImportDataFromXLS implements ImportData {
 
                     component.setBackground(UI.colorWhite);
 
-                    if (isSelected || row + 1 < ((Integer) rowStartSpinner.getValue()).intValue() && column + 1 < ((Integer) columnStartSpinner.getValue()).intValue()) {
+                    if (value == null || isSelected || row + 1 < ((Integer) rowStartSpinner.getValue()).intValue() && column + 1 < ((Integer) columnStartSpinner.getValue()).intValue()) {
 
                         return component;
                     }

@@ -187,6 +187,7 @@ public class IOMaster {
                     final File f[];
                     if (importerInstance.onlyImportFromSingleFile()) {
                         chooser = Tools.getCustomSingleFileChooser(importerInstance.getFileNameExtensionFilter());
+                        chooser.setDialogTitle("Importing from " + importerInstance.getLabel() + " " + (importerInstance.onlyImportFromSingleFile() ? "(single file)" : "(multiple files)"));
                         int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
                         if (returnVal != JFileChooser.APPROVE_OPTION) {
                             return;
@@ -195,6 +196,7 @@ public class IOMaster {
                         
                     } else {
                         chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
+                        chooser.setDialogTitle("Importing from " + importerInstance.getLabel() + " " + (importerInstance.onlyImportFromSingleFile() ? "(single file)" : "(multiple files)"));
                         int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
                         if (returnVal != JFileChooser.APPROVE_OPTION) {
                             return;

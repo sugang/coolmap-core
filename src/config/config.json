@@ -54,7 +54,8 @@
             "load":[
                 "coolmap.application.io.external.ImportCOntologyFromSimpleTwoColumn",
                 "coolmap.application.io.external.ImportCOntologyFromGMT",
-                "coolmap.application.io.external.ImportCOntologyFromOBO"
+                "coolmap.application.io.external.ImportCOntologyFromOBO",
+                "coolmap.application.io.external.ImportCOntologyFromXLS"
             ]
         },
         "data-importer":{
