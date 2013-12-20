@@ -38,7 +38,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -86,25 +85,40 @@ public class IOMaster {
                         return;
                     }
 
-                    JFileChooser chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
-                    int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
-                    if (returnVal != JFileChooser.APPROVE_OPTION) {
-                        return;
+                    JFileChooser chooser;
+                    final File[] f;
+                    if (importerInstance.onlyImportFromSingleFile()) {
+                        chooser = Tools.getCustomSingleFileChooser(importerInstance.getFileNameExtensionFilter());
+                        chooser.setDialogTitle("Importing from " + importerInstance.getLabel() + " " + (importerInstance.onlyImportFromSingleFile() ? "(single file)" : "(multiple files)"));
+                        int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                        if (returnVal != JFileChooser.APPROVE_OPTION) {
+                            return;
+                        }
+                        f = new File[]{chooser.getSelectedFile()};
+                        if (f == null || f.length == 0) {
+                            CMConsole.logError("failed to import, no file was selected.");
+                            return;
+                        }
+                        importerInstance.configure(f);
+
+                    } else {
+
+                        chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
+                        chooser.setDialogTitle("Importing from " + importerInstance.getLabel() + " " + (importerInstance.onlyImportFromSingleFile() ? "(single file)" : "(multiple files)"));
+                        int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+
+                        if (returnVal != JFileChooser.APPROVE_OPTION) {
+                            return;
+                        }
+                        f = chooser.getSelectedFiles();
+                        if (f == null || f.length == 0) {
+                            CMConsole.logError("failed to import, no files were selected.");
+                            return;
+                        }
+                        importerInstance.configure(f);
                     }
 
-                    final File[] f = chooser.getSelectedFiles();
-
-                    System.out.println("selected files" + f + Arrays.toString(f));
-
-                    if (f == null || f.length == 0) {
-                        System.out.println("premature return");
-                        return;
-                    }
-
-                    importerInstance.configure(f);
-                    
-                    
-                    
+//                    System.out.println("selected files" + f + Arrays.toString(f));
                     LongTask task = new LongTask("import data...") {
 
                         @Override
@@ -112,7 +126,12 @@ public class IOMaster {
                             try {
 
                                 System.out.println("Trying to import data");
-                                importerInstance.importFromFile(f);
+
+                                if (importerInstance.onlyImportFromSingleFile()) {
+                                    importerInstance.importFromFile(f[0]);
+                                } else {
+                                    importerInstance.importFromFiles(f);
+                                }
 
                                 Set<CoolMapObject> objects = importerInstance.getImportedCoolMapObjects();
                                 Set<COntology> ontologies = importerInstance.getImportedCOntology();
@@ -120,7 +139,6 @@ public class IOMaster {
                                 if (Thread.interrupted()) {
                                     return;
                                 }
-
 
                                 CoolMapMaster.addNewCoolMapObject(objects);
                                 CoolMapMaster.addNewCOntology(ontologies);
@@ -164,13 +182,28 @@ public class IOMaster {
                         CMConsole.logError("failed to initialize ontology importer :" + importerClass);
                         return;
                     }
-                    JFileChooser chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
-                    int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
-                    if (returnVal != JFileChooser.APPROVE_OPTION) {
-                        return;
+
+                    final JFileChooser chooser;
+                    final File f[];
+                    if (importerInstance.onlyImportFromSingleFile()) {
+                        chooser = Tools.getCustomSingleFileChooser(importerInstance.getFileNameExtensionFilter());
+                        int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                        if (returnVal != JFileChooser.APPROVE_OPTION) {
+                            return;
+                        }
+                        f = new File[]{chooser.getSelectedFile()};
+                        
+                    } else {
+                        chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
+                        int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                        if (returnVal != JFileChooser.APPROVE_OPTION) {
+                            return;
+                        }
+                        f = chooser.getSelectedFiles();
                     }
 
-                    final File f[] = chooser.getSelectedFiles();
+                    importerInstance.configure(f);
+                    
                     if (f != null && f.length > 0) {
 
                         LongTask task = new LongTask("import ontology...") {
@@ -178,7 +211,16 @@ public class IOMaster {
                             @Override
                             public void run() {
                                 try {
-                                    Collection<COntology> ontologies = importerInstance.importFromFile(f);
+                                    
+                                    if(importerInstance.onlyImportFromSingleFile()){
+                                        importerInstance.importFromFile(f[0]);
+                                    }
+                                    else{
+                                        importerInstance.importFromFiles(f);
+                                    }
+                                    
+                                    Set<COntology> ontologies = importerInstance.getImportedCOntology();
+                                     
                                     for (COntology ontology : ontologies) {
                                         if (ontology == null) {
                                             return;
@@ -630,9 +672,8 @@ public class IOMaster {
                 CMConsole.logError("failed to initialize Data IO from config file.");
             }
         }
-        
+
         //other importers with Configuration panels
-        
     }
 
     private static void initializeCreateNew() {

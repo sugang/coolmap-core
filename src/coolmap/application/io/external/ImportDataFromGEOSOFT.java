@@ -69,7 +69,7 @@ public class ImportDataFromGEOSOFT implements ImportData {
     private final String go_component_ID = "GO:Component ID";
 
     @Override
-    public void importFromFile(File... files) throws Exception {
+    public void importFromFiles(File... files) throws Exception {
         for (File file : files) {
             try {
                 GeoSOFT geoEntry = GeoSOFT.parse(file);
@@ -325,5 +325,16 @@ public class ImportDataFromGEOSOFT implements ImportData {
     @Override
     public void configure(File... file) {
     }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return false;
+    }
+
+    @Override
+    public void importFromFile(File file) throws Exception {
+    }
+    
+    
 
 }

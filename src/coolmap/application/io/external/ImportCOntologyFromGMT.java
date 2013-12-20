@@ -13,7 +13,6 @@ import coolmap.utils.bioparser.gseagmt.GmtEntry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,10 +23,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author sugang
  */
 public class ImportCOntologyFromGMT implements ImportCOntology {
+    
+    private final HashSet<COntology> ontologies = new HashSet<COntology>();
+    
+    
+    
+    
+    
 
-    public Collection<COntology> importFromFile(File[] files) throws Exception {
-
-        HashSet<COntology> ontologies = new HashSet<COntology>();
+    public void importFromFiles(File[] files) throws Exception {
 
         for (File file : files) {
             try {
@@ -46,7 +50,8 @@ public class ImportCOntologyFromGMT implements ImportCOntology {
                     for (String gene : genes) {
                         ontology.addRelationshipNoUpdateDepth(geneSetString, gene);
                         if (Thread.interrupted()) {
-                            return null;
+                            ontologies.clear();
+                            return;
                         }
                     }
 
@@ -63,7 +68,7 @@ public class ImportCOntologyFromGMT implements ImportCOntology {
             }
 //        COntologyUtils.printOntology(ontology);  
         }
-        return ontologies;
+        return;
     }
 
     @Override
@@ -73,6 +78,25 @@ public class ImportCOntologyFromGMT implements ImportCOntology {
 
     @Override
     public FileNameExtensionFilter getFileNameExtensionFilter() {
-        return new FileNameExtensionFilter("GSEA gmt", "gmt", "txt");
+        return new FileNameExtensionFilter("GSEA gmt", "gmt", "tsv", "txt");
+    }
+
+    @Override
+    public void importFromFile(File file) throws Exception {
+        importFromFiles(new File[]{file});
+    }
+
+    @Override
+    public Set<COntology> getImportedCOntology() {
+        return ontologies;
+    }
+
+    @Override
+    public void configure(File... file) {
+    }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return false;
     }
 }

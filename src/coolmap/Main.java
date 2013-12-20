@@ -32,37 +32,11 @@ public class Main {
 
                 //First initialize
                 CoolMapMaster.initialize();
-                //CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
-                //CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
-
-//                CoolMapMaster.getCMainFrame().addMenuItem(null, null, true);
-//            FloatExternalizer 
-//                MenuItem saveWorkSpace = new MenuItem("Save Workspace");
-//                CoolMapMaster.getCMainFrame().addMenuItem("View", saveWorkSpace, true);
-//                saveWorkSpace.addActionListener(new ActionListener() {
-//
-//                    @Override
-//                    public void actionPerformed(ActionEvent e) {
-//                        CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
-//                    }
-//                });
-                //then restore workspace
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
                 CMConsole.log("CoolMap initialized.");
 
-//                ImportDataFromTSV tsv = new ImportDataFromTSV();
-//                
                 importTSVSample();
-                importSOFTSample();
-
-//                loadSampleCoolMapProject();
-//                
-//                try {
-////                    ImportCOntologyFromGMT.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/msigdb.v4.0.symbols.gmt"));
-//                } catch (Exception ex) {
-//                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-//                }
             }
         });
 
@@ -73,14 +47,16 @@ public class Main {
 
     private static void importTSVSample() {
         try {
+                        
             ImportDataFromTSV tsvImport = new ImportDataFromTSV();
-            tsvImport.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+            tsvImport.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
             
             CoolMapMaster.addNewCoolMapObject(tsvImport.getImportedCoolMapObjects());
             CoolMapMaster.addNewCOntology(tsvImport.getImportedCOntology());
             
             ImportCOntologyFromSimpleTwoColumn importer = new ImportCOntologyFromSimpleTwoColumn();
-            CoolMapMaster.addNewCOntology(importer.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt")));
+            importer.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+            CoolMapMaster.addNewCOntology(importer.getImportedCOntology());
             
             
         } catch (Exception e) {
@@ -88,30 +64,27 @@ public class Main {
         }
     }
 
-    private static void importSOFTSample() {
-
-    }
 
     private static void loadSampleCoolMapProject() {
         try {
             CoolMapObject object;
             COntology onto;
-            //CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
-//            CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
+            //CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestData.txt"));
+//            CoolMapObject object = importer.importFromFiles(new File("/Users/gangsu/0correlation.txt"));
             //import sample
-            //CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
+            //CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
 // /Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt
 //            "/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"
-//            CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
-//            CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
+//            CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0ClusteringTest.txt"));
+//            CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/eisenFinal.txt"));
 
-//            CMatrix matrix = (new ImportDataFromTSV()).importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+//            CMatrix matrix = (new ImportDataFromTSV()).importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 ////            System.out.println(matrix + " " + matrix.getNumRows() + " " + matrix.getNumColumns() + " " + matrix.getValue(0, 0));
 //
 //            object = new CoolMapObject();
 //            object.addBaseCMatrix(matrix);
 //
-//            CMatrix matrix2 = (new ImportDataFromTSV()).importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+//            CMatrix matrix2 = (new ImportDataFromTSV()).importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 ////            object.addBaseCMatrix(matrix2);
 //
 ////            Add base nodes ===================================================
@@ -128,7 +101,7 @@ public class Main {
 //            object.insertColumnNodes(nodes);
             //need ontology nodes
 ////////////////////////////////////////////////////////////////////////////////
-//            onto = ImportCOntologyFromFile.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
+//            onto = ImportCOntologyFromFile.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0TestOntology.txt"));
 //            CoolMapMaster.addNewCOntology(onto);
 //
 //            ArrayList<VNode> nodes = new ArrayList<VNode>();
@@ -157,10 +130,10 @@ public class Main {
 //            }
 //            ImportCOntologyFromSimpleTwoColumn ip = new ImportCOntologyFromSimpleTwoColumn();
 //            
-//            onto = ip.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+//            onto = ip.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
 //            CoolMapMaster.addNewCOntology(onto);
 //
-//            onto = ip.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
+//            onto = ip.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent copy.txt"));
 //            CoolMapMaster.addNewCOntology(onto);
 //
 //            object.insertRowNodes(onto.getRootNodesOrdered());
@@ -230,16 +203,16 @@ public class Main {
      //////            object.setViewRenderer(new DoubleToColor());
      //////            CoolMapMaster.addNewCoolMapObject(object);
      //FileTSVDoubleImporter importer = new FileTSVDoubleImporter();
-     //CoolMapObject object = importer.importFromFile(new File("/Users/gangsu/0correlation.txt"));
-     //CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/gangsu/Dropbox/T1D/DataTables/229RTCGM.txt"));
+     //CoolMapObject object = importer.importFromFiles(new File("/Users/gangsu/0correlation.txt"));
+     //CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/gangsu/Dropbox/T1D/DataTables/229RTCGM.txt"));
      CoolMapObject object;
      COntology onto;
 
      if (true) {
-     CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
+     CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
 
      //import sample
-     //CMatrix matrix = ImportDataFromTSV.importFromFile(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
+     //CMatrix matrix = ImportDataFromTSV.importFromFiles(new File("/Users/gangsu/Dropbox/Research - Dropbox/TBC 2013/eisenFinal.txt"));
 
      object = new CoolMapObject();
      object.addBaseCMatrix(matrix);
@@ -266,7 +239,7 @@ public class Main {
      object.getCoolMapView().addColumnMap(new ColumnTree(object));
      CoolMapMaster.addNewBaseMatrix(matrix);
      CoolMapMaster.addNewCoolMapObject(object);
-     //onto = ImportCOntologyFromSimpleTwoColumn.importFromFile(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
+     //onto = ImportCOntologyFromSimpleTwoColumn.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
      CoolMapMaster.addNewCOntology(onto);
      }
 

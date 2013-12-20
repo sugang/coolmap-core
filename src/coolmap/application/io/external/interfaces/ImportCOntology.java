@@ -8,7 +8,7 @@ package coolmap.application.io.external.interfaces;
 
 import coolmap.data.contology.model.COntology;
 import java.io.File;
-import java.util.Collection;
+import java.util.Set;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -17,8 +17,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public interface ImportCOntology {
     
-    public Collection<COntology> importFromFile(File... file) throws Exception;
+    
+    
+    
+    public void importFromFiles(File... file) throws Exception;
+    public void importFromFile(File file) throws Exception;
     public String getLabel();
     public FileNameExtensionFilter getFileNameExtensionFilter();
+    public Set<COntology> getImportedCOntology();
+    public void configure(File... file);
+    public boolean onlyImportFromSingleFile();
     
 }

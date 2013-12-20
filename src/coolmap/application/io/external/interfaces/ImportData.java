@@ -23,7 +23,9 @@ public interface ImportData {
      * @param file
      * @throws Exception 
      */
-    public void importFromFile(File... file) throws Exception;
+    public void importFromFiles(File... file) throws Exception;
+    
+    public void importFromFile(File file) throws Exception;
     
     /**
      * get display label
@@ -31,12 +33,36 @@ public interface ImportData {
      */
     public String getLabel();
         
+    /**
+     * file name extension filter
+     * @return 
+     */
     public FileNameExtensionFilter getFileNameExtensionFilter();
     
+    /**
+     * fetch the imported data after the import operation
+     * @return 
+     */
     public Set<CoolMapObject> getImportedCoolMapObjects();
+    
+    
+    /**
+     * fetch the imported ontologies after the import operation
+     * @return 
+     */
     public Set<COntology> getImportedCOntology();
 
+    /**
+     * configure the importer before actually running the import task
+     * @param file 
+     */
     public void configure(File... file);
+    
+    /**
+     * whether this importer supports import from multiple files or a single file
+     * @return 
+     */
+    public boolean onlyImportFromSingleFile();
     
     
 }

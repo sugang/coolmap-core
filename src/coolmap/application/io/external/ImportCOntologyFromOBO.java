@@ -14,8 +14,8 @@ import coolmap.utils.bioparser.simpleobo.SimpleOBOEntry;
 import coolmap.utils.bioparser.simpleobo.SimpleOBOTree;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -24,12 +24,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class ImportCOntologyFromOBO implements ImportCOntology {
 
+    private final HashSet<COntology> ontologies = new HashSet<COntology>();
+    
+    
     @Override
-    public Collection<COntology> importFromFile(File... files) throws Exception {
+    public void importFromFiles(File... files) throws Exception {
 
             //tree.printEntries();
         //Then add them:
-        HashSet<COntology> ontologies = new HashSet<COntology>();
         for (File file : files) {
 
             try {
@@ -52,11 +54,11 @@ public class ImportCOntologyFromOBO implements ImportCOntology {
 
             } catch (Exception e) {
                 CMConsole.logError(" failed to import ontology from: " + file);
-                return null;
+                ontologies.clear();
+                return;
             }
         }
-        return ontologies;
-
+        return;
     }
 
     @Override
@@ -66,7 +68,26 @@ public class ImportCOntologyFromOBO implements ImportCOntology {
 
     @Override
     public FileNameExtensionFilter getFileNameExtensionFilter() {
-        return new FileNameExtensionFilter("Simple obo", "obo", "txt");
+        return new FileNameExtensionFilter("Simple obo", "obo", "tsv", "txt");
+    }
+
+    @Override
+    public void importFromFile(File file) throws Exception {
+        importFromFiles(new File[]{file});
+    }
+
+    @Override
+    public Set<COntology> getImportedCOntology() {
+        return ontologies;
+    }
+
+    @Override
+    public void configure(File... file) {
+    }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return false;
     }
 
 }

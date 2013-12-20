@@ -70,7 +70,6 @@ public class ImportDataFromXLS implements ImportData {
     private int previewNum = 100;
     private boolean proceed = true;
 
-    private File inFile;
     private int sheetIndex;
     private int rowStart; //need to recompute this
     private int columnStart;
@@ -80,9 +79,8 @@ public class ImportDataFromXLS implements ImportData {
     private final HashSet<COntology> importedOntologies = new HashSet<COntology>();
 
     @Override
-    public void importFromFile(File... file) throws Exception {
-
-        //Ignore the file, choose only a single file
+    public void importFromFile(File inFile) throws Exception {
+                //Ignore the file, choose only a single file
         //I actually don't know the row count
         if (!proceed) {
             throw new Exception("Import from excel was cancelled");
@@ -209,7 +207,7 @@ public class ImportDataFromXLS implements ImportData {
 
                 //
                 CoolMapObject object = new CoolMapObject();
-                object.setName(Tools.removeFileExtension(this.inFile.getName()));
+                object.setName(Tools.removeFileExtension(inFile.getName()));
                 object.addBaseCMatrix(matrix);
                 ArrayList<VNode> nodes = new ArrayList<VNode>();
                 for (Object label : matrix.getRowLabelsAsList()) {
@@ -309,7 +307,19 @@ public class ImportDataFromXLS implements ImportData {
             }
 
         }
+    }
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @Override
+    public void importFromFiles(File... file) throws Exception {
     }
 
     @Override
@@ -443,7 +453,7 @@ public class ImportDataFromXLS implements ImportData {
                 workbook = null;
 
                 //set parameters
-                this.inFile = file[0];
+                inFile = file[0];
                 importOntology = configPanel.getImportOntology();
                 rowStart = configPanel.getRowStart();
                 columnStart = configPanel.getColumnStart();
@@ -458,6 +468,11 @@ public class ImportDataFromXLS implements ImportData {
             CMConsole.logError(" failed to import numeric matrix data from: " + file);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return true; //To change body of generated methods, choose Tools | Templates.
     }
 
     private class ConfigPanel extends JPanel {

@@ -12,8 +12,8 @@ import coolmap.utils.Tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -21,9 +21,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author gangsu
  */
 public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
+    
+    private final HashSet<COntology> ontologies = new HashSet<COntology>();
 
-    public Collection<COntology> importFromFile(File... files) throws Exception {
-        HashSet<COntology> ontologies = new HashSet<COntology>();
+    public void importFromFiles(File... files) throws Exception {
         for (File file : files) {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -37,7 +38,8 @@ public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
                         if (elements.length > 2 && elements[2].length() > 0) {
                             ontology.setEdgeAttribute(elements[1], elements[0], new COntologyEdgeAttributeImpl(Float.parseFloat(elements[2])));
                             if (Thread.interrupted()) {
-                                return null;
+                                ontologies.clear();
+                                return;
                             }
                         }
                     } catch (Exception e) {
@@ -53,7 +55,7 @@ public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
                 CMConsole.logError("failed to load ontology from " + file);
             }
         }
-        return ontologies;
+        return;
     }
 
     @Override
@@ -64,5 +66,24 @@ public class ImportCOntologyFromSimpleTwoColumn implements ImportCOntology {
     @Override
     public FileNameExtensionFilter getFileNameExtensionFilter() {
         return new FileNameExtensionFilter("Simple two column (sif) tsv", "tsv", "txt");
+    }
+
+    @Override
+    public void importFromFile(File file) throws Exception {
+        importFromFiles(new File[]{file});
+    }
+
+    @Override
+    public Set<COntology> getImportedCOntology() {
+        return ontologies;
+    }
+
+    @Override
+    public void configure(File... file) {
+    }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return false;
     }
 }

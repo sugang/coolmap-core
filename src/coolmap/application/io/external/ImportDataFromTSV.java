@@ -34,7 +34,7 @@ public class ImportDataFromTSV implements ImportData {
 
     private HashSet<CoolMapObject> objects = new HashSet<CoolMapObject>();
 
-    public void importFromFile(File... files) throws Exception {
+    public void importFromFiles(File... files) throws Exception {
 
 //        System.out.println("importing from files");
         for (File file : files) {
@@ -149,5 +149,16 @@ public class ImportDataFromTSV implements ImportData {
     @Override
     public void configure(File... file) {
     }
+
+    @Override
+    public boolean onlyImportFromSingleFile() {
+        return false;
+    }
+
+    @Override
+    public void importFromFile(File file) throws Exception {
+    }
+    
+    
 
 }
