@@ -976,6 +976,7 @@ public final class CoolMapView<BASE, VIEW> {
             }
         }
 
+        redrawCanvas();
     }
 
 //    public void setSelectedColumns(Collection<Range<Integer>> selectedColumns) {

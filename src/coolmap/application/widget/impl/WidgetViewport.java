@@ -24,6 +24,7 @@ import coolmap.application.utils.viewportActions.ZoomOutAction;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
+import coolmap.canvas.CoolMapView;
 import coolmap.canvas.action.PasteColumnNodesAction;
 import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
@@ -69,7 +70,77 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
     private JToggleButton _gridMode;
 
     private void initPopup() {
-        JMenuItem item = new JMenuItem("Selected Rows");
+        JMenuItem item = new JMenuItem("All Rows");
+        addPopupMenuItem("Selection", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    if (obj == null) {
+                        return;
+                    }
+
+                    CoolMapView view = obj.getCoolMapView();
+                    ArrayList<Range<Integer>> selectedColumns = view.getSelectedColumns();
+                    ArrayList<Range<Integer>> selectedRows = view.getSelectedRows();
+
+                    if (selectedColumns.isEmpty() || selectedRows.isEmpty()) {
+                        return;
+                    }
+
+                    ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+                    for (Range<Integer> range : selectedColumns) {
+                        newSelections.add(new Rectangle(range.lowerEndpoint(), 0, range.upperEndpoint() - range.lowerEndpoint(), obj.getViewNumRows()));
+                    }
+
+                    CoolMapState state = CoolMapState.createStateSelections("Select all rows", obj, null);
+                    view.setSelections(newSelections);
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
+        item = new JMenuItem("All Columns");
+        addPopupMenuItem("Selection", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    if (obj == null) {
+                        return;
+                    }
+
+                    CoolMapView view = obj.getCoolMapView();
+                    ArrayList<Range<Integer>> selectedColumns = view.getSelectedColumns();
+                    ArrayList<Range<Integer>> selectedRows = view.getSelectedRows();
+
+                    if (selectedColumns.isEmpty() || selectedRows.isEmpty()) {
+                        return;
+                    }
+
+                    ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+                    for (Range<Integer> range : selectedRows) {
+                        newSelections.add(new Rectangle(0, range.lowerEndpoint(), obj.getViewNumColumns(), range.upperEndpoint() - range.lowerEndpoint()));
+                    }
+
+                    CoolMapState state = CoolMapState.createStateSelections("Select all columns", obj, null);
+                    view.setSelections(newSelections);
+                    StateStorageMaster.addState(state);
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
+        item = new JMenuItem("Selected Rows");
         addPopupMenuItem("Expand", item, false);
         item.addActionListener(new ActionListener() {
 
@@ -106,6 +177,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
             }
         });
+        
+        addPopupMenuSeparator(null);
 
         item = new JMenuItem("Selected Columns");
         addPopupMenuItem("Expand", item, false);
@@ -263,39 +336,33 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             @Override
             public void actionPerformed(ActionEvent e) {
                 CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                if(obj == null){
+                if (obj == null) {
                     return;
                 }
-                
+
                 CoolMapState columnState = CoolMapState.createStateColumns("Copied columns", obj, null);
-                
+
                 StateStorageMaster.setCopiedState(columnState);
             }
         });
-        
-        
 
         copyItem = new JMenuItem("Both", UI.getImageIcon("grid"));
         addPopupMenuItem("Copy layout", copyItem, true);
-        
+
         copyItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                if(obj == null){
+                if (obj == null) {
                     return;
                 }
-                
+
                 CoolMapState bothState = CoolMapState.createState("Copied both", obj, null);
-                
+
                 StateStorageMaster.setCopiedState(bothState);
             }
         });
-        
-        
-        
-        
 
         JMenuItem pasteLayoutItem = new JMenuItem("Paste layout", UI.getImageIcon("paintRoll"));
         addPopupMenuItem("Paste", pasteLayoutItem, false);
@@ -317,20 +384,17 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 CoolMapState stateBeforePaste = CoolMapState.createState("Pasted state", obj, null);
                 //can save here
                 obj.restoreState(state);
-                
+
                 StateStorageMaster.addState(stateBeforePaste);
             }
         });
-        
-        
-        
 
         //paste nodes from ontology browser
-        JMenuItem pasteItem = new JMenuItem("New nodes to column", UI.getImageIcon("insertRow"));
+        JMenuItem pasteItem = new JMenuItem("Nodes to column from Ontology Browser", UI.getImageIcon("insertRow"));
         addPopupMenuItem("Paste", pasteItem, true);
         pasteItem.addActionListener(new PasteColumnNodesAction());
 
-        pasteItem = new JMenuItem("New nodes to row", UI.getImageIcon("insertColumn"));
+        pasteItem = new JMenuItem("Nodes to row from Ontology Browser", UI.getImageIcon("insertColumn"));
         addPopupMenuItem("Paste", pasteItem, false);
         pasteItem.addActionListener(new PasteRowNodesAction());
     }
