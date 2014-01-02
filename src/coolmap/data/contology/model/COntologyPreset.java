@@ -43,4 +43,11 @@ public class COntologyPreset {
         return new ArrayList<Integer>(toExpandedIndices);
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
+    
+    
+
 }
