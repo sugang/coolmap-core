@@ -38,8 +38,8 @@ public class PrivateCoolMapObjectIO {
 //        return null;
 //    }
     private VNode _getVNodeFromJSON(JSONObject object) throws Exception {
-        String id = object.getString(IOTerm.FIELD_ID);
-        String name = object.getString(IOTerm.FIELD_NAME);
+        String id = object.getString(IOTerm.ATTR_ID);
+        String name = object.getString(IOTerm.ATTR_NAME);
 
         Double currentViewMultiplier = object.optDouble(IOTerm.FIELD_VNODE_CURRENTVIEWMULTIPLIER, -1);
         if (currentViewMultiplier == null || currentViewMultiplier < 0) {
@@ -50,8 +50,8 @@ public class PrivateCoolMapObjectIO {
             defaultViewMultiplier = 1.0;
         }
         Boolean isExpanded = object.optBoolean(IOTerm.FIELD_VNODE_ISEXPANDED, false);
-        //Integer colorString = object.optInt(IOTerm.FIELD_VIEWCOLOR);
-        String colorString = object.optString(IOTerm.FIELD_VIEWCOLOR);
+        //Integer colorString = object.optInt(IOTerm.ATTR_COLOR);
+        String colorString = object.optString(IOTerm.ATTR_COLOR);
 
         Color viewColor;
         if (colorString == null) {
@@ -69,7 +69,7 @@ public class PrivateCoolMapObjectIO {
         String contologyID = object.optString(IOTerm.FIELD_VNODE_ONTOLOGYID);
         COntology ontology = CoolMapMaster.getCOntologyByID(contologyID);
 
-//        object.put(IOTerm.FIELD_NAME, node.getName());
+//        object.put(IOTerm.ATTR_NAME, node.getName());
 //        object.put(IOTerm.FIELD_VNODE_VIEWLABEL, node.getViewLabel());
 //        object.put(IOTerm.FIELD_VNODE_CURRENTVIEWMULTIPLIER, node.getCurrentViewMultiplier());
 //        object.put(IOTerm.FIELD_VNODE_DEFAULTVIEWMULTIPLIER, node.getDefaultViewMultiplier());
@@ -229,8 +229,8 @@ public class PrivateCoolMapObjectIO {
             return null;
         }
         JSONObject object = new JSONObject();
-        object.put(IOTerm.FIELD_ID, node.getID());
-        object.put(IOTerm.FIELD_NAME, node.getName());
+        object.put(IOTerm.ATTR_ID, node.getID());
+        object.put(IOTerm.ATTR_NAME, node.getName());
         object.put(IOTerm.FIELD_VNODE_VIEWLABEL, node.getViewLabel());
         object.put(IOTerm.FIELD_VNODE_CURRENTVIEWMULTIPLIER, node.getCurrentViewMultiplier());
         object.put(IOTerm.FIELD_VNODE_DEFAULTVIEWMULTIPLIER, node.getDefaultViewMultiplier());
@@ -239,7 +239,7 @@ public class PrivateCoolMapObjectIO {
             object.put(IOTerm.FIELD_VNODE_ONTOLOGYID, node.getCOntology().getID());
         }
         if (node.getViewColor() != null) {
-            object.put(IOTerm.FIELD_VIEWCOLOR, node.getViewColor().getRGB());
+            object.put(IOTerm.ATTR_COLOR, node.getViewColor().getRGB());
         }
         return object;
     }

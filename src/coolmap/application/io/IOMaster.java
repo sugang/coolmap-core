@@ -8,6 +8,8 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.interfaces.ImportCOntology;
 import coolmap.application.io.external.interfaces.ImportData;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
+import coolmap.application.io.internal.contology.InternalCOntologyAttributeIO;
+import coolmap.application.io.internal.contology.InternalCOntologyIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
 import coolmap.application.utils.LongTask;
@@ -23,6 +25,14 @@ import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
 import coolmap.utils.Config;
 import coolmap.utils.Tools;
+import de.schlichtherle.truezip.file.TArchiveDetector;
+import de.schlichtherle.truezip.file.TConfig;
+import de.schlichtherle.truezip.file.TFile;
+import de.schlichtherle.truezip.file.TFileOutputStream;
+import de.schlichtherle.truezip.file.TFileReader;
+import de.schlichtherle.truezip.file.TVFS;
+import de.schlichtherle.truezip.fs.archive.zip.JarDriver;
+import de.schlichtherle.truezip.socket.sl.IOPoolLocator;
 import java.awt.Color;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
@@ -36,8 +46,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -193,7 +207,7 @@ public class IOMaster {
                             return;
                         }
                         f = new File[]{chooser.getSelectedFile()};
-                        
+
                     } else {
                         chooser = Tools.getCustomMultiFileChooser(importerInstance.getFileNameExtensionFilter());
                         chooser.setDialogTitle("Importing from " + importerInstance.getLabel() + " " + (importerInstance.onlyImportFromSingleFile() ? "(single file)" : "(multiple files)"));
@@ -205,7 +219,7 @@ public class IOMaster {
                     }
 
                     importerInstance.configure(f);
-                    
+
                     if (f != null && f.length > 0) {
 
                         LongTask task = new LongTask("import ontology...") {
@@ -213,16 +227,15 @@ public class IOMaster {
                             @Override
                             public void run() {
                                 try {
-                                    
-                                    if(importerInstance.onlyImportFromSingleFile()){
+
+                                    if (importerInstance.onlyImportFromSingleFile()) {
                                         importerInstance.importFromFile(f[0]);
-                                    }
-                                    else{
+                                    } else {
                                         importerInstance.importFromFiles(f);
                                     }
-                                    
+
                                     Set<COntology> ontologies = importerInstance.getImportedCOntology();
-                                     
+
                                     for (COntology ontology : ontologies) {
                                         if (ontology == null) {
                                             return;
@@ -297,21 +310,21 @@ public class IOMaster {
                     JSONObject projectInfo = new JSONObject(sb.toString());
 
                     //System.out.println(projectInfo);
-                    String cmatrixDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CMATRIX;
+                    String cmatrixDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CMATRIX_ID;
 
                     //restore cmatrices
-                    JSONObject cmatrices = projectInfo.getJSONObject(IOTerm.OBJECT_CMATRIX);
+                    JSONObject cmatrices = projectInfo.getJSONObject(IOTerm.OBJECT_CMATRIX_ID);
                     Iterator<String> iter = cmatrices.keys();
                     while (iter.hasNext()) {
                         String cmatrixID = iter.next();
                         JSONObject cmatrixEntry = cmatrices.getJSONObject(cmatrixID);
                         //then decompose
-                        String cmatrixName = cmatrixEntry.optString(IOTerm.FIELD_NAME);
-                        int numRow = cmatrixEntry.optInt(IOTerm.FIELD_NUMROW);
-                        int numColumn = cmatrixEntry.optInt(IOTerm.FIELD_NUMCOLUMN);
-                        String datatype = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_MEMBERCLASS);
+                        String cmatrixName = cmatrixEntry.optString(IOTerm.ATTR_NAME);
+                        int numRow = cmatrixEntry.optInt(IOTerm.ATTR_NUMROW);
+                        int numColumn = cmatrixEntry.optInt(IOTerm.ATTR_NUMCOLUMN);
+                        String datatype = cmatrixEntry.optString(IOTerm.ATTR_MEMBERCLASS);
                         String io = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_ICMATRIXIO);
-                        String cmatrixClassString = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_CLASS);
+                        String cmatrixClassString = cmatrixEntry.optString(IOTerm.ATTR_CLASS);
 
 //                        System.out.println(cmatrixID + " " + cmatrixName + " " + numRow + " " + numColumn + " " + datatype + " " + io);
                         Class loaderClass = Class.forName(io);
@@ -331,17 +344,17 @@ public class IOMaster {
                     //////////////////////////////////////////////////////////////////////////
                     //finished restoring matrices
                     //restore ontologies
-                    String contologyDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CONTOLOGY;
+                    String contologyDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_CONTOLOGY_ID;
 
-                    JSONObject contologies = projectInfo.getJSONObject(IOTerm.OBJECT_CONTOLOGY);
+                    JSONObject contologies = projectInfo.getJSONObject(IOTerm.OBJECT_CONTOLOGY_ID);
                     iter = contologies.keys();
                     while (iter.hasNext()) {
                         String contologyID = iter.next();
                         JSONObject contologyEntry = contologies.getJSONObject(contologyID);
                         //decompose data
-                        String name = contologyEntry.optString(IOTerm.FIELD_NAME);
-                        String description = contologyEntry.optString(IOTerm.FIELD_DESCRIPTION);
-                        String colorString = contologyEntry.optString(IOTerm.FIELD_VIEWCOLOR, null);
+                        String name = contologyEntry.optString(IOTerm.ATTR_NAME);
+                        String description = contologyEntry.optString(IOTerm.ATTR_DESCRIPTION);
+                        String colorString = contologyEntry.optString(IOTerm.ATTR_COLOR, null);
                         Color color;
                         if (colorString == null) {
                             color = null;
@@ -381,17 +394,17 @@ public class IOMaster {
 //                        }
 //                    }
                     //restore coolmap objects
-                    String coolmapObjectDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_COOLMAPOBJECT;
-                    JSONObject coolmapObjects = projectInfo.getJSONObject(IOTerm.OBJECT_COOLMAPOBJECT);
+                    String coolmapObjectDirectory = projectDirectory.getAbsolutePath() + File.separator + IOTerm.OBJECT_COOLMAPOBJECT_ID;
+                    JSONObject coolmapObjects = projectInfo.getJSONObject(IOTerm.OBJECT_COOLMAPOBJECT_ID);
                     iter = coolmapObjects.keys();
                     while (iter.hasNext()) {
                         String id = iter.next();
                         JSONObject entry = coolmapObjects.getJSONObject(id);
 
-                        String name = entry.optString(IOTerm.FIELD_NAME);
+                        String name = entry.optString(IOTerm.ATTR_NAME);
                         float zoomX, zoomY;
                         try {
-                            JSONArray zoom = entry.optJSONArray(IOTerm.FIELD_COOLMAPVIEW_ZOOMLEVEL);
+                            JSONArray zoom = entry.optJSONArray(IOTerm.ATTR_ZOOM);
                             zoomX = (float) zoom.getDouble(0);
                             zoomY = (float) zoom.getDouble(1);
                         } catch (Exception e) {
@@ -589,7 +602,7 @@ public class IOMaster {
                 f = Tools.appendFileExtension(f, "xls");
 
                 try {
-                    //BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+                    //BufferedWriter propertyWriter = new BufferedWriter(new FileWriter(f));
                     //writer.write("Writing to file");
                     CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                     if (object == null) {
@@ -693,9 +706,244 @@ public class IOMaster {
 
     }
 
+    private static void initializeSave() {
+        TConfig.get().setArchiveDetector(new TArchiveDetector("cpj", new JarDriver(IOPoolLocator.SINGLETON)));
+
+        MenuItem item = new MenuItem("Save");
+        CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        item = new MenuItem("Save as...", new MenuShortcut(KeyEvent.VK_S));
+        CoolMapMaster.getCMainFrame().addMenuItem("File", item, false, true);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                //dev
+//                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("CoolMap project file", "cpj"));
+//                int returnValue = chooser.showSaveDialog(CoolMapMaster.getCMainFrame());
+//                if (returnValue != JFileChooser.APPROVE_OPTION) {
+//                    return;
+//                }
+//
+//                File saveFile = chooser.getSelectedFile();
+//
+//                String path = saveFile.getAbsolutePath();
+//                path = Tools.appendPathExtension(path, "cpj");
+//
+//                TFile file;
+//                if (saveFile.exists()) {
+//                    try {
+//                        saveFile.delete();
+//                    } catch (Exception ex) {
+//                        CMConsole.logError(saveFile + " can not be deleted. Try to save as an alternative file instead.");
+//                        path = Tools.removeFileExtension("cpj");
+//
+//                        DateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd HH-mm-ss ");
+//                        Date date = new Date();
+//                       
+//
+//                        path +=  dateFormat.format(date);
+//                        
+//                        Tools.appendPathExtension(path, "cpj");
+//                    }
+//                }
+//
+//                //create a new file
+//                file = new TFile(path);
+                //expedite development
+                TFile file = new TFile("/Users/sugang/000.cpj");
+
+                saveProject(file);
+            }
+        });
+
+    }
+
+    private static void saveProject(TFile projectFile) {
+        
+        //wrap this up in a long task to run in the background
+        try {
+
+            saveProjectProperties(projectFile);
+            saveCOntologies(projectFile);
+
+            //this is needed to commit all changes in the temp projectFile and finish the saving
+            TVFS.umount(projectFile);
+        } catch (Exception e) {
+            e.printStackTrace(); // need to abort and delete the file
+        }
+
+        //try load project immediately
+        loadProject(projectFile);
+    }
+
+    private static void saveCOntologies(TFile projectFile) throws Exception {
+        List<COntology> ontologies = CoolMapMaster.getLoadedCOntologies();
+        for (COntology ontology : ontologies) {
+            String ontologyFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COntology + File.separator + ontology.getID();
+            
+            //first write the properties
+            BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(
+                    new TFileOutputStream(ontologyFolderPath + File.separator + IOTerm.FILE_PROPERTY)));
+
+            JSONObject contologyPropertyEntry = new JSONObject();
+
+            contologyPropertyEntry.put(IOTerm.ATTR_ID, ontology.getID());
+            contologyPropertyEntry.put(IOTerm.ATTR_NAME, ontology.getName());
+            if (ontology.getDescription() != null && ontology.getDescription().length() > 0) {
+                contologyPropertyEntry.put(IOTerm.ATTR_DESCRIPTION, ontology.getDescription());
+            }
+
+            if (ontology.getViewColor() != null) {
+                Color c = ontology.getViewColor();
+                contologyPropertyEntry.put(IOTerm.ATTR_COLOR, c.getRGB());
+            }
+
+            propertyWriter.write(contologyPropertyEntry.toString());
+            propertyWriter.flush();
+            propertyWriter.close();
+            
+            
+            //then export the data
+            BufferedWriter dataWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(
+                    ontologyFolderPath + File.separator + IOTerm.FILE_DATA
+            )));
+            
+            InternalCOntologyIO.dumpData(dataWriter, ontology);
+        }
+
+        //Also save contology attributes
+        //Save ontology attributes
+        String ontologyAttributeFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY_ATTRIBUTE;
+        BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(
+                    new TFileOutputStream(ontologyAttributeFolderPath + File.separator + IOTerm.FILE_DATA)));
+        InternalCOntologyAttributeIO.dumpData(propertyWriter);
+    }
+
+    private static void saveProjectProperties(TFile projectFile) throws Exception {
+
+        BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(projectFile.getAbsolutePath() + File.separator + IOTerm.FILE_PROJECT_INFO)));
+        JSONObject projectInfo = new JSONObject();
+
+        //date
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        projectInfo.put(IOTerm.PROJECT_FIELD_DATE, dateFormat.format(new Date()));
+
+        //session name
+        String sessionName = CoolMapMaster.getSessionName();
+        if (sessionName == null || sessionName.length() == 0) {
+            sessionName = "Untitled";
+        }
+        projectInfo.put(IOTerm.PROJECT_FIELD_SESSION_NAME, sessionName);
+
+        //cmatrices projectInfo object
+        ArrayList<String> matrixIDs = new ArrayList<>();
+
+        List<CMatrix> baseMatrices = CoolMapMaster.getLoadedCMatrices();
+        for (CMatrix matrix : baseMatrices) {
+//            JSONObject cmatrixPropertyEntry = new JSONObject();
+//            cmatrixProperties.put(matrix.getID(), cmatrixPropertyEntry);
+//
+//            //add values
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_ID, matrix.getID());
+//            move these to corresponding folders
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_NAME, matrix.getName());
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_NUMROW, matrix.getNumRows());
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_NUMCOLUMN, matrix.getNumColumns());
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_CLASS, matrix.getClass().getName()); //The class of CMatrix, i.e. DoubleCMatrix
+//            cmatrixPropertyEntry.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass()); //The class of the CMatrix members, i.e. Double
+            matrixIDs.add(matrix.getID());
+        }
+        projectInfo.put(IOTerm.OBJECT_CMATRIX_ID, matrixIDs);
+
+        //contology projectInfo object
+        ArrayList contologyIDs = new ArrayList();
+
+        List<COntology> ontologies = CoolMapMaster.getLoadedCOntologies();
+        for (COntology ontology : ontologies) {
+            contologyIDs.add(ontology.getID());
+        }
+        projectInfo.put(IOTerm.OBJECT_CONTOLOGY_ID, contologyIDs);
+
+        //coolmap objects
+        ArrayList coolMapIDs = new ArrayList();
+
+        List<CoolMapObject> objects = CoolMapMaster.getCoolMapObjects();
+
+        for (CoolMapObject object : objects) {
+//            JSONObject coolMapObjectPropertyEntry = new JSONObject();
+//            coolMapObjectProperties.put(object.getID(), coolMapObjectPropertyEntry);
+//
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_ID, object.getID());
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_NAME, object.getName());
+//
+//            CoolMapView view = object.getCoolMapView();
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
+//
+//            Point mapAnchor = object.getCoolMapView().getMapAnchor();
+//            coolMapObjectPropertyEntry.put(IOTerm.FIELD_COOLMAPVIEW_MAPANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
+//
+//            ArrayList<String> linkedMxIDs = new ArrayList<String>();
+//            List<CMatrix> linkedMxs = object.getBaseCMatrices();
+//            for (CMatrix mx : linkedMxs) {
+//                linkedMxIDs.add(mx.getID());
+//            }
+
+            //other info should be read from the corresponding folders
+            //as the state of these things need to be persisted as well.
+//            coolMapObjectPropertyEntry.put(IOTerm.FIELD_COOLMAPOBJECT_LINKEDCMATRICES, linkedMxIDs); //can restore the cMatrix by using such matrices, when they are reloaded
+            coolMapIDs.add(object.getID());
+        }
+        projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT_ID, coolMapIDs);
+
+        propertyWriter.write(projectInfo.toString());
+        propertyWriter.flush();
+        propertyWriter.close();
+
+    }
+
+    private static void loadProject(TFile file) {
+        try {
+
+            System.out.println(Arrays.toString(file.listFiles()));
+            File propertyFile = new TFile(file.getAbsolutePath() + File.separator + IOTerm.FILE_PROJECT_INFO);
+//            System.out.println(propertyFile);
+            StringBuilder contents = new StringBuilder();
+            BufferedReader bufferedReader = new BufferedReader(new TFileReader(propertyFile));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                contents.append(line);
+            }
+            bufferedReader.close();
+
+            JSONObject property = new JSONObject(contents.toString().trim());
+
+            System.out.println(property.toString(2));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void initializeLoad() {
+        MenuItem item = new MenuItem("Open Project", new MenuShortcut(KeyEvent.VK_O));
+        CoolMapMaster.getCMainFrame().addMenuItem("File", item, false, false);
+
+    }
+
     public static void initialize() {
 
         initializeCreateNew();
+        initializeLoad();
+        initializeSave();
         initializeDataImporters();
         initializeOntologyImporters();
 
@@ -746,18 +994,18 @@ public class IOMaster {
 
                         //obtain cmatrices
                         JSONObject cmatrices = new JSONObject();
-                        projectInfo.put(IOTerm.OBJECT_CMATRIX, cmatrices);
+                        projectInfo.put(IOTerm.OBJECT_CMATRIX_ID, cmatrices);
                         List<CMatrix> baseMatrices = CoolMapMaster.getLoadedCMatrices();
                         for (CMatrix matrix : baseMatrices) {
                             JSONObject cmatrix = new JSONObject();
                             cmatrices.put(matrix.getID(), cmatrix);
 
-                            cmatrix.put(IOTerm.FIELD_ID, matrix.getID());
-                            cmatrix.put(IOTerm.FIELD_NAME, matrix.getName());
-                            cmatrix.put(IOTerm.FIELD_NUMROW, matrix.getNumRows());
-                            cmatrix.put(IOTerm.FIELD_NUMCOLUMN, matrix.getNumColumns());
-                            cmatrix.put(IOTerm.FIELD_CMATRIX_MEMBERCLASS, matrix.getMemberClass());
-                            cmatrix.put(IOTerm.FIELD_CMATRIX_CLASS, matrix.getClass().getName());
+                            cmatrix.put(IOTerm.ATTR_ID, matrix.getID());
+                            cmatrix.put(IOTerm.ATTR_NAME, matrix.getName());
+                            cmatrix.put(IOTerm.ATTR_NUMROW, matrix.getNumRows());
+                            cmatrix.put(IOTerm.ATTR_NUMCOLUMN, matrix.getNumColumns());
+                            cmatrix.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass());
+                            cmatrix.put(IOTerm.ATTR_CLASS, matrix.getClass().getName());
 
                             if (exporter != null) {
                                 cmatrix.put(IOTerm.FIELD_CMATRIX_ICMATRIXIO, exporter);
@@ -766,43 +1014,43 @@ public class IOMaster {
 
                         //obtain contologies
                         JSONObject jcontologies = new JSONObject();
-                        projectInfo.put(IOTerm.OBJECT_CONTOLOGY, jcontologies);
+                        projectInfo.put(IOTerm.OBJECT_CONTOLOGY_ID, jcontologies);
                         List<COntology> ontologies = CoolMapMaster.getLoadedCOntologies();
                         for (COntology ontology : ontologies) {
                             JSONObject jontology = new JSONObject();
                             jcontologies.put(ontology.getID(), jontology);
 
-                            jontology.put(IOTerm.FIELD_ID, ontology.getID());
-                            jontology.put(IOTerm.FIELD_NAME, ontology.getName());
+                            jontology.put(IOTerm.ATTR_ID, ontology.getID());
+                            jontology.put(IOTerm.ATTR_NAME, ontology.getName());
                             if (ontology.getDescription() != null) {
-                                jontology.put(IOTerm.FIELD_DESCRIPTION, ontology.getDescription());
+                                jontology.put(IOTerm.ATTR_DESCRIPTION, ontology.getDescription());
                             }
 
                             if (ontology.getViewColor() != null) {
                                 Color c = ontology.getViewColor();
-                                jontology.put(IOTerm.FIELD_VIEWCOLOR, c.getRGB());
+                                jontology.put(IOTerm.ATTR_COLOR, c.getRGB());
                             }
 
 //                            if(ontology.getEdgetAttributeClass() != null){
-//                                jontology.put(IOTerm.FIELD_CONTOLOGY_EDGETATTRIBUTECLASS, ontology.getEdgetAttributeClass().getName());
+//                                contologyPropertyEntry.put(IOTerm.FIELD_CONTOLOGY_EDGETATTRIBUTECLASS, ontology.getEdgetAttributeClass().getName());
 //                            }
                         }
 
                         //obtain coolmap objects
                         //under each object
                         JSONObject jcoolMapObjects = new JSONObject();
-                        projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT, jcoolMapObjects);
+                        projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT_ID, jcoolMapObjects);
                         List<CoolMapObject> objects = CoolMapMaster.getCoolMapObjects();
                         for (CoolMapObject object : objects) {
                             JSONObject jobject = new JSONObject();
                             jcoolMapObjects.put(object.getID(), jobject);
 
-                            jobject.put(IOTerm.FIELD_ID, object.getID());
-                            jobject.put(IOTerm.FIELD_NAME, object.getName());
+                            jobject.put(IOTerm.ATTR_ID, object.getID());
+                            jobject.put(IOTerm.ATTR_NAME, object.getName());
 
                             CoolMapView view = object.getCoolMapView();
 
-                            jobject.put(IOTerm.FIELD_COOLMAPVIEW_ZOOMLEVEL, new float[]{view.getZoomX(), view.getZoomY()});
+                            jobject.put(IOTerm.ATTR_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
 
                             Point mapAnchor = object.getCoolMapView().getMapAnchor();
                             jobject.put(IOTerm.FIELD_COOLMAPVIEW_MAPANCHOR, new int[]{mapAnchor.x, mapAnchor.y});

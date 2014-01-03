@@ -221,6 +221,21 @@ public class Tools {
 
         return filename.substring(0, extensionIndex);
     }
+    
+    public static String appendPathExtension(String fileName, String extension){
+        if(fileName == null){
+            return null;
+        }
+        
+        if(fileName.toLowerCase().endsWith(extension.toLowerCase())){
+            return fileName;
+        }
+        else{
+            return fileName + "." + extension;
+        }
+    }
+    
+    
 
     public static double[][] convertViewToDouble(Object[][] view) {
         if (view == null) {

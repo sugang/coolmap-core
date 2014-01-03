@@ -7,6 +7,7 @@ package coolmap.data.contology.model;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -62,6 +63,12 @@ public final class COntology {
     }
     
 
+    public static Set<Table.Cell> getAllAttributes(){
+        return new HashSet(_attributeTable.cellSet());
+    }
+    
+    
+    
     public static Object getAttribute(String nodeName, String attrName) {
         return _attributeTable.get(nodeName, attrName);
     }
@@ -81,6 +88,7 @@ public final class COntology {
 //        }
     }
 
+    //currently not implemened - maybe future; allow users to specify ontology names
     public static void setAttributeType(String attrName, Class cls) {
         _attributeType.put(attrName, cls);
     }

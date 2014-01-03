@@ -228,7 +228,7 @@ public final class CoolMapMaster {
             return;
         }
         
-        System.out.println("adding:" + object);
+//        System.out.println("adding:" + object);
         _coolMapObjects.add(object);
         addNewBaseMatrix(object.getBaseCMatrices());
 
