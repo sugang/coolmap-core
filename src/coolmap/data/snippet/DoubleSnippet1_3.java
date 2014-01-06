@@ -10,12 +10,12 @@ import java.text.DecimalFormat;
  *
  * @author gangsu
  */
-public class DoubleSnippet1_3 extends SnippetConverter<Double> {
+public class DoubleSnippet1_3 extends SnippetConverter {
 
     private final DecimalFormat _format = new DecimalFormat("#.###");
     
     @Override
-    public String convert(Double obj) {
+    public String convert(Object obj) {
         if(obj == null){
             return null;
         }

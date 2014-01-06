@@ -71,7 +71,7 @@ public final class CoolMapObject<BASE, VIEW> {
     //view renderer
     protected ViewRenderer<VIEW> _viewRenderer = null;
     //annotation renderer
-    protected SnippetConverter<VIEW> _snippetConverter = null;
+    protected SnippetConverter _snippetConverter = null;
     private final HashSet<CObjectListener> _coolMapDataListeners = new HashSet<CObjectListener>();
     private final HashSet<CObjectStateStoreListener> _cObjectStateRestoreListeners = new HashSet<CObjectStateStoreListener>();
 

@@ -119,6 +119,7 @@ public class InternalCoolMapObjectIO {
         TFile objectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CoolMapObject + File.separator
                 + object.getID());
 
+        saveProperties(object, objectFolder);
     }
 
 }

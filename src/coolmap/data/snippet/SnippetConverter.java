@@ -11,9 +11,9 @@ import org.json.JSONObject;
  *
  * @author gangsu
  */
-public abstract class SnippetConverter<T> implements StateSavable{
+public abstract class SnippetConverter implements StateSavable{
     
-    public abstract String convert(T obj);
+    public abstract String convert(Object obj);
     public abstract boolean canConvert(Class cls);
 
     @Override
