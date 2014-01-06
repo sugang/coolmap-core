@@ -6,6 +6,8 @@ package coolmap.module;
 
 import coolmap.utils.Config;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONArray;
 
 /**
@@ -18,10 +20,16 @@ public class ModuleMaster{
     }
     private static HashMap<String, Module> _coolMapModules = new HashMap<String, Module>();
 
+    
+    public static Set<Module> getAllModules(){
+        return new HashSet<Module>(_coolMapModules.values());
+    }
+    
     public static void addModule(Module module) {
         if (module == null) {
             return;
         }
+        module.intialize();
         _coolMapModules.put(module.getClass().getName(), module);
     }
 

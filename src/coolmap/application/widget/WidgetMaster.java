@@ -19,7 +19,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -48,6 +50,10 @@ public class WidgetMaster {
 
         CoolMapMaster.getCMainFrame().addWidget(widget);
         CoolMapMaster.getCMainFrame().addMenuItem("View/Show Widgets", widget.getMenuItem(), false, false);
+    }
+    
+    public static Set<Widget> getAllWidgets(){
+        return new HashSet<Widget>(_coolMapWidgets.values());
     }
 
     public static void initialize() {

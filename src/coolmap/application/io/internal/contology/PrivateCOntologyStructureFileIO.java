@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.io.*;
 import java.util.List;
 import java.util.Set;
-import org.json.JSONObject;
 
 /**
  *
@@ -23,7 +22,7 @@ public class PrivateCOntologyStructureFileIO {
     public COntology readFromFolder(String ID, String name, String description, Color viewColor, File entryFolder) throws Exception{
         if(entryFolder != null && entryFolder.isDirectory()){
 //            System.out.println(entryFolder);
-            File file = new File(entryFolder + File.separator + IOTerm.FILE_CONTOLOGY_ENTRY);
+            File file = new File(entryFolder + File.separator + IOTerm.FILE_DATA);
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line = null;
             COntology ontology = new COntology(name, description, ID);
@@ -55,7 +54,7 @@ public class PrivateCOntologyStructureFileIO {
     public void writeToFolder(COntology ontology, File entryFolder) throws Exception{
         if(entryFolder != null && entryFolder.isDirectory()){
             System.out.println();
-            File of = new File(entryFolder.getAbsolutePath() + File.separator + IOTerm.FILE_CONTOLOGY_ENTRY);
+            File of = new File(entryFolder.getAbsolutePath() + File.separator + IOTerm.FILE_DATA);
             Set<String> childNodes = ontology.getAllNodesWithParents();
             BufferedWriter writer = new BufferedWriter(new FileWriter(of));
             for(String child : childNodes){

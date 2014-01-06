@@ -8,7 +8,11 @@ import coolmap.application.io.IOTerm;
 import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.utils.graphics.UI;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -21,7 +25,7 @@ public class PrivateDoubleCMatrixIO implements ICMatrixIO<Double> {
     @Override
     public CMatrix<Double> importFromDirectory(String ID, String name, int numRow, int numColumn,  File cmatrixDirectory, Class cmatrixClass) throws Exception {
         System.out.println("Trying to import from directory");
-        File file = new File(cmatrixDirectory.getAbsolutePath() + File.separator + IOTerm.FILE_CMATRIX_ENTRY);
+        File file = new File(cmatrixDirectory.getAbsolutePath() + File.separator + IOTerm.FILE_DATA);
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line;
        
@@ -60,7 +64,7 @@ public class PrivateDoubleCMatrixIO implements ICMatrixIO<Double> {
         System.out.println("Attemp to export to directory");
         //It's own import must be able to read its own export
         if(entryDirectory != null && entryDirectory.isDirectory()){
-            File of = new File(entryDirectory + File.separator + IOTerm.FILE_CMATRIX_ENTRY);
+            File of = new File(entryDirectory + File.separator + IOTerm.FILE_DATA);
             BufferedWriter writer = new BufferedWriter(new FileWriter(of));
             
             writer.write("Row/Column" + UI.tab);

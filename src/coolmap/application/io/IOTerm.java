@@ -29,6 +29,19 @@ public class IOTerm {
     public final static String FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER = "AnnotationRenderer";
     public final static String ATTR_VIEW_SNIPPETCONVERTER_CLASS = "SnippetConverter";
     public final static String FIELD_CMATRIX_ICMATRIXIO = "ICMatrixIO";
+    
+    //VNODE IO terms
+    public final static String ATTR_NODE_ID = "i";
+    public final static String ATTR_NODE_NAME = "n";
+    public final static String ATTR_NODE_LABEL = "l";
+    public final static String ATTR_NODE_VIEWMULTIPLIER = "v";
+    public final static String ATTR_NODE_VIEWMULTIPLIER_DEFAULT = "d";
+    public final static String ATTR_NODE_ISEXPANDED = "e";
+    public final static String ATTR_NODE_ONTOLOGYID = "o";
+    public final static String ATTR_NODE_COLOR = "c";
+    
+    
+    
 
     public final static String ATTR_SOURCE = "source";
     public final static String ATTR_DESCRIPTION = "description";
@@ -53,15 +66,14 @@ public class IOTerm {
     public final static String FILE_PROPERTY_SNIPPET = "properties.snippet";
     
     
-    public final static String FILE_CONTOLOGY_ENTRY = "data.ont";
-    public final static String FILE_CMATRIX_ENTRY = "data.cmx";
-//    public final static String FILE_COOLMAPOBJECT_ENTRY = "data.cbj";
-    public final static String FILE_STATESNAPSHOT_TREE_ROW = "rtree.stt";
-    public final static String FILE_STATESNAPSHOT_TREE_COLUMN = "ctree.stt";
-    public final static String FILE_STATESNAPSHOT_NODE_ROWBASE = "rbnodes.stt";
-    public final static String FILE_STATESNAPSHOT_NODE_COLUMNBASE = "cbnodes.stt";
-    public final static String FILE_STATESNAPSHOT_NODE_ROWTREE = "rtnodes.stt";
-    public final static String FILE_STATESNAPSHOT_NODE_COLUMNTREE = "ctnodes.stt";
+    
+    public final static String FILE_STATE_ROWTREE = "rtree";
+    public final static String FILE_STATE_COLUMNTREE = "ctree";//column 
+    public final static String FILE_STATE_NODE_ROWBASE = "rbnodes";//row base nodes
+    public final static String FILE_STATE_NODE_COLUMNBASE = "cbnodes"; //column base nodes
+    public final static String FILE_STATE_NODE_ROWTREE = "rtnodes"; //row tree nodes
+    public final static String FILE_STATE_NODE_COLUMNTREE = "ctnodes"; //column tree nodes
+    
     //folder names
     public final static String DIR_CMATRIX = "cmatrix";
     public final static String DIR_COntology = "contology";

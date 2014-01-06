@@ -9,6 +9,8 @@ import coolmap.application.io.IOTerm;
 import coolmap.canvas.CoolMapView;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.state.CoolMapState;
 import de.schlichtherle.truezip.file.TFile;
 import de.schlichtherle.truezip.file.TFileOutputStream;
 import java.awt.Point;
@@ -16,7 +18,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -135,6 +139,126 @@ public class InternalCoolMapObjectIO {
                 + object.getID());
 
         saveProperties(object, objectFolder);
+        saveCoolMapObjectState(object, objectFolder);
+    }
+
+    private static void saveCoolMapObjectState(CoolMapObject object, TFile objectFolder) throws Exception {
+        TFile stateFolder = new TFile(objectFolder + File.separator + IOTerm.DIR_STATE);
+
+        //Save a state with row, column and selection
+        CoolMapState state = CoolMapState.createState("State to save", object, null);
+
+        //Save to JSON
+        //save row base nodes
+        TFile rowBaseNodeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_ROWBASE);
+        BufferedWriter rowBaseNodesWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(rowBaseNodeFile)));
+        JSONArray rowBaseNodesJSON = nodesToJSON(state.getRowBaseNodes());
+        rowBaseNodesJSON.write(rowBaseNodesWriter);
+        rowBaseNodesWriter.flush();
+        rowBaseNodesWriter.close();
+
+        //save row tree nodes
+        TFile rowTreeNodeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_ROWTREE);
+        BufferedWriter rowTreeNodesWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(rowTreeNodeFile)));
+        JSONArray rowTreeNodesJSON = nodesToJSON(state.getRowTreeNodes());
+        rowTreeNodesJSON.write(rowTreeNodesWriter);
+        rowTreeNodesWriter.flush();
+        rowTreeNodesWriter.close();
+
+        //save row tree structure
+        TFile rowTreeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_ROWTREE);
+        BufferedWriter rowTreeWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(rowTreeFile)));
+        JSONObject rowTreeJSONObject = nodeIDTreeToJSON(state.getRowTreeNodes());
+        rowTreeJSONObject.write(rowTreeWriter);
+        rowTreeWriter.flush();
+        rowTreeWriter.close();
+
+        ////////////////////////////////////////////////////////////////////////
+        //seems to be working just fine
+        //save column base nodes
+        TFile columnBaseNodeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_COLUMNBASE);
+        BufferedWriter columnBaseNodesWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(columnBaseNodeFile)));
+        nodesToJSON(state.getColumnBaseNodes()).write(columnBaseNodesWriter);
+        columnBaseNodesWriter.flush();
+        columnBaseNodesWriter.close();
+
+        //save column tree nodes
+        TFile columnTreeNodeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_COLUMNTREE);
+        BufferedWriter columnTreeNodesWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(columnTreeNodeFile)));
+        nodesToJSON(state.getColumnTreeNodes()).write(columnTreeNodesWriter);
+        columnTreeNodesWriter.flush();
+        columnTreeNodesWriter.close();
+
+        //save column tree structure
+        TFile columnTreeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_COLUMNTREE);
+        BufferedWriter columnTreeWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(columnTreeFile)));
+        nodeIDTreeToJSON(state.getColumnTreeNodes()).write(columnTreeWriter);
+        columnTreeWriter.flush();
+        columnTreeWriter.close();
+    }
+
+    /**
+     * converts a VNode to JSON. Must fail if anything happens
+     *
+     * @param node
+     * @return
+     * @throws Exception
+     */
+    private static JSONObject nodeToJSON(VNode node) throws Exception {
+        JSONObject object = new JSONObject();
+        object.put(IOTerm.ATTR_NODE_ID, node.getID());
+        object.put(IOTerm.ATTR_NODE_NAME, node.getName());
+
+        if (node.getViewLabel() != null) {
+            object.put(IOTerm.ATTR_NODE_LABEL, node.getViewLabel());
+        }
+
+        //save only if the default current
+        if (node.getCurrentViewMultiplier() != node.getDefaultViewMultiplier()) {
+            object.put(IOTerm.ATTR_NODE_VIEWMULTIPLIER, node.getCurrentViewMultiplier());
+        }
+
+        object.put(IOTerm.ATTR_NODE_VIEWMULTIPLIER_DEFAULT, node.getDefaultViewMultiplier());
+
+        if (node.isExpanded()) {
+            object.put(IOTerm.ATTR_NODE_ISEXPANDED, 1);
+        }
+
+        if (node.getCOntology() != null) {
+            object.put(IOTerm.FIELD_VNODE_ONTOLOGYID, node.getCOntology().getID());
+        }
+        if (node.getViewColor() != null) {
+            object.put(IOTerm.ATTR_COLOR, node.getViewColor().getRGB());
+        }
+        return object;
+    }
+
+    private static JSONArray nodesToJSON(List<VNode> vnodes) throws Exception {
+        ArrayList<JSONObject> baseNodes = new ArrayList<JSONObject>();
+        for (VNode node : vnodes) {
+            baseNodes.add(nodeToJSON(node));
+        }
+        return new JSONArray(baseNodes);
+    }
+
+    /**
+     * only an id to id mapping
+     *
+     * @param treeNodes
+     * @return
+     * @throws Exception
+     */
+    private static JSONObject nodeIDTreeToJSON(Collection<VNode> treeNodes) throws Exception {
+        JSONObject tree = new JSONObject();
+        for (VNode node : treeNodes) {
+            List<VNode> childNodes = node.getChildNodes();
+            ArrayList<String> childIDs = new ArrayList<String>();
+            for (VNode childNode : childNodes) {
+                childIDs.add(childNode.getID());
+            }
+            tree.put(node.getID(), childIDs);
+        }
+        return tree;
     }
 
 }

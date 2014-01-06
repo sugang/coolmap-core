@@ -18,8 +18,11 @@ import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.SingleMaximizer;
 import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.application.widget.impl.console.CMConsole;
+import coolmap.module.Module;
+import coolmap.module.ModuleMaster;
 import coolmap.utils.Config;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -51,6 +54,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import org.json.JSONObject;
 
 /**
  *
@@ -516,7 +520,6 @@ public class CMainFrame extends JFrame {
         MenuItem searchItem = null;
 
 //        System.out.println(Arrays.toString(ele));
-
         for (int i = 0; i < ele.length; i++) {
             menuLabel = ele[i].trim();
             if (currentMenu == null) {
@@ -593,7 +596,6 @@ public class CMainFrame extends JFrame {
 //            //could be error but it looks pretty good
 ////            e.printStackTrace();
 //        }
-
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.setTitle("CoolMap Application");
         Dimension d = _defaultToolkit.getScreenSize();
@@ -609,12 +611,39 @@ public class CMainFrame extends JFrame {
         addWindowListener(new CMainFrameWindowAdapter());
     }
 
+    //Processes exit; need to do things when cmd Q as well.
     private class CMainFrameWindowAdapter extends WindowAdapter {
 
         public void windowClosing(WindowEvent e) {
             //Do some prompt of asking the user to - save the current session
             //Here -> CoolMap will be closed
             CoolMapMaster.getCMainFrame().saveWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY));
+
+            //Also save widget states - probably needed for some widgets
+            JSONObject widgetState = new JSONObject();
+            for (Widget widget : WidgetMaster.getAllWidgets()) {
+                JSONObject state = widget.getCurrentState();
+                if (state != null) {
+                    try {
+                        widgetState.put(widget.getClass().getName(), state);
+                    } catch (Exception ex) {
+                        System.err.println("State can't be saved:" + widget);
+                    }
+                }
+            }
+            JSONObject moduleState = new JSONObject();
+            for(Module module : ModuleMaster.getAllModules()){
+                JSONObject state = module.getCurrentState();
+                if(state != null){
+                    try{
+                        moduleState.put(module.getClass().getName(), state);
+                    }
+                    catch(Exception ex){
+                        System.err.println("State can't be saved:" + module);
+                    }
+                }
+            }
+            
 
 //            System.out.println("CoolMap Application will be closed.");
             CMConsole.log("CoolMap Application will be closed");

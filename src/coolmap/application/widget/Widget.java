@@ -10,6 +10,7 @@ import com.javadocking.dockable.DockableState;
 import com.javadocking.dockable.StateActionDockable;
 import com.javadocking.dockable.action.DefaultDockableStateAction;
 import com.javadocking.dockable.action.DefaultDockableStateActionFactory;
+import coolmap.utils.StateSavable;
 import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
@@ -23,7 +24,7 @@ import org.json.JSONObject;
  *
  * @author Gang Su
  */
-public abstract class Widget {
+public abstract class Widget implements StateSavable{
 
 //    locations
     public static final int L_LEFTTOP = 0;
@@ -209,5 +210,18 @@ public abstract class Widget {
     public final void disableMenuItem(){
         _showWidgetItem.setEnabled(false);
     }
+
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
+    
     
 }

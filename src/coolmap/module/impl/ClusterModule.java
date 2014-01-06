@@ -13,8 +13,8 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.state.CoolMapState;
 import coolmap.module.Module;
 import coolmap.utils.Tools;
-import coolmap.utils.statistics.cluster.Cluster;
 import coolmap.utils.graphics.UI;
+import coolmap.utils.statistics.cluster.Cluster;
 import edu.ucla.sspace.clustering.ClusteringByCommittee;
 import edu.ucla.sspace.clustering.HierarchicalAgglomerativeClustering;
 import edu.ucla.sspace.clustering.NeighborChainAgglomerativeClustering;
@@ -1168,16 +1168,6 @@ public class ClusterModule extends Module {
     }
 
     public ClusterModule() {
-
-//        item = new MenuItem("KMeans");
-//        CoolMapMaster.getCMainFrame().addMenuItem("Analysis", item, false);
-//        item.addActionListener(new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                KMeans.kMeansClusterRow(CoolMapMaster.getActiveCoolMapObject(), 5);
-//            }
-//        });
         initHClust();
     }
 }
