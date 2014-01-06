@@ -7,7 +7,9 @@ package coolmap.application.io;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.interfaces.ImportCOntology;
 import coolmap.application.io.external.interfaces.ImportData;
+import coolmap.application.io.internal.cmatrix.DefaultCMatrixExporter;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
+import coolmap.application.io.internal.cmatrix.interfaces.InternalCMatrixExporter;
 import coolmap.application.io.internal.contology.InternalCOntologyAttributeIO;
 import coolmap.application.io.internal.contology.InternalCOntologyIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
@@ -759,8 +761,16 @@ public class IOMaster {
 //                //create a new file
 //                file = new TFile(path);
                 //expedite development
+                File pfile = new File("/Users/sugang/000.cpj");
+                if(pfile.exists()){
+                    pfile.delete();
+                }
+                
+                
                 TFile file = new TFile("/Users/sugang/000.cpj");
 
+                
+                
                 saveProject(file);
             }
         });
@@ -768,12 +778,13 @@ public class IOMaster {
     }
 
     private static void saveProject(TFile projectFile) {
-        
+
         //wrap this up in a long task to run in the background
         try {
 
             saveProjectProperties(projectFile);
             saveCOntologies(projectFile);
+            saveCMatrices(projectFile);
 
             //this is needed to commit all changes in the temp projectFile and finish the saving
             TVFS.umount(projectFile);
@@ -785,11 +796,31 @@ public class IOMaster {
         loadProject(projectFile);
     }
 
+    private static void saveCMatrices(TFile projectFile) throws Exception {
+
+        List<CMatrix> matrices = CoolMapMaster.getLoadedCMatrices();
+        InternalCMatrixExporter exporter;
+        for (CMatrix matrix : matrices) {
+            TFile matrixFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CMATRIX + File.separator + matrix.getID());
+
+            //check if a custom exporter is needed
+            if ((exporter = getCustomExporter(matrix.getClass())) == null) {
+                exporter = new DefaultCMatrixExporter();
+            }
+
+            exporter.dumpData(matrix, matrixFolder);
+        }
+    }
+
+    public static InternalCMatrixExporter getCustomExporter(Class<? extends CMatrix> cmatrixClass) {
+        return null;
+    }
+
     private static void saveCOntologies(TFile projectFile) throws Exception {
         List<COntology> ontologies = CoolMapMaster.getLoadedCOntologies();
         for (COntology ontology : ontologies) {
             String ontologyFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COntology + File.separator + ontology.getID();
-            
+
             //first write the properties
             BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(
                     new TFileOutputStream(ontologyFolderPath + File.separator + IOTerm.FILE_PROPERTY)));
@@ -810,13 +841,12 @@ public class IOMaster {
             propertyWriter.write(contologyPropertyEntry.toString());
             propertyWriter.flush();
             propertyWriter.close();
-            
-            
+
             //then export the data
             BufferedWriter dataWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(
                     ontologyFolderPath + File.separator + IOTerm.FILE_DATA
             )));
-            
+
             InternalCOntologyIO.dumpData(dataWriter, ontology);
         }
 
@@ -824,7 +854,7 @@ public class IOMaster {
         //Save ontology attributes
         String ontologyAttributeFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY_ATTRIBUTE;
         BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(
-                    new TFileOutputStream(ontologyAttributeFolderPath + File.separator + IOTerm.FILE_DATA)));
+                new TFileOutputStream(ontologyAttributeFolderPath + File.separator + IOTerm.FILE_DATA)));
         InternalCOntologyAttributeIO.dumpData(propertyWriter);
     }
 
@@ -928,9 +958,19 @@ public class IOMaster {
 
             System.out.println(property.toString(2));
 
+            bufferedReader.close();
+
+            //try to unzip it
+            
+            
+            TFile directory = new TFile(file.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
+            FileUtils.deleteDirectory(directory);
+            TFile.cp_rp(file, directory, TArchiveDetector.NULL);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private static void initializeLoad() {

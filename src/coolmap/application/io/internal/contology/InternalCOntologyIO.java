@@ -13,12 +13,14 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- *
+ * This is used for read and write COntology
  * @author sugang
  */
 public class InternalCOntologyIO {
     
     public static void dumpData(BufferedWriter writer, COntology ontology) throws Exception{
+        
+        System.out.println("Dumping COntology called...");
         
         if(writer == null || ontology == null)
             return;
