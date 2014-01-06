@@ -655,7 +655,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
      * @return
      */
     @Override
-    public JSONObject saveState() {
+    public JSONObject getCurrentState() {
         return null;
     }
 

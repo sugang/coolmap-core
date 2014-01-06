@@ -4,12 +4,27 @@
  */
 package coolmap.data.snippet;
 
+import coolmap.utils.StateSavable;
+import org.json.JSONObject;
+
 /**
  *
  * @author gangsu
  */
-public interface SnippetConverter<T> {
+public abstract class SnippetConverter<T> implements StateSavable{
     
-    public String convert(T obj);
-    public boolean canConvert(Class cls);
+    public abstract String convert(T obj);
+    public abstract boolean canConvert(Class cls);
+
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
 }

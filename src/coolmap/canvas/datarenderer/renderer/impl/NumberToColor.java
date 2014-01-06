@@ -44,6 +44,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.json.JSONObject;
 
 /**
  *
@@ -61,6 +62,44 @@ public class NumberToColor extends ViewRenderer<Double> {
     private JComboBox presetRangeComboBox;
     private JComboBox presetColorComboBox;
     private JCheckBox drawSubMap;
+
+    public static String ATTR_COLORS = "colors";
+    public static String ATTR_POS = "pos";
+    public static String ATTR_LOW = "low";
+    public static String ATTR_HIGH = "high";
+
+    @Override
+    public JSONObject getCurrentState(){
+        try {
+            JSONObject state = new JSONObject();
+            state.put(ATTR_LOW, _minValue);
+            state.put(ATTR_HIGH, _maxValue);
+            
+            int numPts = editor.getNumPoints();
+            float[] pos = new float[numPts];
+            int[] colors = new int[numPts];
+            
+            for(int i=0; i<editor.getNumPoints(); i++){
+                pos[i] = editor.getColorPositionAt(i);
+                colors[i] = editor.getColorAt(i).getRGB();
+            }
+            
+            state.put(ATTR_COLORS, colors);
+            state.put(ATTR_POS, pos);
+            
+            return state;
+        } catch (Exception e) {
+            //log error
+            System.err.println("View renderer save state exception");
+            return null;
+        }
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState){
+
+        return true;
+    }
 
     public NumberToColor() {
         setName("Number to Color");
@@ -1011,7 +1050,7 @@ public class NumberToColor extends ViewRenderer<Double> {
             JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             l.setIcon(new ImageIcon(((GradientItem) value).getPreview()));
             l.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            l.setText(((GradientItem)value).name);
+            l.setText(((GradientItem) value).name);
             return l;
         }
 

@@ -13,6 +13,7 @@ import coolmap.application.io.internal.cmatrix.interfaces.InternalCMatrixExporte
 import coolmap.application.io.internal.contology.InternalCOntologyAttributeIO;
 import coolmap.application.io.internal.contology.InternalCOntologyIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
+import coolmap.application.io.internal.coolmapobject.InternalCoolMapObjectIO;
 import coolmap.application.io.internal.coolmapobject.PrivateCoolMapObjectIO;
 import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
@@ -406,7 +407,7 @@ public class IOMaster {
                         String name = entry.optString(IOTerm.ATTR_NAME);
                         float zoomX, zoomY;
                         try {
-                            JSONArray zoom = entry.optJSONArray(IOTerm.ATTR_ZOOM);
+                            JSONArray zoom = entry.optJSONArray(IOTerm.ATTR_VIEWZOOM);
                             zoomX = (float) zoom.getDouble(0);
                             zoomY = (float) zoom.getDouble(1);
                         } catch (Exception e) {
@@ -416,7 +417,7 @@ public class IOMaster {
 
                         int mX, mY;
                         try {
-                            JSONArray anchor = entry.optJSONArray(IOTerm.FIELD_COOLMAPVIEW_MAPANCHOR);
+                            JSONArray anchor = entry.optJSONArray(IOTerm.ATTR_VIEWANCHOR);
                             mX = anchor.getInt(0);
                             mY = anchor.getInt(1);
                         } catch (Exception e) {
@@ -428,7 +429,7 @@ public class IOMaster {
                         object.setName(name);
 
                         //set zoom only valid when the views are loaded
-                        JSONArray cmatrixIDs = entry.optJSONArray(IOTerm.FIELD_COOLMAPOBJECT_LINKEDCMATRICES);
+                        JSONArray cmatrixIDs = entry.optJSONArray(IOTerm.ATTR_VIEWMATRICES);
                         ArrayList<CMatrix> matrices = new ArrayList<CMatrix>();
                         for (int i = 0; i < cmatrixIDs.length(); i++) {
                             String cmatrixID = cmatrixIDs.getString(i);
@@ -451,13 +452,13 @@ public class IOMaster {
                         System.out.println("First base matrix value:" + matrices.get(0).getValue(0, 0));
 
 //                        if (object.getAggregator() != null) {
-//                            jobject.put(IOTerm.FIELD_COOLMAPOBJECT_AGGREGATOR, object.getAggregator().getClass());
+//                            jobject.put(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, object.getAggregator().getClass());
 //                        }
 //                        if (object.getAnnotationRenderer() != null) {
 //                            jobject.put(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER, object.getAnnotationRenderer().getClass());
 //                        }
 //                        if (object.getViewRenderer() != null) {
-//                            jobject.put(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER, object.getViewRenderer().getClass());
+//                            jobject.put(IOTerm.ATTR_VIEW_RENDERER_CLASS, object.getViewRenderer().getClass());
 //                        }
                         //Then load snapshots
                         System.out.println("Loaded base matrices:" + object.getBaseCMatrices());
@@ -477,7 +478,7 @@ public class IOMaster {
                         object.getCoolMapView().setZoomLevels(zoomX, zoomY);
                         object.getCoolMapView().moveMapTo(mX, mY);
 //                        
-                        String aggrClassString = entry.optString(IOTerm.FIELD_COOLMAPOBJECT_AGGREGATOR);
+                        String aggrClassString = entry.optString(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS);
 //                        System.out.println("AggrString" + aggrClassString);
 //                        try{
 //                            Class.forName("coolmap.data.aggregator.impl.DoubleDoubleMax");
@@ -498,7 +499,7 @@ public class IOMaster {
                         }
 
                         //object.setAggregator(new DoubleDoubleMax(object));
-                        String viewRendererString = entry.optString(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER);
+                        String viewRendererString = entry.optString(IOTerm.ATTR_VIEW_RENDERER_CLASS);
                         Class viewRendererClass;
                         try {
                             viewRendererClass = Class.forName(viewRendererString);
@@ -513,7 +514,7 @@ public class IOMaster {
                         String annotatorString = entry.optString(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER);
 
                         //load the snippet
-                        String snippetString = entry.optString(IOTerm.FIELD_COOLMAPOBJECT_SNIPPETCONVERTER);
+                        String snippetString = entry.optString(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS);
                         Class snippetConverter;
                         try {
                             snippetConverter = Class.forName(snippetString);
@@ -785,6 +786,7 @@ public class IOMaster {
             saveProjectProperties(projectFile);
             saveCOntologies(projectFile);
             saveCMatrices(projectFile);
+            saveCoolMapObjects(projectFile);
 
             //this is needed to commit all changes in the temp projectFile and finish the saving
             TVFS.umount(projectFile);
@@ -795,6 +797,15 @@ public class IOMaster {
         //try load project immediately
         loadProject(projectFile);
     }
+    
+    private static void saveCoolMapObjects(TFile projectFile) throws Exception {
+        List<CoolMapObject> objects = CoolMapMaster.getCoolMapObjects();
+        for(CoolMapObject object : objects){
+            InternalCoolMapObjectIO.dumpData(object, projectFile);
+        }
+    }
+    
+    
 
     private static void saveCMatrices(TFile projectFile) throws Exception {
 
@@ -835,6 +846,7 @@ public class IOMaster {
 
             if (ontology.getViewColor() != null) {
                 Color c = ontology.getViewColor();
+                //use c.getRGB
                 contologyPropertyEntry.put(IOTerm.ATTR_COLOR, c.getRGB());
             }
 
@@ -879,17 +891,6 @@ public class IOMaster {
 
         List<CMatrix> baseMatrices = CoolMapMaster.getLoadedCMatrices();
         for (CMatrix matrix : baseMatrices) {
-//            JSONObject cmatrixPropertyEntry = new JSONObject();
-//            cmatrixProperties.put(matrix.getID(), cmatrixPropertyEntry);
-//
-//            //add values
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_ID, matrix.getID());
-//            move these to corresponding folders
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_NAME, matrix.getName());
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_NUMROW, matrix.getNumRows());
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_NUMCOLUMN, matrix.getNumColumns());
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_CLASS, matrix.getClass().getName()); //The class of CMatrix, i.e. DoubleCMatrix
-//            cmatrixPropertyEntry.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass()); //The class of the CMatrix members, i.e. Double
             matrixIDs.add(matrix.getID());
         }
         projectInfo.put(IOTerm.OBJECT_CMATRIX_ID, matrixIDs);
@@ -916,10 +917,10 @@ public class IOMaster {
 //            coolMapObjectPropertyEntry.put(IOTerm.ATTR_NAME, object.getName());
 //
 //            CoolMapView view = object.getCoolMapView();
-//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_VIEWZOOM, new float[]{view.getZoomX(), view.getZoomY()});
 //
 //            Point mapAnchor = object.getCoolMapView().getMapAnchor();
-//            coolMapObjectPropertyEntry.put(IOTerm.FIELD_COOLMAPVIEW_MAPANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_VIEWANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
 //
 //            ArrayList<String> linkedMxIDs = new ArrayList<String>();
 //            List<CMatrix> linkedMxs = object.getBaseCMatrices();
@@ -929,7 +930,7 @@ public class IOMaster {
 
             //other info should be read from the corresponding folders
             //as the state of these things need to be persisted as well.
-//            coolMapObjectPropertyEntry.put(IOTerm.FIELD_COOLMAPOBJECT_LINKEDCMATRICES, linkedMxIDs); //can restore the cMatrix by using such matrices, when they are reloaded
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_VIEWMATRICES, linkedMxIDs); //can restore the cMatrix by using such matrices, when they are reloaded
             coolMapIDs.add(object.getID());
         }
         projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT_ID, coolMapIDs);
@@ -1090,10 +1091,10 @@ public class IOMaster {
 
                             CoolMapView view = object.getCoolMapView();
 
-                            jobject.put(IOTerm.ATTR_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
+                            jobject.put(IOTerm.ATTR_VIEWZOOM, new float[]{view.getZoomX(), view.getZoomY()});
 
                             Point mapAnchor = object.getCoolMapView().getMapAnchor();
-                            jobject.put(IOTerm.FIELD_COOLMAPVIEW_MAPANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
+                            jobject.put(IOTerm.ATTR_VIEWANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
 
                             ArrayList<String> linkedMxIDs = new ArrayList<String>();
                             List<CMatrix> linkedMxs = object.getBaseCMatrices();
@@ -1101,20 +1102,20 @@ public class IOMaster {
                                 linkedMxIDs.add(mx.getID());
                             }
 
-                            jobject.put(IOTerm.FIELD_COOLMAPOBJECT_LINKEDCMATRICES, linkedMxIDs);
+                            jobject.put(IOTerm.ATTR_VIEWMATRICES, linkedMxIDs);
 
                             if (object.getAggregator() != null) {
-                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_AGGREGATOR, object.getAggregator().getClass().getName());
+                                jobject.put(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, object.getAggregator().getClass().getName());
                             }
 
 //                            if (object.getAnnotationRenderer() != null) {
 //                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER, object.getAnnotationRenderer().getClass().getName());
 //                            }
                             if (object.getViewRenderer() != null) {
-                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_VIEWRENDERER, object.getViewRenderer().getClass().getName());
+                                jobject.put(IOTerm.ATTR_VIEW_RENDERER_CLASS, object.getViewRenderer().getClass().getName());
                             }
                             if (object.getSnippetConverter() != null) {
-                                jobject.put(IOTerm.FIELD_COOLMAPOBJECT_SNIPPETCONVERTER, object.getSnippetConverter().getClass().getName());
+                                jobject.put(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, object.getSnippetConverter().getClass().getName());
                             }
 
                         }

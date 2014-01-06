@@ -18,7 +18,7 @@ public interface StateSavable {
      * state and be persisted using JSON
      * @return 
      */
-    public abstract JSONObject saveState();
+    public abstract JSONObject getCurrentState();
     
     /**
      * state can be restored from JSON

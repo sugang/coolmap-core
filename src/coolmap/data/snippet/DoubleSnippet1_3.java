@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
  *
  * @author gangsu
  */
-public class DoubleSnippet1_3 implements SnippetConverter<Double> {
+public class DoubleSnippet1_3 extends SnippetConverter<Double> {
 
     private final DecimalFormat _format = new DecimalFormat("#.###");
     

@@ -6,21 +6,19 @@ package coolmap.data.aggregator.model;
 
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.utils.StateSavable;
 import coolmap.utils.Tools;
 import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
-import javax.tools.Tool;
-import javax.xml.bind.JAXBElement;
+import org.json.JSONObject;
 
 /**
  *
  * @author gangsu
  */
-public abstract class CAggregator<BASE, VIEW> {
+public abstract class CAggregator<BASE, VIEW> implements StateSavable{
 
     public abstract VIEW getAggregation(BASE item, Collection<CMatrix> matrices, Integer rowIndex, Integer columnIndex);
 
@@ -112,8 +110,18 @@ public abstract class CAggregator<BASE, VIEW> {
     public String getTipName(){
         return _tipName;
     }
-    
 
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
     
     
 }
