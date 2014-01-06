@@ -26,10 +26,12 @@ import org.json.JSONObject;
 public class InternalCoolMapObjectIO {
 
     /**
-     * save the coolmap property to a JSON file - if exception occurs then project can't be saved correctly
+     * save the coolmap property to a JSON file - if exception occurs then
+     * project can't be saved correctly
+     *
      * @param object
      * @param objectFolder
-     * @throws Exception 
+     * @throws Exception
      */
     private static void saveProperties(CoolMapObject object, TFile objectFolder) throws Exception {
         TFile propertyFile = new TFile(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
@@ -71,47 +73,60 @@ public class InternalCoolMapObjectIO {
         propertyWriter.flush();
         propertyWriter.close();
 
-        //Save aggregator property JSON
-        if (object.getAggregator() != null) {
-            JSONObject aggregatorProperty = object.getAggregator().getCurrentState();
-            if (aggregatorProperty != null) {
-                BufferedWriter aggregatorWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
+        try {
+            //Save aggregator property JSON
+            if (object.getAggregator() != null) {
+                JSONObject aggregatorProperty = object.getAggregator().getCurrentState();
+                if (aggregatorProperty != null) {
+                    BufferedWriter aggregatorWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
 
-                aggregatorWriter.write(aggregatorProperty.toString());
+                    aggregatorWriter.write(aggregatorProperty.toString());
 
-                aggregatorWriter.flush();
-                aggregatorWriter.close();
+                    aggregatorWriter.flush();
+                    aggregatorWriter.close();
+                }
             }
+        } catch (Exception e) {
+            //can still continue, just the aggreat
+            System.err.println("Aggregator state saving error");
         }
 
         //Save renderer property JSON
-        if (object.getViewRenderer() != null) {
-            JSONObject rendererProperty = object.getViewRenderer().getCurrentState();
-            if (rendererProperty != null) {
+        try {
+            if (object.getViewRenderer() != null) {
+                JSONObject rendererProperty = object.getViewRenderer().getCurrentState();
+                if (rendererProperty != null) {
 
-                BufferedWriter viewRendererWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
+                    BufferedWriter viewRendererWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
 
-                viewRendererWriter.write(rendererProperty.toString());
+                    viewRendererWriter.write(rendererProperty.toString());
 
-                viewRendererWriter.flush();
-                viewRendererWriter.close();
+                    viewRendererWriter.flush();
+                    viewRendererWriter.close();
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Renderer state saving error");
         }
 
         //Save snippet property JSON
-        if (object.getSnippetConverter() != null) {
-            JSONObject snippetProperty = object.getAggregator().getCurrentState();
-            if (snippetProperty != null) {
-                BufferedWriter snippetWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
+        try {
+            if (object.getSnippetConverter() != null) {
+                JSONObject snippetProperty = object.getAggregator().getCurrentState();
+                if (snippetProperty != null) {
+                    BufferedWriter snippetWriter = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(objectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER)));
 
-                snippetWriter.write(snippetProperty.toString());
+                    snippetWriter.write(snippetProperty.toString());
 
-                snippetWriter.flush();
-                snippetWriter.close();
+                    snippetWriter.flush();
+                    snippetWriter.close();
+                }
+
             }
-
+        } catch (Exception e) {
+            System.out.println("Snippet state saving erorr");
         }
-        
+
     }
 
     public static void dumpData(CoolMapObject object, TFile projectFile) throws Exception {
