@@ -16,5 +16,4 @@ import de.schlichtherle.truezip.file.TFile;
 public interface InternalCMatrixExporter {
     
     public void dumpData(CMatrix matrix, TFile zipFolder) throws Exception;
-    public void loadData(TFile zipFolder) throws Exception;
 }

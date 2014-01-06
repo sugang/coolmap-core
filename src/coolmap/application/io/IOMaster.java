@@ -8,8 +8,10 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.interfaces.ImportCOntology;
 import coolmap.application.io.external.interfaces.ImportData;
 import coolmap.application.io.internal.cmatrix.DefaultCMatrixExporter;
+import coolmap.application.io.internal.cmatrix.DoubleCMatrixImporter;
 import coolmap.application.io.internal.cmatrix.ICMatrixIO;
 import coolmap.application.io.internal.cmatrix.interfaces.InternalCMatrixExporter;
+import coolmap.application.io.internal.cmatrix.interfaces.InternalCMatrixImporter;
 import coolmap.application.io.internal.contology.InternalCOntologyAttributeIO;
 import coolmap.application.io.internal.contology.InternalCOntologyIO;
 import coolmap.application.io.internal.contology.PrivateCOntologyStructureFileIO;
@@ -23,6 +25,7 @@ import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.PassThrough;
 import coolmap.data.aggregator.model.CAggregator;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.snippet.SnippetConverter;
@@ -31,8 +34,8 @@ import coolmap.utils.Tools;
 import de.schlichtherle.truezip.file.TArchiveDetector;
 import de.schlichtherle.truezip.file.TConfig;
 import de.schlichtherle.truezip.file.TFile;
+import de.schlichtherle.truezip.file.TFileInputStream;
 import de.schlichtherle.truezip.file.TFileOutputStream;
-import de.schlichtherle.truezip.file.TFileReader;
 import de.schlichtherle.truezip.file.TVFS;
 import de.schlichtherle.truezip.fs.archive.zip.JarDriver;
 import de.schlichtherle.truezip.socket.sl.IOPoolLocator;
@@ -49,12 +52,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,6 +67,7 @@ import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -282,7 +288,7 @@ public class IOMaster {
                 try {
 
                     //always new session.
-                    CoolMapMaster.newSession("");
+                    CoolMapMaster.newSession("", null);
 
                     System.out.println("opening session");
 
@@ -323,8 +329,8 @@ public class IOMaster {
                         JSONObject cmatrixEntry = cmatrices.getJSONObject(cmatrixID);
                         //then decompose
                         String cmatrixName = cmatrixEntry.optString(IOTerm.ATTR_NAME);
-                        int numRow = cmatrixEntry.optInt(IOTerm.ATTR_NUMROW);
-                        int numColumn = cmatrixEntry.optInt(IOTerm.ATTR_NUMCOLUMN);
+                        int numRow = cmatrixEntry.optInt(IOTerm.ATTR_CMATRIX_NUMROW);
+                        int numColumn = cmatrixEntry.optInt(IOTerm.ATTR_CMATRIX_NUMCOLUMN);
                         String datatype = cmatrixEntry.optString(IOTerm.ATTR_MEMBERCLASS);
                         String io = cmatrixEntry.optString(IOTerm.FIELD_CMATRIX_ICMATRIXIO);
                         String cmatrixClassString = cmatrixEntry.optString(IOTerm.ATTR_CLASS);
@@ -703,7 +709,7 @@ public class IOMaster {
             public void actionPerformed(ActionEvent ae) {
                 //check whether need to save current session.
 
-                CoolMapMaster.newSession("");
+                CoolMapMaster.newSession("Untitled", null);
             }
         });
 
@@ -729,7 +735,11 @@ public class IOMaster {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //dev
+                LongTask task = new LongTask("Saving project...") {
+
+                    @Override
+                    public void run() {
+                        //dev
 //                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("CoolMap project file", "cpj"));
 //                int returnValue = chooser.showSaveDialog(CoolMapMaster.getCMainFrame());
 //                if (returnValue != JFileChooser.APPROVE_OPTION) {
@@ -761,18 +771,20 @@ public class IOMaster {
 //
 //                //create a new file
 //                file = new TFile(path);
-                //expedite development
-                File pfile = new File("/Users/sugang/000.cpj");
-                if(pfile.exists()){
-                    pfile.delete();
-                }
-                
-                
-                TFile file = new TFile("/Users/sugang/000.cpj");
+                        //expedite development
+                        File pfile = new File("/Users/sugang/000.cpj");
+                        if (pfile.exists()) {
+                            pfile.delete();
+                        }
 
-                
-                
-                saveProject(file);
+                        TFile file = new TFile("/Users/sugang/000.cpj");
+                        saveProject(file);
+
+                    }
+                };//task
+
+                TaskEngine.getInstance().submitTask(task);
+
             }
         });
 
@@ -789,23 +801,31 @@ public class IOMaster {
             saveCoolMapObjects(projectFile);
 
             //this is needed to commit all changes in the temp projectFile and finish the saving
+            //This is needed to synchornize the archive folder
             TVFS.umount(projectFile);
+
+            //temporaray
+            loadProject(projectFile);
+
         } catch (Exception e) {
-            e.printStackTrace(); // need to abort and delete the file
+            //delete this projectfile
+            e.printStackTrace();
+            FileUtils.deleteQuietly(new File(projectFile.getAbsolutePath())); //try to delete this corrupted file if anything occurs
+            
+        }
+        finally{
+            
         }
 
         //try load project immediately
-        loadProject(projectFile);
     }
-    
+
     private static void saveCoolMapObjects(TFile projectFile) throws Exception {
         List<CoolMapObject> objects = CoolMapMaster.getCoolMapObjects();
-        for(CoolMapObject object : objects){
+        for (CoolMapObject object : objects) {
             InternalCoolMapObjectIO.dumpData(object, projectFile);
         }
     }
-    
-    
 
     private static void saveCMatrices(TFile projectFile) throws Exception {
 
@@ -815,7 +835,7 @@ public class IOMaster {
             TFile matrixFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CMATRIX + File.separator + matrix.getID());
 
             //check if a custom exporter is needed
-            if ((exporter = getCustomExporter(matrix.getClass())) == null) {
+            if ((exporter = getExporter(matrix.getClass())) == null) {
                 exporter = new DefaultCMatrixExporter();
             }
 
@@ -823,14 +843,30 @@ public class IOMaster {
         }
     }
 
-    public static InternalCMatrixExporter getCustomExporter(Class<? extends CMatrix> cmatrixClass) {
-        return null;
+    public static InternalCMatrixExporter getExporter(Class<? extends CMatrix> cmatrixClass) {
+        return exporters.get(cmatrixClass);
     }
+
+    public static InternalCMatrixImporter getImporter(Class<? extends CMatrix> cmatrixClass) {
+        return importers.get(cmatrixClass);
+    }
+
+    public static void setImporter(Class<? extends CMatrix> cmatrixClass, InternalCMatrixImporter importer) {
+        importers.put(cmatrixClass, importer);
+    }
+
+    public static void setExporter(Class<? extends CMatrix> cmatrixClass, InternalCMatrixExporter exporter) {
+        exporters.put(cmatrixClass, exporter);
+    }
+
+    //IO
+    private static HashMap<Class<? extends CMatrix>, InternalCMatrixImporter> importers = new HashMap();
+    private static HashMap<Class<? extends CMatrix>, InternalCMatrixExporter> exporters = new HashMap();
 
     private static void saveCOntologies(TFile projectFile) throws Exception {
         List<COntology> ontologies = CoolMapMaster.getLoadedCOntologies();
         for (COntology ontology : ontologies) {
-            String ontologyFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COntology + File.separator + ontology.getID();
+            String ontologyFolderPath = projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY + File.separator + ontology.getID();
 
             //first write the properties
             BufferedWriter propertyWriter = new BufferedWriter(new OutputStreamWriter(
@@ -941,37 +977,150 @@ public class IOMaster {
 
     }
 
-    private static void loadProject(TFile file) {
+    //The save would save to the last saved path - if saved before
+    private static void loadProject(TFile projectFile) throws Exception {
         try {
 
-            System.out.println(Arrays.toString(file.listFiles()));
-            File propertyFile = new TFile(file.getAbsolutePath() + File.separator + IOTerm.FILE_PROJECT_INFO);
-//            System.out.println(propertyFile);
-            StringBuilder contents = new StringBuilder();
-            BufferedReader bufferedReader = new BufferedReader(new TFileReader(propertyFile));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                contents.append(line);
-            }
-            bufferedReader.close();
-
-            JSONObject property = new JSONObject(contents.toString().trim());
-
-            System.out.println(property.toString(2));
-
-            bufferedReader.close();
+            CoolMapMaster.newSession(Tools.removeFileExtension(projectFile.getName()), null);
+            File propertyFile = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.FILE_PROJECT_INFO);
+            JSONObject property = new JSONObject(IOUtils.toString(new TFileInputStream(propertyFile)));
 
             //try to unzip it
-            
-            
-            TFile directory = new TFile(file.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
+            TFile directory = new TFile(projectFile.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
             FileUtils.deleteDirectory(directory);
-            TFile.cp_rp(file, directory, TArchiveDetector.NULL);
+            TFile.cp_rp(projectFile, directory, TArchiveDetector.NULL);
+            
+            //Got to widget state are restored at the beginning of the .. not here
+            
+            
+            loadCMatrices(projectFile, property);
+            loadCOntologies(projectFile, property);
+            loadCoolMapObjects(projectFile, property);
+            
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            CoolMapMaster.newSession("Untitled", null);
+            //Also get some warning message
         }
 
+    }
+    
+    /**
+     * load COntologies
+     * @param projectFile
+     * @param property
+     * @throws Exception 
+     */
+    private static void loadCOntologies(TFile projectFile, JSONObject property) throws Exception{
+        JSONArray contologyIDs = property.getJSONArray(IOTerm.OBJECT_CONTOLOGY_ID);
+        List<COntology> contologies = new ArrayList<COntology>();
+        for( int i = 0; i < contologyIDs.length(); i++){
+            Object cOntologyID = contologyIDs.get(i);
+            TFile contologyFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY + File.separator + cOntologyID);
+            TFile contologyPropertyFile = new TFile(contologyFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
+            JSONObject contologyProperty = new JSONObject(IOUtils.toString(new TFileInputStream(contologyPropertyFile)));
+//            System.out.println(contologyProperty);
+            
+            String id = contologyProperty.getString(IOTerm.ATTR_ID);
+            String name = contologyProperty.optString(IOTerm.ATTR_NAME);
+            Color c = null;
+            try{
+                c = new Color(Integer.parseInt(contologyProperty.getString(IOTerm.ATTR_COLOR)));
+            }
+            catch(Exception e){
+                //go on
+            }
+            String description = contologyProperty.optString(IOTerm.ATTR_DESCRIPTION, null);
+            
+            COntology ontology = new COntology(name, description, id);
+            if(c != null){
+                ontology.setViewColor(c);
+            }
+            
+            TFile contologyDataFile = new TFile(contologyFolder.getAbsolutePath() + File.separator + IOTerm.FILE_DATA);
+            InternalCOntologyIO.loadData(new BufferedReader(new InputStreamReader(new TFileInputStream(contologyDataFile))), ontology);
+            
+//            COntologyUtils.printOntology(ontology);
+            contologies.add(ontology);
+        }
+        CoolMapMaster.addNewCOntology(contologies);
+    }
+    
+    /**
+     * finally - load CoolMap Objects!
+     * @param projectFile
+     * @param property
+     * @throws Exception 
+     */
+    private static void loadCoolMapObjects(TFile projectFile, JSONObject property) throws Exception{
+        JSONArray coolMapObjectIDs = property.getJSONArray(IOTerm.OBJECT_COOLMAPOBJECT_ID);
+        List<CoolMapObject> coolMapObjects = new ArrayList<>();
+        for(int i=0; i <coolMapObjectIDs.length(); i++){
+            Object coolMapObjectID = coolMapObjectIDs.get(i);
+            TFile coolMapObjectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT + File.separator + coolMapObjectID);
+            TFile coolMapPropertyFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
+            JSONObject coolMapProperty = new JSONObject(IOUtils.toString(new TFileInputStream(coolMapPropertyFile)));
+            
+            System.out.println(coolMapProperty.toString(2));
+            
+            String id = coolMapProperty.getString(IOTerm.ATTR_ID);
+            String name = coolMapProperty.optString(IOTerm.ATTR_NAME, "Untitled");
+            String aggrClass = coolMapProperty.optString(IOTerm.ATTR_VIEWANCHOR, null);
+            String rendererClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_RENDERER_CLASS, null);
+            String snipClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_RENDERER_CLASS, null);
+            JSONArray anchor = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWANCHOR);
+            JSONArray zoom = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWZOOM);
+            JSONArray linkedCMatrixIDs = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWMATRICES);
+            
+            CoolMapObject object = new CoolMapObject(id);
+            object.setName(name);
+            
+            
+            
+            if(aggrClass != null){
+                CAggregator aggregator;
+                try{
+                    aggregator = (CAggregator)Class.forName(aggrClass).newInstance();
+                    //Also need to restore from JSON
+                }
+                catch(Exception e){
+                    aggregator = new PassThrough();
+                }
+                object.setAggregator(aggregator);
+            }
+            
+            
+            if(Thread.interrupted()){
+                throw new InterruptedException("Loading cancelled");
+            }
+            
+            coolMapObjects.add(object);
+        }
+        CoolMapMaster.addNewCoolMapObject(coolMapObjects);
+        
+    }
+    
+    
+
+    private static void loadCMatrices(TFile projectFile, JSONObject property) throws Exception {
+        JSONArray cmatrixIDs = property.getJSONArray(IOTerm.OBJECT_CMATRIX_ID);
+        List<CMatrix> matrices = new ArrayList<CMatrix>();
+        for (int i = 0; i < cmatrixIDs.length(); i++) {
+            Object cMatrixID = cmatrixIDs.get(i);
+            TFile matrixFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CMATRIX + File.separator + cMatrixID);
+            TFile matrixPropertyFile = new TFile(matrixFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
+            JSONObject matrixProperty = new JSONObject(IOUtils.toString(new TFileInputStream(matrixPropertyFile)));
+
+            Class cmatrixClass = Class.forName(matrixProperty.getString(IOTerm.ATTR_CLASS));
+
+            InternalCMatrixImporter importer = getImporter(cmatrixClass);
+
+            if (importer != null) {
+                CMatrix matrix = importer.loadData(matrixFolder, matrixProperty);
+                matrices.add(matrix);
+            }
+        }
+        CoolMapMaster.addNewBaseMatrix(matrices);
     }
 
     private static void initializeLoad() {
@@ -980,8 +1129,15 @@ public class IOMaster {
 
     }
 
+    private static void initializeDefaultInternalIO() {
+        setImporter(DoubleCMatrix.class, new DoubleCMatrixImporter());
+//        setExporter(DoubleCMatrix.class, new DefaultCMatrixExporter());//not necessary; default always use toString method
+
+    }
+
     public static void initialize() {
 
+        initializeDefaultInternalIO();
         initializeCreateNew();
         initializeLoad();
         initializeSave();
@@ -1043,8 +1199,8 @@ public class IOMaster {
 
                             cmatrix.put(IOTerm.ATTR_ID, matrix.getID());
                             cmatrix.put(IOTerm.ATTR_NAME, matrix.getName());
-                            cmatrix.put(IOTerm.ATTR_NUMROW, matrix.getNumRows());
-                            cmatrix.put(IOTerm.ATTR_NUMCOLUMN, matrix.getNumColumns());
+                            cmatrix.put(IOTerm.ATTR_CMATRIX_NUMROW, matrix.getNumRows());
+                            cmatrix.put(IOTerm.ATTR_CMATRIX_NUMCOLUMN, matrix.getNumColumns());
                             cmatrix.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass());
                             cmatrix.put(IOTerm.ATTR_CLASS, matrix.getClass().getName());
 
@@ -1153,7 +1309,7 @@ public class IOMaster {
 
                         //write COntology
                         //
-                        File contologyFolder = new File(rootDirectory.getAbsolutePath() + File.separator + IOTerm.DIR_COntology);
+                        File contologyFolder = new File(rootDirectory.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY);
                         contologyFolder.mkdir();
                         ontologies = CoolMapMaster.getLoadedCOntologies();
                         for (COntology ontology : ontologies) {
@@ -1167,7 +1323,7 @@ public class IOMaster {
                         }
 
                         //write coolmapobjects
-                        File coolmapfolder = new File(rootDirectory.getAbsolutePath() + File.separator + IOTerm.DIR_CoolMapObject);
+                        File coolmapfolder = new File(rootDirectory.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT);
                         coolmapfolder.mkdir();
                         objects = CoolMapMaster.getCoolMapObjects();
                         PrivateCoolMapObjectIO objIO = new PrivateCoolMapObjectIO();

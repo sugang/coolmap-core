@@ -69,8 +69,15 @@ public final class CoolMapMaster {
         _sessionName = name;
         getViewport().setTitle("Canvas ( " + name + " project)");
     }
+    
+    public static String sessionPath = null;
+    
+    private static void setSessionPath(String sp){
+        sessionPath = sp;
+    }
+    
 
-    public static void newSession(String name) {
+    public static void newSession(String name, String path) {
         CoolMapObject object = _activeCoolMapObject;
         _activeCoolMapObject = null;
         _fireActiveCoolMapChanged(object, null);
@@ -91,6 +98,7 @@ public final class CoolMapMaster {
         }
 
         setSessionName(name);
+        setSessionPath(path);
 
     }
 
@@ -155,7 +163,7 @@ public final class CoolMapMaster {
         
         
         //new session
-        CoolMapMaster.newSession("");
+        CoolMapMaster.newSession("Untitled", null);
 
         SwingUtilities.invokeLater(new Runnable() {
 

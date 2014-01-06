@@ -16,8 +16,8 @@ public class IOTerm {
     public final static String OBJECT_COOLMAPOBJECT_ID = "coolmapobject_id";
     public final static String OBJECT_CONTOLOGY_ID = "contology_id";
     //fields
-    public final static String ATTR_NUMROW = "num_row";
-    public final static String ATTR_NUMCOLUMN = "num_column";
+    public final static String ATTR_CMATRIX_NUMROW = "num_row";
+    public final static String ATTR_CMATRIX_NUMCOLUMN = "num_column";
     public final static String ATTR_ID = "id";
     public final static String ATTR_NAME = "name";
     public final static String ATTR_MEMBERCLASS = "member_class";
@@ -76,9 +76,9 @@ public class IOTerm {
     
     //folder names
     public final static String DIR_CMATRIX = "cmatrix";
-    public final static String DIR_COntology = "contology";
+    public final static String DIR_CONTOLOGY = "contology";
     public final static String DIR_CONTOLOGY_ATTRIBUTE = "contology_attr";
-    public final static String DIR_CoolMapObject = "coolmapobject";
+    public final static String DIR_COOLMAPOBJECT = "coolmapobject";
     public final static String DIR_StateSnapshot = "state"; // this one is under coolmapobject
     public final static String DIR_STATE = "state";
 

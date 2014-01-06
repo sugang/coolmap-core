@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package coolmap.application.io.internal.contology;
 
 import coolmap.data.contology.model.COntology;
@@ -14,46 +13,54 @@ import java.util.Set;
 
 /**
  * This is used for read and write COntology
+ *
  * @author sugang
  */
 public class InternalCOntologyIO {
-    
-    public static void dumpData(BufferedWriter writer, COntology ontology) throws Exception{
-        
-        System.out.println("Dumping COntology called...");
-        
-        if(writer == null || ontology == null)
+
+    public static void dumpData(BufferedWriter writer, COntology ontology) throws Exception {
+
+//        System.out.println("Dumping COntology called...");
+        if (writer == null || ontology == null) {
             return;
-        
+        }
+
         Set<String> parentNodes = ontology.getAllNodesWithChildren();
-        for(String parentNode : parentNodes){
+        for (String parentNode : parentNodes) {
             writer.write(parentNode);
             ArrayList<String> immediateChildren = ontology.getImmediateChildren(parentNode);
-            for(String childNode : immediateChildren){
+            for (String childNode : immediateChildren) {
                 writer.write("\t");
                 writer.write(childNode);
+
             }
             writer.write("\n");
+            if (Thread.interrupted()) {
+                throw new InterruptedException("Saving interrupted");
+            }
         }
-        
+
         writer.flush();
         writer.close();
     }
-    
-    public static void loadData(BufferedReader reader, COntology ontology) throws Exception{
+
+    public static void loadData(BufferedReader reader, COntology ontology) throws Exception {
         String line;
-        while( (line = reader.readLine()) != null){
+        while ((line = reader.readLine()) != null) {
             String[] ele = line.split("\\t", -1);
-            if(ele.length < 1){
+            if (ele.length < 1) {
                 throw new Exception("Malformed ontology file");
             }
-            
+
             String parentNode = ele[0].trim();
-            for(int i=1; i < ele.length; i++){
+            for (int i = 1; i < ele.length; i++) {
                 ontology.addRelationshipNoUpdateDepth(parentNode, ele[i]);
             }
-            
+            if (Thread.interrupted()) {
+                throw new InterruptedException("Loading interrupted");
+            }
         }
+
         ontology.validate();
     }
 }

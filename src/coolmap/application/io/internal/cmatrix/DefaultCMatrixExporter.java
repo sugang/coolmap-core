@@ -32,12 +32,12 @@ public class DefaultCMatrixExporter implements InternalCMatrixExporter{
         JSONObject cmatrixPropertyEntry = new JSONObject();
         cmatrixPropertyEntry.put(IOTerm.ATTR_ID, matrix.getID());
         cmatrixPropertyEntry.put(IOTerm.ATTR_NAME, matrix.getName());
-        cmatrixPropertyEntry.put(IOTerm.ATTR_NUMROW, matrix.getNumRows());
-        cmatrixPropertyEntry.put(IOTerm.ATTR_NUMCOLUMN, matrix.getNumColumns());
+        cmatrixPropertyEntry.put(IOTerm.ATTR_CMATRIX_NUMROW, matrix.getNumRows());
+        cmatrixPropertyEntry.put(IOTerm.ATTR_CMATRIX_NUMCOLUMN, matrix.getNumColumns());
         cmatrixPropertyEntry.put(IOTerm.ATTR_CLASS, matrix.getClass().getName());
         cmatrixPropertyEntry.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass().getName());
         
-        System.out.println(cmatrixPropertyEntry);
+//        System.out.println(cmatrixPropertyEntry);
         
         propertyWriter.write(cmatrixPropertyEntry.toString());
         
@@ -85,12 +85,7 @@ public class DefaultCMatrixExporter implements InternalCMatrixExporter{
         dataWriter.flush();
         dataWriter.close();
         
-        System.out.println("Dumping successful");
-    }
-
-    @Override
-    public void loadData(TFile zipFolder) throws Exception {
-    
+//        System.out.println("Dumping successful");
     }
     
 }

@@ -135,7 +135,7 @@ public class InternalCoolMapObjectIO {
 
     public static void dumpData(CoolMapObject object, TFile projectFile) throws Exception {
 
-        TFile objectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CoolMapObject + File.separator
+        TFile objectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT + File.separator
                 + object.getID());
 
         saveProperties(object, objectFolder);
@@ -260,5 +260,7 @@ public class InternalCoolMapObjectIO {
         }
         return tree;
     }
+    
+    
 
 }
