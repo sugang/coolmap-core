@@ -45,8 +45,8 @@ public class IOTerm {
 
     public final static String ATTR_SOURCE = "source";
     public final static String ATTR_DESCRIPTION = "description";
-    public final static String ATTR_VIEWZOOM = "zoom";
-    public final static String ATTR_VIEWANCHOR = "anchor";
+    public final static String ATTR_VIEW_ZOOM = "zoom";
+    public final static String ATTR_VIEW_ANCHOR = "anchor";
     public final static String ATTR_COLOR = "color";
     
     public final static String FIELD_VNODE_CURRENTVIEWMULTIPLIER = "ViewMultiplier";

@@ -56,9 +56,9 @@ public class InternalCoolMapObjectIO {
         property.put(IOTerm.ATTR_ID, object.getID());
         property.put(IOTerm.ATTR_NAME, object.getName());
         CoolMapView view = object.getCoolMapView();
-        property.put(IOTerm.ATTR_VIEWZOOM, new float[]{view.getZoomX(), view.getZoomY()});
+        property.put(IOTerm.ATTR_VIEW_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
         Point mapAnchor = object.getCoolMapView().getMapAnchor();
-        property.put(IOTerm.ATTR_VIEWANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
+        property.put(IOTerm.ATTR_VIEW_ANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
 
         ArrayList<String> linkedMxIDs = new ArrayList<String>();
         List<CMatrix> linkedMxs = object.getBaseCMatrices();
@@ -138,6 +138,12 @@ public class InternalCoolMapObjectIO {
             System.out.println("Snippet state saving erorr");
         }
 
+        //Save the side panels used in CoolMapView
+        boolean rowPanelVisible = object.getCoolMapView().isRowPanelsVisible();
+        boolean columnPanelVisible = object.getCoolMapView().isColumnPanelsVisible();
+        
+        JSONObject panelConfig = new JSONObject();
+        
     }
 
     public static void dumpData(CoolMapObject object, TFile projectFile) throws Exception {
