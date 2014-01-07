@@ -320,6 +320,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                         for (VNode node : nodes) {
                             node.setViewColor(color);
                         }
+                        
+                        for(VNode node : _selectedNodes){
+                            node.setViewColor(color);
+                        }
+                        
                         getCoolMapView().updateRowMapBuffersEnforceAll();
                     } catch (Exception e) {
                         //

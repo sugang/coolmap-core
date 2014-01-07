@@ -18,6 +18,7 @@ import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
+import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.PassThrough;
@@ -764,22 +765,21 @@ public class IOMaster {
                 if (!visible) {
                     object.getCoolMapView().setRowPanelsVisible(false);
                 }
-                
+
                 JSONArray panels = rowPanelConfig.optJSONArray(IOTerm.ATTR_VIEW_PANEL);
-                for(int j=0;j<panels.length();j++){
-                    try{
+                for (int j = 0; j < panels.length(); j++) {
+                    try {
                         JSONObject panelEntry = panels.getJSONObject(j);
-                        RowMap map = (RowMap)Class.forName(panelEntry.getString(IOTerm.ATTR_CLASS)).getConstructor(CoolMapObject.class).newInstance(object);
+                        RowMap map = (RowMap) Class.forName(panelEntry.getString(IOTerm.ATTR_CLASS)).getConstructor(CoolMapObject.class).newInstance(object);
                         //restore map config
                         JSONObject config = panelEntry.optJSONObject(IOTerm.ATTR_CONFIG);
                         map.restoreState(config);
                         object.getCoolMapView().addRowMap(map);
-                    }
-                    catch(Exception e){
-                        
+                    } catch (Exception e) {
+
                     }
                 }
-                
+
             } catch (Exception e) {
 
             }
@@ -790,6 +790,21 @@ public class IOMaster {
                 if (!visible) {
                     object.getCoolMapView().setColumnPanelsVisible(false);
                 }
+
+                JSONArray panels = columnPanelConfig.optJSONArray(IOTerm.ATTR_VIEW_PANEL);
+                for (int j = 0; j < panels.length(); j++) {
+                    try {
+                        JSONObject panelEntry = panels.getJSONObject(j);
+                        ColumnMap map = (ColumnMap) Class.forName(panelEntry.getString(IOTerm.ATTR_CLASS)).getConstructor(CoolMapObject.class).newInstance(object);
+                        //restore map config
+                        JSONObject config = panelEntry.optJSONObject(IOTerm.ATTR_CONFIG);
+                        map.restoreState(config);
+                        object.getCoolMapView().addColumnMap(map);
+                    } catch (Exception e) {
+
+                    }
+                }
+
             } catch (Exception e) {
 
             }

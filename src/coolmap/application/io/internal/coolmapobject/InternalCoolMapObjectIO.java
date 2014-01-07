@@ -8,6 +8,7 @@ package coolmap.application.io.internal.coolmapobject;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.IOTerm;
 import coolmap.canvas.CoolMapView;
+import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
@@ -80,49 +81,63 @@ public class InternalCoolMapObjectIO {
         if (object.getSnippetConverter() != null) {
             property.put(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, object.getSnippetConverter().getClass().getName());
         }
-        
-                //Save the side panels used in CoolMapView
+
+        //Save the side panels used in CoolMapView
         boolean rowPanelVisible = object.getCoolMapView().isRowPanelsVisible();
         boolean columnPanelVisible = object.getCoolMapView().isColumnPanelsVisible();
-        
-        
+
         JSONObject rowPanelConfig = new JSONObject();
         property.put(IOTerm.ATTR_VIEW_PANEL_ROW, rowPanelConfig);
-        
-        if(rowPanelVisible){
+
+        if (rowPanelVisible) {
             rowPanelConfig.put(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, true);
         }
         //figure out which panels are visible
         List<RowMap> rowMaps = object.getCoolMapView().getRowMaps();
         ArrayList<JSONObject> rowMapsList = new ArrayList<>(rowMaps.size());
-        
-        for(RowMap map : rowMaps){
+
+        for (RowMap map : rowMaps) {
             JSONObject rowMapEntry = new JSONObject();
             rowMapsList.add(rowMapEntry);
             rowMapEntry.put(IOTerm.ATTR_CLASS, map.getClass().getName());
-            
+
             //config
             JSONObject config = map.getCurrentState();
-            if(config != null){
+            if (config != null) {
                 rowMapEntry.put(IOTerm.ATTR_CONFIG, config);
             }
         }
-        
+
         rowPanelConfig.put(IOTerm.ATTR_VIEW_PANEL, rowMapsList);
-        
-        
-        
+
         ///////////////////////////////////////////////
         //columnMaps
         JSONObject columnPanelConfig = new JSONObject();
         property.put(IOTerm.ATTR_VIEW_PANEL_COLUMN, columnPanelConfig);
-        if(columnPanelVisible){
+        if (columnPanelVisible) {
             columnPanelConfig.put(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, true);
-            
+
         }
 
-        //figure out which panels are visible
+        List<ColumnMap> columnMaps = object.getCoolMapView().getColumnMaps();
+        ArrayList<JSONObject> columnMapsList = new ArrayList<>(columnMaps.size());
 
+        //
+        for (ColumnMap map : columnMaps) {
+            JSONObject colMapEntry = new JSONObject();
+            columnMapsList.add(colMapEntry);
+            colMapEntry.put(IOTerm.ATTR_CLASS, map.getClass().getName());
+
+            //config
+            JSONObject config = map.getCurrentState();
+            if (config != null) {
+                colMapEntry.put(IOTerm.ATTR_CONFIG, config);
+            }
+        }
+
+        columnPanelConfig.put(IOTerm.ATTR_VIEW_PANEL, columnMapsList);
+
+        //figure out which panels are visible
         propertyWriter.write(property.toString());
         propertyWriter.flush();
         propertyWriter.close();
@@ -181,9 +196,6 @@ public class InternalCoolMapObjectIO {
             System.out.println("Snippet state saving erorr");
         }
 
-
-        
-        
     }
 
     public static void dumpData(CoolMapObject object, TFile projectFile) throws Exception {
@@ -281,8 +293,19 @@ public class InternalCoolMapObjectIO {
             object.put(IOTerm.ATTR_NODE_ONTOLOGYID, node.getCOntology().getID());
         }
         if (node.getViewColor() != null) {
-            object.put(IOTerm.ATTR_COLOR, node.getViewColor().getRGB());
+            object.put(IOTerm.ATTR_NODE_COLOR, node.getViewColor().getRGB());
         }
+
+        if (node.getViewHeightInTree() != null) {
+            object.put(IOTerm.ATTR_NODE_VIEWHEIGHT, node.getViewHeightInTree());
+        }
+
+        if (node.getViewHeightDiffFromParent() != null) {
+            object.put(IOTerm.ATTR_NODE_VIEWHEIGHTDIFF, node.getViewHeightDiffFromParent());
+        }
+        
+        System.out.println(node.getName() + " " + node.isExpanded() + " " + node.getViewHeightInTree());
+
         return object;
     }
 
@@ -407,8 +430,8 @@ public class InternalCoolMapObjectIO {
 //        }
         
         object.replaceRowNodes(rowBaseNodes, rowTreeNodes);
-        
         object.replaceColumnNodes(colBaseNodes, colTreeNodes);
+
     }
 
     private static VNode createNodeFromJSON(JSONObject object) throws Exception {
@@ -423,6 +446,7 @@ public class InternalCoolMapObjectIO {
             currentViewMultiplier = defaultViewMultiplier;
         }
         boolean isExpanded = object.optInt(IOTerm.ATTR_NODE_ISEXPANDED, 0) == 1 ? true : false;
+        
         String colorString = object.optString(IOTerm.ATTR_NODE_COLOR);
         Color viewColor;
         if (colorString == null) {
@@ -435,18 +459,22 @@ public class InternalCoolMapObjectIO {
             }
 
         }
+
 //        System.out.println(object);
         String contologyID = object.optString(IOTerm.ATTR_NODE_ONTOLOGYID);
-        
+
         COntology ontology = CoolMapMaster.getCOntologyByID(contologyID); //This part may need to be refactored: nodes only need to associate with ontology ID
-        
+
 //        System.out.println("ontology to be loaded:" + contologyID + " " + ontology);
-        
+        //set view heights
         VNode node = new VNode(name, ontology, id);
         node.setViewColor(viewColor);
         node.setDefaultViewMultiplier(defaultViewMultiplier.floatValue());
         node.setViewMultiplier(currentViewMultiplier.floatValue());
         node.setExpanded(isExpanded);
+
+        Float viewHeight = new Float(object.optDouble(IOTerm.ATTR_NODE_VIEWHEIGHT, -1));
+        node.setViewHeight(viewHeight == -1 ? null : viewHeight);
         return node;
     }
 

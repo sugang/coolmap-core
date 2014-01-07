@@ -42,6 +42,8 @@ public class IOTerm {
     public final static String ATTR_NODE_ISEXPANDED = "e";
     public final static String ATTR_NODE_ONTOLOGYID = "o";
     public final static String ATTR_NODE_COLOR = "c";
+    public final static String ATTR_NODE_VIEWHEIGHT = "h";
+    public final static String ATTR_NODE_VIEWHEIGHTDIFF = "f";
 
     //general attributes
     public final static String ATTR_SOURCE = "source";

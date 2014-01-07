@@ -10,6 +10,7 @@ import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
+import coolmap.utils.StateSavable;
 import coolmap.utils.graphics.UI;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -23,12 +24,13 @@ import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.json.JSONObject;
 
 /**
  *
  * @author gangsu
  */
-public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectListener {
+public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectListener, StateSavable{
 
     private final ViewPanel _viewPanel = new ViewPanel();
     private final static GraphicsConfiguration _graphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -133,28 +135,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
         _messageFont = UI.fontPlain.deriveFont(12f);
         getViewPanel().setName(getName());
 
-//        _viewPanel.addComponentListener(new ComponentListener() {
-//
-//            @Override
-//            public void componentResized(ComponentEvent ce) {
-//                //System.out.println("Component Resized" + _viewPanel.getBounds());
-//            }
-//
-//            @Override
-//            public void componentMoved(ComponentEvent ce) {
-//                System.out.println("Component Moved" + _viewPanel.getBounds());
-//            }
-//
-//            @Override
-//            public void componentShown(ComponentEvent ce) {
-//                System.out.println("Component Shown" + _viewPanel.getBounds());
-//                updateBuffer();
-//            }
-//
-//            @Override
-//            public void componentHidden(ComponentEvent ce) {
-//            }
-//        });
     }
 
     public JComponent getViewPanel() {
@@ -409,4 +389,18 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
     }
 
     public abstract JComponent getConfigUI();
+
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
+    
+    
 }

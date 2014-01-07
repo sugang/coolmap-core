@@ -1347,7 +1347,16 @@ public final class CoolMapObject<BASE, VIEW> {
             }
 
             notifyRowsChanged();
+            
+            //The row node height should not be null. How can it be null?
+//            for(VNode node : getViewNodesRowTree(0, 10)){
+//                System.out.println(node.getName() + " " + node.getViewHeightInTree());
+//            }
+            
             return nodesToBeExpanded;
+            
+            
+            
 
         } catch (Exception e) {
             System.err.println("Minor issue: exapnd row error");

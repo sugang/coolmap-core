@@ -577,6 +577,8 @@ public class VNode {
         //node.setViewIndex(_index);
         //node.setViewOffset(_displayOffset);
         node.setExpanded(_isExpanded);
+        node.setViewHeight(_height); //This was not copied over
+        
         return node;
     }
     

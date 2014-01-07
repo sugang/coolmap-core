@@ -389,6 +389,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                             node.setViewColor(color);
                         }
 
+                        for (VNode node : _selectedNodes) {
+                            node.setViewColor(color);
+                        }
+
                         getCoolMapView().updateColumnMapBuffersEnforceAll();
                     } catch (Exception e) {
                         //
