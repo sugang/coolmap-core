@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,6 +68,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     public final int STRAIGHT = 0;
     public final int ORTHOGONAL = 1;
     public final int CURVE = 2;
+    private Font _hoverFontRotated;
     private Font _hoverFont;
 
     //This records the offset of node: x = parentNode 
@@ -80,7 +82,12 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         _leafBorderColor = UI.colorBlack5;
         getViewPanel().addMouseListener(this);
         getViewPanel().addMouseMotionListener(this);
+
+        AffineTransform at = new AffineTransform();
+        at.rotate(-Math.PI / 2);
+
         _hoverFont = UI.fontMono.deriveFont(Font.BOLD).deriveFont(11f);
+        _hoverFontRotated = UI.fontMono.deriveFont(Font.BOLD).deriveFont(11f).deriveFont(at);
         _initPopupMenu();
 
         CImageGradient gradient = new CImageGradient(10);
@@ -866,7 +873,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     @Override
     protected void postPaint(Graphics2D g2D, CoolMapObject object, int width, int height) {
         if (!_selectedNodes.isEmpty()) {
-            g2D.setFont(_hoverFont);
+
             g2D.setColor(UI.colorBlack3);
             int index = 0;
             for (VNode node : _selectedNodes) {
@@ -882,11 +889,14 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 if (label == null) {
                     label = "";
                 }
-                int labelWidth = g2D.getFontMetrics().stringWidth(label);
-                int labelHeight = g2D.getFontMetrics().getHeight();
+                g2D.setFont(_hoverFont);
+
+                int labelHeight = g2D.getFontMetrics().stringWidth(label) + 6;
+                int labelWidth = g2D.getFontMetrics().getHeight() + 4;
 
                 g2D.setColor(UI.colorBlack5);
-                g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
+                g2D.fillRoundRect(x - labelWidth + 1, y - labelHeight - 2 + 1, labelWidth, labelHeight, 4, 5);
+                //g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
                 if (_selectedNodes.size() > 1) {
                     int ci = (int) (labelColors.length * 1.0f * index / _selectedNodes.size());
@@ -899,10 +909,14 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     g2D.setColor(Color.WHITE);
                 }
 
-                g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+                //g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+                //g2D.setColor(UI.colorBlack2);
+                //g2D.drawString(label, x - labelWidth - 7, y - 5);
+                g2D.fillRoundRect(x - labelWidth, y - labelHeight - 2, labelWidth, labelHeight, 4, 5);
 
                 g2D.setColor(UI.colorBlack2);
-                g2D.drawString(label, x - labelWidth - 7, y - 5);
+                g2D.setFont(_hoverFontRotated);
+                g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
 
                 index++;
             }
@@ -919,17 +933,24 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             if (label == null) {
                 label = "";
             }
-            int labelWidth = g2D.getFontMetrics().stringWidth(label);
-            int labelHeight = g2D.getFontMetrics().getHeight();
+//            int labelWidth = g2D.getFontMetrics().stringWidth(label);
+//            int labelHeight = g2D.getFontMetrics().getHeight();
+            int labelHeight = g2D.getFontMetrics().stringWidth(label) + 6;
+            int labelWidth = g2D.getFontMetrics().getHeight() + 4;
 
+//            g2D.setColor(UI.colorBlack5);
+            //g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
             g2D.setColor(UI.colorBlack5);
-            g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
+            g2D.fillRoundRect(x - labelWidth + 1, y - labelHeight - 2 + 1, labelWidth, labelHeight, 4, 5);
 
             g2D.setColor(UI.colorLightYellow);
-            g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+//            g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+            g2D.fillRoundRect(x - labelWidth, y - labelHeight - 2, labelWidth, labelHeight, 4, 5);
 
             g2D.setColor(UI.colorBlack2);
-            g2D.drawString(label, x - labelWidth - 7, y - 5);
+            g2D.setFont(_hoverFontRotated);
+            g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
+//            g2D.drawString(label, x - labelWidth - 7, y - 5);
 
             //g2D.drawString(_activeNode.getViewLabel(), _activeNodePoint.x + getCoolMapView().getMapAnchor().x, height + _activeNodePoint.y);
         }
