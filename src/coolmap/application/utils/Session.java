@@ -24,18 +24,6 @@ public class Session {
         return sessionName;
     }
 
-//    public void setSessionName(String sessionName) {
-//        if (sessionName == null || sessionName.length() == 0) {
-//            sessionName = "Untitled";
-//        }
-//        this.sessionName = sessionName;
-////        try{
-////            WidgetMaster.getViewport().setTitle(sessionName);
-////        }
-////        catch(Exception e){
-////            
-////        }
-//    }
 
     public String getSessionURI() {
         return sessionURI;

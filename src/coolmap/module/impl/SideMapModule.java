@@ -30,8 +30,8 @@ public class SideMapModule extends Module {
 
     public SideMapModule() {
 //        System.out.println("Side maps initialized");
-      CoolMapMaster.getCMainFrame().addMenuSeparator("View/Canvas config/");
-        
+        CoolMapMaster.getCMainFrame().addMenuSeparator("View/Canvas config/");
+
         try {
             if (Config.isInitialized()) {
                 JSONObject obj = Config.getJSONConfig().getJSONObject("module").getJSONObject("config").getJSONObject(this.getClass().getName()).getJSONObject("load");
@@ -41,15 +41,12 @@ public class SideMapModule extends Module {
                 for (int i = 0; i < rowMaps.length(); i++) {
                     try {
                         String rowMapClass = rowMaps.getString(i);
-                        
+
                         Class<RowMap> cls = (Class<RowMap>) Class.forName(rowMapClass);
-                        
+
                         //System.out.println(cls);
-                        
                         //Constructor ct = cls.getDeclaredConstructor(CoolMapObject.class);
-                        
                         //ct.newInstance(new CoolMapObject<Object, Object>());
-                        
                         //registerSideMapRow(map.getClass());
                         registerSideMapRow(cls);
                     } catch (Exception e) {
@@ -60,9 +57,9 @@ public class SideMapModule extends Module {
                 for (int j = 0; j < columnMaps.length(); j++) {
                     try {
                         String colMapClass = columnMaps.getString(j);
-                        
+
                         Class<ColumnMap> cls = (Class<ColumnMap>) Class.forName(colMapClass);
-                        
+
 //                        ColumnMap map = cls.getDeclaredConstructor(CoolMapObject.class).newInstance();
                         registerSideMapColumn(cls);
                     } catch (Exception e) {
@@ -81,51 +78,53 @@ public class SideMapModule extends Module {
         rowMaps.add(rowMap);
         //Also add to menu
 //        System.err.println(rowMap);
-        
-        
-        
-        
-        MenuItem item = new MenuItem(rowMap.getSimpleName());
-        CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", item, false, false);
-        item.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                    object.getCoolMapView().addRowMap(rowMap.getConstructor(CoolMapObject.class).newInstance(object));
-                }
-                catch(Exception ex){
+        try {
+            MenuItem item = new MenuItem(((RowMap) rowMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
+
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", item, false, false);
+            item.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                        object.getCoolMapView().addRowMap(rowMap.getConstructor(CoolMapObject.class).newInstance(object));
+                    } catch (Exception ex) {
 //                    ex.printStackTrace();
-                    //need an error logging system
+                        //need an error logging system
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void registerSideMapColumn(final Class<ColumnMap> columnMap) {
         columnMaps.add(columnMap);
         //Also add to menu
 //        System.err.println(columnMap);
-        MenuItem item = new MenuItem(columnMap.getSimpleName());
-        CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Column side/", item, false, false);
-        item.addActionListener(new ActionListener() {
+        try {
+            MenuItem item = new MenuItem(((ColumnMap) columnMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Column side/", item, false, false);
+            item.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
-                    object.getCoolMapView().addColumnMap(columnMap.getConstructor(CoolMapObject.class).newInstance(object));
-                }
-                catch(Exception ex){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                        object.getCoolMapView().addColumnMap(columnMap.getConstructor(CoolMapObject.class).newInstance(object));
+                    } catch (Exception ex) {
 //                    ex.printStackTrace();
-                    //need an error logging system
-                }            
-            }
-        });
-        
-        
-        
+                        //need an error logging system
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

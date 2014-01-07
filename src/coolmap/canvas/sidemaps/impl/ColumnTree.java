@@ -49,6 +49,11 @@ import javax.swing.SwingUtilities;
 public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionListener {
 
     @Override
+    public String getName() {
+        return "Column Ontology";
+    }
+
+    @Override
     public void nameChanged(CoolMapObject object) {
     }
 
@@ -70,7 +75,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     public ColumnTree(CoolMapObject object) {
         super(object);
-        setName("Column Ontology");
+
         _leafColor = UI.colorGrey3;
         _leafBorderColor = UI.colorBlack5;
         getViewPanel().addMouseListener(this);
@@ -261,11 +266,11 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 Collections.sort(nodes, new VNodeHeightComparator());
                 List<VNode> nodesToBeSelected = getCoolMapObject().expandColumnNodes(new ArrayList(_selectedNodes), true);
                 _selectedNodes.clear();
-                if(nodesToBeSelected != null){
+                if (nodesToBeSelected != null) {
                     _selectedNodes.addAll(nodesToBeSelected);
                 }
                 getViewPanel().repaint();
-                
+
                 StateStorageMaster.addState(state);
 
             }

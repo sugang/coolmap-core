@@ -26,6 +26,12 @@ public class IOTerm {
     public final static String ATTR_VIEW_AGGREGATOR_CLASS = "aggregator";
     public final static String ATTR_VIEW_RENDERER_CLASS = "renderer";
     public final static String ATTR_VIEW_SNIPPETCONVERTER_CLASS = "snippet_converter";
+    public final static String ATTR_VIEW_PANEL_COLUMN = "column_panels";
+    public final static String ATTR_VIEW_PANEL_ROW = "row_panels";
+    public final static String ATTR_VIEW_PANEL_CONTAINER_VISIBLE = "visible";
+    public final static String ATTR_VIEW_PANEL = "panel";
+    
+    
 
     //node attributes
     public final static String ATTR_NODE_ID = "i";
@@ -47,6 +53,7 @@ public class IOTerm {
     public final static String ATTR_NAME = "name";
     public final static String ATTR_CLASS = "class";
     public final static String ATTR_URI = "uri";
+    public final static String ATTR_CONFIG = "config";
 
     //project attributes
     public final static String ATTR_PROJECT_DATE = "date";

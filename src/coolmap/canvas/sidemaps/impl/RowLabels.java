@@ -49,6 +49,11 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
     private final JMenuItem _sortDescending, _removeSelected;
 
     @Override
+    public String getName() {
+        return "Row Labels";
+    }
+
+    @Override
     public void nameChanged(CoolMapObject object) {
     }
 
@@ -58,15 +63,15 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         _updateRectangle(getCoolMapView().getActiveCell());
         getViewPanel().repaint();
     }
-    
-    public RowLabels(){
+
+    public RowLabels() {
         this(null);
     }
 
     public RowLabels(CoolMapObject obj) {
         super(obj);
-//        setCoolMapObject(obj);
-        setName("Row Labels");
+
+
         _sortAscending = new JMenuItem("Sort Ascending", UI.getImageIcon("leftThin"));
         _sortDescending = new JMenuItem("Sort Dscending", UI.getImageIcon("rightThin"));
         _zoomControlY = getCoolMapView().getZoomControlY();

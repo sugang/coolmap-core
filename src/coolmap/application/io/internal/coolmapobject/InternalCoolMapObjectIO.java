@@ -8,6 +8,7 @@ package coolmap.application.io.internal.coolmapobject;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.io.IOTerm;
 import coolmap.canvas.CoolMapView;
+import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -79,6 +80,48 @@ public class InternalCoolMapObjectIO {
         if (object.getSnippetConverter() != null) {
             property.put(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, object.getSnippetConverter().getClass().getName());
         }
+        
+                //Save the side panels used in CoolMapView
+        boolean rowPanelVisible = object.getCoolMapView().isRowPanelsVisible();
+        boolean columnPanelVisible = object.getCoolMapView().isColumnPanelsVisible();
+        
+        
+        JSONObject rowPanelConfig = new JSONObject();
+        property.put(IOTerm.ATTR_VIEW_PANEL_ROW, rowPanelConfig);
+        
+        if(rowPanelVisible){
+            rowPanelConfig.put(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, true);
+        }
+        //figure out which panels are visible
+        List<RowMap> rowMaps = object.getCoolMapView().getRowMaps();
+        ArrayList<JSONObject> rowMapsList = new ArrayList<>(rowMaps.size());
+        
+        for(RowMap map : rowMaps){
+            JSONObject rowMapEntry = new JSONObject();
+            rowMapsList.add(rowMapEntry);
+            rowMapEntry.put(IOTerm.ATTR_CLASS, map.getClass().getName());
+            
+            //config
+            JSONObject config = map.getCurrentState();
+            if(config != null){
+                rowMapEntry.put(IOTerm.ATTR_CONFIG, config);
+            }
+        }
+        
+        rowPanelConfig.put(IOTerm.ATTR_VIEW_PANEL, rowMapsList);
+        
+        
+        
+        ///////////////////////////////////////////////
+        //columnMaps
+        JSONObject columnPanelConfig = new JSONObject();
+        property.put(IOTerm.ATTR_VIEW_PANEL_COLUMN, columnPanelConfig);
+        if(columnPanelVisible){
+            columnPanelConfig.put(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, true);
+            
+        }
+
+        //figure out which panels are visible
 
         propertyWriter.write(property.toString());
         propertyWriter.flush();
@@ -138,11 +181,8 @@ public class InternalCoolMapObjectIO {
             System.out.println("Snippet state saving erorr");
         }
 
-        //Save the side panels used in CoolMapView
-        boolean rowPanelVisible = object.getCoolMapView().isRowPanelsVisible();
-        boolean columnPanelVisible = object.getCoolMapView().isColumnPanelsVisible();
+
         
-        JSONObject panelConfig = new JSONObject();
         
     }
 

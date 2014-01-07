@@ -18,6 +18,7 @@ import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
+import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.PassThrough;
 import coolmap.data.aggregator.model.CAggregator;
@@ -606,7 +607,6 @@ public class IOMaster {
             loadCMatrices(projectFile, property);
             loadCOntologies(projectFile, property);
             loadCoolMapObjects(projectFile, property);
-            
 
         } catch (InterruptedException e) {
             CoolMapMaster.newSession("Untitled", null);
@@ -681,7 +681,7 @@ public class IOMaster {
             String snipClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, null);
             JSONArray anchor = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_ANCHOR);
             JSONArray zoom = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_ZOOM);
-            
+
             JSONArray linkedCMatrixIDs = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_MATRICES);
 
             CoolMapObject object = new CoolMapObject(id);
@@ -754,6 +754,43 @@ public class IOMaster {
                 } catch (Exception e) {
 
                 }
+
+            }
+
+            //load row panel configs
+            JSONObject rowPanelConfig = coolMapProperty.getJSONObject(IOTerm.ATTR_VIEW_PANEL_ROW);
+            try {
+                boolean visible = rowPanelConfig.optBoolean(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, false);
+                if (!visible) {
+                    object.getCoolMapView().setRowPanelsVisible(false);
+                }
+                
+                JSONArray panels = rowPanelConfig.optJSONArray(IOTerm.ATTR_VIEW_PANEL);
+                for(int j=0;j<panels.length();j++){
+                    try{
+                        JSONObject panelEntry = panels.getJSONObject(j);
+                        RowMap map = (RowMap)Class.forName(panelEntry.getString(IOTerm.ATTR_CLASS)).getConstructor(CoolMapObject.class).newInstance(object);
+                        //restore map config
+                        JSONObject config = panelEntry.optJSONObject(IOTerm.ATTR_CONFIG);
+                        map.restoreState(config);
+                        object.getCoolMapView().addRowMap(map);
+                    }
+                    catch(Exception e){
+                        
+                    }
+                }
+                
+            } catch (Exception e) {
+
+            }
+
+            JSONObject columnPanelConfig = coolMapProperty.getJSONObject(IOTerm.ATTR_VIEW_PANEL_COLUMN);
+            try {
+                boolean visible = columnPanelConfig.optBoolean(IOTerm.ATTR_VIEW_PANEL_CONTAINER_VISIBLE, false);
+                if (!visible) {
+                    object.getCoolMapView().setColumnPanelsVisible(false);
+                }
+            } catch (Exception e) {
 
             }
 

@@ -33,7 +33,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
     private final ViewPanel _viewPanel = new ViewPanel();
     private final static GraphicsConfiguration _graphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
     private BufferedImage _mapBuffer;
-    private String _name;
     private final CoolMapObject<BASE, VIEW> _coolMapObject;
     private ImageIcon _icon;
     private Font _messageFont;
@@ -132,6 +131,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
         _coolMapObject = coolMapObject;
         _icon = UI.getImageIcon("infoBW");
         _messageFont = UI.fontPlain.deriveFont(12f);
+        getViewPanel().setName(getName());
 
 //        _viewPanel.addComponentListener(new ComponentListener() {
 //
@@ -318,16 +318,9 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
         return _enabled;
     }
 
-    public final String getName() {
-        return _name;
-    }
+    public abstract String getName();
 
-    ;
     
-    public final void setName(String name) {
-        _name = name;
-        _viewPanel.setName(name);
-    }
 
     /**
      *

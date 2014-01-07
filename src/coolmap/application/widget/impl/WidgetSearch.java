@@ -197,9 +197,13 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
             return;
         }
 
+        //This part should be done using a selection changed listener.. but it's selecting tree nodes yak!
         if (!rowTreeNodes.isEmpty()) {
             try {
                 RowTree rowTree = (RowTree) (obj.getCoolMapView().getRowMap("coolmap.canvas.sidemaps.impl.RowTree"));
+                if(rowTree == null){
+                    return;
+                }
                 rowTree.setSelectedTreeNodes(rowTreeNodes);
             } catch (Exception e) {
 //                e.printStackTrace();
@@ -210,6 +214,9 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
         if (!columnTreeNodes.isEmpty()) {
             try {
                 ColumnTree columnTree = (ColumnTree) (obj.getCoolMapView().getColumnMap("coolmap.canvas.sidemaps.impl.ColumnTree"));
+                if(columnTree == null){
+                    return;
+                }
                 columnTree.setSelectedTreeNodes(columnTreeNodes);
             } catch (Exception e) {
 //                e.printStackTrace();

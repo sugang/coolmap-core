@@ -10,6 +10,7 @@ import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.listeners.CObjectListener;
+import coolmap.utils.StateSavable;
 import coolmap.utils.graphics.UI;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -25,18 +26,18 @@ import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.json.JSONObject;
 
 /**
  *
  * @author gangsu
  */
-public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListener {
+public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListener, StateSavable {
 
     private String _description = null;
     private final ViewPanel _viewPanel = new ViewPanel();
     private final static GraphicsConfiguration _graphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
     private BufferedImage _mapBuffer;
-    private String _name;
     private final CoolMapObject<BASE, VIEW> _coolMapObject;
     private ImageIcon _icon;
     private Font _messageFont;
@@ -86,6 +87,8 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         AffineTransform rotationTransform = new AffineTransform();
         rotationTransform.rotate(-Math.PI / 2);
         _messageFont = UI.fontPlain.deriveFont(12f);
+        
+        getViewPanel().setName(getName());
     }
     
 //    public void setCoolMapObject(CoolMapObject obj){
@@ -300,16 +303,7 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 
     protected abstract void renderRow(Graphics2D g2D, CoolMapObject<BASE, VIEW> object, VNode node, int anchorX, int anchorY, int cellWidth, int cellHeight);
 
-    public final String getName() {
-        return _name;
-    }
-
-    ;
-    
-    public final void setName(String name) {
-        _name = name;
-        _viewPanel.setName(name);
-    }
+    public abstract String getName();
     
         public void aggregatorUpdated(CoolMapObject object) {
     }
@@ -368,4 +362,17 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 //    ;
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //    }
+
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        return false;
+    }
+    
+    
+    
 }

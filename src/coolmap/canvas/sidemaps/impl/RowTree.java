@@ -140,11 +140,10 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     public RowTree() {
         this(null);
     }
-
+    
     public RowTree(CoolMapObject object) {
         super(object);
-//        setCoolMapObject(object);
-        setName("Row Ontology");
+        
         _leafColor = UI.colorGrey3;
         _leafBorderColor = UI.colorBlack5;
         getViewPanel().addMouseListener(this);
@@ -484,6 +483,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
     @Override
     public void gridChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public String getName() {
+        return "Row Ontology";
     }
 
     private class LinetypeChangedListener implements ActionListener {

@@ -64,6 +64,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.JComponent;
@@ -137,6 +138,14 @@ public final class CoolMapView<BASE, VIEW> {
     
     public ColumnMap getColumnMap(String className){
        return _colDrawer.getColumnMap(className);
+    }
+    
+    public List<ColumnMap> getColumnMaps(){
+       return _colDrawer.getColumnMaps();
+    }
+    
+    public List<RowMap> getRowMaps(){
+        return _rowDrawer.getRowMaps();
     }
     
     public RowMap getRowMap(String className){

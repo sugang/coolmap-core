@@ -51,16 +51,22 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     private final JMenuItem _sortAscending;
     private final JMenuItem _sortDescending, _removeSelected;
 
+    @Override
+    public String getName() {
+        return "Column Labels";
+    }
+
     public ColumnLabels(CoolMapObject object) {
         super(object);
-        setName("Column Labels");
+
+        getViewPanel().setName(getName());
+
         getViewPanel().addMouseListener(this);
         getViewPanel().addMouseMotionListener(this);
 
         _sortAscending = new JMenuItem("Sort ascending", UI.getImageIcon("upThin"));
         _sortDescending = new JMenuItem("Sort dscending", UI.getImageIcon("downThin"));
         _zoomControlX = getCoolMapView().getZoomControlX();
-
 
         _sortAscending.addActionListener(new ActionListener() {
 
@@ -81,7 +87,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                 }
             }
         });
-
 
         _menu.addPopupMenuListener(new PopupMenuListener() {
 
@@ -138,14 +143,12 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                             }
                         }
                     }//end iteration
-                    
-                    try{
+
+                    try {
                         CoolMapState state = CoolMapState.createStateColumns("Remove columns", obj, null);
                         obj.removeViewNodesColumn(nodesToBeRemoved);
                         StateStorageMaster.addState(state);
-                    }
-                    
-                    catch(Exception e){
+                    } catch (Exception e) {
                         System.err.println("Error removing columns");
                     }
                 }
@@ -157,8 +160,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     }
 
     private boolean _validateActions() {
-
-
 
         CoolMapView view = getCoolMapView();
         if (view == null) {
@@ -196,7 +197,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
         if (node.isGroupNode()) {
 
-
             Color color;
 
             if (node.getViewColor() == null) {
@@ -204,9 +204,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             } else {
                 color = node.getViewColor();
             }
-
-
-
 
             if (cellWidth > 6) {
                 g2D.setColor(color);
@@ -221,7 +218,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     @Override
     public void prePaint(Graphics2D g2D, CoolMapObject<Object, Object> object, int width, int height) {
 
-
         //paint selected columns
         CoolMapObject obj = getCoolMapObject();
         CoolMapView canvas = getCoolMapView();
@@ -231,8 +227,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                 for (Range<Integer> range : selectedColumns) {
                     int start = range.lowerEndpoint();
                     int end = range.upperEndpoint() - 1;
-
-
 
                     VNode startNode = obj.getViewNodeColumn(start);
                     VNode endNode = obj.getViewNodeColumn(end);
@@ -289,16 +283,13 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 //    @Override
 //    public void stateStorageUpdated(CoolMapObject object) {
 //    }
-
 //    @Override
 //    public void subSelectionRowChanged(CoolMapObject object) {
 //    }
-
 //    @Override
 //    public void subSelectionColumnChanged(CoolMapObject object) {
 //        System.out.println(object.getCoolMapView().getSubSelectedColumns());
 //    }
-
     @Override
     public void viewRendererChanged(CoolMapObject object) {
     }
@@ -321,28 +312,24 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         private final Rectangle _endRect = new Rectangle();
 
         public void setBeginEnd(MatrixCell oldCell, MatrixCell newCell) {
-            
+
             //System.out.println(oldCell + " " + newCell);
-            
             CoolMapView view = getCoolMapView();
-            if (view == null){ // || oldCell == null || oldCell.getCol() == null || newCell == null || newCell.getCol() == null) {
+            if (view == null) { // || oldCell == null || oldCell.getCol() == null || newCell == null || newCell.getCol() == null) {
                 return;
             }
-            
-            if(oldCell == null || newCell == null){
+
+            if (oldCell == null || newCell == null) {
                 return;
             }
-            
-            if(newCell.col == null){
+
+            if (newCell.col == null) {
                 return;
             }
-            
-            if(oldCell.col == null && newCell.col != null){
+
+            if (oldCell.col == null && newCell.col != null) {
                 oldCell.col = newCell.col;
             }
-            
-            
-            
 
             VNode oldNode = getCoolMapView().getCoolMapObject().getViewNodeColumn(oldCell.getCol());
             VNode newNode = getCoolMapView().getCoolMapObject().getViewNodeColumn(newCell.getCol());
@@ -395,9 +382,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             g2D.setStroke(UI.strokeDash2);
             g2D.fillOval(_dragStartPoint.x - 3, _dragStartPoint.y - 3, 6, 6);
 
-
-
-
             CoolMapView view = getCoolMapView();
             int targetX;
             if (isDataViewValid() && _targetCol != null) {
@@ -422,11 +406,8 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                 }
 
                 //draw a marker for ontology
-
-
                 //draw a marker for sorter
             }
-
 
         }
 
@@ -443,7 +424,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             int cellWidth = (int) lastSortedColumn.getViewSizeInMap(getCoolMapView().getZoomX());
 
             g2D.setStroke(UI.stroke4);
-
 
             //Don't dispose
             g2D = (Graphics2D) g2D.create(x, 0, cellWidth, height);
@@ -462,9 +442,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             }
             g2D.setClip(null);
         }
-
-
-
 
     }
 
@@ -517,7 +494,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         //need to find out which columns are selected
         //need a way to merge rectangles.
 
-
     }
 
     @Override
@@ -531,9 +507,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     @Override
     public void mouseClicked(MouseEvent me) {
-
-
-
 
         if (SwingUtilities.isLeftMouseButton(me)) {
             _colSelectionChange(me);
@@ -582,9 +555,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     _addSingleSelection(obj, targetCol);
                 }
 
-
             }
-
 
         } else if (me.isShiftDown()) {
             //select a range.
@@ -600,7 +571,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 //            view.clearSelection();
 //            StateStorageMaster.addState(state);
 //        }
-
     }
 
     private void _newSpanSelection(CoolMapObject obj, int targetCol) {
@@ -641,7 +611,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                 }
             }
-            
+
             CoolMapState state = CoolMapState.createStateSelections("Select columns", obj, null);
             view.setSelections(newSelections);
             StateStorageMaster.addState(state);
@@ -663,7 +633,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         CoolMapState state = CoolMapState.createStateSelections("Select column", obj, null);
         view.setSelections(newSelections);
         StateStorageMaster.addState(state);
-        
+
         _anchorCol = targetCol;
     }
 
@@ -683,7 +653,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         CoolMapState state = CoolMapState.createStateSelections("Add selected column", obj, null);
         view.addSelection(newSelections);
         StateStorageMaster.addState(state);
-        
+
         _anchorCol = targetCol;
     }
 
@@ -707,13 +677,11 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             }
 
             //System.out.println("temp range:" + tempRange);
-
             if (tempRange == null) {
                 return; //no range contain this range
             } else {
                 if (tempRange.lowerEndpoint().intValue() == targetCol && tempRange.upperEndpoint().intValue() == targetCol + 1) {
                     selectedColumns.remove(tempRange);
-
 
                 } else {
                     //split the rectangles, and remove that columns
@@ -737,7 +705,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                         newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
                     }
                 }
-                
+
                 CoolMapState state = CoolMapState.createStateSelections("Remove selected column", obj, null);
                 view.setSelections(newSelections);
                 StateStorageMaster.addState(state);
@@ -779,15 +747,15 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                 //System.out.println("Drag column to:" + endCol);
                 if (_startCol != null && _startCol.intValue() != endCol.intValue()) {
                     ArrayList<Range<Integer>> columns = getCoolMapView().getSelectedColumns();
-                    if(columns == null || columns.isEmpty())
+                    if (columns == null || columns.isEmpty()) {
                         return;
-                    
+                    }
+
                     CoolMapState state = CoolMapState.createStateColumns("Shift columns", getCoolMapObject(), null);
                     getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol.intValue());
-                    
+
                     StateStorageMaster.addState(state);
-                    
-                    
+
                 } else {
                     _targetCol = null;
                 }
