@@ -7,9 +7,11 @@ package coolmap.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +38,19 @@ public class Config {
 
     public static String getProperty(String key){
         return configHash.get(key);
+    }
+    
+    public static void saveConfig() {
+        try{
+//            String workingDirectory;
+//            workingDirectory = System.getProperty("user.dir");
+//            configFile = workingDirectory + File.separator + "config.json";
+            String savePath = getProperty(COOLMAP_DIRECTORY) + File.separator + "config.json";
+            IOUtils.write(getJSONConfig().toString(), new FileOutputStream(new File(savePath)));
+        }
+        catch(Exception e){
+            System.err.println("Config can not be saved");
+        }
     }
     
     

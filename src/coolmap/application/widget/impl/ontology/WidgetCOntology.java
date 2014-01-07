@@ -978,7 +978,17 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
                 //make sure the setting new model won't affect the last recorded state
 //                _ontologyTable.getColumnModel().removeColumnModelListener(columnListener);
-                DefaultTableModel model = _getOntologyAsTableModel(ontology);
+
+                
+                
+                DefaultTableModel model;
+                
+                if(ontology != null){
+                    model = _getOntologyAsTableModel(ontology);
+                }
+                else{
+                    model = new DefaultTableModel();
+                }
                 //maintain the same column model layout if the last one has
                 TableColumnModel columnModel = _ontologyTable.getColumnModel();
                 TableModel currentTableModel = _ontologyTable.getModel();

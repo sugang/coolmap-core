@@ -135,6 +135,7 @@ public class Cluster {
 
             Streemer s = new Streemer();
 
+            
             Assignments assignments = s.cluster(matrix, numClusters, backgroundClusterPerc, similarityThreshold, minClusterSize, simFunction);
 
             if (Thread.interrupted()) {

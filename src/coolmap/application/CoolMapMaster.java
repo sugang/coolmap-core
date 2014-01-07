@@ -9,11 +9,13 @@ import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
 import coolmap.application.utils.DataMaster;
+import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
+import coolmap.module.Module;
 import coolmap.module.ModuleMaster;
 import coolmap.utils.Config;
 import coolmap.utils.Tools;
@@ -99,6 +101,15 @@ public final class CoolMapMaster {
 
         setSessionName(name);
         setSessionPath(path);
+        
+        //Also clear all widget states
+        for(Widget widget : WidgetMaster.getAllWidgets()){
+            widget.restoreState(null);
+        }
+        
+        for(Module module : ModuleMaster.getAllModules()){
+            module.restoreState(null);
+        }
 
     }
 

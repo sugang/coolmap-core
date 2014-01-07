@@ -111,6 +111,11 @@ public class VMatrix<BASE, VIEW> {
                 _activeRowNodesInTree.addAll(treeNodes);
             }
             _updateActiveRowNodeViewIndices();
+            _updateActiveRowNodeHeights();
+            
+            //looks like the node heights were not updated
+            //what if i keep it the way it is
+//            _updateActiveRowNodeHeights();
         }
         //reset the 
         for (VNode node : nodes) {
@@ -135,6 +140,7 @@ public class VMatrix<BASE, VIEW> {
                 _activeColNodesInTree.addAll(treeNodes);
             }
             _updateActiveColNodeViewIndices();
+            _updateActiveColNodeHeights();
         }
         //reset the 
         for (VNode node : nodes) {

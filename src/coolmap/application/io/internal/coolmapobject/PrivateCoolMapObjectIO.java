@@ -63,7 +63,6 @@ public class PrivateCoolMapObjectIO {
                 viewColor = null;
             }
 
-//            System.out.println("Color:" + viewColor + " " + colorString);
         }
 
         String contologyID = object.optString(IOTerm.FIELD_VNODE_ONTOLOGYID);

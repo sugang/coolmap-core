@@ -5,21 +5,28 @@
  */
 package coolmap.application.io.internal.coolmapobject;
 
+import coolmap.application.CoolMapMaster;
 import coolmap.application.io.IOTerm;
 import coolmap.canvas.CoolMapView;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import de.schlichtherle.truezip.file.TFile;
+import de.schlichtherle.truezip.file.TFileInputStream;
 import de.schlichtherle.truezip.file.TFileOutputStream;
+import java.awt.Color;
 import java.awt.Point;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -59,7 +66,7 @@ public class InternalCoolMapObjectIO {
             linkedMxIDs.add(mx.getID());
         }
 
-        property.put(IOTerm.ATTR_VIEWMATRICES, linkedMxs);
+        property.put(IOTerm.ATTR_VIEWMATRICES, linkedMxIDs);
 
         if (object.getAggregator() != null) {
             property.put(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, object.getAggregator().getClass().getName());
@@ -225,7 +232,7 @@ public class InternalCoolMapObjectIO {
         }
 
         if (node.getCOntology() != null) {
-            object.put(IOTerm.FIELD_VNODE_ONTOLOGYID, node.getCOntology().getID());
+            object.put(IOTerm.ATTR_NODE_ONTOLOGYID, node.getCOntology().getID());
         }
         if (node.getViewColor() != null) {
             object.put(IOTerm.ATTR_COLOR, node.getViewColor().getRGB());
@@ -260,7 +267,141 @@ public class InternalCoolMapObjectIO {
         }
         return tree;
     }
-    
-    
+
+    public static void restoreCoolMapObjectState(CoolMapObject object, TFile coolMapObjectFolder) throws Exception {
+
+        //Recreate a CoolMapState from saved files
+        HashMap<String, VNode> nodeHash = new HashMap<String, VNode>();
+
+        TFile stateFolder = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.DIR_STATE);
+
+        //row  
+        TFile rowBaseNodesFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_ROWBASE);
+        TFile rowTreeNodesFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_ROWTREE);
+        TFile rowTreeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_ROWTREE);
+
+        //column
+        TFile colBaseNodesFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_COLUMNBASE);
+        TFile colTreeNodesFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_NODE_COLUMNTREE);
+        TFile colTreeFile = new TFile(stateFolder.getAbsolutePath() + File.separator + IOTerm.FILE_STATE_COLUMNTREE);
+
+        JSONArray rowBaseNodesJSON = new JSONArray(IOUtils.toString(new TFileInputStream(rowBaseNodesFile)));
+        JSONArray rowTreeNodesJSON = new JSONArray(IOUtils.toString(new TFileInputStream(rowTreeNodesFile)));
+        JSONArray colBaseNodesJSON = new JSONArray(IOUtils.toString(new TFileInputStream(colBaseNodesFile)));
+        JSONArray colTreeNodesJSON = new JSONArray(IOUtils.toString(new TFileInputStream(colTreeNodesFile)));
+
+        JSONObject rowTreeJSON = new JSONObject(IOUtils.toString(new TFileInputStream(rowTreeFile)));
+        JSONObject columnTreeJSON = new JSONObject(IOUtils.toString(new TFileInputStream(colTreeFile)));
+
+        //looks like they are all working
+        //create row base nodes
+        ArrayList<VNode> rowBaseNodes = new ArrayList<VNode>(rowBaseNodesJSON.length());
+        for (int i = 0; i < rowBaseNodesJSON.length(); i++) {
+//            System.out.println(rowBaseNodesJSON);
+            VNode node = createNodeFromJSON(rowBaseNodesJSON.getJSONObject(i));
+            rowBaseNodes.add(node);
+            nodeHash.put(node.getID(), node);
+        }
+
+        //create column base nodes
+        ArrayList<VNode> colBaseNodes = new ArrayList<VNode>(colBaseNodesJSON.length());
+        for (int i = 0; i < colBaseNodesJSON.length(); i++) {
+            VNode node = createNodeFromJSON(colBaseNodesJSON.getJSONObject(i));
+            colBaseNodes.add(node);
+            nodeHash.put(node.getID(), node);
+        }
+
+        //create row tree nodes
+        ArrayList<VNode> rowTreeNodes = new ArrayList<VNode>();
+        for (int i = 0; i < rowTreeNodesJSON.length(); i++) {
+            VNode node = createNodeFromJSON(rowTreeNodesJSON.getJSONObject(i));
+            rowTreeNodes.add(node);
+            nodeHash.put(node.getID(), node);
+        }
+
+        //create column tree nodes
+        ArrayList<VNode> colTreeNodes = new ArrayList<VNode>();
+        for (int i = 0; i < colTreeNodesJSON.length(); i++) {
+            VNode node = createNodeFromJSON(colTreeNodesJSON.getJSONObject(i));
+            colTreeNodes.add(node);
+            nodeHash.put(node.getID(), node);
+        }
+
+        //restore the tree structure
+        Iterator<String> rIT = rowTreeJSON.keys();
+        String parentID;
+        String childID;
+
+        while (rIT.hasNext()) {
+            parentID = rIT.next();
+            VNode parentNode = nodeHash.get(parentID);
+            JSONArray childIDs = rowTreeJSON.getJSONArray(parentID);
+            for (int i = 0; i < childIDs.length(); i++) {
+                childID = childIDs.getString(i);
+                parentNode.addChildNode(nodeHash.get(childID));
+            }
+        }
+
+        Iterator<String> cIT = columnTreeJSON.keys();
+        while (cIT.hasNext()) {
+            parentID = cIT.next();
+            VNode parentNode = nodeHash.get(parentID);
+            JSONArray childIDs = columnTreeJSON.getJSONArray(parentID);
+            for (int i = 0; i < childIDs.length(); i++) {
+                childID = childIDs.getString(i);
+                parentNode.addChildNode(nodeHash.get(childID));
+            }
+        }
+
+        //restore tree has some issues
+//        System.out.println(rowBaseNodes);
+//        for(VNode node : rowTreeNodes){
+//            System.out.println(node + " =====> " + node.getChildNodes());
+//            System.out.println(node.getCOntology());//COntology is null???
+//        }
+        
+        object.replaceRowNodes(rowBaseNodes, rowTreeNodes);
+        
+        object.replaceColumnNodes(colBaseNodes, colTreeNodes);
+    }
+
+    private static VNode createNodeFromJSON(JSONObject object) throws Exception {
+        String id = object.getString(IOTerm.ATTR_NODE_ID);
+        String name = object.getString(IOTerm.ATTR_NODE_NAME);
+        Double defaultViewMultiplier = object.optDouble(IOTerm.ATTR_NODE_VIEWMULTIPLIER_DEFAULT, -1);
+        if (defaultViewMultiplier == null || defaultViewMultiplier < 0) {
+            defaultViewMultiplier = 1.0;
+        }
+        Double currentViewMultiplier = object.optDouble(IOTerm.ATTR_NODE_VIEWMULTIPLIER, -1);
+        if (currentViewMultiplier == null || currentViewMultiplier < 0) {
+            currentViewMultiplier = defaultViewMultiplier;
+        }
+        boolean isExpanded = object.optInt(IOTerm.ATTR_NODE_ISEXPANDED, 0) == 1 ? true : false;
+        String colorString = object.optString(IOTerm.ATTR_NODE_COLOR);
+        Color viewColor;
+        if (colorString == null) {
+            viewColor = null;
+        } else {
+            try {
+                viewColor = new Color(Integer.parseInt(colorString));
+            } catch (Exception e) {
+                viewColor = null;
+            }
+
+        }
+//        System.out.println(object);
+        String contologyID = object.optString(IOTerm.ATTR_NODE_ONTOLOGYID);
+        
+        COntology ontology = CoolMapMaster.getCOntologyByID(contologyID); //This part may need to be refactored: nodes only need to associate with ontology ID
+        
+//        System.out.println("ontology to be loaded:" + contologyID + " " + ontology);
+        
+        VNode node = new VNode(name, ontology, id);
+        node.setViewColor(viewColor);
+        node.setDefaultViewMultiplier(defaultViewMultiplier.floatValue());
+        node.setViewMultiplier(currentViewMultiplier.floatValue());
+        node.setExpanded(isExpanded);
+        return node;
+    }
 
 }

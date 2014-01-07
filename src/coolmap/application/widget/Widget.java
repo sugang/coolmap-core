@@ -48,6 +48,24 @@ public abstract class Widget implements StateSavable{
     private String _description = null;
     private String _title = null;
 //    private String _id = null;
+    
+//    /**
+//     * load application-wise global parameters
+//     * @param config 
+//     */
+//    public void loadParameters(JSONObject config){
+//        
+//    }
+//    
+//    /**
+//     * save application-wise global parameters
+//     * such as 
+//     * @param config
+//     * @return 
+//     */
+//    public JSONObject saveParameters(JSONObject config){
+//        return config;
+//    }
 
     
     /**

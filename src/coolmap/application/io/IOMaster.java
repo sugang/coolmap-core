@@ -802,8 +802,13 @@ public class IOMaster {
 
             //this is needed to commit all changes in the temp projectFile and finish the saving
             //This is needed to synchornize the archive folder
-            TVFS.umount(projectFile);
-
+            //may throw an exception - not sure whether it may throw a warning
+            try {
+                TVFS.umount(projectFile);
+            } catch (Exception e) {
+                //should make sure all streams are closed
+                System.err.println("TVFS unmount error");
+            }
             //temporaray
             loadProject(projectFile);
 
@@ -811,10 +816,9 @@ public class IOMaster {
             //delete this projectfile
             e.printStackTrace();
             FileUtils.deleteQuietly(new File(projectFile.getAbsolutePath())); //try to delete this corrupted file if anything occurs
-            
-        }
-        finally{
-            
+
+        } finally {
+
         }
 
         //try load project immediately
@@ -989,14 +993,11 @@ public class IOMaster {
             TFile directory = new TFile(projectFile.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
             FileUtils.deleteDirectory(directory);
             TFile.cp_rp(projectFile, directory, TArchiveDetector.NULL);
-            
+
             //Got to widget state are restored at the beginning of the .. not here
-            
-            
             loadCMatrices(projectFile, property);
             loadCOntologies(projectFile, property);
             loadCoolMapObjects(projectFile, property);
-            
 
         } catch (InterruptedException e) {
             CoolMapMaster.newSession("Untitled", null);
@@ -1004,103 +1005,158 @@ public class IOMaster {
         }
 
     }
-    
+
     /**
      * load COntologies
+     *
      * @param projectFile
      * @param property
-     * @throws Exception 
+     * @throws Exception
      */
-    private static void loadCOntologies(TFile projectFile, JSONObject property) throws Exception{
+    private static void loadCOntologies(TFile projectFile, JSONObject property) throws Exception {
         JSONArray contologyIDs = property.getJSONArray(IOTerm.OBJECT_CONTOLOGY_ID);
         List<COntology> contologies = new ArrayList<COntology>();
-        for( int i = 0; i < contologyIDs.length(); i++){
+        for (int i = 0; i < contologyIDs.length(); i++) {
             Object cOntologyID = contologyIDs.get(i);
             TFile contologyFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_CONTOLOGY + File.separator + cOntologyID);
             TFile contologyPropertyFile = new TFile(contologyFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
             JSONObject contologyProperty = new JSONObject(IOUtils.toString(new TFileInputStream(contologyPropertyFile)));
 //            System.out.println(contologyProperty);
-            
+
             String id = contologyProperty.getString(IOTerm.ATTR_ID);
             String name = contologyProperty.optString(IOTerm.ATTR_NAME);
             Color c = null;
-            try{
+            try {
                 c = new Color(Integer.parseInt(contologyProperty.getString(IOTerm.ATTR_COLOR)));
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 //go on
             }
             String description = contologyProperty.optString(IOTerm.ATTR_DESCRIPTION, null);
-            
+
             COntology ontology = new COntology(name, description, id);
-            if(c != null){
+            if (c != null) {
                 ontology.setViewColor(c);
             }
-            
+
             TFile contologyDataFile = new TFile(contologyFolder.getAbsolutePath() + File.separator + IOTerm.FILE_DATA);
             InternalCOntologyIO.loadData(new BufferedReader(new InputStreamReader(new TFileInputStream(contologyDataFile))), ontology);
-            
+
 //            COntologyUtils.printOntology(ontology);
             contologies.add(ontology);
         }
         CoolMapMaster.addNewCOntology(contologies);
     }
-    
+
     /**
      * finally - load CoolMap Objects!
+     *
      * @param projectFile
      * @param property
-     * @throws Exception 
+     * @throws Exception
      */
-    private static void loadCoolMapObjects(TFile projectFile, JSONObject property) throws Exception{
+    private static void loadCoolMapObjects(TFile projectFile, JSONObject property) throws Exception {
         JSONArray coolMapObjectIDs = property.getJSONArray(IOTerm.OBJECT_COOLMAPOBJECT_ID);
         List<CoolMapObject> coolMapObjects = new ArrayList<>();
-        for(int i=0; i <coolMapObjectIDs.length(); i++){
+        for (int i = 0; i < coolMapObjectIDs.length(); i++) {
             Object coolMapObjectID = coolMapObjectIDs.get(i);
             TFile coolMapObjectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT + File.separator + coolMapObjectID);
             TFile coolMapPropertyFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
             JSONObject coolMapProperty = new JSONObject(IOUtils.toString(new TFileInputStream(coolMapPropertyFile)));
-            
+
             System.out.println(coolMapProperty.toString(2));
-            
+
             String id = coolMapProperty.getString(IOTerm.ATTR_ID);
             String name = coolMapProperty.optString(IOTerm.ATTR_NAME, "Untitled");
-            String aggrClass = coolMapProperty.optString(IOTerm.ATTR_VIEWANCHOR, null);
+            String aggrClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, null);
             String rendererClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_RENDERER_CLASS, null);
-            String snipClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_RENDERER_CLASS, null);
+            String snipClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, null);
             JSONArray anchor = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWANCHOR);
             JSONArray zoom = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWZOOM);
             JSONArray linkedCMatrixIDs = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWMATRICES);
-            
+
             CoolMapObject object = new CoolMapObject(id);
             object.setName(name);
-            
-            
-            
-            if(aggrClass != null){
+
+            //First need to restore state.
+            InternalCoolMapObjectIO.restoreCoolMapObjectState(object, coolMapObjectFolder);
+
+            //add matrices            
+            for (int j = 0; i < linkedCMatrixIDs.length(); i++) {
+                CMatrix matrix = CoolMapMaster.getCMatrixByID(linkedCMatrixIDs.getString(j));
+                object.addBaseCMatrix(matrix);
+                System.out.println(matrix);
+            }
+
+            //Set aggregator
+            if (aggrClass != null) {
                 CAggregator aggregator;
-                try{
-                    aggregator = (CAggregator)Class.forName(aggrClass).newInstance();
+                try {
+                    aggregator = (CAggregator) Class.forName(aggrClass).newInstance();
                     //Also need to restore from JSON
-                }
-                catch(Exception e){
+                } catch (Exception e) {
                     aggregator = new PassThrough();
                 }
                 object.setAggregator(aggregator);
             }
-            
-            
-            if(Thread.interrupted()){
+
+            //Set snippet converter
+            if (snipClass != null) {
+                SnippetConverter snip;
+                try {
+                    snip = (SnippetConverter) Class.forName(snipClass).newInstance();
+                } catch (Exception e) {
+                    snip = null;
+                    e.printStackTrace();
+                }
+                object.setSnippetConverter(snip);
+            }
+
+            //viewRenderer
+            if (rendererClass != null) {
+                ViewRenderer renderer = null;
+                try {
+                    renderer = (ViewRenderer) Class.forName(rendererClass).newInstance();
+                } catch (Exception e) {
+                    renderer = null; //Set to default String renderer if all fails
+                }
+                object.setViewRenderer(renderer, true);
+            }
+
+            //set base nodes
+//            System.out.println(object.getAggregator());
+            if (zoom != null) {
+                try {
+                    int zoomX = zoom.getInt(0);
+                    int zoomY = zoom.getInt(1);
+                    object.getCoolMapView().setZoomLevels(zoomX, zoomY);
+                } catch (Exception e) {
+
+                }
+            }
+
+            if (anchor != null) {
+
+                try {
+
+                    Point pt = new Point(anchor.getInt(0), anchor.getInt(1));
+                    object.getCoolMapView().moveMapTo(pt.x, pt.y);
+
+                } catch (Exception e) {
+
+                }
+
+            }
+
+            if (Thread.interrupted()) {
                 throw new InterruptedException("Loading cancelled");
             }
-            
+
             coolMapObjects.add(object);
+
         }
         CoolMapMaster.addNewCoolMapObject(coolMapObjects);
-        
+
     }
-    
-    
 
     private static void loadCMatrices(TFile projectFile, JSONObject property) throws Exception {
         JSONArray cmatrixIDs = property.getJSONArray(IOTerm.OBJECT_CMATRIX_ID);

@@ -565,6 +565,9 @@ public final class CoolMapObject<BASE, VIEW> {
 
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
+        
+        
+        
         //No update yet
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
