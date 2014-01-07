@@ -109,13 +109,11 @@ public abstract class Widget implements StateSavable{
         _description = description;
         _contentPane.setPreferredSize(new Dimension(400, 300));
         
-        //init dockable
         initDockable();
         
         final DefaultDockableStateAction restoreAction = new DefaultDockableStateAction(getDockable(), DockableState.NORMAL);
         _showWidgetItem = new MenuItem(_title);
         
-        //initialy set to true
         _showWidgetItem.setEnabled(true);
         
         _showWidgetItem.addActionListener(new ActionListener() {
@@ -125,35 +123,6 @@ public abstract class Widget implements StateSavable{
                 restoreAction.actionPerformed(ae);
             }
         });
-        
-        
-//      Hide this action temporarily        
-//        getDockable().addDockingListener(new DockingListener() {
-//
-//            @Override
-//            public void dockingWillChange(DockingEvent dockingEvent) {
-//            }
-//
-//            @Override
-//            public void dockingChanged(DockingEvent dockingEvent) {
-//                
-//                
-//                
-//                if (dockingEvent.getDestinationDock() == null) {
-//                    _showWidgetItem.setEnabled(true);
-//                    //System.out.println(dockingEvent.getDestinationDock());
-//                } else {
-//                    _showWidgetItem.setEnabled(false);
-//                    //destination dock
-//                }
-//                
-//                
-//            }
-//        });
-        
-        
-        
-//        System.out.println("ID:" + getID());
     }
 
     protected void initDockable() {
@@ -170,12 +139,15 @@ public abstract class Widget implements StateSavable{
                 break;
         }
         _dockable = new DefaultDockable(getClass().getName(), _contentPane, _title, _icon);
+        
+        
         _dockableWrapper = new StateActionDockable(_dockable, new DefaultDockableStateActionFactory(), dockableStates);
     }
 
-    public void setTitle(String name){
+    public void setTitle(String name, String description){
         _contentPane.setName(name);
         _dockable.setTitle(name);
+        _contentPane.setToolTipText(description);
     }
     
     

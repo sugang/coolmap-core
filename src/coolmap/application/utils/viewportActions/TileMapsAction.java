@@ -6,7 +6,7 @@
 
 package coolmap.application.utils.viewportActions;
 
-import coolmap.application.CoolMapMaster;
+import coolmap.application.widget.WidgetMaster;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
@@ -20,7 +20,7 @@ public class TileMapsAction extends AbstractAction{
     public void actionPerformed(ActionEvent e) {
         
         try{
-            CoolMapMaster.getViewport().tileWindows();
+            WidgetMaster.getViewport().tileWindows();
         }
         catch(Exception ex){
             

@@ -7,6 +7,7 @@ package coolmap.module.impl;
 
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
+import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.CoolMapObject;
@@ -28,8 +29,8 @@ public class QuickStatModule extends Module {
 
     public QuickStatModule() {
 
-        WidgetViewport viewport = CoolMapMaster.getViewport();
-        CoolMapMaster.getViewport().addPopupMenuSeparator(null);
+        WidgetViewport viewport = WidgetMaster.getViewport();
+        viewport.addPopupMenuSeparator(null);
 
         JMenuItem item = new JMenuItem("ANOVA(t-test)");
         item.addActionListener(new RowTest());

@@ -6,7 +6,7 @@
 
 package coolmap.application.utils.viewportActions;
 
-import coolmap.application.CoolMapMaster;
+import coolmap.application.widget.WidgetMaster;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
@@ -19,7 +19,7 @@ public class CascadeMapsAction extends AbstractAction{
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            CoolMapMaster.getViewport().cascadeWindows();
+            WidgetMaster.getViewport().cascadeWindows();
         } catch (Exception ex) {
         }
     }

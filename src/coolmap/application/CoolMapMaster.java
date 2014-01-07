@@ -9,9 +9,9 @@ import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
 import coolmap.application.utils.DataMaster;
+import coolmap.application.utils.Session;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
-import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
@@ -37,19 +37,23 @@ import javax.swing.UIManager;
 public final class CoolMapMaster {
 
     private final static ActiveCoolMapObjectListenerTunnel _activeCoolMapObjectListenerTunnel = ActiveCoolMapObjectListenerTunnel.getInstance();
-    
     private final static LinkedHashMap<String, CMatrix> _cMatrices = new LinkedHashMap<String, CMatrix>();
     private final static LinkedHashSet<CoolMapObject> _coolMapObjects = new LinkedHashSet<CoolMapObject>();
     private final static HashSet<ActiveCoolMapChangedListener> _activeCoolMapChangedListeners = new HashSet<ActiveCoolMapChangedListener>();
     private final static LinkedHashMap<String, COntology> _contologies = new LinkedHashMap<String, COntology>();
+
     private static CoolMapObject _activeCoolMapObject = null;
-    private static String _sessionName = null;
-    
+
     //can't be final because I need Config to load before static inialization
     private static CMainFrame _cMainFrame;
 
-    public static String getSessionName() {
-        return _sessionName;
+    private static Session session;
+
+    public static Session getSession() {
+        if (session == null) {
+            session = new Session(null, null);
+        }
+        return session;
     }
 
     public static CMatrix getCMatrixByID(String identifier) {
@@ -59,27 +63,20 @@ public final class CoolMapMaster {
         return _cMatrices.get(identifier);
     }
 
-    /**
-     * will be the folder name of the save file
-     *
-     * @param name
-     */
-    public static void setSessionName(String name) {
+    private CoolMapMaster() {    //prevent initializing
+
+    }
+
+    public static void newSession(String name, String path) {
+
         if (name == null || name.length() == 0) {
             name = "Untitled";
         }
-        _sessionName = name;
-        getViewport().setTitle("Canvas ( " + name + " project)");
-    }
-    
-    public static String sessionPath = null;
-    
-    private static void setSessionPath(String sp){
-        sessionPath = sp;
-    }
-    
+        
+        session = new Session(name, path);
+        WidgetMaster.getViewport().setTitle(name, path);
+        
 
-    public static void newSession(String name, String path) {
         CoolMapObject object = _activeCoolMapObject;
         _activeCoolMapObject = null;
         _fireActiveCoolMapChanged(object, null);
@@ -99,15 +96,12 @@ public final class CoolMapMaster {
             destroyCMatrix(matrix);
         }
 
-        setSessionName(name);
-        setSessionPath(path);
-        
         //Also clear all widget states
-        for(Widget widget : WidgetMaster.getAllWidgets()){
+        for (Widget widget : WidgetMaster.getAllWidgets()) {
             widget.restoreState(null);
         }
-        
-        for(Module module : ModuleMaster.getAllModules()){
+
+        for (Module module : ModuleMaster.getAllModules()) {
             module.restoreState(null);
         }
 
@@ -120,59 +114,48 @@ public final class CoolMapMaster {
     public static List<CoolMapObject> getCoolMapObjects() {
         return new ArrayList<CoolMapObject>(_coolMapObjects);
     }
-    
-    public static CoolMapObject getCoolMapObjectByID(String ID){
-        for(CoolMapObject object : _coolMapObjects){
-            if(object.getID().equals(ID)){
+
+    public static CoolMapObject getCoolMapObjectByID(String ID) {
+        for (CoolMapObject object : _coolMapObjects) {
+            if (object.getID().equals(ID)) {
                 return object;
             }
         }
         return null;
     }
-    
-    
-    
 
     /**
      * initialize the neceesary elements
      */
     public static void initialize() {
 
-        try{
+        try {
 //            WebLookAndFeel.install();
 //            UIManager.LookAndFeelInfo[] infos = UIManager.getInstalledLookAndFeels();
 //            for( UIManager.LookAndFeelInfo info : infos){
 //                System.out.println(info.getName());
 //            }
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+
         }
-        catch(Exception e){
-            
-        }
-        
-        
+
         Config.initialize();
-        
+
         //
         _cMainFrame = new CMainFrame();
-        
+
         UI.initialize();
         Tools.initialize();
         IOMaster.initialize();
         WidgetMaster.initialize();
         ModuleMaster.initialize();
         StateStorageMaster.initialize();
-        
+
 //        SnippetMaster.initialize();
-        
-       
 //        ServiceMaster.initialize();
-        
         //
-        
 //        CreaterMaster.initialize(); //Creater should be defined as a module
-        
-        
         //new session
         CoolMapMaster.newSession("Untitled", null);
 
@@ -187,7 +170,6 @@ public final class CoolMapMaster {
         });
     }
 
-
     public static void addActiveCoolMapChangedListener(ActiveCoolMapChangedListener lis) {
         if (lis != null) {
             _activeCoolMapChangedListeners.add(lis);
@@ -198,20 +180,11 @@ public final class CoolMapMaster {
         for (ActiveCoolMapChangedListener lis : _activeCoolMapChangedListeners) {
             lis.activeCoolMapChanged(newObject, _activeCoolMapObject);
         }
-        
+
     }
 
     public static CMainFrame getCMainFrame() {
         return _cMainFrame;
-    }
-
-    /**
-     * return the viewport
-     * @return 
-     */
-    public static WidgetViewport getViewport() {
-        //return ((WidgetViewport) WidgetMaster.getWidget(WidgetMaster.CANVAS));
-        return WidgetMaster.getViewport();
     }
 
     public static CoolMapObject getActiveCoolMapObject() {
@@ -246,7 +219,7 @@ public final class CoolMapMaster {
         if (object == null || _coolMapObjects.contains(object)) {
             return;
         }
-        
+
 //        System.out.println("adding:" + object);
         _coolMapObjects.add(object);
         addNewBaseMatrix(object.getBaseCMatrices());
@@ -254,22 +227,19 @@ public final class CoolMapMaster {
         object.addCObjectDataListener(_activeCoolMapObjectListenerTunnel);
         object.getCoolMapView().addCViewListener(_activeCoolMapObjectListenerTunnel);
 
-        getViewport().addCoolMapView(object);
+        WidgetMaster.getViewport().addCoolMapView(object);
         DataMaster.fireCoolMapObjectAdded(object);
     }
-    
-    public static void addNewCoolMapObject(Collection<CoolMapObject> objects){
-        if(objects == null || objects.isEmpty()){
+
+    public static void addNewCoolMapObject(Collection<CoolMapObject> objects) {
+        if (objects == null || objects.isEmpty()) {
             return;
         }
-        
-        for(CoolMapObject object : objects){
+
+        for (CoolMapObject object : objects) {
             addNewCoolMapObject(object);
         }
     }
-    
-    
-    
 
     public static void addNewBaseMatrix(Collection<CMatrix> matrices) {
         if (matrices == null || matrices.isEmpty()) {
@@ -279,7 +249,7 @@ public final class CoolMapMaster {
         for (CMatrix matrix : matrices) {
             if (!_cMatrices.values().contains(matrix)) {
                 _cMatrices.put(matrix.getID(), matrix);
-                
+
                 DataMaster.fireCMatrixAdded(matrix);
             }
         }

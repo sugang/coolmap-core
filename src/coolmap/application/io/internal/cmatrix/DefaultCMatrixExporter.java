@@ -35,7 +35,7 @@ public class DefaultCMatrixExporter implements InternalCMatrixExporter{
         cmatrixPropertyEntry.put(IOTerm.ATTR_CMATRIX_NUMROW, matrix.getNumRows());
         cmatrixPropertyEntry.put(IOTerm.ATTR_CMATRIX_NUMCOLUMN, matrix.getNumColumns());
         cmatrixPropertyEntry.put(IOTerm.ATTR_CLASS, matrix.getClass().getName());
-        cmatrixPropertyEntry.put(IOTerm.ATTR_MEMBERCLASS, matrix.getMemberClass().getName());
+        cmatrixPropertyEntry.put(IOTerm.ATTR_CMATRIX_MEMBERCLASS, matrix.getMemberClass().getName());
         
 //        System.out.println(cmatrixPropertyEntry);
         

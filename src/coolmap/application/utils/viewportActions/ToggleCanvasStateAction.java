@@ -8,7 +8,7 @@ package coolmap.application.utils.viewportActions;
 
 import com.javadocking.dockable.DockableState;
 import com.javadocking.dockable.action.DefaultDockableStateAction;
-import coolmap.application.CoolMapMaster;
+import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -22,7 +22,7 @@ public class ToggleCanvasStateAction extends AbstractAction{
     @Override
     public void actionPerformed(ActionEvent e) {
         try{
-                            WidgetViewport viewport = CoolMapMaster.getViewport();
+                            WidgetViewport viewport = WidgetMaster.getViewport();
                 int state = viewport.getDockable().getState();
                 if(state == DockableState.MAXIMIZED || state == DockableState.EXTERNALIZED){
                     DefaultDockableStateAction action = new DefaultDockableStateAction(viewport.getDockable(), DockableState.NORMAL);

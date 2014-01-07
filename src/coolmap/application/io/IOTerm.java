@@ -15,22 +15,19 @@ public class IOTerm {
     public final static String OBJECT_STATESNAPSHOT_ID = "StateSnapshot";
     public final static String OBJECT_COOLMAPOBJECT_ID = "coolmapobject_id";
     public final static String OBJECT_CONTOLOGY_ID = "contology_id";
-    //fields
+
+    //matrix attributes
     public final static String ATTR_CMATRIX_NUMROW = "num_row";
     public final static String ATTR_CMATRIX_NUMCOLUMN = "num_column";
-    public final static String ATTR_ID = "id";
-    public final static String ATTR_NAME = "name";
-    public final static String ATTR_MEMBERCLASS = "member_class";
-    public final static String ATTR_CLASS = "class";
-    public final static String FIELD_URI = "URI";
-    public final static String ATTR_VIEWMATRICES = "LinkedCMatrices";
-    public final static String ATTR_VIEW_AGGREGATOR_CLASS = "Aggregator";
-    public final static String ATTR_VIEW_RENDERER_CLASS = "ViewRenderer";
-    public final static String FIELD_COOLMAPOBJECT_ANNOTATIONRENDERER = "AnnotationRenderer";
-    public final static String ATTR_VIEW_SNIPPETCONVERTER_CLASS = "SnippetConverter";
-    public final static String FIELD_CMATRIX_ICMATRIXIO = "ICMatrixIO";
-    
-    //VNODE IO terms
+    public final static String ATTR_CMATRIX_MEMBERCLASS = "member_class";
+
+    //matrix view attributes
+    public final static String ATTR_VIEW_MATRICES = "linked_matrices";
+    public final static String ATTR_VIEW_AGGREGATOR_CLASS = "aggregator";
+    public final static String ATTR_VIEW_RENDERER_CLASS = "renderer";
+    public final static String ATTR_VIEW_SNIPPETCONVERTER_CLASS = "snippet_converter";
+
+    //node attributes
     public final static String ATTR_NODE_ID = "i";
     public final static String ATTR_NODE_NAME = "n";
     public final static String ATTR_NODE_LABEL = "l";
@@ -39,41 +36,36 @@ public class IOTerm {
     public final static String ATTR_NODE_ISEXPANDED = "e";
     public final static String ATTR_NODE_ONTOLOGYID = "o";
     public final static String ATTR_NODE_COLOR = "c";
-    
-    
-    
 
+    //general attributes
     public final static String ATTR_SOURCE = "source";
     public final static String ATTR_DESCRIPTION = "description";
     public final static String ATTR_VIEW_ZOOM = "zoom";
     public final static String ATTR_VIEW_ANCHOR = "anchor";
     public final static String ATTR_COLOR = "color";
-    
-    public final static String FIELD_VNODE_CURRENTVIEWMULTIPLIER = "ViewMultiplier";
-    public final static String FIELD_VNODE_DEFAULTVIEWMULTIPLIER = "DefaultMultiplier";
-    public final static String FIELD_VNODE_VIEWLABEL = "ViewLabel";
-    public final static String FIELD_VNODE_ISEXPANDED = "Expanded";
-    public final static String FIELD_VNODE_ONTOLOGYID = "OntologyID";
-    public final static String FIELD_CONTOLOGY_EDGETATTRIBUTECLASS = "EdgeAttributeClass";
+    public final static String ATTR_ID = "id";
+    public final static String ATTR_NAME = "name";
+    public final static String ATTR_CLASS = "class";
+    public final static String ATTR_URI = "uri";
+
+    //project attributes
+    public final static String ATTR_PROJECT_DATE = "date";
+    public final static String ATTR_PROJECT_SESSION_NAME = "session_name";
 
     //file names
     public final static String FILE_PROJECT_INFO = "project.info";
     public final static String FILE_PROPERTY = "properties";
     public final static String FILE_DATA = "data";
-    
     public final static String FILE_PROPERTY_AGGREGATOR = "properties.aggregator";
     public final static String FILE_PROPERTY_RENDERER = "properties.renderer";
     public final static String FILE_PROPERTY_SNIPPET = "properties.snippet";
-    
-    
-    
     public final static String FILE_STATE_ROWTREE = "rtree";
     public final static String FILE_STATE_COLUMNTREE = "ctree";//column 
     public final static String FILE_STATE_NODE_ROWBASE = "rbnodes";//row base nodes
     public final static String FILE_STATE_NODE_COLUMNBASE = "cbnodes"; //column base nodes
     public final static String FILE_STATE_NODE_ROWTREE = "rtnodes"; //row tree nodes
     public final static String FILE_STATE_NODE_COLUMNTREE = "ctnodes"; //column tree nodes
-    
+
     //folder names
     public final static String DIR_CMATRIX = "cmatrix";
     public final static String DIR_CONTOLOGY = "contology";
@@ -81,9 +73,5 @@ public class IOTerm {
     public final static String DIR_COOLMAPOBJECT = "coolmapobject";
     public final static String DIR_StateSnapshot = "state"; // this one is under coolmapobject
     public final static String DIR_STATE = "state";
-
-    //property file
-    public final static String PROJECT_FIELD_DATE = "date";
-    public final static String PROJECT_FIELD_SESSION_NAME = "session_name";
 
 }

@@ -66,7 +66,7 @@ public class InternalCoolMapObjectIO {
             linkedMxIDs.add(mx.getID());
         }
 
-        property.put(IOTerm.ATTR_VIEWMATRICES, linkedMxIDs);
+        property.put(IOTerm.ATTR_VIEW_MATRICES, linkedMxIDs);
 
         if (object.getAggregator() != null) {
             property.put(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, object.getAggregator().getClass().getName());

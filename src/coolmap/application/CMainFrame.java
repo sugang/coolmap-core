@@ -19,6 +19,7 @@ import com.javadocking.visualizer.SingleMaximizer;
 import coolmap.application.utils.AppClosingWindowAdapter;
 import coolmap.application.utils.TaskDialog;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.WidgetViewport;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.utils.Config;
@@ -146,7 +147,7 @@ public class CMainFrame extends JFrame {
             //write custom parameters
             File file = new File(fileUrlString + "/default.dck");
 //            System.out.println("Viewport:" + CoolMapMaster.getViewport());
-            WidgetViewport viewport = CoolMapMaster.getViewport();
+            WidgetViewport viewport = WidgetMaster.getViewport();
             FileWriter writer = new FileWriter(file, true);
 
             if (viewport != null && viewport.getDockable().getState() == DockableState.MAXIMIZED) {
@@ -285,7 +286,7 @@ public class CMainFrame extends JFrame {
             //determine whether maximize is needed
 //            System.out.println("Is maximizing viewport needed?");
             if (maximizeViewport) {
-                WidgetViewport viewport = CoolMapMaster.getViewport();
+                WidgetViewport viewport = WidgetMaster.getViewport();
                 if (viewport != null) {
                     DefaultDockableStateAction maximizeAction = new DefaultDockableStateAction(viewport.getDockable(), DockableState.MAXIMIZED);
                     maximizeAction.actionPerformed(null);

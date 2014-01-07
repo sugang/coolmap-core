@@ -525,14 +525,14 @@ public class IOMaster {
 
         //date
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        projectInfo.put(IOTerm.PROJECT_FIELD_DATE, dateFormat.format(new Date()));
+        projectInfo.put(IOTerm.ATTR_PROJECT_DATE, dateFormat.format(new Date()));
 
         //session name
-        String sessionName = CoolMapMaster.getSessionName();
+        String sessionName = CoolMapMaster.getSession().getSessionName();
         if (sessionName == null || sessionName.length() == 0) {
             sessionName = "Untitled";
         }
-        projectInfo.put(IOTerm.PROJECT_FIELD_SESSION_NAME, sessionName);
+        projectInfo.put(IOTerm.ATTR_PROJECT_SESSION_NAME, sessionName);
 
         //cmatrices projectInfo object
         ArrayList<String> matrixIDs = new ArrayList<>();
@@ -578,7 +578,7 @@ public class IOMaster {
 
             //other info should be read from the corresponding folders
             //as the state of these things need to be persisted as well.
-//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_VIEWMATRICES, linkedMxIDs); //can restore the cMatrix by using such matrices, when they are reloaded
+//            coolMapObjectPropertyEntry.put(IOTerm.ATTR_VIEW_MATRICES, linkedMxIDs); //can restore the cMatrix by using such matrices, when they are reloaded
             coolMapIDs.add(object.getID());
         }
         projectInfo.put(IOTerm.OBJECT_COOLMAPOBJECT_ID, coolMapIDs);
@@ -606,6 +606,7 @@ public class IOMaster {
             loadCMatrices(projectFile, property);
             loadCOntologies(projectFile, property);
             loadCoolMapObjects(projectFile, property);
+            
 
         } catch (InterruptedException e) {
             CoolMapMaster.newSession("Untitled", null);
@@ -680,7 +681,8 @@ public class IOMaster {
             String snipClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_SNIPPETCONVERTER_CLASS, null);
             JSONArray anchor = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_ANCHOR);
             JSONArray zoom = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_ZOOM);
-            JSONArray linkedCMatrixIDs = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEWMATRICES);
+            
+            JSONArray linkedCMatrixIDs = coolMapProperty.getJSONArray(IOTerm.ATTR_VIEW_MATRICES);
 
             CoolMapObject object = new CoolMapObject(id);
             object.setName(name);
