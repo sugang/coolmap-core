@@ -8,7 +8,6 @@ package coolmap.canvas.viewmaps;
 import coolmap.data.CoolMapObject;
 import coolmap.data.annotation.PointAnnotation;
 import coolmap.data.cmatrixview.model.VNode;
-import coolmap.data.contology.model.COntology;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
 import java.awt.Font;
@@ -95,16 +94,18 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
             ////&& Objects.equal(node.getCOntology().getID(), colNodeOntoID)
             for (VNode node : colNodes) {
                 if (node.getViewIndex() != null && node.getViewIndex() >= fromCol && node.getViewIndex() < toCol) {
-                    COntology o = node.getCOntology();
+//                    COntology o = node.getCOntology();
 //                    if( o == null && colNodeOntoID != null){}
 ////                        continue;
 //                    else
+                    String id = node.getCOntologyID();
+                    
                     if (colNodeOntoID == null) {
                         colNodesInView.add(node);
                         continue;
                     }
 
-                    if (o == null && colNodeOntoID == null || o != null && o.getID().equals(colNodeOntoID)) {
+                    if (id == null && colNodeOntoID == null || id.equals(colNodeOntoID)) {
                         colNodesInView.add(node);
                     }
                 }
@@ -113,15 +114,16 @@ public class PointAnnotationLayer implements MapLayer<Object, Object> {
             ////&& Objects.equal(node.getCOntology().getID(), rowNodeOntoID)
             for (VNode node : rowNodes) {
                 if (node.getViewIndex() != null && node.getViewIndex() >= fromRow && node.getViewIndex() < toRow) {
-                    COntology o = node.getCOntology();
+//                    COntology o = node.getCOntology();
 
+                    String id = node.getCOntologyID();
                     //fix that nodes will show up correctly after assigning cluster trees
                     if (rowNodeOntoID == null) {
                         rowNodesInView.add(node);
                         continue;
                     }
 
-                    if (o == null && rowNodeOntoID == null || o != null && o.getID().equals(rowNodeOntoID)) {
+                    if (id == null && rowNodeOntoID == null || id.equals(rowNodeOntoID)) {
                         rowNodesInView.add(node);
                     }
                 }

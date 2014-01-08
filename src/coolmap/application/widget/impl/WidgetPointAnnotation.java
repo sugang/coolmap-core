@@ -330,7 +330,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
                             for (VNode node : rowNodes) {
                                 if (node.getName().equals(rowLabel)) {
 
-                                    if (node.isSingleNode() || node.getCOntology().getID().equals(rowOntologyID)) {
+                                    if (node.isSingleNode() || node.getCOntologyID().equals(rowOntologyID)) {
                                         rowNodeToSelect = node;
                                         break;
                                     }
@@ -342,7 +342,7 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
 
                             for (VNode node : colNodes) {
                                 if (node.getName().equals(colLabel)) {
-                                    if (node.isSingleNode() || node.getCOntology().getID().equals(colOntologyID)) {
+                                    if (node.isSingleNode() || node.getCOntologyID().equals(colOntologyID)) {
                                         colNodeToSelect = node;
                                         break;
                                     }

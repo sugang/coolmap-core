@@ -1212,6 +1212,11 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     private DefaultTableModel _getOntologyAsTableModel(COntology ontology) {
         //Shows how rows 
         nodeToTableRowHash.clear();
+        
+        if(ontology == null){
+            return new DefaultTableModel();
+        }
+        
 
         HashSet<String> nodes = new HashSet<String>();
         nodes.addAll(ontology.getAllNodesWithChildren());

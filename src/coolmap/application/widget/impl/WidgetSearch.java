@@ -353,7 +353,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
                     data[row][0] = node;
                     data[row][1] = "Row";
                     data[row][2] = "";
-                    data[row][3] = node.getCOntology() == null ? "" : node.getCOntology();
+                    data[row][3] = node.getCOntologyID() == null ? "" : CoolMapMaster.getCOntologyByID(node.getCOntologyID());
                     row++;
                 }
 
@@ -361,7 +361,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
                     data[row][0] = node;
                     data[row][1] = "Column";
                     data[row][2] = "";
-                    data[row][3] = node.getCOntology() == null ? "" : node.getCOntology();
+                    data[row][3] = node.getCOntologyID() == null ? "" : CoolMapMaster.getCOntologyByID(node.getCOntologyID());
                     row++;
                 }
 
@@ -369,7 +369,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
                     data[row][0] = node;
                     data[row][1] = "Row";
                     data[row][2] = "Tree";
-                    data[row][3] = node.getCOntology() == null ? "" : node.getCOntology();
+                    data[row][3] = node.getCOntologyID() == null ? "" : CoolMapMaster.getCOntologyByID(node.getCOntologyID());
                     row++;
                 }
 
@@ -377,7 +377,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
                     data[row][0] = node;
                     data[row][1] = "Column";
                     data[row][2] = "Tree";
-                    data[row][3] = node.getCOntology() == null ? "" : node.getCOntology();
+                    data[row][3] = node.getCOntologyID() == null ? "" : CoolMapMaster.getCOntologyByID(node.getCOntologyID());
                     row++;
                 }
 

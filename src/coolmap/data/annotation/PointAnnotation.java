@@ -58,12 +58,12 @@ public class PointAnnotation implements Comparable<PointAnnotation> {
 //            columnNodeOntologyID = columnNode.getCOntology().getID();
 //        }
         if (rowNode != null && columnNode != null) {
-            COntology conto = columnNode.getCOntology();
+            COntology conto = CoolMapMaster.getCOntologyByID(columnNode.getCOntologyID());
             if (conto != null) {
                 columnNodeOntologyID = conto.getID();
             }
 
-            COntology ronto = rowNode.getCOntology();
+            COntology ronto = CoolMapMaster.getCOntologyByID(rowNode.getCOntologyID());
             if (ronto != null) {
                 rowNodeOntologyID = ronto.getID();
             }

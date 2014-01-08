@@ -4,6 +4,7 @@
  */
 package coolmap.data.cmatrixview.model;
 
+import coolmap.application.CoolMapMaster;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
 import coolmap.data.contology.model.COntology;
@@ -26,7 +27,7 @@ public class VNode {
     public static final Integer ROOT = 3; //assc with ontology, root nodes
     public static final Integer TREE = 4; //assc with ontology, tree nodes
     private final String _ID;
-    private final COntology _cOntology;
+    private final String cOntologyID;
     private final Integer _type;
     private final String _name;
     private String _label = null;
@@ -46,15 +47,9 @@ public class VNode {
     private boolean _isChildNodeLoaded = false;
     private boolean _isBaseNodeLoaded = false;
     private float _defaultMultiplier = 1.0f;
-    
-    
-    
-    
-    
-    
+
 //    private boolean _isChildFromBase = false;
 //    private boolean _isLoadedWithBaseNode = false;
-
     public void setViewColor(Color color) {
         _displayColor = color;
     }
@@ -66,11 +61,10 @@ public class VNode {
     public final String getID() {
         return _ID;
     }
-    
+
 //    private final void _setID(String ID){
 //        _ID = ID;
 //    }
-
     public VNode(String name) {
         this(name, null);
     }
@@ -78,31 +72,38 @@ public class VNode {
     public VNode(String name, COntology cOntology) {
         this(name, cOntology, Tools.randomID());
     }
+
+    private VNode(String id, String name, String cOntologyID, Integer type){
+        _ID = id;
+        _name = name;
+        this.cOntologyID = cOntologyID;
+        _type = type;
+    }
     
-    public VNode(String name, COntology cOntology, String ID){
-                _ID = ID;
+    public VNode(String name, COntology cOntology, String ID) {
+        _ID = ID;
         if (name == null || name.length() == 0) {
             //it's an empty node
             _name = null;
-            _cOntology = null;
+            cOntologyID = null;
             _type = VOID;
 
         } else {
             _name = name;
             if (cOntology == null) {
-                _cOntology = null;
+                cOntologyID = null;
                 _type = SINGLE;
             } else {
-                _cOntology = cOntology;
+                cOntologyID = cOntology.getID();
 
-                if (_cOntology.hasChildren(name)) {
+                if (cOntology.hasChildren(name)) {
                     //This is a tree node
-                    if (_cOntology.hasParents(name)) {
+                    if (cOntology.hasParents(name)) {
                         _type = TREE;
                     } else {
                         _type = ROOT;
                     }
-                } else if (_cOntology.hasParents(name)) {
+                } else if (cOntology.hasParents(name)) {
                     _type = LEAF;
                 } else {
                     _type = SINGLE;
@@ -111,7 +112,6 @@ public class VNode {
         }
         setExpanded(false);
     }
-    
 
 //    /**
 //     * set the base nodes as child nodes
@@ -177,8 +177,12 @@ public class VNode {
         return _displayColor;
     }
 
-    public COntology getCOntology() {
-        return _cOntology;
+//    public COntology getCOntology() {
+//        return CoolMapMaster.getCOntologyByID(cOntologyID);
+//    }
+    
+    public String getCOntologyID() {
+        return cOntologyID;
     }
 
     public void setViewMultiplier(Float multiplier) {
@@ -216,12 +220,23 @@ public class VNode {
         return _height;
     }
 
+    private Float heightDifference = null;
+
     public Float getViewHeightDiffFromParent() {
-        if (_parentNode == null) {
-            return 1.0f;
-        } else {
-            return _cOntology.getHeightDifference(_parentNode.getName(), _name);
+        if (heightDifference == null) {
+            if (_parentNode == null) {
+                heightDifference = 1.0f;
+            } else {
+                COntology ontology = CoolMapMaster.getCOntologyByID(cOntologyID);
+                if(ontology == null){
+                    heightDifference = 1.0f;
+                }
+                else{
+                    heightDifference = ontology.getHeightDifference(_parentNode.getName(), _name);
+                }
+            }
         }
+        return heightDifference;
     }
 
     public void sortChildNodes() {
@@ -236,28 +251,39 @@ public class VNode {
         }
     }
 
-    public int getChildNodeCountFromCOntology() {
-        if (!isGroupNode()) {
-            return 0;
-        } else {
-            return _cOntology.getImmediateChildrenCount(_name);
-        }
+    //The trick is there are no need to update them everytime. The base indices would not change after the node is created.
+    //Lazy intialization
+    //But if ontology is edited, say an edge was removed
+    //
+    //Can make a reset function
+    /**
+     * need to be called if ontologies were changed since
+     */
+    public void refresh() {
+        baseIndices = null;
+        heightDifference = null;
     }
 
-    public int getBaseNodeCountFromCOntology(CMatrix cMatrix, Integer direction) {
-        if (!isGroupNode()) {
-            return 0;
-        } else {
-            return _cOntology.getBaseIndices(cMatrix, direction, _name).length;
-        }
-    }
+    private Integer[] baseIndices = null;
 
     public Integer[] getBaseIndicesFromCOntology(CMatrix cMatrix, Integer direction) {
-        if (_type == VOID || _type == SINGLE || _cOntology == null) {
-            return new Integer[0];
-        } else {
-            return _cOntology.getBaseIndices(cMatrix, direction, _name);
+
+        if (baseIndices == null) {
+
+            if (_type == VOID || _type == SINGLE || cOntologyID == null) {
+                baseIndices = new Integer[0];
+            } else {
+                COntology ontology = CoolMapMaster.getCOntologyByID(cOntologyID);
+                if(ontology == null){
+                    baseIndices = new Integer[0];
+                }
+                else{
+                    baseIndices = ontology.getBaseIndices(cMatrix, direction, _name);
+                }
+            }
         }
+
+        return baseIndices;
     }
 
     public String getName() {
@@ -270,10 +296,9 @@ public class VNode {
      * @return
      */
     public String getViewLabel() {
-        if(_label == null){
+        if (_label == null) {
             return _name;
-        }
-        else{
+        } else {
             return _label + "  (" + _name + ")";
         }
     }
@@ -286,11 +311,10 @@ public class VNode {
         //Here's the issue: zoom size does not allow to be smaller than 1
         //control here
         float size = zoom * _displayMultiplier;
-        
+
 //        if (size < 1) {
 //            size = 1;
 //        }
-        
         return size;
     }
 
@@ -306,25 +330,23 @@ public class VNode {
         }
         return getViewOffset() + getViewSizeInMap(zoom);
     }
-    
+
     /**
      * returns the center offset f the node
+     *
      * @param zoom
-     * @return 
+     * @return
      */
-    public Float getrViewOffsetCenter(float zoom){
-        if(getViewOffset() == null){
+    public Float getrViewOffsetCenter(float zoom) {
+        if (getViewOffset() == null) {
             return null;
         }
-        return getViewOffset() + getViewSizeInMap(zoom)/2;
+        return getViewOffset() + getViewSizeInMap(zoom) / 2;
     }
-    
 
     public VNode getParentNode() {
         return _parentNode;
     }
-    
-    
 
     /**
      * lazy loading childnodes
@@ -367,39 +389,11 @@ public class VNode {
 //        _loadBaseNodesFromCMatrix(cMatrix, direction);
 //        return new ArrayList<VNode>(_baseNodes);
 //    }
-
 //    public int getChildNodeCount() {
 //        return _childNodes.size();
 //    }
     //Let's change the mechanism. When a node is added, it's child node is automatically loaded?
     //only when node is expanding, load it. Lazy load.
-    private synchronized void _loadBaseNodesFromCMatrix(CMatrix cMatrix, Integer direction) {
-        if (cMatrix == null || direction == null || (direction != COntology.ROW && direction != COntology.COLUMN)) {
-            return;
-        } else {
-            Integer[] baseIndices = getBaseIndicesFromCOntology(cMatrix, direction);
-            List<String> newNodeNames = null;
-            if (direction == COntology.ROW) {
-                newNodeNames = cMatrix.getRowLabelsAsList(baseIndices);
-            } else if (direction == COntology.COLUMN) {
-                newNodeNames = cMatrix.getColLabelsAsList(baseIndices);
-            }
-
-
-
-            if (newNodeNames == null || newNodeNames.isEmpty()) {
-                return;
-            } else {
-                _clearBaseNodes();
-                for (String name : newNodeNames) {
-                    VNode node = new VNode(name, _cOntology);
-                    _addBaseNode(node);
-                }
-                _isBaseNodeLoaded = true;
-            }
-
-        }
-    }
 
     //need to mark whether the nodes are base nodes or ontology nodes
     private synchronized void _loadChildNodesFromCOntology() {
@@ -408,14 +402,19 @@ public class VNode {
             return;
         }
 
-        List<String> childNodes = _cOntology.getImmediateChildrenOrdered(_name);
+        COntology onto = CoolMapMaster.getCOntologyByID(cOntologyID);
+        if(onto == null){
+            return;
+        }
+        
+        List<String> childNodes = onto.getImmediateChildrenOrdered(_name);
         if (childNodes == null || childNodes.isEmpty()) {
             return;
         }
 
         _clearChildNodes();
         for (String name : childNodes) {
-            VNode node = new VNode(name, _cOntology);
+            VNode node = new VNode(name, onto);
             _addChildNode(node);
         }
         _isChildNodeLoaded = true;
@@ -543,9 +542,10 @@ public class VNode {
     }
 
     /**
-     * distance in pixels, including the width of both nodes
-     * however, the zoom parameter only returns the - we don't know the viewOffset @ which the nodes are actually set
-     * so if use a zoom different than the zoom when the nodes are set, tehre
+     * distance in pixels, including the width of both nodes however, the zoom
+     * parameter only returns the - we don't know the viewOffset @ which the
+     * nodes are actually set so if use a zoom different than the zoom when the
+     * nodes are set, tehre
      *
      * @param v1
      * @param v2
@@ -559,15 +559,18 @@ public class VNode {
             return -1;
         }
     }
+
+    
+    
     
     /*
      * 
      */
-    public VNode duplicate(){
+    public VNode duplicate() {
         //same ID, same name, same color, same multipler
         //make a entire copy of the node
-        VNode node = new VNode(_name, _cOntology, _ID);
-        
+        VNode node = new VNode(_ID, _name, cOntologyID, _type);
+
         //weird why color is not saved?
         node.setViewColor(_displayColor);
         node.setViewMultiplier(_displayMultiplier);
@@ -578,38 +581,37 @@ public class VNode {
         //node.setViewOffset(_displayOffset);
         node.setExpanded(_isExpanded);
         node.setViewHeight(_height); //This was not copied over
-        
+
         return node;
     }
-    
-    public void addChildNode(VNode node){
+
+    public void addChildNode(VNode node) {
         _childNodes.add(node);
         node.setParentNode(this);
         _isChildNodeLoaded = true; //prevent from replacing child nodes.
     }
-    
-    public float getCurrentViewMultiplier(){
+
+    public float getCurrentViewMultiplier() {
         return _displayMultiplier;
     }
-    
-    public float getDefaultViewMultiplier(){
+
+    public float getDefaultViewMultiplier() {
         return _defaultMultiplier;
     }
-    
-    
+
     private boolean mark;
-    
+
     /**
      * a boolean mark that can be used in various occasions - not threadsafe!
-     * @param mark 
+     *
+     * @param mark
      */
-    public void mark(boolean mark){
+    public void mark(boolean mark) {
         this.mark = mark;
     }
-    
-    public boolean isMarked(){
+
+    public boolean isMarked() {
         return mark;
     }
-
 
 }

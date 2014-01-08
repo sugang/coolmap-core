@@ -5,6 +5,7 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
@@ -12,6 +13,7 @@ import coolmap.canvas.misc.ZoomControl;
 import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
@@ -344,7 +346,13 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
             Color color;
 
             if (node.getViewColor() == null) {
-                color = node.getCOntology().getViewColor();
+                COntology onto = CoolMapMaster.getCOntologyByID(node.getCOntologyID());
+                if(onto != null){
+                    color = onto.getViewColor();
+                }
+                else{
+                    color = null;
+                }
             } else {
                 color = node.getViewColor();
             }

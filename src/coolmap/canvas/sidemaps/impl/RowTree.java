@@ -5,6 +5,7 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
@@ -12,6 +13,7 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
+import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
@@ -140,10 +142,10 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     public RowTree() {
         this(null);
     }
-    
+
     public RowTree(CoolMapObject object) {
         super(object);
-        
+
         _leafColor = UI.colorGrey3;
         _leafBorderColor = UI.colorBlack5;
         getViewPanel().addMouseListener(this);
@@ -196,17 +198,17 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 CoolMapState state = CoolMapState.createStateRows("Expand row nodes", getCoolMapObject(), null);
 //                System.out.println(_selectedNodes);
                 List<VNode> nodesToBeSelected = getCoolMapObject().expandRowNodes(new ArrayList(_selectedNodes), true);
-                
+
 //                System.out.println(_selectedNodes);
                 _selectedNodes.clear();
-                if(nodesToBeSelected != null){
+                if (nodesToBeSelected != null) {
                     _selectedNodes.addAll(nodesToBeSelected);
                 }
-                
+
                 getViewPanel().repaint();
-                
+
                 StateStorageMaster.addState(state);
-                
+
             }
         });
         _popupMenu.add(_expandToAll);
@@ -251,7 +253,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 CoolMapObject obj = getCoolMapObject();
-                if(obj == null){
+                if (obj == null) {
                     return;
                 }
                 CoolMapState state = CoolMapState.createStateRows("Expand rows to the next level", obj, null);
@@ -320,11 +322,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                         for (VNode node : nodes) {
                             node.setViewColor(color);
                         }
-                        
-                        for(VNode node : _selectedNodes){
+
+                        for (VNode node : _selectedNodes) {
                             node.setViewColor(color);
                         }
-                        
+
                         getCoolMapView().updateRowMapBuffersEnforceAll();
                     } catch (Exception e) {
                         //
@@ -651,7 +653,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         if (node.getViewColor() != null) {
             nodeColor = node.getViewColor();
         } else if (node.isGroupNode()) {
-            nodeColor = node.getCOntology().getViewColor();
+//            nodeColor = node.getCOntology().getViewColor();
+            COntology onto = CoolMapMaster.getCOntologyByID(node.getCOntologyID());
+            if (onto != null) {
+                nodeColor = onto.getViewColor();
+            } else {
+                nodeColor = null;
+            }
         } else {
             nodeColor = _leafColor;
         }
@@ -795,7 +803,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     if (child.getViewColor() != null) {
                         nodeColor = child.getViewColor();
                     } else {
-                        nodeColor = child.getCOntology().getViewColor();
+//                        nodeColor = child.getCOntology().getViewColor();
+                        COntology onto = CoolMapMaster.getCOntologyByID(child.getCOntologyID());
+                        if (onto != null) {
+                            nodeColor = onto.getViewColor();
+                        } else {
+                            nodeColor = null;
+                        }
                     }
 
                     //have to draw child nodes on top
@@ -823,7 +837,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             if (treeNode.getViewColor() != null) {
                 nodeColor = treeNode.getViewColor();
             } else {
-                nodeColor = treeNode.getCOntology().getViewColor();
+//                nodeColor = treeNode.getCOntology().getViewColor();
+                COntology onto = CoolMapMaster.getCOntologyByID(treeNode.getCOntologyID());
+                if (onto != null) {
+                    nodeColor = onto.getViewColor();
+                } else {
+                    nodeColor = null;
+                }
             }
 
             if (zoomY > 6) {

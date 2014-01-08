@@ -5,6 +5,7 @@
 package coolmap.canvas;
 
 import com.google.common.collect.Range;
+import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.listeners.CViewListener;
@@ -23,6 +24,7 @@ import coolmap.canvas.viewmaps.PointAnnotationLayer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrixview.model.VNode;
+import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.RangeComparator;
 import coolmap.utils.graphics.CAnimator;
@@ -135,20 +137,20 @@ public final class CoolMapView<BASE, VIEW> {
     public void addColumnMap(ColumnMap map) {
         _colDrawer.addColumnMap(map);
     }
-    
-    public ColumnMap getColumnMap(String className){
-       return _colDrawer.getColumnMap(className);
+
+    public ColumnMap getColumnMap(String className) {
+        return _colDrawer.getColumnMap(className);
     }
-    
-    public List<ColumnMap> getColumnMaps(){
-       return _colDrawer.getColumnMaps();
+
+    public List<ColumnMap> getColumnMaps() {
+        return _colDrawer.getColumnMaps();
     }
-    
-    public List<RowMap> getRowMaps(){
+
+    public List<RowMap> getRowMaps() {
         return _rowDrawer.getRowMaps();
     }
-    
-    public RowMap getRowMap(String className){
+
+    public RowMap getRowMap(String className) {
         return _rowDrawer.getRowMap(className);
     }
 
@@ -167,8 +169,6 @@ public final class CoolMapView<BASE, VIEW> {
     public boolean isGridMode() {
         return _gridLayer.isVisible();
     }
-    
-    
 
 //    public void addViewAnchorMovedListener(CViewAnchorMovedListener lis) {
 //        _viewAnchorMovedListeners.add(lis);
@@ -266,8 +266,8 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     /**
-     * update the currently selected rows and columns
-     * This is the way to merge and figure out the best rangeset for selections
+     * update the currently selected rows and columns This is the way to merge
+     * and figure out the best rangeset for selections
      */
     private void _updateColRowRanges() {
         _selectedRows.clear();
@@ -629,7 +629,6 @@ public final class CoolMapView<BASE, VIEW> {
 
         updateCanvasEnforceAll();
 
-        
         System.out.println("Zooms are:" + _zoom);
         _fireViewZoomChanged();
         return true;
@@ -680,7 +679,6 @@ public final class CoolMapView<BASE, VIEW> {
         updateCanvasEnforceAll();
 
 //        System.out.println("Zoom set to:" + _zoom);
-        
         _fireViewZoomChanged();
 
     }
@@ -710,7 +708,6 @@ public final class CoolMapView<BASE, VIEW> {
         }
 
 //        System.out.println("Current zooms are set to:" + _zoom);
-
         //force update
         //node sizes can't be smaller than 1
         updateNodeDisplayParams();
@@ -825,7 +822,6 @@ public final class CoolMapView<BASE, VIEW> {
 
 //        System.out.println("Selected columns:" + selectedColumns);
 //        System.out.println("Selected rows:" + selectedRows);
-
         ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
@@ -835,7 +831,6 @@ public final class CoolMapView<BASE, VIEW> {
 
 //        System.out.println("New selections:" + newSelections);
 //        System.out.println("New selections" + newSelections);
-
         setSelections(newSelections);
     }
 
@@ -1346,7 +1341,7 @@ public final class CoolMapView<BASE, VIEW> {
         //Error, nothing can be found.
         //Should not rech here.
         return null;
-        
+
     }
 
     public Integer getCurrentRowSearchAll(int screenY) {
@@ -1892,7 +1887,7 @@ public final class CoolMapView<BASE, VIEW> {
                 for (int i = 1; i < _coolMapObject.getViewNumRows(); i++) {
                     nodePrev = _coolMapObject.getViewNodeRow(i - 1);
                     node = _coolMapObject.getViewNodeRow(i);
-                //multiple  calls may result in exception
+                    //multiple  calls may result in exception
 
                     if (node == null || nodePrev == null) {
                         return false;
@@ -1943,7 +1938,7 @@ public final class CoolMapView<BASE, VIEW> {
 //        System.out.println(subMapIndexMin);
 //        System.out.println(subMapIndexMax);
 
-        //objects updated:
+            //objects updated:
             //subMapDimension
             //subMapIndexMin
             //subMapIndexMax
@@ -2321,7 +2316,7 @@ public final class CoolMapView<BASE, VIEW> {
                 _rowDrawer.updateDrawerBuffers();
             }
         });
-        
+
     }
 
     //This function is not called in a separate thread, may cause UI freeze
@@ -2335,8 +2330,6 @@ public final class CoolMapView<BASE, VIEW> {
             }
         });
     }
-    
-    
 
     /**
      * update all if needed, but enforce update the overlay layer (respond to
@@ -3690,7 +3683,6 @@ public final class CoolMapView<BASE, VIEW> {
 
 //                should be success -> however, this was done in the enforce all i think, as it's a MOVE.
 //                System.out.println("Force update overlay called. ");
-
                 _overlayContainer.updateMapBuffers(_subMapIndexMin, _subMapIndexMax, _subMapDimension);
 
                 _progressMask.fadeOut();
@@ -4400,9 +4392,12 @@ public final class CoolMapView<BASE, VIEW> {
                 if (rowNode.getViewColor() != null) {
                     gI.setColor(UI.mixOpacity(rowNode.getViewColor(), 0.4f));
                     gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
-                } else if (rowNode.getCOntology() != null && rowNode.getCOntology().getViewColor() != null) {
-                    gI.setColor(UI.mixOpacity(rowNode.getCOntology().getViewColor(), 0.4f));
-                    gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
+                } else if (rowNode.getCOntologyID() != null) {
+                    COntology onto = CoolMapMaster.getCOntologyByID(rowNode.getCOntologyID());
+                    if (onto != null && onto.getViewColor() != null) {
+                        gI.setColor(UI.mixOpacity(onto.getViewColor(), 0.4f));
+                        gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
+                    }
                 }
             }
 
@@ -4415,9 +4410,12 @@ public final class CoolMapView<BASE, VIEW> {
                 if (colNode.getViewColor() != null) {
                     gI.setColor(UI.mixOpacity(colNode.getViewColor(), 0.4f));
                     gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent + labelFontHeight + 3, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
-                } else if (colNode.getCOntology() != null && colNode.getCOntology().getViewColor() != null) {
-                    gI.setColor(UI.mixOpacity(colNode.getCOntology().getViewColor(), 0.4f));
-                    gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent + labelFontHeight + 3, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
+                } else if (colNode.getCOntologyID() != null) {
+                    COntology onto = CoolMapMaster.getCOntologyByID(colNode.getCOntologyID());
+                    if (onto != null && onto.getViewColor() != null) {
+                        gI.setColor(UI.mixOpacity(onto.getViewColor(), 0.4f));
+                        gI.fillRoundRect(23 + additionalWidth, 9 - labelDescent + labelFontHeight + 3, hoverWidth - 25 - additionalWidth, labelFontHeight + 3, 4, 4);
+                    }
                 }
             }
 

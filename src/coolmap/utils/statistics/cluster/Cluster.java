@@ -135,7 +135,6 @@ public class Cluster {
 
             Streemer s = new Streemer();
 
-            
             Assignments assignments = s.cluster(matrix, numClusters, backgroundClusterPerc, similarityThreshold, minClusterSize, simFunction);
 
             if (Thread.interrupted()) {
@@ -337,17 +336,18 @@ public class Cluster {
         }
 
         //create row nodes to make it work
-        HashMultimap<COntology, String> map = HashMultimap.create();
+        HashMultimap<String, String> map = HashMultimap.create();
         for (VNode node : object.getViewNodesRow()) {
-            if (node.getCOntology() != null) {
-                map.put(node.getCOntology(), node.getName());
+            if (node.getCOntologyID() != null) {
+                map.put(node.getCOntologyID(), node.getName());
             }
         }
 //
 //            it should be merged, but why not merged?
-        for (COntology otherOntology : map.keySet()) {
-            Set<String> termsToMerge = map.get(otherOntology);
+        for (String otherOntologyID : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntologyID);
 //            System.out.println("Terms to merge:" + termsToMerge);
+            COntology otherOntology = CoolMapMaster.getCOntologyByID(otherOntologyID);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
@@ -387,16 +387,31 @@ public class Cluster {
             }
         }
 
-        HashMultimap<COntology, String> map = HashMultimap.create();
+//        HashMultimap<COntology, String> map = HashMultimap.create();
+//        for (VNode node : object.getViewNodesColumn()) {
+//            if (node.getCOntology() != null) {
+//                map.put(node.getCOntology(), node.getName());
+//            }
+//        }
+//
+//        for (COntology otherOntology : map.keySet()) {
+//            Set<String> termsToMerge = map.get(otherOntology);
+////            System.out.println("Terms to merge:" + termsToMerge);
+//            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+//        }
+        //create row nodes to make it work
+        HashMultimap<String, String> map = HashMultimap.create();
         for (VNode node : object.getViewNodesColumn()) {
-            if (node.getCOntology() != null) {
-                map.put(node.getCOntology(), node.getName());
+            if (node.getCOntologyID() != null) {
+                map.put(node.getCOntologyID(), node.getName());
             }
         }
-
-        for (COntology otherOntology : map.keySet()) {
-            Set<String> termsToMerge = map.get(otherOntology);
+//
+//            it should be merged, but why not merged?
+        for (String otherOntologyID : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntologyID);
 //            System.out.println("Terms to merge:" + termsToMerge);
+            COntology otherOntology = CoolMapMaster.getCOntologyByID(otherOntologyID);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
@@ -542,7 +557,6 @@ public class Cluster {
         }
 
 //        System.out.println("Clustering started:" + linkage + " " + simType);
-
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumRows(), object.getViewNumColumns());
         for (int i = 0; i < object.getViewNumRows(); i++) {
             for (int j = 0; j < object.getViewNumColumns(); j++) {
@@ -643,23 +657,37 @@ public class Cluster {
         CoolMapMaster.addNewCOntology(ontology);
 
         //HashSet<COntology> previousOntologies = new HashSet<COntology>();
-        HashMultimap<COntology, String> map = HashMultimap.create();
+//        HashMultimap<COntology, String> map = HashMultimap.create();
 
+//        for (VNode node : object.getViewNodesRow()) {
+//            if (node.getCOntology() != null) {
+//                map.put(node.getCOntology(), node.getName());
+//            }
+//        }
+//
+//        for (COntology otherOntology : map.keySet()) {
+//            Set<String> termsToMerge = map.get(otherOntology);
+////            System.out.println("Terms to merge:" + termsToMerge);
+//            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+//        }
+                //create row nodes to make it work
+        HashMultimap<String, String> map = HashMultimap.create();
         for (VNode node : object.getViewNodesRow()) {
-            if (node.getCOntology() != null) {
-                map.put(node.getCOntology(), node.getName());
+            if (node.getCOntologyID() != null) {
+                map.put(node.getCOntologyID(), node.getName());
             }
         }
-
-        for (COntology otherOntology : map.keySet()) {
-            Set<String> termsToMerge = map.get(otherOntology);
+//
+//            it should be merged, but why not merged?
+        for (String otherOntologyID : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntologyID);
 //            System.out.println("Terms to merge:" + termsToMerge);
+            COntology otherOntology = CoolMapMaster.getCOntologyByID(otherOntologyID);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 
 //        System.out.println("+++ check point +++");
 //        System.out.println(ontology.getRootNamesOrdered());
-
 //        Why this step go it dead completely?
 //        System.out.println("attempt to replace nodes:");
         object.replaceRowNodes(ontology.getRootNodesOrdered(), null);
@@ -670,7 +698,6 @@ public class Cluster {
         object.expandRowNodeToBottom(object.getViewNodeRow(0));
 
 //        System.out.println("+++++++++++++++++++++++Ended Successfully\n\n");
-
     }
 
     public synchronized static void hClustColumn(CoolMapObject<?, Double> object, HierarchicalAgglomerativeClustering.ClusterLinkage linkage, Similarity.SimType simType, boolean nullsAsZero) {
@@ -680,7 +707,6 @@ public class Cluster {
         }
 
 //        System.out.println("Clustering started:" + linkage + " " + simType);
-
         ArrayMatrix matrix = new ArrayMatrix(object.getViewNumColumns(), object.getViewNumRows());
         for (int i = 0; i < object.getViewNumRows(); i++) {
             for (int j = 0; j < object.getViewNumColumns(); j++) {
@@ -797,17 +823,33 @@ public class Cluster {
 ////            prevOnto.mergeCOntologyTo(ontology);
 //        }
 //        Node merge -> ensure nodes can be expanded correctly
-        HashMultimap<COntology, String> map = HashMultimap.create();
+//        HashMultimap<COntology, String> map = HashMultimap.create();
 
+//        for (VNode node : object.getViewNodesColumn()) {
+//            if (node.getCOntology() != null) {
+//                map.put(node.getCOntology(), node.getName());
+//            }
+//        }
+//
+//        for (COntology otherOntology : map.keySet()) {
+//            Set<String> termsToMerge = map.get(otherOntology);
+////            System.out.println("Terms to merge:" + termsToMerge);
+//            otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
+//        }
+        
+                //create row nodes to make it work
+        HashMultimap<String, String> map = HashMultimap.create();
         for (VNode node : object.getViewNodesColumn()) {
-            if (node.getCOntology() != null) {
-                map.put(node.getCOntology(), node.getName());
+            if (node.getCOntologyID() != null) {
+                map.put(node.getCOntologyID(), node.getName());
             }
         }
-
-        for (COntology otherOntology : map.keySet()) {
-            Set<String> termsToMerge = map.get(otherOntology);
+//
+//            it should be merged, but why not merged?
+        for (String otherOntologyID : map.keySet()) {
+            Set<String> termsToMerge = map.get(otherOntologyID);
 //            System.out.println("Terms to merge:" + termsToMerge);
+            COntology otherOntology = CoolMapMaster.getCOntologyByID(otherOntologyID);
             otherOntology.mergeCOntologyTo(ontology, termsToMerge); //merge over the previous terms
         }
 

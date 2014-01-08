@@ -31,12 +31,12 @@ public class AnnotationStorage {
         String rowKey = rowNode.getName();
         String columnKey = colNode.getName();
 
-        if (rowNode.getCOntology() != null) {
-            rowKey += "|" + rowNode.getCOntology().getID();
+        if (rowNode.getCOntologyID() != null) {
+            rowKey += "|" + rowNode.getCOntologyID();
         }
 
-        if (colNode.getCOntology() != null) {
-            columnKey += "|" + colNode.getCOntology().getID();
+        if (colNode.getCOntologyID()!= null) {
+            columnKey += "|" + colNode.getCOntologyID();
         }
         
         pointAnnotationStorage.remove(rowKey, columnKey);
@@ -70,12 +70,12 @@ public class AnnotationStorage {
         String rowKey = rowNode.getName();
         String columnKey = columnNode.getName();
 
-        if (rowNode.getCOntology() != null) {
-            rowKey += "|" + rowNode.getCOntology().getID();
+        if (rowNode.getCOntologyID() != null) {
+            rowKey += "|" + rowNode.getCOntologyID();
         }
 
-        if (columnNode.getCOntology() != null) {
-            columnKey += "|" + columnNode.getCOntology().getID();
+        if (columnNode.getCOntologyID() != null) {
+            columnKey += "|" + columnNode.getCOntologyID();
         }
 
         return pointAnnotationStorage.get(rowKey, columnKey);

@@ -5,6 +5,7 @@
 package coolmap.canvas.sidemaps.impl;
 
 import com.google.common.collect.Range;
+import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
@@ -12,6 +13,7 @@ import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
+import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
@@ -771,7 +773,13 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     if (child.getViewColor() != null) {
                         nodeColor = child.getViewColor();
                     } else {
-                        nodeColor = child.getCOntology().getViewColor();
+                        COntology onto = CoolMapMaster.getCOntologyByID(child.getCOntologyID());
+                        if (onto != null) {
+                            nodeColor = onto.getViewColor();
+                        } else {
+                            nodeColor = null;
+                        }
+
                     }
 
                     //have to draw child nodes on top
@@ -798,7 +806,13 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             if (treeNode.getViewColor() != null) {
                 nodeColor = treeNode.getViewColor();
             } else {
-                nodeColor = treeNode.getCOntology().getViewColor();
+//                nodeColor = treeNode.getCOntology().getViewColor();
+                COntology onto = CoolMapMaster.getCOntologyByID(treeNode.getCOntologyID());
+                if (onto != null) {
+                    nodeColor = onto.getViewColor();
+                } else {
+                    nodeColor = null;
+                }
             }
 
             if (zoomX > 6) {
@@ -836,7 +850,13 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         if (node.getViewColor() != null) {
             nodeColor = node.getViewColor();
         } else if (node.isGroupNode()) {
-            nodeColor = node.getCOntology().getViewColor();
+//            nodeColor = node.getCOntology().getViewColor();
+            COntology onto = CoolMapMaster.getCOntologyByID(node.getCOntologyID());
+            if (onto != null) {
+                nodeColor = onto.getViewColor();
+            } else {
+                nodeColor = null;
+            }
         } else {
             nodeColor = _leafColor;
         }

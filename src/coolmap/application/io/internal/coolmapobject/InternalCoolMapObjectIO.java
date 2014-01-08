@@ -289,8 +289,8 @@ public class InternalCoolMapObjectIO {
             object.put(IOTerm.ATTR_NODE_ISEXPANDED, 1);
         }
 
-        if (node.getCOntology() != null) {
-            object.put(IOTerm.ATTR_NODE_ONTOLOGYID, node.getCOntology().getID());
+        if (node.getCOntologyID() != null) {
+            object.put(IOTerm.ATTR_NODE_ONTOLOGYID, node.getCOntologyID());
         }
         if (node.getViewColor() != null) {
             object.put(IOTerm.ATTR_NODE_COLOR, node.getViewColor().getRGB());
