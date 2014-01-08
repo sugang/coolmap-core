@@ -584,8 +584,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //    }
 
     public static BufferedImage createToolTipFromJLabel(JLabel label) {
-        label.setSize(label.getPreferredSize());
-        Font font = label.getFont();
+
         label.setSize(label.getPreferredSize()); //make sure it is the preferred size.
 
         BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(label.getWidth(), label.getHeight());

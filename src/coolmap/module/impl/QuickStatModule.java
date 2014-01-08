@@ -109,7 +109,7 @@ public class QuickStatModule extends Module {
                         + "\nDirection: " + "Row" + "\nTest Groups: " + Arrays.toString(nodes.toArray())
                         + "\nData size: " + columnIndices.size(), pValue);
 
-                CMConsole.logData(result.toString());
+                CMConsole.log(result.toString());
 
                 //Then extract these values
             } catch (Exception ex) {
@@ -188,7 +188,7 @@ public class QuickStatModule extends Module {
                         + "\nDirection: " + "Column" + "\nTest Groups: " + Arrays.toString(nodes.toArray())
                         + "\nData size: " + rowIndices.size(), pValue);
 
-                CMConsole.logData(result.toString());
+                CMConsole.log(result.toString());
 
                 //Then extract these values
             } catch (Exception ex) {

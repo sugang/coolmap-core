@@ -26,14 +26,14 @@ public class CMConsole {
         }
 
         if (instance != null) {
-            instance.logError("Error: " + message);
+            instance.logError("[Error] " + message);
         } else {
-            System.err.println("Error: " + message);
+            System.err.println("[Error] " + message);
         }
 
     }
 
-    public static void logInSuccess(String message) {
+    public static void logInfo(String message) {
         if (instance == null) {
             try {
                 instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
@@ -43,20 +43,7 @@ public class CMConsole {
             }
         }
 
-        instance.logInfo(message);
-    }
-
-    public static void logData(String message) {
-        if (instance == null) {
-            try {
-                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
-            } catch (Exception e) {
-                instance = null;
-                return;
-            }
-        }
-
-        instance.logData(message);
+        instance.logInfo("[Info] " + message);
     }
 
     public static void log(String message) {
@@ -71,4 +58,18 @@ public class CMConsole {
 
         instance.log(message);
     }
+
+    public static void logWarning(String message) {
+        if (instance == null) {
+            try {
+                instance = (WidgetConsole) WidgetMaster.getWidget(WidgetConsole.class.getName());
+            } catch (Exception e) {
+                instance = null;
+                return;
+            }
+        }
+
+        instance.logWaring("[Warning] " + message);
+    }
+
 }

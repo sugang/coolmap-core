@@ -30,6 +30,9 @@ public class IOTerm {
     public final static String ATTR_VIEW_PANEL_ROW = "row_panels";
     public final static String ATTR_VIEW_PANEL_CONTAINER_VISIBLE = "visible";
     public final static String ATTR_VIEW_PANEL = "panel";
+    public final static String ATTR_VIEW_MAXIMIZED = "maximized";
+    public final static String ATTR_VIEW_MINIMIZED = "minimized";
+    public final static String ATTR_VIEW_BOUNDS = "bounds";
     
     
 

@@ -17,6 +17,8 @@ import coolmap.application.io.internal.coolmapobject.InternalCoolMapObjectIO;
 import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
 import coolmap.application.widget.impl.console.CMConsole;
+import coolmap.canvas.CoolMapView;
+import coolmap.canvas.datarenderer.renderer.impl.TextRenderer;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.ColumnMap;
 import coolmap.canvas.sidemaps.RowMap;
@@ -41,6 +43,7 @@ import java.awt.Color;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -155,7 +158,7 @@ public class IOMaster {
                                 CoolMapMaster.addNewCoolMapObject(objects);
                                 CoolMapMaster.addNewCOntology(ontologies);
 
-                                CMConsole.logInSuccess("Data imported from: " + Arrays.toString(f));
+                                CMConsole.logInfo("Data imported from: " + Arrays.toString(f));
 
                             } catch (Exception ex2) {
                                 CMConsole.logError("Failed to import data from: " + Arrays.toString(f));
@@ -245,7 +248,7 @@ public class IOMaster {
 
                                         CoolMapMaster.addNewCOntology(ontology);
 
-                                        CMConsole.logInSuccess("Ontology imported from " + Arrays.toString(f));
+                                        CMConsole.logInfo("Ontology imported from " + Arrays.toString(f));
                                     }
                                 } catch (Exception e) {
                                     CMConsole.logError("failed to load ontology from " + Arrays.toString(f));
@@ -673,8 +676,7 @@ public class IOMaster {
             TFile coolMapPropertyFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
             JSONObject coolMapProperty = new JSONObject(IOUtils.toString(new TFileInputStream(coolMapPropertyFile)));
 
-            System.out.println(coolMapProperty.toString(2));
-
+//            System.out.println(coolMapProperty.toString(2));
             String id = coolMapProperty.getString(IOTerm.ATTR_ID);
             String name = coolMapProperty.optString(IOTerm.ATTR_NAME, "Untitled");
             String aggrClass = coolMapProperty.optString(IOTerm.ATTR_VIEW_AGGREGATOR_CLASS, null);
@@ -695,7 +697,7 @@ public class IOMaster {
             for (int j = 0; i < linkedCMatrixIDs.length(); i++) {
                 CMatrix matrix = CoolMapMaster.getCMatrixByID(linkedCMatrixIDs.getString(j));
                 object.addBaseCMatrix(matrix);
-                System.out.println(matrix);
+//                System.out.println(matrix);
             }
 
             //Set aggregator
@@ -727,10 +729,28 @@ public class IOMaster {
                 ViewRenderer renderer = null;
                 try {
                     renderer = (ViewRenderer) Class.forName(rendererClass).newInstance();
+
+                    //also need to restore state.
+                    TFile rendererPropsFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER);
+                    object.setViewRenderer(renderer, true);
+                    
+                    try {
+                        if (rendererPropsFile.exists()) {
+                            JSONObject props = new JSONObject(IOUtils.toString(new TFileInputStream(rendererPropsFile)));
+//                            System.out.println(props);
+                            renderer.restoreState(props);
+                        }
+                    } catch (Exception e) {
+                        CMConsole.logError("Error loading renderer " + renderer.getName() + " state. Using default parameters instead.");
+                    }
+
                 } catch (Exception e) {
-                    renderer = null; //Set to default String renderer if all fails
+                    renderer = new TextRenderer(); //Set to default String renderer if all fails
+                    
+                    //A default text renderer
+                    object.setViewRenderer(renderer, true);
                 }
-                object.setViewRenderer(renderer, true);
+                
             }
 
             //set base nodes
@@ -813,11 +833,49 @@ public class IOMaster {
                 throw new InterruptedException("Loading cancelled");
             }
 
+//            System.out.println(coolMapProperty);
             coolMapObjects.add(object);
+            CoolMapMaster.addNewCoolMapObject(object);
 
+
+            CoolMapView view = object.getCoolMapView();
+            //
+            boolean isMaximized = coolMapProperty.optBoolean(IOTerm.ATTR_VIEW_MAXIMIZED, false);
+            if (isMaximized) {
+                try {
+                    view.setMaximize(true);
+                } catch (Exception e) {
+
+                }
+            }
+
+            //
+            boolean isMinimized = coolMapProperty.optBoolean(IOTerm.ATTR_VIEW_MINIMIZED, false);
+            if (isMinimized) {
+                try {
+                    view.setMinimize(true);
+                } catch (Exception e) {
+
+                }
+            }
+            
+                        //configure frame after adding.
+            JSONArray bounds = coolMapProperty.optJSONArray(IOTerm.ATTR_VIEW_BOUNDS);
+            
+            if (bounds != null && !isMaximized && !isMinimized) {
+                try {
+                    Rectangle r = new Rectangle(bounds.getInt(0), bounds.getInt(1), bounds.getInt(2), bounds.getInt(3));
+                    view.setBounds(r);
+                } catch (Exception e) {
+                }
+            }
         }
-        CoolMapMaster.addNewCoolMapObject(coolMapObjects);
 
+//        CoolMapMaster.addNewCoolMapObject(coolMapObjects);
+//        CMConsole.logInfo("Load successful\nit is !\n");
+//        CMConsole.logWarning("This is a warning");
+//        CMConsole.logError("This is an error");
+//        CMConsole.log("This is a message");
     }
 
     private static void loadCMatrices(TFile projectFile, JSONObject property) throws Exception {

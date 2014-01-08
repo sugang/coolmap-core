@@ -58,6 +58,7 @@ public class WidgetConsole extends Widget {
     }
 
     public void logError(String message) {
+        message = message.replaceAll("\n", "\n  ");
         message = "> " + message.trim();
         message += "\n";
         SimpleAttributeSet aset = new SimpleAttributeSet();
@@ -66,7 +67,18 @@ public class WidgetConsole extends Widget {
         appendToPane(message, aset);
     }
 
+    public void logWaring(String message) {
+        message = message.replaceAll("\n", "\n  ");
+        message = "> " + message.trim();
+        message += "\n";
+        SimpleAttributeSet aset = new SimpleAttributeSet();
+        StyleConstants.setBold(aset, true);
+        StyleConstants.setForeground(aset, UI.colorOrange0);
+        appendToPane(message, aset);
+    }
+
     public void logInfo(String message) {
+        message = message.replaceAll("\n", "\n  ");
         message = "> " + message.trim();
         message += "\n";
         SimpleAttributeSet aset = new SimpleAttributeSet();
@@ -76,6 +88,7 @@ public class WidgetConsole extends Widget {
     }
 
     public void logData(String message) {
+        message = message.replaceAll("\n", "\n  ");
         message = "> " + message.trim();
         message += "\n\n";
         SimpleAttributeSet aset = new SimpleAttributeSet();
@@ -85,6 +98,7 @@ public class WidgetConsole extends Widget {
     }
 
     public void log(String message) {
+        message = message.replaceAll("\n", "\n  ");
         message = "> " + message.trim();
         message += "\n";
         SimpleAttributeSet aset = new SimpleAttributeSet();

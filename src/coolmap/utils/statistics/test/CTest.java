@@ -88,7 +88,7 @@ public class CTest {
                 double pValue = test.pairedTTest(data1, data2);
 
                 TestResult result = new TestResult("Student Paired T-Test", "Two tailed paired t-test with alpha = 0.05.\nData: " + obj.getName() + "\nDirection: " + direction + "\nGroups: " + leafNode1 + ", " + leafNode2, pValue);
-                CMConsole.logData(result.toString());
+                CMConsole.log(result.toString());
 
             } else {
                 CMConsole.logError("T-test error: group dimension mismatch, must both be row ontology group or column ontology groups.");
@@ -126,7 +126,7 @@ public class CTest {
             OneWayAnova anova = new OneWayAnova();
             double pValue = anova.anovaPValue(data);
             TestResult result = new TestResult("One-way ANOVA", "One way analysis of variance wiht alpha = 0.05. \nData: " + obj.getName() + "\nDirection: " + direction + "\nGroups: " + Arrays.toString(nodes), pValue);
-            CMConsole.logData(result.toString());
+            CMConsole.log(result.toString());
 
         } catch (Exception e) {
             CMConsole.logError("ANOVA error: " + " Dataset:" + obj + " Direction:" + direction + " Groups:" + nodes == null ? null : Arrays.toString(nodes));

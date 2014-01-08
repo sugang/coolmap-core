@@ -28,7 +28,8 @@
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToBar",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToSortedBar",
                             "coolmap.canvas.datarenderer.renderer.impl.NumberToBoxPlot",
-                            "coolmap.canvas.datarenderer.renderer.impl.NumberComposite"
+                            "coolmap.canvas.datarenderer.renderer.impl.NumberComposite",
+                            "coolmap.canvas.datarenderer.renderer.impl.TextRenderer"
                             ],
                         "preferred-location":"left-bottom"
                     }

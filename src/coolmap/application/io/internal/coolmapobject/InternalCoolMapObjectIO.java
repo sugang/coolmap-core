@@ -20,6 +20,7 @@ import de.schlichtherle.truezip.file.TFileInputStream;
 import de.schlichtherle.truezip.file.TFileOutputStream;
 import java.awt.Color;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.OutputStreamWriter;
@@ -61,7 +62,14 @@ public class InternalCoolMapObjectIO {
         property.put(IOTerm.ATTR_VIEW_ZOOM, new float[]{view.getZoomX(), view.getZoomY()});
         Point mapAnchor = object.getCoolMapView().getMapAnchor();
         property.put(IOTerm.ATTR_VIEW_ANCHOR, new int[]{mapAnchor.x, mapAnchor.y});
-
+        
+        CoolMapView v = object.getCoolMapView();
+        property.put(IOTerm.ATTR_VIEW_MAXIMIZED, v.isMaximized());
+        property.put(IOTerm.ATTR_VIEW_MINIMIZED, v.isMinimized());
+        
+        Rectangle b = v.getBounds();
+        property.put(IOTerm.ATTR_VIEW_BOUNDS, new int[]{b.x, b.y, b.width, b.height});
+        
         ArrayList<String> linkedMxIDs = new ArrayList<String>();
         List<CMatrix> linkedMxs = object.getBaseCMatrices();
         for (CMatrix mx : linkedMxs) {
@@ -304,7 +312,7 @@ public class InternalCoolMapObjectIO {
             object.put(IOTerm.ATTR_NODE_VIEWHEIGHTDIFF, node.getViewHeightDiffFromParent());
         }
         
-        System.out.println(node.getName() + " " + node.isExpanded() + " " + node.getViewHeightInTree());
+//        System.out.println(node.getName() + " " + node.isExpanded() + " " + node.getViewHeightInTree());
 
         return object;
     }
@@ -431,6 +439,8 @@ public class InternalCoolMapObjectIO {
         
         object.replaceRowNodes(rowBaseNodes, rowTreeNodes);
         object.replaceColumnNodes(colBaseNodes, colTreeNodes);
+        
+        
 
     }
 

@@ -1413,6 +1413,49 @@ public final class CoolMapView<BASE, VIEW> {
     }
     private JInternalFrame _internalFrame;
 
+    /**
+     * Attempt to maximize view
+     *
+     * @param maximize
+     */
+    public void setMaximize(boolean maximize) {
+        try {
+            _internalFrame.setMaximum(maximize);
+        } catch (Exception e) {
+
+        }
+    }
+    
+    public boolean isMaximized(){
+        return _internalFrame.isMaximum();
+    }
+    
+    public boolean isMinimized(){
+        return _internalFrame.isIcon();
+    }
+
+    public void setMinimize(boolean minimize) {
+        try {
+            _internalFrame.setIcon(minimize);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void setBounds(Rectangle bounds) {
+        try {
+            _internalFrame.setMaximum(false);
+            _internalFrame.setIcon(false);
+            _internalFrame.setBounds(bounds);
+        } catch (Exception e) {
+
+        }
+    }
+    
+    public Rectangle getBounds(){
+        return _internalFrame.getBounds();
+    }
+
     private void _createInternalFrame() {
         _internalFrame = new JInternalFrame(getCoolMapObject().getName(), true, true, true, true);
         _internalFrame.setSize(new Dimension(800, 600));

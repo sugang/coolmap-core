@@ -179,7 +179,7 @@ public class CMainFrame extends JFrame {
         DockModelPropertiesDecoder dockModelDecoder = new DockModelPropertiesDecoder();
         //Need to load all the current dockables
 //        System.out.println("Loading from:" + fileUrlString);
-        CMConsole.logInSuccess("Workspace restored from: " + fileUrlString);
+        CMConsole.logInfo("Workspace restored from: " + fileUrlString);
 
         //This works
         Map dockableMap = new HashMap();

@@ -44,6 +44,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -69,24 +70,24 @@ public class NumberToColor extends ViewRenderer<Double> {
     public static String ATTR_HIGH = "high";
 
     @Override
-    public JSONObject getCurrentState(){
+    public JSONObject getCurrentState() {
         try {
             JSONObject state = new JSONObject();
             state.put(ATTR_LOW, _minValue);
             state.put(ATTR_HIGH, _maxValue);
-            
+
             int numPts = editor.getNumPoints();
             float[] pos = new float[numPts];
             int[] colors = new int[numPts];
-            
-            for(int i=0; i<editor.getNumPoints(); i++){
+
+            for (int i = 0; i < editor.getNumPoints(); i++) {
                 pos[i] = editor.getColorPositionAt(i);
                 colors[i] = editor.getColorAt(i).getRGB();
             }
-            
+
             state.put(ATTR_COLORS, colors);
             state.put(ATTR_POS, pos);
-            
+
             return state;
         } catch (Exception e) {
             //log error
@@ -96,9 +97,59 @@ public class NumberToColor extends ViewRenderer<Double> {
     }
 
     @Override
-    public boolean restoreState(JSONObject savedState){
+    public boolean restoreState(JSONObject savedState) {
 
-        return true;
+        try {
+
+            double low = savedState.optDouble(ATTR_LOW, 0);
+            double high = savedState.optDouble(ATTR_HIGH, 1);
+            JSONArray posJ = savedState.optJSONArray(ATTR_POS);
+            JSONArray colorsJ = savedState.optJSONArray(ATTR_COLORS);
+
+            _minValue = low;
+            _maxValue = high;
+            float[] p = new float[posJ.length()];
+            Color[] c = new Color[colorsJ.length()];
+            for (int i = 0; i < posJ.length(); i++) {
+                p[i] = (float) posJ.getDouble(i);
+            }
+            for (int i = 0; i < colorsJ.length(); i++) {
+                c[i] = new Color(Integer.parseInt(colorsJ.getString(i)));
+            }
+
+//            System.out.println(Arrays.toString(c));
+//            System.out.println(Arrays.toString(p));
+//            System.out.println(low + " " + high);
+            editor.clearColors();
+            editor.setStart(c[0]);
+            editor.setEnd(c[c.length - 1]);
+
+            if (c.length > 2) {
+                for (int i = 1; i < c.length - 1; i++) {
+                    editor.addColor(c[i], p[i]);
+                }
+            }
+
+            minValueField.setText(low + "");
+            maxValueField.setText(high + "");
+            editor.setMinValue((float)low);
+            editor.setMaxValue((float)high);
+            
+            updateRenderer();
+            
+
+            return true;
+        } catch (Exception e) {
+            minValueField.setText("0");
+            maxValueField.setText("1");
+            editor.setMinValue(0);
+            editor.setMaxValue(1);
+            _minValue = 0;
+            _maxValue = 1;
+            e.printStackTrace();
+            return false;
+        }
+
     }
 
     public NumberToColor() {
