@@ -49,7 +49,13 @@ public class WidgetMaster {
         _coolMapWidgets.put(widget.getClass().getName(), widget);
 
         CoolMapMaster.getCMainFrame().addWidget(widget);
-        CoolMapMaster.getCMainFrame().addMenuItem("View/Show Widgets", widget.getMenuItem(), false, false);
+        if(widget instanceof WidgetViewport){
+            //Viewport can not be hidden
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Show Widgets", widget.getMenuItem(), false, true);
+        }
+        else{
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Show Widgets", widget.getMenuItem(), false, false);
+        }
     }
     
     public static Set<Widget> getAllWidgets(){
@@ -59,9 +65,16 @@ public class WidgetMaster {
     public static void initialize() {
 
         if (Config.isInitialized()) {
+            
+            
 
 //            System.out.println("!!! Config file loading successful, loading widgets based on config file definitions");
             try {
+                
+                //First initialize viewport - static!
+                addWidget(new WidgetViewport());
+                
+                
                 JSONArray widgetsToLoad = Config.getJSONConfig().getJSONObject("widget").getJSONArray("load");
                 String[] widgetsNames = new String[widgetsToLoad.length()];
                 for(int i=0; i<widgetsToLoad.length(); i++){

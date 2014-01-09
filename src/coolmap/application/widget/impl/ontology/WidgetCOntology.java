@@ -12,6 +12,9 @@ import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.WidgetMaster;
+import coolmap.canvas.action.PasteColumnNodesAction;
+import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
@@ -876,6 +879,19 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
 
         _ontologyTable.setAutoCreateRowSorter(true);
+        
+        //why it is null?
+//        System.out.println(WidgetMaster.getViewport());
+        
+        JMenuItem pasteItem = new JMenuItem("Nodes to column from Ontology Browser", UI.getImageIcon("insertRow"));
+        WidgetMaster.getViewport().addPopupMenuItem("Paste", pasteItem, true);
+        pasteItem.addActionListener(new PasteColumnNodesAction());
+        pasteItem.setToolTipText("Paste nodes copied from ontology browser to columns");
+
+        pasteItem = new JMenuItem("Nodes to row from Ontology Browser", UI.getImageIcon("insertColumn"));
+        pasteItem.setToolTipText("Paste nodes copied from ontology browser to rows");
+        WidgetMaster.getViewport().addPopupMenuItem("Paste", pasteItem, false);
+        pasteItem.addActionListener(new PasteRowNodesAction());
     }
 
     private void _filterTable() {

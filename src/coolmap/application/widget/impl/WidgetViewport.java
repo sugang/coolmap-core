@@ -25,8 +25,6 @@ import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
 import coolmap.canvas.CoolMapView;
-import coolmap.canvas.action.PasteColumnNodesAction;
-import coolmap.canvas.action.PasteRowNodesAction;
 import coolmap.data.CoolMapObject;
 import coolmap.data.action.RenameCoolMapObjectAction;
 import coolmap.data.cmatrixview.model.VNode;
@@ -390,13 +388,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
 
         //paste nodes from ontology browser
-        JMenuItem pasteItem = new JMenuItem("Nodes to column from Ontology Browser", UI.getImageIcon("insertRow"));
-        addPopupMenuItem("Paste", pasteItem, true);
-        pasteItem.addActionListener(new PasteColumnNodesAction());
 
-        pasteItem = new JMenuItem("Nodes to row from Ontology Browser", UI.getImageIcon("insertColumn"));
-        addPopupMenuItem("Paste", pasteItem, false);
-        pasteItem.addActionListener(new PasteRowNodesAction());
     }
 
     public WidgetViewport() {
