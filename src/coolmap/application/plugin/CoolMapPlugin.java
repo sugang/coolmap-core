@@ -15,4 +15,5 @@ import net.xeoh.plugins.base.Plugin;
 public interface CoolMapPlugin extends Plugin {
     
     public void initialize();
+    public String getName();
 }

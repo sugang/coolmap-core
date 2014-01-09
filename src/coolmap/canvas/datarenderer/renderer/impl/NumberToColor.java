@@ -88,6 +88,8 @@ public class NumberToColor extends ViewRenderer<Double> {
             state.put(ATTR_COLORS, colors);
             state.put(ATTR_POS, pos);
 
+            state = new JSONObject(state.toString());
+            
             return state;
         } catch (Exception e) {
             //log error
@@ -101,13 +103,32 @@ public class NumberToColor extends ViewRenderer<Double> {
 
         try {
 
+            //putting array this wayd is not a JSONArray!
+            
             double low = savedState.optDouble(ATTR_LOW, 0);
             double high = savedState.optDouble(ATTR_HIGH, 1);
-            JSONArray posJ = savedState.optJSONArray(ATTR_POS);
-            JSONArray colorsJ = savedState.optJSONArray(ATTR_COLORS);
-
+            JSONArray posJ = savedState.getJSONArray(ATTR_POS);
+            JSONArray colorsJ = savedState.getJSONArray(ATTR_COLORS);
+            
+//            Iterator keys = savedState.keys();
+//            while(keys.hasNext()){
+//                Object key = keys.next();
+//                System.out.println("Key:" + key);
+//                System.out.println(savedState.get(key.toString()).getClass());
+//            }
+//            
+//            System.out.println(savedState.getJSONArray(ATTR_POS));
+            
+            
             _minValue = low;
             _maxValue = high;
+            
+//            System.out.println("State to restore from:" + savedState);
+            System.out.println(low);
+            System.out.println(high);
+            System.out.println(posJ);
+            System.out.println(colorsJ);
+            
             float[] p = new float[posJ.length()];
             Color[] c = new Color[colorsJ.length()];
             for (int i = 0; i < posJ.length(); i++) {
@@ -146,6 +167,7 @@ public class NumberToColor extends ViewRenderer<Double> {
             editor.setMaxValue(1);
             _minValue = 0;
             _maxValue = 1;
+            System.err.println("Failed to restore renderer state");
             e.printStackTrace();
             return false;
         }

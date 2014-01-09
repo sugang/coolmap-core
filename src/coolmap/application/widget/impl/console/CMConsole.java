@@ -14,6 +14,10 @@ import coolmap.application.widget.WidgetMaster;
 public class CMConsole {
 
     private static WidgetConsole instance = null;
+    
+    public static void logToFile(Exception e){
+        e.printStackTrace();
+    }
 
     public static void logError(String message) {
         if (instance == null) {
