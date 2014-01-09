@@ -6,6 +6,7 @@ package coolmap.application;
 
 import coolmap.application.io.IOMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.plugin.PluginMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.ActiveCoolMapObjectListenerTunnel;
 import coolmap.application.utils.DataMaster;
@@ -151,6 +152,7 @@ public final class CoolMapMaster {
         WidgetMaster.initialize();
         ModuleMaster.initialize();
         StateStorageMaster.initialize();
+        PluginMaster.initialize();
 
 //        SnippetMaster.initialize();
 //        ServiceMaster.initialize();

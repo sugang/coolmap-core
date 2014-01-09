@@ -1117,7 +1117,7 @@ public class ClusterModule extends Module {
 
     }
 
-    private void initHClust() {
+    private void init() {
 
         //bisec kmeans
         addClusterMenuItem("Cluster Row (BK)", "Cluster/Bisec Kmeans", new BisecRowAction());
@@ -1168,6 +1168,6 @@ public class ClusterModule extends Module {
     }
 
     public ClusterModule() {
-        initHClust();
+        init();
     }
 }
