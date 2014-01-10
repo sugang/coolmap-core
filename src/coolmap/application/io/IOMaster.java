@@ -156,8 +156,13 @@ public class IOMaster {
                                     return;
                                 }
 
-                                CoolMapMaster.addNewCoolMapObject(objects);
                                 CoolMapMaster.addNewCOntology(ontologies);
+                                CoolMapMaster.addNewCoolMapObject(objects);
+                                
+                                //When the nodes were created, the contology does not exist, which resulted in base 
+                                //System.out.println(objects.iterator().next().getViewNodeRow(0).getBaseIndicesFromCOntology(null, Integer.MIN_VALUE));
+                                //The orders are quite important.
+                                
 
                                 CMConsole.logInfo("Data imported from: " + Arrays.toString(f));
 

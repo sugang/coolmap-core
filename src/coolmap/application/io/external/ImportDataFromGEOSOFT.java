@@ -7,6 +7,7 @@ package coolmap.application.io.external;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Table;
+import coolmap.application.CoolMapMaster;
 import coolmap.application.io.external.interfaces.ImportData;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
@@ -235,6 +236,10 @@ public class ImportDataFromGEOSOFT implements ImportData {
                 geneOntology.addPreset(preset);
 
                 ontologies.add(geneOntology);
+                
+                //If I want to add preset, then ontology needs to be added beforehand.
+                //It's a little broken here but it's good for the greater good.
+                CoolMapMaster.addNewCOntology(ontologies); //If it was added before, it won't be added again.
 
                 DoubleCMatrix matrix = new DoubleCMatrix(Tools.removeFileExtension(file.getName()), rowNames.length, columnNames.length);
 
@@ -244,7 +249,7 @@ public class ImportDataFromGEOSOFT implements ImportData {
 //                System.out.println(Arrays.toString(columnNames));
                 matrix.setColLabels(columnNames);
                 matrix.setRowLabels(rowNames);
-
+                
                 for (int i = 0; i < rowNames.length; i++) {
                     for (int j = 0; j < columnNames.length; j++) {
                         matrix.setValue(i, j, arrayTable.getValue(i, j));
