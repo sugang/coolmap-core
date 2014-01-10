@@ -18,7 +18,7 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.contology.model.COntology;
 import coolmap.module.Module;
 import coolmap.module.ModuleMaster;
-import coolmap.utils.Config;
+import coolmap.utils.CSplashScreen;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.util.ArrayList;
@@ -148,16 +148,21 @@ public final class CoolMapMaster {
 
         }
 
-        Config.initialize();
+        
 
         //
         _cMainFrame = new CMainFrame();
 
+        CSplashScreen.splashUpdate("Loading UI...", 10);
         UI.initialize();
+        CSplashScreen.splashUpdate("Loading utilities...", 15);
         Tools.initialize();
+        CSplashScreen.splashUpdate("Loading IO...", 25);
         IOMaster.initialize();
+        CSplashScreen.splashUpdate("Loading widgets...", 50);
         WidgetMaster.initialize();
         ModuleMaster.initialize();
+        CSplashScreen.splashUpdate("Loading state manager...", 60);
         StateStorageMaster.initialize();
         
 
@@ -166,11 +171,14 @@ public final class CoolMapMaster {
         //
 //        CreaterMaster.initialize(); //Creater should be defined as a module
         //new session
+        CSplashScreen.splashUpdate("Creating new session...", 80);
         CoolMapMaster.newSession("Untitled", null);
         
         //Plugin loading after new session.
+        CSplashScreen.splashUpdate("Loading plugins...", 90);
         PluginMaster.initialize();
 
+        CSplashScreen.splashUpdate("Finalizing...", 95);
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override

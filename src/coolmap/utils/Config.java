@@ -25,7 +25,9 @@ public class Config {
     public static final String PLUGIN_DIRECTORY = "plugin-directory";
     public static final String CONFIG_FILE = "config-file";
     public static final String WORKSPACE_DIRECTORY = "workspace-directory";
-
+    public static final String VERSION = "version";
+    
+    
     private static JSONObject configObject = new JSONObject();
     private static HashMap<String, String> configHash = new HashMap<String, String>();
     
@@ -103,6 +105,8 @@ public class Config {
             }
 //            System.out.println(workspaceDirectory);
             configHash.put(WORKSPACE_DIRECTORY, workspaceDirectory);
+            
+            configHash.put(VERSION, configObject.optString(VERSION));
             
             //if successful intialized
             isInitialized = true;

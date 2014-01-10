@@ -6,6 +6,7 @@ import coolmap.application.io.external.ImportDataFromTSV;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.CoolMapObject;
 import coolmap.data.contology.model.COntology;
+import coolmap.utils.CSplashScreen;
 import coolmap.utils.Config;
 import java.io.File;
 import java.util.logging.Level;
@@ -30,6 +31,8 @@ public class Main {
             @Override
             public void run() {
 
+                Config.initialize();
+                CSplashScreen.splashInit();
                 //First initialize
                 CoolMapMaster.initialize();
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
