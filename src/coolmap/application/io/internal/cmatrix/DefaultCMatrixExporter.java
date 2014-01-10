@@ -80,8 +80,6 @@ public class DefaultCMatrixExporter implements InternalCMatrixExporter{
             
         }
         
-        
-        
         dataWriter.flush();
         dataWriter.close();
         

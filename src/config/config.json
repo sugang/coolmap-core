@@ -1,6 +1,5 @@
 {
     "version": "1.0",
-    "R": {"R-Path": "usr/bin/R", "RScript-Path": "/usr/bin/Rscript"},
     "plugin": {"directory": "plugin"},
     "workspace": {"directory": "workspace"},
     "widget": {

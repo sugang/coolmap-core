@@ -47,6 +47,10 @@ public final class COntology {
     private Class _ontologyAttributeClass = COntologyEdgeAttributeImpl.class;
 
     private boolean _isDestroyed = false;
+    
+    public static void clearAttributes(){
+        _attributeTable.clear();
+    }
 
     //These are used for handling attribute. all static
     private static HashBasedTable<String, String, Object> _attributeTable = HashBasedTable.create();

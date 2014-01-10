@@ -62,6 +62,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -140,7 +141,7 @@ public class IOMaster {
                         public void run() {
                             try {
 
-                                System.out.println("Trying to import data");
+//                                System.out.println("Trying to import data");
 
                                 if (importerInstance.onlyImportFromSingleFile()) {
                                     importerInstance.importFromFile(f[0]);
@@ -331,82 +332,146 @@ public class IOMaster {
     private static void initializeSave() {
         TConfig.get().setArchiveDetector(new TArchiveDetector("cpj", new JarDriver(IOPoolLocator.SINGLETON)));
 
-        MenuItem item = new MenuItem("Save");
+        MenuItem item = new MenuItem("Save", new MenuShortcut(KeyEvent.VK_S));
         CoolMapMaster.getCMainFrame().addMenuItem("File", item, true, false);
         item.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                //The only difference is if the file is till
+                File file = null;
+                String uri = CoolMapMaster.getSession().getSessionURI();
+                if (uri != null) {
+
+//                    System.out.println("Current uri: " + uri);
+                    file = new File(uri);
+
+                    if (!file.exists() || file.isDirectory() || !file.canWrite()) {
+                        //need a new File
+                        file = null;
+                    };
+                }
+
+                //if can't write to the file
+                if (file == null) {
+                    JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("CoolMap project file", "cpj"));
+                    int returnValue = chooser.showSaveDialog(CoolMapMaster.getCMainFrame());
+                    if (returnValue != JFileChooser.APPROVE_OPTION) {
+                        return;
+                    }
+
+                    File saveFile = chooser.getSelectedFile();
+
+                    String path = saveFile.getAbsolutePath();
+                    path = Tools.appendPathExtension(path, "cpj");
+
+                    if (saveFile.exists()) {
+                        try {
+                            saveFile.delete();
+                        } catch (Exception ex) {
+                            CMConsole.logError(saveFile + " can not be deleted. Try to save as an alternative file instead.");
+                            path = Tools.removeFileExtension("cpj");
+
+                            DateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd HH-mm-ss ");
+                            Date date = new Date();
+
+                            path += dateFormat.format(date);
+
+                            Tools.appendPathExtension(path, "cpj");
+                        }
+                    }
+                    file = new TFile(path);
+                }
+
+                //save it
+                final TFile outputFile = new TFile(file);
+                LongTask task = new LongTask("Saving project...") {
+
+                    @Override
+                    public void run() {
+                        try {
+                            saveProject(outputFile);
+                            CMConsole.logInfo("Saved project to: " + outputFile.getAbsolutePath());
+                        } catch (Exception ex) {
+                            FileUtils.deleteQuietly(new File(outputFile.getAbsolutePath())); //try to delete this corrupted file if anything occurs
+                            CMConsole.logError("Error occured when saving to " + outputFile + ", please save to a different file or export data");
+                        }
+
+                    }
+                };//task
+
+                TaskEngine.getInstance().submitTask(task);
             }
         });
 
-        item = new MenuItem("Save as...", new MenuShortcut(KeyEvent.VK_S));
+        item = new MenuItem("Save as...", new MenuShortcut(KeyEvent.VK_S, true));
         CoolMapMaster.getCMainFrame().addMenuItem("File", item, false, true);
         item.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("CoolMap project file", "cpj"));
+                int returnValue = chooser.showSaveDialog(CoolMapMaster.getCMainFrame());
+                if (returnValue != JFileChooser.APPROVE_OPTION) {
+                    return;
+                }
+
+                File saveFile = chooser.getSelectedFile();
+
+                String path = saveFile.getAbsolutePath();
+                path = Tools.appendPathExtension(path, "cpj");
+
+                if (saveFile.exists()) {
+                    try {
+                        saveFile.delete();
+                    } catch (Exception ex) {
+                        CMConsole.logError(saveFile + " can not be deleted. Try to save as an alternative file instead.");
+                        path = Tools.removeFileExtension("cpj");
+
+                        DateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd HH-mm-ss ");
+                        Date date = new Date();
+
+                        path += dateFormat.format(date);
+
+                        Tools.appendPathExtension(path, "cpj");
+                    }
+                }
+//  
+                final TFile file = new TFile(path);
+
                 LongTask task = new LongTask("Saving project...") {
 
                     @Override
                     public void run() {
                         //dev
-//                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("CoolMap project file", "cpj"));
-//                int returnValue = chooser.showSaveDialog(CoolMapMaster.getCMainFrame());
-//                if (returnValue != JFileChooser.APPROVE_OPTION) {
-//                    return;
-//                }
-//
-//                File saveFile = chooser.getSelectedFile();
-//
-//                String path = saveFile.getAbsolutePath();
-//                path = Tools.appendPathExtension(path, "cpj");
-//
-//                TFile file;
-//                if (saveFile.exists()) {
-//                    try {
-//                        saveFile.delete();
-//                    } catch (Exception ex) {
-//                        CMConsole.logError(saveFile + " can not be deleted. Try to save as an alternative file instead.");
-//                        path = Tools.removeFileExtension("cpj");
-//
-//                        DateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd HH-mm-ss ");
-//                        Date date = new Date();
-//                       
-//
-//                        path +=  dateFormat.format(date);
-//                        
-//                        Tools.appendPathExtension(path, "cpj");
-//                    }
-//                }
-//
-//                //create a new file
-//                file = new TFile(path);
-                        //expedite development
-                        File pfile = new File("/Users/sugang/000.cpj");
-                        if (pfile.exists()) {
-                            pfile.delete();
-                        }
 
-                        TFile file = new TFile("/Users/sugang/000.cpj");
-                        saveProject(file);
+//                        File pfile = new File("/Users/sugang/000.cpj");
+//                        if (pfile.exists()) {
+//                            pfile.delete();
+//                        }
+//                        TFile file = new TFile("/Users/sugang/000.cpj");
+                        try {
+
+                            saveProject(file);
+                            CMConsole.logInfo("Saved project to: " + file.getAbsolutePath());
+                        } catch (Exception ex) {
+                            FileUtils.deleteQuietly(new File(file.getAbsolutePath())); //try to delete this corrupted file if anything occursfi
+                            CMConsole.logError("Error occured when saving to " + file + ", please save to a different file or export data");
+                        }
 
                     }
                 };//task
 
                 TaskEngine.getInstance().submitTask(task);
 
-            }
+            }//end of action performed
         });
 
     }
 
-    private static void saveProject(TFile projectFile) {
-
-        //wrap this up in a long task to run in the background
-        try {
+    private static void saveProject(TFile projectFile) throws Exception {
 
             saveProjectProperties(projectFile);
             saveCOntologies(projectFile);
@@ -422,17 +487,12 @@ public class IOMaster {
                 //should make sure all streams are closed
                 System.err.println("TVFS unmount error");
             }
-            //temporaray
-            loadProject(projectFile);
 
-        } catch (Exception e) {
-            //delete this projectfile
-            e.printStackTrace();
-            FileUtils.deleteQuietly(new File(projectFile.getAbsolutePath())); //try to delete this corrupted file if anything occurs
+            CoolMapMaster.updateSession(Tools.removeFileExtension(projectFile.getName()), projectFile.getPath());
 
-        } finally {
 
-        }
+            
+
 
         //try load project immediately
     }
@@ -598,7 +658,7 @@ public class IOMaster {
     private static void loadProject(TFile projectFile) throws Exception {
         try {
 
-            CoolMapMaster.newSession(Tools.removeFileExtension(projectFile.getName()), null);
+            CoolMapMaster.newSession(Tools.removeFileExtension(projectFile.getName()), projectFile.getAbsolutePath());
             File propertyFile = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.FILE_PROJECT_INFO);
             JSONObject property = new JSONObject(IOUtils.toString(new TFileInputStream(propertyFile)));
 
@@ -733,7 +793,7 @@ public class IOMaster {
                     //also need to restore state.
                     TFile rendererPropsFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY_RENDERER);
                     object.setViewRenderer(renderer, true);
-                    
+
                     try {
                         if (rendererPropsFile.exists()) {
                             JSONObject props = new JSONObject(IOUtils.toString(new TFileInputStream(rendererPropsFile)));
@@ -746,11 +806,11 @@ public class IOMaster {
 
                 } catch (Exception e) {
                     renderer = new TextRenderer(); //Set to default String renderer if all fails
-                    
+
                     //A default text renderer
                     object.setViewRenderer(renderer, true);
                 }
-                
+
             }
 
             //set base nodes
@@ -837,7 +897,6 @@ public class IOMaster {
             coolMapObjects.add(object);
             CoolMapMaster.addNewCoolMapObject(object);
 
-
             CoolMapView view = object.getCoolMapView();
             //
             boolean isMaximized = coolMapProperty.optBoolean(IOTerm.ATTR_VIEW_MAXIMIZED, false);
@@ -858,10 +917,10 @@ public class IOMaster {
 
                 }
             }
-            
-                        //configure frame after adding.
+
+            //configure frame after adding.
             JSONArray bounds = coolMapProperty.optJSONArray(IOTerm.ATTR_VIEW_BOUNDS);
-            
+
             if (bounds != null && !isMaximized && !isMinimized) {
                 try {
                     Rectangle r = new Rectangle(bounds.getInt(0), bounds.getInt(1), bounds.getInt(2), bounds.getInt(3));
@@ -902,6 +961,24 @@ public class IOMaster {
     private static void initializeLoad() {
         MenuItem item = new MenuItem("Open Project", new MenuShortcut(KeyEvent.VK_O));
         CoolMapMaster.getCMainFrame().addMenuItem("File", item, false, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("Coolmap project file", "cpj"));
+                int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        File inFile = chooser.getSelectedFile();
+                        TFile file = new TFile(inFile);
+                        loadProject(file);
+                        CMConsole.logInfo("Opened project from: " + file.getAbsolutePath());
+                    } catch (Exception ex) {
+                        CMConsole.logError("Error occured when trying to open project. File maybe corrupted.");
+                    }
+                }
+            }
+        });
 
     }
 

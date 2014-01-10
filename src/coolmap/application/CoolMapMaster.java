@@ -105,7 +105,14 @@ public final class CoolMapMaster {
         for (Module module : ModuleMaster.getAllModules()) {
             module.restoreState(null);
         }
+        
+        COntology.clearAttributes();
 
+    }
+    
+    public static void updateSession(String name, String path){
+        session = new Session(name, path);
+        WidgetMaster.getViewport().setTitle(name, path);
     }
 
     public static ActiveCoolMapObjectListenerTunnel getActiveCoolMapObjectListenerDelegate() {
@@ -152,7 +159,7 @@ public final class CoolMapMaster {
         WidgetMaster.initialize();
         ModuleMaster.initialize();
         StateStorageMaster.initialize();
-        PluginMaster.initialize();
+        
 
 //        SnippetMaster.initialize();
 //        ServiceMaster.initialize();
@@ -160,6 +167,9 @@ public final class CoolMapMaster {
 //        CreaterMaster.initialize(); //Creater should be defined as a module
         //new session
         CoolMapMaster.newSession("Untitled", null);
+        
+        //Plugin loading after new session.
+        PluginMaster.initialize();
 
         SwingUtilities.invokeLater(new Runnable() {
 

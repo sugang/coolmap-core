@@ -24,7 +24,6 @@ public class Config {
     public static final String COOLMAP_DIRECTORY = "coolmap-directory";
     public static final String PLUGIN_DIRECTORY = "plugin-directory";
     public static final String CONFIG_FILE = "config-file";
-    public static final String RSCRIPT_PATH = "rscript-path";
     public static final String WORKSPACE_DIRECTORY = "workspace-directory";
 
     private static JSONObject configObject = new JSONObject();
@@ -86,13 +85,6 @@ public class Config {
 
             configObject = new JSONObject(sb.toString());
 
-            //load RScript path
-            try {
-                rscriptPath = configObject.getJSONObject("R").getString("RScript-Path");
-            } catch (JSONException ejson) {
-                rscriptPath = "/usr/bin/Rscript";
-            }
-            configHash.put(RSCRIPT_PATH, rscriptPath);
 
             //load pluginDirectory
             try {

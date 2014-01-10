@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import org.json.JSONObject;
 
 /**
  *
@@ -28,6 +29,24 @@ public class WidgetConsole extends Widget {
     private final JPanel _container = new JPanel();
     private JTextPane consolePane = new JTextPane();
 
+    @Override
+    public JSONObject getCurrentState() {
+        return null;
+    }
+
+    @Override
+    public boolean restoreState(JSONObject savedState) {
+        if(savedState == null){
+            consolePane.setText("");
+        }
+        return true;
+    }
+    
+
+
+    
+    
+    
     public WidgetConsole() {
         super("Console", W_DATA, L_DATAPORT, UI.getImageIcon("console"), "Displays console information");
         getContentPane().setLayout(new BorderLayout());

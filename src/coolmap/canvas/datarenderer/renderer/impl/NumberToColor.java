@@ -124,10 +124,10 @@ public class NumberToColor extends ViewRenderer<Double> {
             _maxValue = high;
             
 //            System.out.println("State to restore from:" + savedState);
-            System.out.println(low);
-            System.out.println(high);
-            System.out.println(posJ);
-            System.out.println(colorsJ);
+//            System.out.println(low);
+//            System.out.println(high);
+//            System.out.println(posJ);
+//            System.out.println(colorsJ);
             
             float[] p = new float[posJ.length()];
             Color[] c = new Color[colorsJ.length()];

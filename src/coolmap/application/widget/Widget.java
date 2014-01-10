@@ -66,22 +66,6 @@ public abstract class Widget implements StateSavable{
 //    public JSONObject saveParameters(JSONObject config){
 //        return config;
 //    }
-
-    
-    /**
-     * save state of a widget to json string
-     */
-    public JSONObject saveToJSON(){
-        return null;
-    }
-    
-    /**
-     * restore the state from a json config
-     * @param config 
-     */
-    public void restoreFromJSON(JSONObject config){
-
-    }
     
     /**
      * when extending this class, need to override constructor, and add type
