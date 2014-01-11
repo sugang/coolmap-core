@@ -14,6 +14,7 @@ import coolmap.application.io.internal.cmatrix.interfaces.InternalCMatrixImporte
 import coolmap.application.io.internal.contology.InternalCOntologyAttributeIO;
 import coolmap.application.io.internal.contology.InternalCOntologyIO;
 import coolmap.application.io.internal.coolmapobject.InternalCoolMapObjectIO;
+import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
 import coolmap.application.widget.impl.console.CMConsole;
@@ -62,6 +63,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -429,6 +431,12 @@ public class IOMaster {
                 path = Tools.appendPathExtension(path, "cpj");
 
                 if (saveFile.exists()) {
+                    
+                    int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), "Override existing file " + saveFile + "?", "Override warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if(returnVal == JOptionPane.CANCEL_OPTION){
+                        return;
+                    }
+                    
                     try {
                         saveFile.delete();
                     } catch (Exception ex) {
@@ -494,11 +502,9 @@ public class IOMaster {
             }
 
             CoolMapMaster.updateSession(Tools.removeFileExtension(projectFile.getName()), projectFile.getPath());
-
-
+            StateStorageMaster.clearAllStates();
+           
             
-
-
         //try load project immediately
     }
 

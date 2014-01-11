@@ -69,7 +69,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
     private void initPopup() {
         JMenuItem item = new JMenuItem("All Rows");
-        addPopupMenuItem("Selection", item, false);
+        addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -105,7 +105,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
 
         item = new JMenuItem("All Columns");
-        addPopupMenuItem("Selection", item, false);
+        addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -137,6 +137,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
             }
         });
+
+        addPopupMenuSeparator(null);
 
         item = new JMenuItem("Selected Rows");
         addPopupMenuItem("Expand", item, false);
@@ -175,11 +177,24 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
             }
         });
-        
-        addPopupMenuSeparator(null);
+
+        item = new JMenuItem("All Rows");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                obj.expandRowNodesOneLayer();
+            }
+        });
 
         item = new JMenuItem("Selected Columns");
-        addPopupMenuItem("Expand", item, false);
+        addPopupMenuItem("Expand", item, true);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -212,6 +227,21 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 } catch (Exception ex) {
 
                 }
+            }
+        });
+
+        item = new JMenuItem("All Columns");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                obj.expandColumnNodesOneLayer();
             }
         });
 
@@ -259,8 +289,23 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
 
-        item = new JMenuItem("Selected Columns");
+        item = new JMenuItem("All Rows");
         addPopupMenuItem("Collapse", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                obj.collapseRowNodesOneLayer();
+            }
+        });
+
+        item = new JMenuItem("Selected Columns");
+        addPopupMenuItem("Collapse", item, true);
         item.addActionListener(new ActionListener() {
 
             @Override
@@ -302,6 +347,81 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                 }
 
+            }
+        });
+
+        item = new JMenuItem("All Columns");
+        addPopupMenuItem("Collapse", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                obj.collapseColumnNodesOneLayer();
+            }
+        });
+
+        item = new JMenuItem("Selected Rows");
+        addPopupMenuItem("Remove", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
+                ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
+                for (Range<Integer> selections : selRows) {
+                    for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
+                        VNode node = obj.getViewNodeRow(i);
+                        nodesToBeRemoved.add(node);
+
+                    }
+                }//end iteration
+                try {
+                    CoolMapState state = CoolMapState.createStateRows("Remove rows", obj, null);
+                    obj.removeViewNodesRow(nodesToBeRemoved);
+                    StateStorageMaster.addState(state);
+                } catch (Exception ex) {
+                    System.out.println("Error removing rows");
+                }
+            }
+        });
+
+        item = new JMenuItem("Selected Columns");
+        addPopupMenuItem("Remove", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
+                ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
+                for (Range<Integer> selections : selColumns) {
+                    for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
+                        VNode node = obj.getViewNodeColumn(i);
+                        nodesToBeRemoved.add(node);
+                    }
+                }//end iteration
+
+                try {
+                    CoolMapState state = CoolMapState.createStateColumns("Remove columns", obj, null);
+                    obj.removeViewNodesColumn(nodesToBeRemoved);
+                    StateStorageMaster.addState(state);
+                } catch (Exception ex) {
+                    System.err.println("Error removing columns");
+                }
             }
         });
 
@@ -388,7 +508,6 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
 
         //paste nodes from ontology browser
-
     }
 
     public WidgetViewport() {

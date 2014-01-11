@@ -454,16 +454,9 @@ public final class CoolMapObject<BASE, VIEW> {
             return;
         }
 
-        HashSet<VNode> nodesToBeRemoved = new HashSet<VNode>(nodes.size());
-        for (VNode node : nodes) {
-            if (node != null && node.getParentNode() == null) {
-                nodesToBeRemoved.add(node);
-            }
-        }
-
         //This is dangerous. The parents must be checked;
+        HashSet<VNode> nodesToBeRemoved = new HashSet<>(nodes);
         _vMatrix.removeActiveColNodes(nodesToBeRemoved);
-
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedRow();
         _sortTracker.clearSortedColumn();
@@ -472,33 +465,32 @@ public final class CoolMapObject<BASE, VIEW> {
         notifyColumnsChanged();
 
         //System.out.println(getViewValue(3, 10));
+        if (getViewNumColumns() == 0) {
+            getCoolMapView().setActiveCell(null, null); //will it work?
+        }
     }
 
+    /**
+     * remove nodes from row. If the node is an ontology nodes, the entire
+     * expanded tree will be removed also.
+     */
     public void removeViewNodesRow(Collection<VNode> nodes) {
-        //make sure only nodes with no parents
         if (nodes == null || nodes.isEmpty()) {
             return;
         }
 
-//        System.out.println(System.currentTimeMillis());
-        HashSet<VNode> nodesToBeRemoved = new HashSet<VNode>(nodes.size());
-        for (VNode node : nodes) {
-            if (node != null && node.getParentNode() == null) {
-                nodesToBeRemoved.add(node);
-            }
-        }
-//        System.out.println(System.currentTimeMillis());
-
-        //slow
+        HashSet<VNode> nodesToBeRemoved = new HashSet<>(nodes);
         _vMatrix.removeActiveRowNodes(nodesToBeRemoved);
-
-//        System.out.println(System.currentTimeMillis());
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
         _sortTracker.clearSortedRow();
         getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
+
+        if (getViewNumRows() == 0) {
+            getCoolMapView().setActiveCell(null, null); //will it work?
+        }
     }
 
     public int getViewNumRows() {
@@ -565,15 +557,16 @@ public final class CoolMapObject<BASE, VIEW> {
 
         _coolMapView.updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
-        
-        
-        
+
         //No update yet
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
 
         getCoolMapView().centerToPercentage(0.5f, 0.5f);
 
+        if (getViewNumRows() == 0) {
+            getCoolMapView().setActiveCell(null, null); //will it work?
+        }
     }
 
     public void replaceColumnNodes(List<VNode> nodes, List<VNode> treeNodes) {
@@ -592,6 +585,10 @@ public final class CoolMapObject<BASE, VIEW> {
         notifyColumnsChanged();
 
         getCoolMapView().centerToPercentage(0.5f, 0.5f);
+        
+        if (getViewNumColumns() == 0) {
+            getCoolMapView().setActiveCell(null, null); //will it work?
+        }
     }
 
     //insertRowNodes without updating view
@@ -1310,7 +1307,7 @@ public final class CoolMapObject<BASE, VIEW> {
             //add a filtering step
 
             _vMatrix.expandRowNodeToChildNodes(nodesToBeExpanded);
-            
+
             getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
             _sortTracker.clearSortedColumn();
@@ -1347,16 +1344,12 @@ public final class CoolMapObject<BASE, VIEW> {
             }
 
             notifyRowsChanged();
-            
+
             //The row node height should not be null. How can it be null?
 //            for(VNode node : getViewNodesRowTree(0, 10)){
 //                System.out.println(node.getName() + " " + node.getViewHeightInTree());
 //            }
-            
             return nodesToBeExpanded;
-            
-            
-            
 
         } catch (Exception e) {
             System.err.println("Minor issue: exapnd row error");
@@ -1465,7 +1458,7 @@ public final class CoolMapObject<BASE, VIEW> {
                     }
                 }
             }
-            
+
             HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
 
             if (columnSelections != null) {
@@ -1538,11 +1531,11 @@ public final class CoolMapObject<BASE, VIEW> {
     }
 
     public boolean expandColumnNodesOneLayer() {
-        return expandColumnNodes(getViewNodesColumn(), false)==null?false:true;
+        return expandColumnNodes(getViewNodesColumn(), false) == null ? false : true;
     }
 
     public boolean expandRowNodesOneLayer() {
-        return expandRowNodes(getViewNodesRow(), false)==null?false:true;
+        return expandRowNodes(getViewNodesRow(), false) == null ? false : true;
     }
 
     public boolean collapseColumnNodesOneLayer() {
@@ -1583,7 +1576,7 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         if (!onlyLevelOneParents.isEmpty()) {
-            return collapseColumnNodes(onlyLevelOneParents, false) == null?false:true;
+            return collapseColumnNodes(onlyLevelOneParents, false) == null ? false : true;
         }
         return false;
     }

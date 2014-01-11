@@ -190,6 +190,12 @@ public class StateStorageMaster {
         }
         _stateQueuesHash.remove(object.getID());
     }
+    
+    public static void clearAllStates(){
+        _stateQueuesHash.clear();
+        updateMenus(null);
+    }
+    
 
     public static void activeCoolMapChanged(CoolMapObject oldObject, CoolMapObject newObject) {
         updateMenus(newObject);
@@ -198,6 +204,7 @@ public class StateStorageMaster {
     public static void updateMenus(CoolMapObject object) {
         if (object == null) {
             _undoOperation.setEnabled(false);
+            _undoOperation.setLabel("Undo");
             _redoOperation.setEnabled(false);
             _saveStateOperation.setEnabled(false);
             _saveStateOperation.setEnabled(false);
@@ -207,6 +214,7 @@ public class StateStorageMaster {
             StateQueues queues = _stateQueuesHash.get(object.getID());
             if (queues == null) {
                 _undoOperation.setEnabled(false);
+                _undoOperation.setLabel("Undo");
                 _redoOperation.setEnabled(false);
             } else {
                 if (queues.hasRedo()) {

@@ -163,7 +163,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
 
-        _selectSubtree = new JMenuItem("Select leaf rows");
+        _selectSubtree = new JMenuItem("Select rows");
         _selectSubtree.setToolTipText("Select rows with selected ontology nodes");
         _popupMenu.add(_selectSubtree);
         _selectSubtree.addActionListener(new ActionListener() {

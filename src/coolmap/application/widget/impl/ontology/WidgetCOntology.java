@@ -6,8 +6,6 @@ package coolmap.application.widget.impl.ontology;
 
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
-import coolmap.application.actions.DeleteCOntologyAction;
-import coolmap.application.actions.RenameCOntologyAction;
 import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
@@ -373,9 +371,36 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         ontologyButton.setBorder(null);
         ontologyButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        configPopupMenu.add(new RenameCOntologyAction());
-        configPopupMenu.add(new DeleteCOntologyAction());
+        
+        
+        
 
+        JMenuItem deleteItem = new JMenuItem("Remove this ontology");
+        deleteItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                int returnVal = JOptionPane.showConfirmDialog(
+                        CoolMapMaster.getCMainFrame(), 
+                        "Remove ontology '" + _ontologyCombo.getSelectedItem() +"' ?\nAll ontology nodes associated with this ontology will also be deleted.\nThis operation can not be undone.", 
+                        "Remove ontology warning", 
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                
+                if( returnVal == JOptionPane.CANCEL_OPTION){
+                    return;
+                }
+                
+                //GO ON AND DELETE
+                 
+                COntology ontology = (COntology)_ontologyCombo.getItemAt(0);
+                CoolMapMaster.destroyCOntology(ontology);
+                
+            }
+        });
+        
+        configPopupMenu.add(deleteItem);
+        
         ontologyButton.addMouseListener(new MouseAdapter() {
 
             @Override

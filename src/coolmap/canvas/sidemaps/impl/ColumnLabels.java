@@ -140,9 +140,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     for (Range<Integer> selections : selColumns) {
                         for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
                             VNode node = obj.getViewNodeColumn(i);
-                            if (node.getParentNode() == null) {
-                                nodesToBeRemoved.add(node);
-                            }
+                            nodesToBeRemoved.add(node);
                         }
                     }//end iteration
 
@@ -203,10 +201,9 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
             if (node.getViewColor() == null) {
                 COntology onto = CoolMapMaster.getCOntologyByID(node.getCOntologyID());
-                if(onto != null){
+                if (onto != null) {
                     color = onto.getViewColor();
-                }
-                else{
+                } else {
                     color = null;
                 }
             } else {

@@ -111,7 +111,7 @@ public class VMatrix<BASE, VIEW> {
                 _activeRowNodesInTree.addAll(treeNodes);
             }
             _updateActiveRowNodeViewIndices();
-            
+
             //looks like the node heights were not updated
             //what if i keep it the way it is
 //            _updateActiveRowNodeHeights();
@@ -164,7 +164,7 @@ public class VMatrix<BASE, VIEW> {
     }
 
     /**
-     * set the active rowNodes
+     * set the active colNodes
      *
      * @param nodes
      */
@@ -180,62 +180,31 @@ public class VMatrix<BASE, VIEW> {
         _updateActiveRowNodeViewIndices();
     }
 
-//    public synchronized void insertActiveColNodes(VNode... nodes) {
-//        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
-//        nodesToBeAdded.addAll(Arrays.asList(nodes));
-//        insertActiveColNodes(0, nodesToBeAdded);
-//    }
-//    public synchronized void insertActiveRowNodes(VNode... nodes) {
-//        ArrayList<VNode> nodesToBeAdded = new ArrayList<VNode>(1);
-//        nodesToBeAdded.addAll(Arrays.asList(nodes));
-//        insertActiveRowNodes(0, nodesToBeAdded);
-//    }
-//    public synchronized void removeActiveRowNodes(Set<Integer> index) {
-//        ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
-//        for (Integer i : index) {
-//            if (i != null && i >= 0 && i < getNumCols()) {
-//                nodesToBeRemoved.add(getActiveRowNode(i));
-//            }
-//        }
-//        if (!nodesToBeRemoved.isEmpty()) {
-//            _activeRowNodes.removeAll(nodesToBeRemoved);
-//        }
-//        for (VNode node : nodesToBeRemoved) {
-//            node.setViewIndex(null);
-//        }
-//    }
-//    public synchronized void removeActiveColNodes(Set<Integer> index) {
-//        ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
-//        for (Integer i : index) {
-//            if (i != null && i >= 0 && i < getNumRows()) {
-//                nodesToBeRemoved.add(getActiveColNode(i));
-//            }
-//        }
-//        if (!nodesToBeRemoved.isEmpty()) {
-//            _activeColNodes.removeAll(nodesToBeRemoved);
-//        }
-//        for (VNode node : nodesToBeRemoved) {
-//            node.setViewIndex(null);
-//        }
-//    }
     public synchronized void removeActiveColNodes(HashSet<VNode> nodes) {
         if (nodes != null && !nodes.isEmpty()) {
-//            System.out.println(nodes);
-//            remove 
-
-            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes); //use hashset removes much faster
-            colNodes.removeAll(nodes);
-
+            
+            HashSet<VNode> nodesToRemove = new HashSet<>();
+            HashSet<VNode> nodesToCollapse = new HashSet<>();
+            for(VNode node : nodes){
+                if(node.getParentNode() == null){
+                    nodesToRemove.add(node);
+                }
+                else{
+                    _findRootNodes(node, nodesToCollapse);
+                }
+            }
+            
+            collapseTreeColNodes(nodesToCollapse);
+            nodesToRemove.addAll(nodesToCollapse);
+            
+            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes);
+            colNodes.removeAll(nodesToRemove);
             _activeColNodes.clear();
             _activeColNodes.addAll(colNodes);
-//            System.out.println(_activeColNodes);
-            for (VNode node : nodes) {
-                node.setViewIndex(null); //They may still be contained elsewhere. Therefore needs to set the index to null
-            }
+
+            //Need to also find tree nodes to remove
             _updateActiveColNodeViewIndices();
-//            for(VNode node : _activeColNodes){
-//                System.out.println(node + "-->" + node.getViewIndex());
-//            }
+            
         }
     }
 
@@ -255,25 +224,45 @@ public class VMatrix<BASE, VIEW> {
      * @param nodes
      */
     public synchronized void removeActiveRowNodes(HashSet<VNode> nodes) {
+
         if (nodes != null && !nodes.isEmpty()) {
 
-//            System.out.println("row node size before removal:");
-//            System.out.println(_activeRowNodes.size());
-            //why this step takes so long!
+            HashSet<VNode> nodesToRemove = new HashSet<>();
+            HashSet<VNode> nodesToCollapse = new HashSet<>();
+            for(VNode node : nodes){
+                if(node.getParentNode() == null){
+                    nodesToRemove.add(node);
+                }
+                else{
+                    _findRootNodes(node, nodesToCollapse);
+                }
+            }
+            
+            collapseTreeRowNodes(nodesToCollapse);
+            nodesToRemove.addAll(nodesToCollapse);
+            
             LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>(_activeRowNodes);
-            rowNodes.removeAll(nodes);
-
-            //_activeRowNodes.removeAll(nodes);
+            rowNodes.removeAll(nodesToRemove);
             _activeRowNodes.clear();
             _activeRowNodes.addAll(rowNodes);
 
-            for (VNode node : nodes) {
-                node.setViewIndex(null);
-            }
-
-//            System.out.println("row node size after removal");
-//            System.out.println(_activeRowNodes.size());
+            //Need to also find tree nodes to remove
             _updateActiveRowNodeViewIndices();
+        }
+    }
+
+    private void _findRootNodes(VNode childNode, HashSet<VNode> nodes) {
+        VNode parentNode = childNode.getParentNode();
+        if (parentNode == null) {
+            nodes.add(childNode);
+            return;
+        } 
+        else if(parentNode.isMarked()){
+            return;
+        }
+        else {
+            parentNode.mark(true);
+            _findRootNodes(parentNode, nodes);
         }
     }
 
@@ -509,7 +498,6 @@ public class VMatrix<BASE, VIEW> {
         _updateActiveRowNodeHeights();
         _updateActiveRowNodeViewIndices();
 
-        
     }
 
     /**
@@ -695,7 +683,6 @@ public class VMatrix<BASE, VIEW> {
 
 //                System.out.println(node.getName());
 //                node.setViewColor(Color.RED);
-
                 ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
                 ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>(); //these nodes are marked to be removed, so no worries
                 _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);

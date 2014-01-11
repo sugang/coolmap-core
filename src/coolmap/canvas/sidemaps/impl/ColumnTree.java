@@ -236,7 +236,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
 
-        _selectSubtree = new JMenuItem("Select");
+        _selectSubtree = new JMenuItem("Select columns");
         _selectSubtree.setToolTipText("Select columns with selected ontology nodes");
         _popupMenu.add(_selectSubtree);
         _selectSubtree.addActionListener(new ActionListener() {

@@ -15,6 +15,7 @@ import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.module.Module;
 import coolmap.module.ModuleMaster;
@@ -107,7 +108,7 @@ public final class CoolMapMaster {
         }
         
         COntology.clearAttributes();
-
+        StateStorageMaster.clearAllStates();
     }
     
     public static void updateSession(String name, String path){
@@ -345,6 +346,40 @@ public final class CoolMapMaster {
         if (ontology == null) {
             return;
         }
+        
+        String ontologyID = ontology.getID();
+        
+        //Also need to remove all view nodes that are associated with this ontology
+        for(CoolMapObject object : CoolMapMaster.getCoolMapObjects()){
+            
+            //check all row nodes and column nodes, see whether there are associated nodes
+            ArrayList<VNode> rowNodesToRemove = new ArrayList();
+            ArrayList<VNode> colNodesToRemove = new ArrayList();
+            List<VNode> viewNodesRow = object.getViewNodesRow();
+            List<VNode> viewNodesCol = object.getViewNodesColumn();
+            
+            
+            for(VNode node : viewNodesRow){
+                if(node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)){
+                    rowNodesToRemove.add(node);
+                }
+            }
+            
+            for(VNode node : viewNodesCol){
+                if(node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)){
+                    colNodesToRemove.add(node);
+                }
+            }
+            
+            object.removeViewNodesRow(rowNodesToRemove);
+            object.removeViewNodesColumn(colNodesToRemove);
+            
+            if(!rowNodesToRemove.isEmpty() || !colNodesToRemove.isEmpty()){
+                StateStorageMaster.clearStates(object);
+            }
+            
+        }
+        
 
         if (ontology.isDestroyed() && _contologies.values().contains(ontology)) {
             _contologies.remove(ontology.getID());

@@ -73,7 +73,6 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
     public RowLabels(CoolMapObject obj) {
         super(obj);
 
-
         _sortAscending = new JMenuItem("Sort Ascending", UI.getImageIcon("leftThin"));
         _sortDescending = new JMenuItem("Sort Dscending", UI.getImageIcon("rightThin"));
         _zoomControlY = getCoolMapView().getZoomControlY();
@@ -148,14 +147,17 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
                     for (Range<Integer> selections : selRows) {
                         for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
                             VNode node = obj.getViewNodeRow(i);
-                            if (node.getParentNode() == null) {
-                                nodesToBeRemoved.add(node);
-                            }
+                            nodesToBeRemoved.add(node);
+
                         }
                     }//end iteration
-                    CoolMapState state = CoolMapState.createStateRows("Remove rows", obj, null);
-                    obj.removeViewNodesRow(nodesToBeRemoved);
-                    StateStorageMaster.addState(state);
+                    try {
+                        CoolMapState state = CoolMapState.createStateRows("Remove rows", obj, null);
+                        obj.removeViewNodesRow(nodesToBeRemoved);
+                        StateStorageMaster.addState(state);
+                    } catch (Exception ex) {
+                        System.out.println("Error removing rows");
+                    }
                 }
             }
         });
@@ -347,10 +349,9 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 
             if (node.getViewColor() == null) {
                 COntology onto = CoolMapMaster.getCOntologyByID(node.getCOntologyID());
-                if(onto != null){
+                if (onto != null) {
                     color = onto.getViewColor();
-                }
-                else{
+                } else {
                     color = null;
                 }
             } else {
