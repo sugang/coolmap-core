@@ -512,18 +512,12 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
                         //make sure drawing don't go to other cells
                         if (Thread.currentThread().isInterrupted()) {
-                            //throw new InterruptedException();
-                            //simply stop rendering
-                            //System.out.println("Interrupted?");
-                            //Immediately return
                             return;
                         }
 
-//                    System.out.println(cellWidth + " " + cellHeight);
                         if (_clipCell) {
                             g2D.setClip((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
                         }
-//                    System.out.println("Render SD row:" + i + " col:" + j);
                         switch (__mode) {
                             case LD:
                                 renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
@@ -540,7 +534,6 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                         }
 
                     } catch (Exception e) {
-                        System.err.println("View render exception.. Current render session canceled");
                         return;
                     }
 

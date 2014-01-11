@@ -79,9 +79,17 @@ public class COntologyToCMatrixMap {
             return null;
         }
     }
+    
+    //force rebuilding the base index map
+    public synchronized void rebuildBaseIndexMap(CMatrix matrix, Integer direction){
+        _baseIndexMaps.remove(new ItemKey(matrix, direction));
+        _buildBaseIndexMap(matrix, direction);
+    }
+    
 
     private synchronized void _buildBaseIndexMap(CMatrix matrix, Integer direction) {
-        if (matrix == null || _cOntology == null || _cOntology.containsLoop()) {
+        
+        if (matrix == null || _cOntology == null) {
             //change stuff here later on
             return;
         }

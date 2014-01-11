@@ -918,7 +918,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     public synchronized void addSelection(Collection<Rectangle> selections) {
         if (selections == null) {
-            return;
+            clearSelection();
         } else {
             for (Rectangle selection : selections) {
                 if (_isValidRegion(selection)) {
@@ -3749,16 +3749,8 @@ public final class CoolMapView<BASE, VIEW> {
         this._anchorSynced = anchorSynced;
     }
 
-    public void setSyncColumnLayout(boolean columnLayoutSynced) {
-        this._columnLayoutSynced = columnLayoutSynced;
-    }
-
     public void setSyncColumnSelection(boolean columnSelectionSynced) {
         this._columnSelectionSynced = columnSelectionSynced;
-    }
-
-    public void setSyncRowLayout(boolean rowLayoutSynced) {
-        this._rowLayoutSynced = rowLayoutSynced;
     }
 
     public void setSyncRowSelection(boolean rowSelectionSynced) {
@@ -3774,9 +3766,6 @@ public final class CoolMapView<BASE, VIEW> {
     private boolean _activeCellSynced = false;
     private boolean _rowSelectionSynced = false;
     private boolean _columnSelectionSynced = false;
-    private boolean _rowLayoutSynced = false;
-    private boolean _columnLayoutSynced = false;
-
     /**
      * deSync
      */
@@ -3784,10 +3773,8 @@ public final class CoolMapView<BASE, VIEW> {
         setSyncMapAnchor(false);
         setSyncZoom(false);
         setSyncActiveCell(false);
-        setSyncRowSelection(false);
+        setSyncRowSelection(false);        
         setSyncColumnSelection(false);
-        setSyncRowLayout(false);
-        setSyncColumnLayout(false);
         redrawCanvas();
     }
 
@@ -5278,14 +5265,6 @@ public final class CoolMapView<BASE, VIEW> {
 
             if (_columnSelectionSynced) {
                 _linkIcons.add(UI.getImageIcon("rangeColumn").getImage());
-            }
-
-            if (_rowLayoutSynced) {
-                _linkIcons.add(UI.getImageIcon("rowLabel").getImage());
-            }
-
-            if (_columnLayoutSynced) {
-                _linkIcons.add(UI.getImageIcon("colLabel").getImage());
             }
 
             //System.out.println(_linkIcons.size() + " " + _activeCellSynced);

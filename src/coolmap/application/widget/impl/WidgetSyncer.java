@@ -9,6 +9,7 @@ import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
@@ -17,10 +18,12 @@ import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.listeners.CObjectListener;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -46,13 +49,7 @@ import javax.swing.SwingUtilities;
  */
 public final class WidgetSyncer extends Widget implements CViewListener, CObjectListener, DataStorageListener {
 
-//    private boolean _isSyncingAnchor = true;
-//    private boolean _isSyncingZoom = true;
-//    private boolean _isSyncingSelection = false;
-//    private boolean _isSyncingRows = false;
-//    private boolean _isSyncingColumns = false;
-//    private boolean _isSynchingActiveCell = true;
-    private final JToggleButton _anchor, _zoom, _activeCell, _selectionRow, _selectionColumn, _rowLayout, _columnLayout;
+    private final JToggleButton _anchor, _zoom, _activeCell, _selectionRow, _selectionColumn;
     private final JList _list = new JList();
 
     private void _updateSyncStatus(CoolMapObject object) {
@@ -90,18 +87,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             view.setSyncColumnSelection(true);
         } else {
             view.setSyncColumnSelection(false);
-        }
-
-        if (_rowLayout.isSelected()) {
-            view.setSyncRowLayout(true);
-        } else {
-            view.setSyncRowLayout(false);
-        }
-
-        if (_columnLayout.isSelected()) {
-            view.setSyncColumnLayout(true);
-        } else {
-            view.setSyncColumnLayout(false);
         }
 
         view.redrawCanvas();
@@ -184,35 +169,11 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
             }
         });
 
-        _rowLayout = new JToggleButton(UI.getImageIcon("rowLabel"));
-        _rowLayout.setToolTipText("Sync row layout");
-        _rowLayout.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                rowsChanged(CoolMapMaster.getActiveCoolMapObject());
-                _updateSyncStatusAll();
-            }
-        });
-
-        _columnLayout = new JToggleButton(UI.getImageIcon("colLabel"));
-        _columnLayout.setToolTipText("Sync column layout");
-        _columnLayout.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                columnsChanged(CoolMapMaster.getActiveCoolMapObject());
-                _updateSyncStatusAll();
-            }
-        });
-
         toolBar.add(_anchor);
         toolBar.add(_zoom);
         toolBar.add(_activeCell);
         toolBar.add(_selectionRow);
         toolBar.add(_selectionColumn);
-        toolBar.add(_rowLayout);
-        toolBar.add(_columnLayout);
 
         contentPane.add(toolBar, BorderLayout.NORTH);
         contentPane.add(new JScrollPane(_list), BorderLayout.CENTER);
@@ -229,14 +190,14 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                 if (SwingUtilities.isLeftMouseButton(event)) {
                     JList list = (JList) event.getSource();
 
-                // Get index of item clicked
+                    // Get index of item clicked
                     int index = list.locationToIndex(event.getPoint());
                     CheckListItem item = (CheckListItem) list.getModel().getElementAt(index);
 
-                // Toggle selected state
+                    // Toggle selected state
                     item.setSelected(!item.isSelected());
 
-                // Repaint cell
+                    // Repaint cell
                     list.repaint(list.getCellBounds(index, index));
 
                 }
@@ -259,10 +220,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         }
 
         //figure out the selected node names
-        if (_selectionColumn.isSelected()) {
-            //find the selected anchor names
-            //if itself is not checked, return
-            
+        if (_selectionColumn.isSelected() && !_selectionRow.isSelected()) {
 
             HashSet<String> nodeNames = new HashSet<String>();
             ArrayList<Range<Integer>> selectedColumns = object.getCoolMapView().getSelectedColumns();
@@ -299,10 +257,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                             }
                         }
                     }
-
-                    //now you have a good idea of to be selected
-                    //System.out.println(toBeSelected);
-                    //now merge them!
                     if (toBeSelectedIndices.isEmpty()) {
                         otherObject.getCoolMapView().setSelectionsColumn(null);
                     } else {
@@ -325,21 +279,12 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 //                        System.out.println(otherObject.getName());
                         otherObject.getCoolMapView().setSelectionsColumn(selectedColumnsRanges);
 
-//                        ////////////////////////////////////////////////////////////////////////
-//                        ////////////////////////////////////////////////////////////////////////
-//                        otherObject.getCoolMapView().setSubSelectionColumns(nodeNames);
                     }
-                    //end of changing selection operation
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-                    //ontology 
-
                 }
             }
         }//selection column done
-
         //figure out the selected node names
-        if (_selectionRow.isSelected()) {
+        else if (_selectionRow.isSelected() && !_selectionColumn.isSelected()) {
 
             HashSet<String> nodeNames = new HashSet<String>();
             ArrayList<Range<Integer>> selectedRows = object.getCoolMapView().getSelectedRows();
@@ -406,12 +351,116 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                 }
             }
         }//selection row done
+        else if (_selectionColumn.isSelected() && _selectionRow.isSelected()) {
+            //synchronized both rows and columns selections
+            //obtain selected row node names
+            HashSet<String> rowNodeNames = new HashSet<String>();
+            ArrayList<Range<Integer>> selectedRows = object.getCoolMapView().getSelectedRows();
+            VNode node;
+            for (Range<Integer> range : selectedRows) {
+                for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                    node = object.getViewNodeRow(i);
+                    if (node != null && node.getName() != null) {
+                        rowNodeNames.add(node.getName());
+                    }
+                }
+            }
+
+            //obtain selected column node names
+            HashSet<String> columnNodeNames = new HashSet<String>();
+            ArrayList<Range<Integer>> selectedColumns = object.getCoolMapView().getSelectedColumns();
+            for (Range<Integer> range : selectedColumns) {
+                for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                    node = object.getViewNodeColumn(i);
+                    if (node != null && node.getName() != null) {
+                        columnNodeNames.add(node.getName());
+                    }
+                }
+            }
+
+            for (int i = 0; i < _list.getModel().getSize(); i++) {
+                CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
+                if (item.isSelected()) {
+                    CoolMapObject otherObject = item.getCoolMapObject();
+                    if (object == otherObject) {
+                        //does not need to apply to self
+                        continue;
+                    }
+
+                    //obtain to beselected row indices
+                    TreeSet<Integer> toBeSelectedRowIndices = new TreeSet<Integer>();
+                    for (String name : rowNodeNames) {
+                        List<VNode> nodes = otherObject.getViewNodesRow(name);
+                        if (nodes == null || nodes.isEmpty()) {
+                            continue;
+                        } else {
+                            for (VNode node1 : nodes) {
+                                if (node1 != null && node1.getViewIndex() != null) {
+                                    toBeSelectedRowIndices.add(node1.getViewIndex().intValue());
+                                }
+                            }
+                        }
+                    }
+
+                    //obtain to beselected column indices, need to be ordered
+                    TreeSet<Integer> toBeSelectedColumnIndices = new TreeSet<Integer>();
+                    for (String name : columnNodeNames) {
+                        List<VNode> nodes = otherObject.getViewNodesColumn(name);
+                        if (nodes == null || nodes.isEmpty()) {
+                            continue;
+                        } else {
+                            for (VNode node1 : nodes) {
+                                if (node1 != null && node1.getViewIndex() != null) {
+                                    toBeSelectedColumnIndices.add(node1.getViewIndex().intValue());
+                                }
+                            }
+                        }
+                    }
+
+                    HashSet<Range<Integer>> rowIndices = Tools.createRangesFromIndices(new ArrayList<>(toBeSelectedRowIndices));
+                    HashSet<Range<Integer>> columnIndices = Tools.createRangesFromIndices(new ArrayList<>(toBeSelectedColumnIndices));
+
+//                    System.out.println(rowIndices);
+//                    System.out.println(columnIndices);
+                    if (rowIndices == null || columnIndices == null) {
+                        otherObject.getCoolMapView().clearSelection();
+                    } else {
+                        ArrayList<Rectangle> selections = new ArrayList<>();
+                        for (Range<Integer> rowRange : rowIndices) {
+                            for (Range<Integer> columnRange : columnIndices) {
+                                try {
+                                    Rectangle selection = new Rectangle(
+                                            columnRange.lowerEndpoint(),
+                                            rowRange.lowerEndpoint(),
+                                            columnRange.upperEndpoint() - columnRange.lowerEndpoint(),
+                                            rowRange.upperEndpoint() - rowRange.lowerEndpoint()
+                                    );
+                                    selections.add(selection);
+                                } catch (Exception e) {
+                                    CMConsole.logToFile(e);
+                                }
+                            }
+                        }
+                        otherObject.getCoolMapView().setSelections(selections);
+                    }
+
+                    //directly apply these rectangles
+                }
+
+            }
+
+        }
 
     }
 
     @Override
     public void mapAnchorMoved(CoolMapObject object) {
+        if (object == null) {
+            return;
+        }
+
         Point mapAnchor = object.getCoolMapView().getMapAnchor();
+
         if (_anchor.isSelected()) {
             for (int i = 0; i < _list.getModel().getSize(); i++) {
                 CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
@@ -430,6 +479,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
                     otherObject.getCoolMapView().moveMapTo(mapAnchor.x, mapAnchor.y);
                 }
             }
+
         }
 
     }
@@ -528,33 +578,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         if (object == null) {
             return;
         }
-
-//        System.out.println("Rows changed");
-        if (_rowLayout.isSelected()) {
-            for (int i = 0; i < _list.getModel().getSize(); i++) {
-                CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
-                if (item.getCoolMapObject() == object && !item.isSelected()) {
-                    return;//if the active coolmap object is not selected
-                }
-            }
-
-//            StateSnapshot snapshot = new StateSnapshot(object, COntology.ROW, StateSnapshot.STATESET);
-            for (int i = 0; i < _list.getModel().getSize(); i++) {
-                CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
-                if (item.isSelected()) {
-                    CoolMapObject otherObject = item.getCoolMapObject();
-                    if (object == otherObject) {
-                        continue;
-                    }
-
-                    //start here
-//                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
-                    if (_selectionRow.isSelected()) {
-                        otherObject.getCoolMapView().setSelectionsRow(object.getCoolMapView().getSelectedRows());
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -562,34 +585,6 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
         if (object == null) {
             return;
         }
-
-//        System.out.println("Columns changed");
-        if (_columnLayout.isSelected()) {
-            for (int i = 0; i < _list.getModel().getSize(); i++) {
-                CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
-                if (item.getCoolMapObject() == object && !item.isSelected()) {
-                    return;//if the active coolmap object is not selected
-                }
-            }
-
-//            StateSnapshot snapshot = new StateSnapshot(object, COntology.COLUMN, StateSnapshot.STATESET);
-            for (int i = 0; i < _list.getModel().getSize(); i++) {
-                CheckListItem item = (CheckListItem) _list.getModel().getElementAt(i);
-                if (item.isSelected()) {
-                    CoolMapObject otherObject = item.getCoolMapObject();
-                    if (object == otherObject) {
-                        continue;
-                    }
-
-                    //start here
-//                    otherObject.restoreSnapshot(snapshot.duplicate(), true);
-                    if (_selectionColumn.isSelected()) {
-                        otherObject.getCoolMapView().setSelectionsColumn(object.getCoolMapView().getSelectedColumns());
-                    }
-                }
-            }
-        }
-
     }
 
     @Override

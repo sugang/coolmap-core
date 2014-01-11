@@ -33,7 +33,7 @@ public class CSplashScreen {
         if (splashScreen != null) {
             Dimension dim = splashScreen.getSize();
 
-            System.out.println(dim);
+//            System.out.println(dim);
             splashWidth = dim.width;
             splashHeight = dim.height;
 
@@ -81,7 +81,7 @@ public class CSplashScreen {
 
                     int versionW = sg.getFontMetrics().stringWidth(version);
 
-                    System.out.println(version);
+//                    System.out.println(version);
                     sg.drawString(version, splashWidth - 15 - versionW, 20);
                     splashScreen.update();
                 }

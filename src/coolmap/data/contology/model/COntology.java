@@ -896,10 +896,4 @@ public final class COntology {
         _recomputeDepthFromLeaves();
     }
 
-    public boolean containsLoop() {
-        //may still contain ball loops
-        //Therefore removeAllLoops is required when ontology is loaded
-
-        return containsLoopFromLeaf() != null || containsLoopFromRoot() != null;
-    }
 }
