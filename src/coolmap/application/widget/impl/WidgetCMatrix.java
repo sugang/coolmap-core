@@ -9,19 +9,41 @@ import coolmap.application.listeners.CMatrixListener;
 import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.WidgetMaster;
+import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
+import coolmap.data.aggregator.model.CAggregator;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
+import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.snippet.SnippetMaster;
 import coolmap.utils.graphics.UI;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -73,7 +95,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
         }
 
 //        System.out.println(returnVal);
-
         int counter = 0;
         for (CMatrix matrix : selectedMatrices) {
             if (counter == 0) {
@@ -91,15 +112,203 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
     }
 
     private void createLogTransform(double base) {
+        List<CMatrix> selectedMatrices = getSelectedMatrices();
+        for (CMatrix matrix : selectedMatrices) {
+            if (matrix instanceof DoubleCMatrix) {
+                DoubleCMatrix newMatrix = new DoubleCMatrix(matrix.getName() + " log(" + base + ") transformed", matrix.getNumRows(), matrix.getNumColumns());
+                for (int i = 0; i < matrix.getNumRows(); i++) {
+                    for (int j = 0; j < matrix.getNumColumns(); j++) {
+                        try {
+                            newMatrix.setValue(i, j, Math.log((Double) matrix.getValue(i, j)) / Math.log(base));
+                        } catch (Exception e) {
+                            newMatrix.setValue(i, j, null);
+                        }
+                    }
+                }
 
+                //
+                for (int i = 0; i < matrix.getNumRows(); i++) {
+                    newMatrix.setRowLabel(i, matrix.getRowLabel(i));
+                }
+
+                //
+                for (int i = 0; i < matrix.getNumColumns(); i++) {
+                    newMatrix.setColLabel(i, matrix.getColLabel(i));
+                }
+
+                CoolMapMaster.addNewBaseMatrix(newMatrix);
+
+            }
+        }
     }
 
     private void createZTransform() {
 
     }
 
-    private void createRangeTransform() {
+    private void createView() {
+        List<CMatrix> selectedMatrices = getSelectedMatrices();
+        if(selectedMatrices.isEmpty()){
+            return;
+        }
+        
+        CMatrix[] matrices = new CMatrix[selectedMatrices.size()];
+        for(int i=0; i<selectedMatrices.size(); i++){
+            matrices[i] = selectedMatrices.get(i);
+        }
+        
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.ipadx = 5;
+        c.ipady = 5;
 
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(new JLabel("CoolMap Name:"), c);
+        c.gridx = 1;
+        panel.add(_name, c);
+        c.gridy++;
+        c.gridx = 0;
+        panel.add(new JLabel("Aggregator:"), c);
+        c.gridx = 1;
+        panel.add(_aggregators, c);
+        c.gridy++;
+        c.gridx = 0;
+
+        panel.add(new JLabel("Renderer:"), c);
+        c.gridx = 1;
+        panel.add(_renderer, c);
+
+        _name.setText("Untitiled");
+        _name.setColumns(20);
+
+        CoolMapObject object = new CoolMapObject();
+        object.addBaseCMatrix(matrices);
+
+        try {
+            WidgetAggregator aggrWidget = (WidgetAggregator) WidgetMaster.getWidget(WidgetAggregator.class.getName());
+            LinkedHashSet<CAggregator> aggrs = aggrWidget.getLoadedRenderers();
+            DefaultComboBoxModel model = new DefaultComboBoxModel();
+            for (CAggregator aggr : aggrs) {
+                if (aggr.canAggregate(object.getBaseClass())) {
+                    model.addElement(aggr);
+                }
+            }
+            _aggregators.setModel(model);
+
+        } catch (Exception e) {
+            
+        }
+
+        JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), panel);
+        CMatrix m0 = matrices[0];
+        ArrayList<VNode> nodes = new ArrayList<VNode>();
+        for (int i = 0; i < m0.getNumRows(); i++) {
+            nodes.add(new VNode(m0.getRowLabel(i)));
+        }
+        object.insertRowNodes(0, nodes, false);
+
+        nodes.clear();
+        for (int i = 0; i < m0.getNumColumns(); i++) {
+            nodes.add(new VNode(m0.getColLabel(i)));
+        }
+        object.insertColumnNodes(0, nodes, false);
+
+        //need a dialog
+        try {
+            object.setAggregator((CAggregator) (_aggregators.getSelectedItem().getClass().newInstance()));
+            object.setViewRenderer((ViewRenderer)(_renderer.getSelectedItem().getClass().newInstance()), true);
+            if (Double.class.isAssignableFrom(object.getViewClass())) {
+                object.setSnippetConverter(SnippetMaster.getConverter("D13"));
+            }
+        } catch (Exception e) {
+            
+        }
+        object.setName("Untitiled");
+
+        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+        object.getCoolMapView().addColumnMap(new ColumnTree(object));
+
+        object.getCoolMapView().addRowMap(new RowLabels(object));
+        object.getCoolMapView().addRowMap(new RowTree(object));
+
+        CoolMapMaster.addNewCoolMapObject(object);
+
+    }
+
+    private void createRangeTransform() {
+        List<CMatrix> selectedMatrices = getSelectedMatrices();
+        for (CMatrix matrix : selectedMatrices) {
+            if (matrix instanceof DoubleCMatrix) {
+                DoubleCMatrix newMatrix = new DoubleCMatrix(matrix.getName() + " z transformed", matrix.getNumRows(), matrix.getNumColumns());
+
+                double min = Double.MAX_VALUE;
+                double max = Double.MIN_VALUE;
+
+                for (int i = 0; i < matrix.getNumRows(); i++) {
+                    for (int j = 0; j < matrix.getNumColumns(); j++) {
+                        try {
+                            Double v = (Double) matrix.getValue(i, j);
+                            if (v == null || v.isInfinite() || v.isNaN()) {
+                                continue;
+                            } else {
+                                if (v < min) {
+                                    min = v;
+                                }
+                                if (v > max) {
+                                    max = v;
+                                }
+                            }
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
+
+                double range = max - min;
+                if (range == 0) {
+                    //Every value is the same, no need to transform
+                    for (int i = 0; i < matrix.getNumRows(); i++) {
+                        for (int j = 0; j < matrix.getNumColumns(); j++) {
+                            try {
+                                newMatrix.setValue(i, j, (Double) matrix.getValue(i, j));
+                            } catch (Exception e) {
+                                newMatrix.setValue(i, j, null);
+                            }
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < matrix.getNumRows(); i++) {
+                        for (int j = 0; j < matrix.getNumColumns(); j++) {
+                            try {
+                                Double v = (Double) matrix.getValue(i, j);
+                                newMatrix.setValue(i, j, (v - min) / range);
+                            } catch (Exception e) {
+                                newMatrix.setValue(i, j, null);
+                            }
+                        }
+                    }
+                }
+
+                //
+                for (int i = 0; i < matrix.getNumRows(); i++) {
+                    newMatrix.setRowLabel(i, matrix.getRowLabel(i));
+                }
+
+                //
+                for (int i = 0; i < matrix.getNumColumns(); i++) {
+                    newMatrix.setColLabel(i, matrix.getColLabel(i));
+                }
+
+                CoolMapMaster.addNewBaseMatrix(newMatrix);
+//                newMatrix.printMatrix();
+
+            }
+        }
     }
 
     private void initPopupmenu() {
@@ -125,9 +334,19 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                 removeSelected();
             }
         });
+        
+        JMenuItem createView = new JMenuItem("Create view from selected");
+        menu.add(createView);
+        createView.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createView();
+            }
+        });
 
         menu.addSeparator();
-        JMenu create = new JMenu("Create from selected");
+        JMenu create = new JMenu("Create new from selected");
         menu.add(create);
 
         JMenuItem createLog2 = new JMenuItem("log2");
@@ -219,102 +438,101 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
 //        getContentPane().add(_toolBar, BorderLayout.NORTH);
 //
 //
-//        _aggregators.addItemListener(new ItemListener() {
+        _aggregators.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ie) {
+                if (ie.getStateChange() == ItemEvent.SELECTED) {
+//                    DefaultComboBoxModel model = new DefaultComboBoxModel();
+//                    System.out.println("ItemStatedChanged");
+                    if (_aggregators.getSelectedItem() == null || !(_aggregators.getSelectedItem() instanceof CAggregator)) {
+                        _renderer.setModel(new DefaultComboBoxModel());
+                        return;
+                    }
+                    try {
+                        //WidgetMaster.getWidget("coolmap.application.widget.impl.WidgetCMatrix");
+                        DefaultComboBoxModel model = new DefaultComboBoxModel();
+                        WidgetViewRenderer rendererWidget = (WidgetViewRenderer) WidgetMaster.getWidget(WidgetViewRenderer.class.getName());
+                        LinkedHashSet<ViewRenderer> renderers = rendererWidget.getLoadedRenderers();
+                        for (ViewRenderer renderer : renderers) {
+                            if (renderer.canRender(((CAggregator) _aggregators.getSelectedItem()).getViewClass())) {
+                                model.addElement(renderer);
+                            }
+                        }
+//                        System.out.println("Renderer set model");
+                        _renderer.setModel(model);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        });
 //
-//            @Override
-//            public void itemStateChanged(ItemEvent ie) {
-//                if (ie.getStateChange() == ItemEvent.SELECTED) {
-////                    DefaultComboBoxModel model = new DefaultComboBoxModel();
-////                    System.out.println("ItemStatedChanged");
-//                    if (_aggregators.getSelectedItem() == null || !(_aggregators.getSelectedItem() instanceof CAggregator)) {
-//                        _renderer.setModel(new DefaultComboBoxModel());
-//                        return;
-//                    }
-//                    try {
-//                        //WidgetMaster.getWidget("coolmap.application.widget.impl.WidgetCMatrix");
-//                        DefaultComboBoxModel model = new DefaultComboBoxModel();
-//                        WidgetViewRenderer rendererWidget = (WidgetViewRenderer) WidgetMaster.getWidget(WidgetViewRenderer.class.getName());
-//                        LinkedHashSet<ViewRenderer> renderers = rendererWidget.getLoadedRenderers();
-//                        for (ViewRenderer renderer : renderers) {
-//                            if (renderer.canRender(((CAggregator) _aggregators.getSelectedItem()).getViewClass())) {
-//                                model.addElement(renderer);
-//                            }
-//                        }
-////                        System.out.println("Renderer set model");
-//                        _renderer.setModel(model);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
+        _aggregators.setRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(jlist, o, i, bln, bln1);
+                if (o == null) {
+                    return label;
+                }
+                if (CoolMapMaster.getActiveCoolMapObject() != null) {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    //CAggregator a = obj.getAggregator();
+                    //System.out.println("label disable:" + a.canAggregate(obj.getBaseClass()) + " " + obj.getBaseClass());
+                    CAggregator a = (CAggregator) o;
+                    if (a != null && a.canAggregate(obj.getBaseClass())) {
+//                        System.out.println("pass:" + o.getClass() + obj.getBaseClass());
+                        label.setEnabled(true);
+                        label.setFocusable(true);
+                    } else {
+                        label.setEnabled(false);
+                        label.setFocusable(false);
+                        label.setBackground(UI.colorRedWarning);
+                    }
+                }
+
+                try {
+                    String displayName = ((CAggregator) o).getName();
+                    label.setText(displayName);
+                } catch (Exception e) {
+                    label.setText(o.getClass().getSimpleName());
+                }
+                return label;
+            }
+        });
 //
-//        _aggregators.setRenderer(new DefaultListCellRenderer() {
-//
-//            @Override
-//            public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
-//                JLabel label = (JLabel) super.getListCellRendererComponent(jlist, o, i, bln, bln1);
-//                if (o == null) {
-//                    return label;
-//                }
-//                if (CoolMapMaster.getActiveCoolMapObject() != null) {
-//                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-//                    //CAggregator a = obj.getAggregator();
-//                    //System.out.println("label disable:" + a.canAggregate(obj.getBaseClass()) + " " + obj.getBaseClass());
-//                    CAggregator a = (CAggregator) o;
-//                    if (a != null && a.canAggregate(obj.getBaseClass())) {
-////                        System.out.println("pass:" + o.getClass() + obj.getBaseClass());
-//                        label.setEnabled(true);
-//                        label.setFocusable(true);
-//                    } else {
-//                        label.setEnabled(false);
-//                        label.setFocusable(false);
-//                        label.setBackground(UI.colorRedWarning);
-//                    }
-//                }
-//
-//                try {
-//                    String displayName = ((CAggregator) o).getName();
-//                    label.setText(displayName);
-//                } catch (Exception e) {
-//                    label.setText(o.getClass().getSimpleName());
-//                }
-//                return label;
-//            }
-//        });
-//
-//        _renderer.setRenderer(new DefaultListCellRenderer() {
-//
-//            @Override
-//            public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
-//                JLabel label = (JLabel) super.getListCellRendererComponent(jlist, o, i, bln, bln1);
-//                if (o == null) {
-//                    return label;
-//                }
-//
-//                if (CoolMapMaster.getActiveCoolMapObject() != null) {
-//                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-//                    ViewRenderer renderer = (ViewRenderer) o;
-//                    if (renderer != null && renderer.canRender(obj.getViewClass())) {
-//                        label.setEnabled(true);
-//                        label.setFocusable(true);
-//                    } else {
-//                        label.setEnabled(false);
-//                        label.setFocusable(false);
-//                        label.setBackground(UI.colorRedWarning);
-//                    }
-//                }
-//                try {
-//                    String displayName = ((ViewRenderer) o).getName();
-//                    label.setText(displayName);
-//                } catch (Exception e) {
-//                    label.setText(o.getClass().getSimpleName());
-//                }
-//
-//                return label;
-//
-//            }
-//        });
+        _renderer.setRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(jlist, o, i, bln, bln1);
+                if (o == null) {
+                    return label;
+                }
+
+                if (CoolMapMaster.getActiveCoolMapObject() != null) {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ViewRenderer renderer = (ViewRenderer) o;
+                    if (renderer != null && renderer.canRender(obj.getViewClass())) {
+                        label.setEnabled(true);
+                        label.setFocusable(true);
+                    } else {
+                        label.setEnabled(false);
+                        label.setFocusable(false);
+                        label.setBackground(UI.colorRedWarning);
+                    }
+                }
+                try {
+                    String displayName = ((ViewRenderer) o).getName();
+                    label.setText(displayName);
+                } catch (Exception e) {
+                    label.setText(o.getClass().getSimpleName());
+                }
+
+                return label;
+
+            }
+        });
 //        
 //        
 //        JButton button = new JButton(UI.getImageIcon("screen"));
