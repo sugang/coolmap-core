@@ -148,7 +148,6 @@ public class ImportDataFromXLS implements ImportData {
 
                 }
 
-                System.out.println("Row start:" + rowStart + " Column start:" + columnStart);
 
                 //now I have row data
                 int rowCount = data.size() - rowStart - 1;
@@ -202,6 +201,11 @@ public class ImportDataFromXLS implements ImportData {
 
 //                matrix.printMatrix();
                 //
+                
+                matrix.setRowLabels(rowNames);
+                matrix.setColLabels(columnNames);
+                
+                
                 CoolMapObject object = new CoolMapObject();
                 object.setName(Tools.removeFileExtension(inFile.getName()));
                 object.addBaseCMatrix(matrix);

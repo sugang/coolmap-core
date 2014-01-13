@@ -371,36 +371,31 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         ontologyButton.setBorder(null);
         ontologyButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        
-        
-        
-
         JMenuItem deleteItem = new JMenuItem("Remove this ontology");
         deleteItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 int returnVal = JOptionPane.showConfirmDialog(
-                        CoolMapMaster.getCMainFrame(), 
-                        "Remove ontology '" + _ontologyCombo.getSelectedItem() +"' ?\nAll ontology nodes associated with this ontology will also be deleted.\nThis operation can not be undone.", 
-                        "Remove ontology warning", 
+                        CoolMapMaster.getCMainFrame(),
+                        "Remove ontology '" + _ontologyCombo.getSelectedItem() + "' ?\nAll ontology nodes associated with this ontology will also be deleted.\nThis operation can not be undone.",
+                        "Remove ontology warning",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-                
-                if( returnVal == JOptionPane.CANCEL_OPTION){
+
+                if (returnVal == JOptionPane.CANCEL_OPTION) {
                     return;
                 }
-                
+
                 //GO ON AND DELETE
-                 
-                COntology ontology = (COntology)_ontologyCombo.getItemAt(0);
+                COntology ontology = (COntology) _ontologyCombo.getItemAt(0);
                 CoolMapMaster.destroyCOntology(ontology);
-                
+
             }
         });
-        
+
         configPopupMenu.add(deleteItem);
-        
+
         ontologyButton.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -540,60 +535,65 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                 final COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
 
 //                System.out.println(ontology.getPresets());
-                Collection<COntologyPreset> presets = ontology.getPresets();
+                try {
+                    Collection<COntologyPreset> presets = ontology.getPresets();
 
-                if (!presets.isEmpty()) {
-                    menu.addSeparator();
-                    for (COntologyPreset preset : presets) {
+                    if (!presets.isEmpty()) {
+                        menu.addSeparator();
+                        for (COntologyPreset preset : presets) {
 
-                        final COntologyPreset setToApplyTo = preset;
-                        final ArrayList<String> labels = setToApplyTo.getLabels();
-                        final ArrayList<Integer> toBeExpandedIndices = setToApplyTo.getToBeExpandedIndices();
+                            final COntologyPreset setToApplyTo = preset;
+                            final ArrayList<String> labels = setToApplyTo.getLabels();
+                            final ArrayList<Integer> toBeExpandedIndices = setToApplyTo.getToBeExpandedIndices();
 
-                        if (labels == null || labels.isEmpty()) {
-                            continue;
-                        }
+                            if (labels == null || labels.isEmpty()) {
+                                continue;
+                            }
 
-                        JMenuItem presetItem = new JMenuItem(setToApplyTo.toString());
-                        menu.add(presetItem);
-                        presetItem.addActionListener(new ActionListener() {
+                            JMenuItem presetItem = new JMenuItem(setToApplyTo.toString());
+                            menu.add(presetItem);
+                            presetItem.addActionListener(new ActionListener() {
 
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
 
-                                ArrayList<VNode> rowNodes = new ArrayList<VNode>(labels.size());
-                                for (String label : labels) {
-                                    rowNodes.add(new VNode(label, ontology));
-                                }
-
-                                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
-                                    return;
-                                }
-
-                                CoolMapState state = CoolMapState.createStateRows("Apply row preset", obj, null);
-                                obj.replaceRowNodes(rowNodes, null);
-                                StateStorageMaster.addState(state);
-
-                                if (toBeExpandedIndices != null && !toBeExpandedIndices.isEmpty()) {
-
-                                    //Expand
-                                    ArrayList<VNode> tobeExpanded = new ArrayList();
-                                    for (Integer i : toBeExpandedIndices) {
-                                        try {
-                                            tobeExpanded.add(rowNodes.get(i));
-                                        } catch (Exception ex) {
-                                            System.err.println("To be expanded in preset rows are out of bounds");
-                                        }
+                                    ArrayList<VNode> rowNodes = new ArrayList<VNode>(labels.size());
+                                    for (String label : labels) {
+                                        rowNodes.add(new VNode(label, ontology));
                                     }
 
-                                    obj.expandRowNodes(tobeExpanded, false);
+                                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                                    if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                                        return;
+                                    }
+
+                                    CoolMapState state = CoolMapState.createStateRows("Apply row preset", obj, null);
+                                    obj.replaceRowNodes(rowNodes, null);
+                                    StateStorageMaster.addState(state);
+
+                                    if (toBeExpandedIndices != null && !toBeExpandedIndices.isEmpty()) {
+
+                                        //Expand
+                                        ArrayList<VNode> tobeExpanded = new ArrayList();
+                                        for (Integer i : toBeExpandedIndices) {
+                                            try {
+                                                tobeExpanded.add(rowNodes.get(i));
+                                            } catch (Exception ex) {
+                                                System.err.println("To be expanded in preset rows are out of bounds");
+                                            }
+                                        }
+
+                                        obj.expandRowNodes(tobeExpanded, false);
+                                    }
+
                                 }
+                            });
 
-                            }
-                        });
+                        };
+                    }
 
-                    };
+                } catch (Exception ex) {
+
                 }
 
                 //
@@ -656,61 +656,64 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
                 });
 
                 menu.add(item);
-                final COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
-                Collection<COntologyPreset> presets = ontology.getPresets();
+                try {
+                    final COntology ontology = (COntology) _ontologyCombo.getSelectedItem();
+                    Collection<COntologyPreset> presets = ontology.getPresets();
+                    if (!presets.isEmpty()) {
+                        menu.addSeparator();
+                        for (COntologyPreset preset : presets) {
 
-                if (!presets.isEmpty()) {
-                    menu.addSeparator();
-                    for (COntologyPreset preset : presets) {
+                            final COntologyPreset setToApplyTo = preset;
+                            final ArrayList<String> labels = setToApplyTo.getLabels();
+                            final ArrayList<Integer> toBeExpandedIndices = setToApplyTo.getToBeExpandedIndices();
 
-                        final COntologyPreset setToApplyTo = preset;
-                        final ArrayList<String> labels = setToApplyTo.getLabels();
-                        final ArrayList<Integer> toBeExpandedIndices = setToApplyTo.getToBeExpandedIndices();
+                            if (labels == null || labels.isEmpty()) {
+                                continue;
+                            }
 
-                        if (labels == null || labels.isEmpty()) {
-                            continue;
-                        }
+                            JMenuItem presetItem = new JMenuItem(setToApplyTo.toString());
+                            menu.add(presetItem);
+                            presetItem.addActionListener(new ActionListener() {
 
-                        JMenuItem presetItem = new JMenuItem(setToApplyTo.toString());
-                        menu.add(presetItem);
-                        presetItem.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
 
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-
-                                ArrayList<VNode> columnNodes = new ArrayList<VNode>(labels.size());
-                                for (String label : labels) {
-                                    columnNodes.add(new VNode(label, ontology));
-                                }
-
-                                CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                                if (obj == null || obj.getBaseCMatrices().isEmpty()) {
-                                    return;
-                                }
-
-                                CoolMapState state = CoolMapState.createStateColumns("Apply column preset", obj, null);
-                                obj.replaceColumnNodes(columnNodes, null);
-                                StateStorageMaster.addState(state);
-
-                                if (toBeExpandedIndices != null && !toBeExpandedIndices.isEmpty()) {
-
-                                    //Expand
-                                    ArrayList<VNode> tobeExpanded = new ArrayList();
-                                    for (Integer i : toBeExpandedIndices) {
-                                        try {
-                                            tobeExpanded.add(columnNodes.get(i));
-                                        } catch (Exception ex) {
-                                            System.err.println("To be expanded in preset rows are out of bounds");
-                                        }
+                                    ArrayList<VNode> columnNodes = new ArrayList<VNode>(labels.size());
+                                    for (String label : labels) {
+                                        columnNodes.add(new VNode(label, ontology));
                                     }
 
-                                    obj.expandColumnNodes(tobeExpanded, false);
+                                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                                    if (obj == null || obj.getBaseCMatrices().isEmpty()) {
+                                        return;
+                                    }
+
+                                    CoolMapState state = CoolMapState.createStateColumns("Apply column preset", obj, null);
+                                    obj.replaceColumnNodes(columnNodes, null);
+                                    StateStorageMaster.addState(state);
+
+                                    if (toBeExpandedIndices != null && !toBeExpandedIndices.isEmpty()) {
+
+                                        //Expand
+                                        ArrayList<VNode> tobeExpanded = new ArrayList();
+                                        for (Integer i : toBeExpandedIndices) {
+                                            try {
+                                                tobeExpanded.add(columnNodes.get(i));
+                                            } catch (Exception ex) {
+                                                System.err.println("To be expanded in preset rows are out of bounds");
+                                            }
+                                        }
+
+                                        obj.expandColumnNodes(tobeExpanded, false);
+                                    }
+
                                 }
+                            });
 
-                            }
-                        });
+                        };
+                    }
+                } catch (Exception ex) {
 
-                    };
                 }
 
                 menu.show(columnSetbutton, e.getX(), e.getY());
@@ -904,10 +907,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         });
 
         _ontologyTable.setAutoCreateRowSorter(true);
-        
+
         //why it is null?
 //        System.out.println(WidgetMaster.getViewport());
-        
         JMenuItem pasteItem = new JMenuItem("Nodes to column from Ontology Browser", UI.getImageIcon("insertRow"));
         WidgetMaster.getViewport().addPopupMenuItem("Paste", pasteItem, true);
         pasteItem.addActionListener(new PasteColumnNodesAction());
@@ -1019,15 +1021,11 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
 
                 //make sure the setting new model won't affect the last recorded state
 //                _ontologyTable.getColumnModel().removeColumnModelListener(columnListener);
-
-                
-                
                 DefaultTableModel model;
-                
-                if(ontology != null){
+
+                if (ontology != null) {
                     model = _getOntologyAsTableModel(ontology);
-                }
-                else{
+                } else {
                     model = new DefaultTableModel();
                 }
                 //maintain the same column model layout if the last one has
@@ -1253,11 +1251,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     private DefaultTableModel _getOntologyAsTableModel(COntology ontology) {
         //Shows how rows 
         nodeToTableRowHash.clear();
-        
-        if(ontology == null){
+
+        if (ontology == null) {
             return new DefaultTableModel();
         }
-        
 
         HashSet<String> nodes = new HashSet<String>();
         nodes.addAll(ontology.getAllNodesWithChildren());

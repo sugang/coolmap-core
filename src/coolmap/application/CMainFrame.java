@@ -119,14 +119,16 @@ public class CMainFrame extends JFrame {
     }
 
     public void hideBusyDialog() {
+
+//        glassPane.setVisible(false);
+//        CoolMapMaster.getViewport().setEnabled(true);
+        _glassPane.setVisible(false);
+        _glassPane.setBusy(false);
+        _glassPane.repaint();
+
         if (busyWindow != null && busyWindow.isVisible()) {
             busyWindow.setVisible(false);
         }
-//        glassPane.setVisible(false);
-//        CoolMapMaster.getViewport().setEnabled(true);
-
-        _glassPane.setVisible(false);
-        _glassPane.setBusy(false);
 
     }
 
