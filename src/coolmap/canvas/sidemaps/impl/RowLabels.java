@@ -394,7 +394,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     @Override

@@ -588,7 +588,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     @Override

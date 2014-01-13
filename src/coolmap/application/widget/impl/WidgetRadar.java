@@ -507,7 +507,7 @@ public class WidgetRadar extends Widget implements ActiveCoolMapChangedListener,
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
 //        System.out.println("base matrix changed");
         //update image
 //        updateBufferedImage();

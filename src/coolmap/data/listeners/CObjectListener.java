@@ -21,7 +21,7 @@ public interface CObjectListener {
     
     public void columnsChanged(CoolMapObject object);
     
-    public void baseMatrixChanged(CoolMapObject object);
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object);
     
 //    public void stateStorageUpdated(CoolMapObject object);
     

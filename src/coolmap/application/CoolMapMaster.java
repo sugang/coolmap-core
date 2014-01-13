@@ -74,10 +74,9 @@ public final class CoolMapMaster {
         if (name == null || name.length() == 0) {
             name = "Untitled";
         }
-        
+
         session = new Session(name, path);
         WidgetMaster.getViewport().setTitle(name, path);
-        
 
         CoolMapObject object = _activeCoolMapObject;
         _activeCoolMapObject = null;
@@ -106,12 +105,12 @@ public final class CoolMapMaster {
         for (Module module : ModuleMaster.getAllModules()) {
             module.restoreState(null);
         }
-        
+
         COntology.clearAttributes();
         StateStorageMaster.clearAllStates();
     }
-    
-    public static void updateSession(String name, String path){
+
+    public static void updateSession(String name, String path) {
         session = new Session(name, path);
         WidgetMaster.getViewport().setTitle(name, path);
     }
@@ -149,8 +148,6 @@ public final class CoolMapMaster {
 
         }
 
-        
-
         //
         _cMainFrame = new CMainFrame();
 
@@ -165,7 +162,6 @@ public final class CoolMapMaster {
         ModuleMaster.initialize();
         CSplashScreen.splashUpdate("Loading state manager...", 60);
         StateStorageMaster.initialize();
-        
 
 //        SnippetMaster.initialize();
 //        ServiceMaster.initialize();
@@ -174,7 +170,7 @@ public final class CoolMapMaster {
         //new session
         CSplashScreen.splashUpdate("Creating new session...", 80);
         CoolMapMaster.newSession("Untitled", null);
-        
+
         //Plugin loading after new session.
         CSplashScreen.splashUpdate("Loading plugins...", 90);
         PluginMaster.initialize();
@@ -331,14 +327,58 @@ public final class CoolMapMaster {
         if (matrix == null) {
             return;
         }
-
-        if (matrix.isDestroyed() && _cMatrices.values().contains(matrix)) {
-            _cMatrices.remove(matrix.getID());
-        }
-
+//        if (matrix.isDestroyed() && _cMatrices.values().contains(matrix)) {
+//            _cMatrices.remove(matrix.getID());
+//        }
         _cMatrices.remove(matrix.getID());
         DataMaster.fireCMatrixToBeRemoved(matrix);
+
+        List<CoolMapObject> objs = CoolMapMaster.getCoolMapObjects();
+        if (objs != null && !objs.isEmpty()) {
+
+            for (CoolMapObject obj : objs) {
+                obj.removeBaseCMatrix((CMatrix) matrix);
+            }
+        }
+        //how to programmatically set a coolMapObject is tricky
+
         matrix.destroy();
+    }
+
+    
+
+    public static void renameCMatrix(String matrixID, String newName) {
+        CMatrix mx = getCMatrixByID(matrixID);
+        if (mx == null) {
+            return;
+        }
+        mx.setName(newName);
+        DataMaster.fireCMatrixListenerNameChanged(mx, newName);
+    }
+    
+    public static void renameCOntology(String ontologyID, String newName){
+        COntology cOntology = getCOntologyByID(ontologyID);
+        if(ontologyID == null){
+            return;
+        }
+        cOntology.setName(newName);
+        DataMaster.fireCOntologyNameChanged(cOntology);
+    }
+
+
+
+    public static void destroyCMatrices(Collection<CMatrix> matrices) {
+        if (matrices == null) {
+            return;
+        }
+
+        for (CMatrix matrix : matrices) {
+            try {
+                destroyCMatrix(matrix);
+            } catch (Exception e) {
+                //throw an error message?
+            }
+        }
     }
 
     public static void destroyCOntology(COntology ontology) {
@@ -346,40 +386,38 @@ public final class CoolMapMaster {
         if (ontology == null) {
             return;
         }
-        
+
         String ontologyID = ontology.getID();
-        
+
         //Also need to remove all view nodes that are associated with this ontology
-        for(CoolMapObject object : CoolMapMaster.getCoolMapObjects()){
-            
+        for (CoolMapObject object : CoolMapMaster.getCoolMapObjects()) {
+
             //check all row nodes and column nodes, see whether there are associated nodes
             ArrayList<VNode> rowNodesToRemove = new ArrayList();
             ArrayList<VNode> colNodesToRemove = new ArrayList();
             List<VNode> viewNodesRow = object.getViewNodesRow();
             List<VNode> viewNodesCol = object.getViewNodesColumn();
-            
-            
-            for(VNode node : viewNodesRow){
-                if(node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)){
+
+            for (VNode node : viewNodesRow) {
+                if (node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)) {
                     rowNodesToRemove.add(node);
                 }
             }
-            
-            for(VNode node : viewNodesCol){
-                if(node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)){
+
+            for (VNode node : viewNodesCol) {
+                if (node.getCOntologyID() != null && node.getCOntologyID().equals(ontologyID)) {
                     colNodesToRemove.add(node);
                 }
             }
-            
+
             object.removeViewNodesRow(rowNodesToRemove);
             object.removeViewNodesColumn(colNodesToRemove);
-            
-            if(!rowNodesToRemove.isEmpty() || !colNodesToRemove.isEmpty()){
+
+            if (!rowNodesToRemove.isEmpty() || !colNodesToRemove.isEmpty()) {
                 StateStorageMaster.clearStates(object);
             }
-            
+
         }
-        
 
         if (ontology.isDestroyed() && _contologies.values().contains(ontology)) {
             _contologies.remove(ontology.getID());

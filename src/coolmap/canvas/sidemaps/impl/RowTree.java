@@ -477,7 +477,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     @Override

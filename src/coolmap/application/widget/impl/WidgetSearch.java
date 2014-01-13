@@ -320,7 +320,7 @@ public class WidgetSearch extends Widget implements CObjectListener, ActiveCoolM
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
 //    @Override

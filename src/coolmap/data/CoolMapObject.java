@@ -930,7 +930,7 @@ public final class CoolMapObject<BASE, VIEW> {
         _cache.clear();
         getCoolMapView().updateCanvasEnforceAll();
         for (CObjectListener lis : _coolMapDataListeners) {
-            lis.baseMatrixChanged(this);
+            lis.coolMapObjectBaseMatrixChanged(this);
         }
     }
 

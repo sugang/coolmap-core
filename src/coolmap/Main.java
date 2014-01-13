@@ -39,7 +39,8 @@ public class Main {
 
                 CMConsole.log("CoolMap initialized.");
 
-//                importTSVSample();
+                importTSVSample();
+                importTSVSample();
             }
         });
 

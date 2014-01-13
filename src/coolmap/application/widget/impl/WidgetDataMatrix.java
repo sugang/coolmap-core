@@ -683,7 +683,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
         if (_activeObject != null && _activeObject == object) {
             _updateData();
         }

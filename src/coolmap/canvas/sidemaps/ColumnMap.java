@@ -62,7 +62,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
 
     ;
     
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     ;

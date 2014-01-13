@@ -6,6 +6,8 @@ package coolmap.application.widget.impl;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
+import coolmap.application.listeners.CMatrixListener;
+import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
@@ -27,12 +29,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 /**
  *
  * @author gangsu
  */
-public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChangedListener, CObjectListener {
+public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChangedListener, CObjectListener, CMatrixListener {
 
     private JPanel _container = new JPanel();
     private JToolBar _toolBar = new JToolBar();
@@ -41,9 +44,10 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
     private JList _allCMatrixList = new JList();
 
     public WidgetCoolMapProperties() {
-        super("Active CoolMap Matrices", W_MODULE, L_LEFTBOTTOM, UI.getImageIcon("commentDots"), "Comments in the current view");
+        super("Data Linked to Active View", W_MODULE, L_LEFTBOTTOM, UI.getImageIcon("commentDots"), "Comments in the current view");
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         CoolMapMaster.getActiveCoolMapObjectListenerDelegate().addCObjectListener(this);
+        DataMaster.addCMatrixListener(this);
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(_container);
         _container.setLayout(new BorderLayout());
@@ -242,22 +246,37 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
     }
 
     private void _updateBaseCMatrixList() {
+        
         CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
         if (obj == null) {
-            _cmatrixList.setModel(new DefaultListModel());
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    _cmatrixList.setModel(new DefaultListModel());
+                }
+            });
             return;
         }
 
 
         List<CMatrix> cmatrices = obj.getBaseCMatrices();
-        DefaultListModel model = new DefaultListModel();
+        final DefaultListModel model = new DefaultListModel();
         for (CMatrix matrix : cmatrices) {
             model.addElement(matrix);
         }
 
 //        System.out.println("Model updated:" + model);
+        SwingUtilities.invokeLater(new Runnable() {
 
-        _cmatrixList.setModel(model);
+            @Override
+            public void run() {
+                _cmatrixList.setModel(model);
+                _cmatrixList.repaint();
+            }
+        });
+        
+        
     }
 
     @Override
@@ -273,7 +292,7 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
         _updateBaseCMatrixList();
     }
 
@@ -291,5 +310,15 @@ public class WidgetCoolMapProperties extends Widget implements ActiveCoolMapChan
 
     @Override
     public void nameChanged(CoolMapObject object) {
+    }
+
+    @Override
+    public void cmatrixNameChanged(CMatrix mx) {
+        _cmatrixList.repaint();
+    }
+
+    @Override
+    public void cmatrixValueUpdated(CMatrix mx) {
+        
     }
 }

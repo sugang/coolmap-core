@@ -128,7 +128,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     @Override

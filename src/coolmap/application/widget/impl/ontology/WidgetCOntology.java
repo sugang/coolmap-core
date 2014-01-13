@@ -6,6 +6,7 @@ package coolmap.application.widget.impl.ontology;
 
 import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
+import coolmap.application.listeners.COntologyListener;
 import coolmap.application.listeners.DataStorageListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
@@ -86,7 +87,7 @@ import org.json.JSONObject;
  *
  * @author gangsu
  */
-public class WidgetCOntology extends Widget implements DataStorageListener {
+public class WidgetCOntology extends Widget implements DataStorageListener, COntologyListener {
 
     private JPanel _container = new JPanel();
     private JXTable _ontologyTable = new JXTable();
@@ -95,6 +96,11 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     private JTextField _searchField = new JTextField();
     private OntologyBrowser _ontologyBrowswer = new OntologyBrowser();
     private BrowserSelectionListener _browserSelectionListener = new BrowserSelectionListener();
+
+    @Override
+    public void contologyNameChanged(COntology ontology) {
+        _ontologyCombo.repaint();
+    }
 
     private class BrowserSelectionListener implements OntologyBrowserActiveTermChangedListener {
 
@@ -181,6 +187,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
     public WidgetCOntology() {
 
         super("Ontology Table", W_DATA, L_DATAPORT, UI.getImageIcon("textList"), null);
+
+        DataMaster.addCOntologyListener(this);
 
         executor = Executors.newSingleThreadExecutor();
 
@@ -370,6 +378,26 @@ public class WidgetCOntology extends Widget implements DataStorageListener {
         toolBar.add(ontologyButton);
         ontologyButton.setBorder(null);
         ontologyButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JMenuItem rename = new JMenuItem("Rename");
+        rename.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String name = JOptionPane.showInputDialog(CoolMapMaster.getCMainFrame(), "Please provide a new name");
+                    if(name == null || name.length() == 0){
+                        name = "Untitled";
+                    }
+                    
+                    CoolMapMaster.renameCOntology(((COntology) _ontologyCombo.getSelectedItem()).getID(), name);
+                } catch (Exception ex) {
+                    
+                }
+            }
+        });
+
+        configPopupMenu.add(rename);
 
         JMenuItem deleteItem = new JMenuItem("Remove this ontology");
         deleteItem.addActionListener(new ActionListener() {

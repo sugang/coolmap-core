@@ -125,12 +125,12 @@ public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObject
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
         if (!_isActiveObject(object)) {
             return;
         }
         for (CObjectListener lis : _objectListeners) {
-            lis.baseMatrixChanged(object);
+            lis.coolMapObjectBaseMatrixChanged(object);
         }
     }
 

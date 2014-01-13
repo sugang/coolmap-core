@@ -7,8 +7,8 @@ package coolmap.application.widget.impl;
 
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
-import coolmap.application.utils.Messenger;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.listeners.CViewListener;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
@@ -483,10 +483,10 @@ public class WidgetPointAnnotation extends Widget implements CObjectListener, CV
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
         //when this changes, it should be notified.
         //
-        Messenger.showWarningMessage("Base matrices are changed. The annotated values may have also changed.", "Data changed");
+        CMConsole.logWarning("Base matrices changed for view: '" + object.getName() + "'.\nExisting annotations may not be valid anymore.");
     }
 
 //    @Override

@@ -273,7 +273,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     }
 
     @Override
-    public void baseMatrixChanged(CoolMapObject object) {
+    public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
     @Override

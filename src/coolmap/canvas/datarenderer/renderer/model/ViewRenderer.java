@@ -430,138 +430,146 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
         @Override
         public void run() {
-            VNode colStartNode = __data.getViewNodeColumn(__matrixFromCol);
-            VNode colEndNode = __data.getViewNodeColumn(__matrixToCol - 1);
-            VNode rowStartNode = __data.getViewNodeRow(__matrixFromRow);
-            VNode rowEndNode = __data.getViewNodeRow(__matrixToRow - 1);
+            try {
+                VNode colStartNode = __data.getViewNodeColumn(__matrixFromCol);
+                VNode colEndNode = __data.getViewNodeColumn(__matrixToCol - 1);
+                VNode rowStartNode = __data.getViewNodeRow(__matrixFromRow);
+                VNode rowEndNode = __data.getViewNodeRow(__matrixToRow - 1);
 
 //            System.out.println("Rendering Column:" + __matrixFromCol + " " + __matrixToCol);
 //            System.out.println("Rendering Row:" + __matrixFromRow + " " + __matrixToRow);
-            //int subMapWidth = (int) (colEndNode.getViewOffset() - colStartNode.getViewOffset() + colEndNode.getViewSize(__zoomX));
-            //int subMapHeight = (int) (rowEndNode.getViewOffset() - rowStartNode.getViewOffset() + rowEndNode.getViewSize(__zoomY));
-            //System.out.println("zoomX:" + __zoomX);
-            int subMapWidth = VNode.distanceInclusive(colStartNode, colEndNode, __zoomX);
-            int subMapHeight = VNode.distanceInclusive(rowStartNode, rowEndNode, __zoomY);
+                //int subMapWidth = (int) (colEndNode.getViewOffset() - colStartNode.getViewOffset() + colEndNode.getViewSize(__zoomX));
+                //int subMapHeight = (int) (rowEndNode.getViewOffset() - rowStartNode.getViewOffset() + rowEndNode.getViewSize(__zoomY));
+                //System.out.println("zoomX:" + __zoomX);
+                int subMapWidth = VNode.distanceInclusive(colStartNode, colEndNode, __zoomX);
+                int subMapHeight = VNode.distanceInclusive(rowStartNode, rowEndNode, __zoomY);
 
-            //ensure it's at least 1 px 
-            if (subMapWidth <= 0) {
-                subMapWidth = 1;
-            }
+                //ensure it's at least 1 px 
+                if (subMapWidth <= 0) {
+                    subMapWidth = 1;
+                }
 
-            //ensure it's at least 1 px
-            if (subMapHeight <= 0) {
-                subMapHeight = 1;
-            }
+                //ensure it's at least 1 px
+                if (subMapHeight <= 0) {
+                    subMapHeight = 1;
+                }
 
-            //System.out.println(subMapWidth + " " + subMapHeight);
-            final BufferedImage subMap = _graphicsConfiguration.createCompatibleImage(subMapWidth, subMapHeight, Transparency.OPAQUE);
+                //System.out.println(subMapWidth + " " + subMapHeight);
+                final BufferedImage subMap = _graphicsConfiguration.createCompatibleImage(subMapWidth, subMapHeight, Transparency.OPAQUE);
 
-            Graphics2D g2D = subMap.createGraphics();
-            if (_antiAliasing) {
-                g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            } else {
-                g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-            }
+                Graphics2D g2D = subMap.createGraphics();
+                if (_antiAliasing) {
+                    g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                } else {
+                    g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                }
 
-            prepareGraphics(g2D);
+                prepareGraphics(g2D);
 
-            int anchorX;
-            int anchorY;
-            int cellWidth;
-            int cellHeight;
-            float offsetX = __data.getViewNodeColumn(__matrixFromCol).getViewOffset();
-            float offsetY = __data.getViewNodeRow(__matrixFromRow).getViewOffset();
-            VNode rowNode;
-            VNode colNode;
-            VIEW value;
+                int anchorX;
+                int anchorY;
+                int cellWidth;
+                int cellHeight;
+                float offsetX = __data.getViewNodeColumn(__matrixFromCol).getViewOffset();
+                float offsetY = __data.getViewNodeRow(__matrixFromRow).getViewOffset();
+                VNode rowNode;
+                VNode colNode;
+                VIEW value;
 
-            for (int i = 0; i < __matrixToRow - __matrixFromRow; i++) {
-                for (int j = 0; j < __matrixToCol - __matrixFromCol; j++) {
+                for (int i = 0; i < __matrixToRow - __matrixFromRow; i++) {
+                    for (int j = 0; j < __matrixToCol - __matrixFromCol; j++) {
 
-                    try {
-                        rowNode = __data.getViewNodeRow(i + __matrixFromRow);
-                        colNode = __data.getViewNodeColumn(j + __matrixFromCol);
+                        try {
+                            rowNode = __data.getViewNodeRow(i + __matrixFromRow);
+                            colNode = __data.getViewNodeColumn(j + __matrixFromCol);
 
-                        value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
+                            value = __data.getViewValue(i + __matrixFromRow, j + __matrixFromCol);
 
-                        anchorX = (int) Math.round(colNode.getViewOffset() - offsetX);
+                            anchorX = (int) Math.round(colNode.getViewOffset() - offsetX);
 
-                        //sometimes error here.
-                        anchorY = (int) Math.round(rowNode.getViewOffset() - offsetY);
+                            //sometimes error here.
+                            anchorY = (int) Math.round(rowNode.getViewOffset() - offsetY);
 
-                        cellWidth = (int) Math.round(colNode.getViewSizeInMap(__zoomX));
-                        cellHeight = (int) Math.round(rowNode.getViewSizeInMap(__zoomY));
-                        
-                        //make it minimal 1 px for rendering
-                        if(cellWidth < 1)cellWidth = 1;
-                        if(cellHeight < 1)cellHeight = 1;
+                            cellWidth = (int) Math.round(colNode.getViewSizeInMap(__zoomX));
+                            cellHeight = (int) Math.round(rowNode.getViewSizeInMap(__zoomY));
 
-                        //System.out.println(cellWidth + " " + cellHeight);
-                        //each cell can take a different size. Therefore need to 
-                        if (!_modeOverride) {
-                            if (cellWidth <= _ldThreshold || cellHeight <= _ldThreshold) {
-                                __mode = LD;
-                            } else if (cellWidth >= _hdThreshold || cellHeight > +_hdThreshold) {
-                                __mode = HD;
-                            } else {
-                                __mode = SD;
+                            //make it minimal 1 px for rendering
+                            if (cellWidth < 1) {
+                                cellWidth = 1;
                             }
-                        } else {
-                            __mode = _globalMode;
-                        }
+                            if (cellHeight < 1) {
+                                cellHeight = 1;
+                            }
 
-                        //make sure drawing don't go to other cells
-                        if (Thread.currentThread().isInterrupted()) {
+                            //System.out.println(cellWidth + " " + cellHeight);
+                            //each cell can take a different size. Therefore need to 
+                            if (!_modeOverride) {
+                                if (cellWidth <= _ldThreshold || cellHeight <= _ldThreshold) {
+                                    __mode = LD;
+                                } else if (cellWidth >= _hdThreshold || cellHeight > +_hdThreshold) {
+                                    __mode = HD;
+                                } else {
+                                    __mode = SD;
+                                }
+                            } else {
+                                __mode = _globalMode;
+                            }
+
+                            //make sure drawing don't go to other cells
+                            if (Thread.currentThread().isInterrupted()) {
+                                return;
+                            }
+
+                            if (_clipCell) {
+                                g2D.setClip((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
+                            }
+                            switch (__mode) {
+                                case LD:
+                                    renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                    break;
+                                case SD:
+
+                                    renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                    break;
+                                case HD:
+                                    renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                                    break;
+                                default:
+                                    renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
+                            }
+
+                        } catch (Exception e) {
                             return;
                         }
 
-                        if (_clipCell) {
-                            g2D.setClip((int) anchorX, (int) anchorY, (int) cellWidth, (int) cellHeight);
-                        }
-                        switch (__mode) {
-                            case LD:
-                                renderCellLD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                                break;
-                            case SD:
+                    }//end of inner loop
+                }//end of outter loop
 
-                                renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                                break;
-                            case HD:
-                                renderCellHD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                                break;
-                            default:
-                                renderCellSD(value, rowNode, colNode, g2D, anchorX, anchorY, cellWidth, cellHeight);
-                        }
-
-                    } catch (Exception e) {
-                        return;
-                    }
-
-                }//end of inner loop
-            }//end of outter loop
-
-            g2D.dispose();
+                g2D.dispose();
 //            try {
 //                ImageIO.write(subMap, "png", new File("/Users/gangsu/Desktop/subrender.png"));
 //            } catch (Exception e) {
 //                e.printStackTrace();
 //            }
 
-            Graphics2D g2DM = __viewMap.createGraphics();
-            synchronized (g2D) {
-                if (_antiAliasing) {
-                    g2DM.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                } else {
-                    g2DM.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                Graphics2D g2DM = __viewMap.createGraphics();
+                synchronized (g2D) {
+                    if (_antiAliasing) {
+                        g2DM.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    } else {
+                        g2DM.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    }
+
+                    //System.out.println(__subImageAnchorX + " " + __subImageAnchorY);
+                    g2DM.drawImage(subMap, __subImageAnchorX, __subImageAnchorY, null);
+                    g2DM.dispose();
                 }
 
-                //System.out.println(__subImageAnchorX + " " + __subImageAnchorY);
-                g2DM.drawImage(subMap, __subImageAnchorX, __subImageAnchorY, null);
-                g2DM.dispose();
+            } catch (Exception e) {
+                //would return whenever an exception occurs.
             }
-
         }
-    }
+    }//end of runner renderer
 
     protected boolean _clipCell = true;
 
