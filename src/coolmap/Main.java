@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 
 /*
@@ -34,6 +35,18 @@ public class Main {
                 Config.initialize();
                 CSplashScreen.splashInit();
                 //First initialize
+                try {
+//            WebLookAndFeel.install();
+//            UIManager.LookAndFeelInfo[] infos = UIManager.getInstalledLookAndFeels();
+//            for( UIManager.LookAndFeelInfo info : infos){
+//                System.out.println(info.getName());
+//            }
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//                    UIManager.setLookAndFeel("de.javasoft.plaf.synthetica.SyntheticaAluOxideLookAndFeel");
+                } catch (Exception e) {
+
+                }
+
                 CoolMapMaster.initialize();
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
@@ -51,23 +64,21 @@ public class Main {
 
     private static void importTSVSample() {
         try {
-                        
+
             ImportDataFromTSV tsvImport = new ImportDataFromTSV();
             tsvImport.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0correlation.txt"));
-            
+
             CoolMapMaster.addNewCoolMapObject(tsvImport.getImportedCoolMapObjects());
             CoolMapMaster.addNewCOntology(tsvImport.getImportedCOntology());
-            
+
             ImportCOntologyFromSimpleTwoColumn importer = new ImportCOntologyFromSimpleTwoColumn();
             importer.importFromFiles(new File("/Users/sugang/Dropbox/Research - Dropbox/CoolMap datasets/0Child_Parent.txt"));
             CoolMapMaster.addNewCOntology(importer.getImportedCOntology());
-            
-            
+
         } catch (Exception e) {
             System.err.println("File import error");
         }
     }
-
 
     private static void loadSampleCoolMapProject() {
         try {

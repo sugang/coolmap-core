@@ -18,7 +18,6 @@ import coolmap.canvas.sidemaps.impl.RowLabels;
 import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
-import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
@@ -41,7 +40,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -51,9 +49,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /**
  *
@@ -114,122 +111,9 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
         CoolMapMaster.destroyCMatrices(selectedMatrices);
     }
 
-    private void createLogTransform(double base) {
-        List<CMatrix> selectedMatrices = getSelectedMatrices();
-        if (selectedMatrices.isEmpty()) {
-            Messenger.showWarningMessage("Please select datasets to continue.", "Empty selection");
-            return;
-        }
 
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
-            }
-        }
 
-        for (CMatrix matrix : selectedMatrices) {
-            if (matrix instanceof DoubleCMatrix) {
-                DoubleCMatrix newMatrix = new DoubleCMatrix(matrix.getName() + " log(" + base + ") transformed", matrix.getNumRows(), matrix.getNumColumns());
-                for (int i = 0; i < matrix.getNumRows(); i++) {
-                    for (int j = 0; j < matrix.getNumColumns(); j++) {
-                        try {
-                            newMatrix.setValue(i, j, Math.log((Double) matrix.getValue(i, j)) / Math.log(base));
-                        } catch (Exception e) {
-                            newMatrix.setValue(i, j, null);
-                        }
-                    }
-                }
 
-                //
-                for (int i = 0; i < matrix.getNumRows(); i++) {
-                    newMatrix.setRowLabel(i, matrix.getRowLabel(i));
-                }
-
-                //
-                for (int i = 0; i < matrix.getNumColumns(); i++) {
-                    newMatrix.setColLabel(i, matrix.getColLabel(i));
-                }
-
-                CoolMapMaster.addNewBaseMatrix(newMatrix);
-
-            }
-        }
-    }
-
-    private void createZTransform() {
-        List<CMatrix> selectedMatrices = getSelectedMatrices();
-        if (selectedMatrices.isEmpty()) {
-            Messenger.showWarningMessage("Please select datasets to continue.", "Empty selection");
-            return;
-        }
-
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
-            }
-        }
-
-        //selected matrices
-        for (CMatrix matrix : selectedMatrices) {
-            ArrayList<Double> values = new ArrayList<>();
-            DoubleCMatrix newMatrix = new DoubleCMatrix(matrix.getName() + "z transformed", matrix.getNumRows(), matrix.getNumColumns());
-
-            //
-            for (int i = 0; i < matrix.getNumRows(); i++) {
-                for (int j = 0; j < matrix.getNumColumns(); j++) {
-                    try {
-                        Double value = (Double) matrix.getValue(i, j);
-                        if (value == null || value.isInfinite() || value.isNaN()) {
-                            continue;
-                        } else {
-                            values.add(value);
-                        }
-                    } catch (Exception e) {
-                    }
-                }//loop of num columns
-
-            }//loop of num rows
-
-            double[] v = new double[values.size()];
-            for (int i = 0; i < v.length; i++) {
-                v[i] = values.get(i);
-            }
-
-            Mean mean = new Mean();
-            StandardDeviation sd = new StandardDeviation();
-
-            double mu = mean.evaluate(v);
-            double sigma = sd.evaluate(v);
-
-//            System.out.println("Mean: " + mu + " sd:" + sigma);
-            for (int i = 0; i < matrix.getNumRows(); i++) {
-                for (int j = 0; j < matrix.getNumColumns(); j++) {
-                    Double value = (Double) matrix.getValue(i, j);
-                    if (value == null || value.isInfinite() || value.isNaN()) {
-                        continue;
-                    } else {
-                        newMatrix.setValue(i, j, (value - mu) / sigma);
-                    }
-                }
-            }
-
-            //
-            for (int i = 0; i < matrix.getNumRows(); i++) {
-                newMatrix.setRowLabel(i, matrix.getRowLabel(i));
-            }
-
-            //
-            for (int i = 0; i < matrix.getNumColumns(); i++) {
-                newMatrix.setColLabel(i, matrix.getColLabel(i));
-            }
-
-            CoolMapMaster.addNewBaseMatrix(newMatrix);
-
-        }//end of matrices
-
-    }
 
     private boolean canBeGrouped(List<CMatrix> matrices) {
         if (matrices == null || matrices.isEmpty()) {
@@ -348,88 +232,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
         }
     }
 
-    private void createRangeTransform() {
-        List<CMatrix> selectedMatrices = getSelectedMatrices();
-        if (selectedMatrices.isEmpty()) {
-            Messenger.showWarningMessage("Please select datasets to continue.", "Empty selection");
-            return;
-        }
 
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
-            }
-        }
-
-        for (CMatrix matrix : selectedMatrices) {
-            if (matrix instanceof DoubleCMatrix) {
-                DoubleCMatrix newMatrix = new DoubleCMatrix(matrix.getName() + "range transformed", matrix.getNumRows(), matrix.getNumColumns());
-
-                double min = Double.MAX_VALUE;
-                double max = Double.MIN_VALUE;
-
-                for (int i = 0; i < matrix.getNumRows(); i++) {
-                    for (int j = 0; j < matrix.getNumColumns(); j++) {
-                        try {
-                            Double v = (Double) matrix.getValue(i, j);
-                            if (v == null || v.isInfinite() || v.isNaN()) {
-                                continue;
-                            } else {
-                                if (v < min) {
-                                    min = v;
-                                }
-                                if (v > max) {
-                                    max = v;
-                                }
-                            }
-                        } catch (Exception e) {
-
-                        }
-                    }
-                }
-
-                double range = max - min;
-                if (range == 0) {
-                    //Every value is the same, no need to transform
-                    for (int i = 0; i < matrix.getNumRows(); i++) {
-                        for (int j = 0; j < matrix.getNumColumns(); j++) {
-                            try {
-                                newMatrix.setValue(i, j, (Double) matrix.getValue(i, j));
-                            } catch (Exception e) {
-                                newMatrix.setValue(i, j, null);
-                            }
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < matrix.getNumRows(); i++) {
-                        for (int j = 0; j < matrix.getNumColumns(); j++) {
-                            try {
-                                Double v = (Double) matrix.getValue(i, j);
-                                newMatrix.setValue(i, j, (v - min) / range);
-                            } catch (Exception e) {
-                                newMatrix.setValue(i, j, null);
-                            }
-                        }
-                    }
-                }
-
-                //
-                for (int i = 0; i < matrix.getNumRows(); i++) {
-                    newMatrix.setRowLabel(i, matrix.getRowLabel(i));
-                }
-
-                //
-                for (int i = 0; i < matrix.getNumColumns(); i++) {
-                    newMatrix.setColLabel(i, matrix.getColLabel(i));
-                }
-
-                CoolMapMaster.addNewBaseMatrix(newMatrix);
-//                newMatrix.printMatrix();
-
-            }
-        }
-    }
 
     private void initPopupmenu() {
         JPopupMenu menu = new JPopupMenu();
@@ -442,6 +245,16 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
             @Override
             public void actionPerformed(ActionEvent e) {
                 renameSelected();
+            }
+        });
+
+        JMenuItem view = new JMenuItem("View selected");
+        menu.add(view);
+        view.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                view();
             }
         });
 
@@ -465,276 +278,170 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
             }
         });
 
-        menu.addSeparator();
-        JMenu create = new JMenu("Create transformed from selected");
-        menu.add(create);
+        //These should not be putted here. move to plugin.
+        
+//        menu.addSeparator();
+//        JMenu create = new JMenu("Create transformed from selected");
+//        menu.add(create);
 
-        JMenuItem createLog2 = new JMenuItem("log2");
-        create.add(createLog2);
-        createLog2.addActionListener(new ActionListener() {
+        
+//        JMenuItem createLog2 = new JMenuItem("log2");
+//        create.add(createLog2);
+//        createLog2.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                createLogTransform(2.0);
+//            }
+//        });
+//
+//        JMenuItem createLog10 = new JMenuItem("log10");
+//        create.add(createLog10);
+//        createLog10.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                createLogTransform(10.0);
+//            }
+//        });
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createLogTransform(2.0);
-            }
-        });
+//        JMenuItem createZ = new JMenuItem("z");
+//        create.add(createZ);
+//        createZ.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                createZTransform();
+//            }
+//        });
 
-        JMenuItem createLog10 = new JMenuItem("log10");
-        create.add(createLog10);
-        createLog10.addActionListener(new ActionListener() {
+//        JMenuItem createRange = new JMenuItem("0-1 range");
+//        create.add(createRange);
+//        createRange.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                createRangeTransform();
+//            }
+//        });
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createLogTransform(10.0);
-            }
-        });
+//        JMenu aggregate = new JMenu("Create aggregate from selected");
+//        menu.add(aggregate);
 
-        JMenuItem createZ = new JMenuItem("z");
-        create.add(createZ);
-        createZ.addActionListener(new ActionListener() {
+//        JMenuItem sum = new JMenuItem("sum");
+//        aggregate.add(sum);
+//        sum.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                sum();
+//            }
+//        });
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createZTransform();
-            }
-        });
+//        JMenuItem avg = new JMenuItem("average");
+//        aggregate.add(avg);
+//        avg.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                average();
+//            }
+//        });
 
-        JMenuItem createRange = new JMenuItem("0-1 range");
-        create.add(createRange);
-        createRange.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createRangeTransform();
-            }
-        });
-
-        JMenu aggregate = new JMenu("Create aggregate from selected");
-        menu.add(aggregate);
-
-        JMenuItem sum = new JMenuItem("sum");
-        aggregate.add(sum);
-        sum.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sum();
-            }
-        });
-
-        JMenuItem avg = new JMenuItem("average");
-        aggregate.add(avg);
-        avg.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                average();
-            }
-        });
-
-        JMenuItem diff = new JMenuItem("difference (1-2)");
-        aggregate.add(diff);
-        diff.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                difference();
-            }
-        });
+//        JMenuItem diff = new JMenuItem("difference (1-2)");
+//        aggregate.add(diff);
+//        diff.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                difference();
+//            }
+//        });
 
     }
 
-    private void sum() {
+
+
+
+
+    private void view() {
         List<CMatrix> selectedMatrices = getSelectedMatrices();
         if (selectedMatrices.isEmpty()) {
-            Messenger.showWarningMessage("Please select datasets to continue.", "Empty selection");
+            Messenger.showWarningMessage("Please select datasets to continue.", "Invalid selection");
             return;
         }
 
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
+        for (int index = 0; index < selectedMatrices.size(); index++) {
+            final CMatrix mx = selectedMatrices.get(index);
+
+            //
+            Object[][] data = new Object[mx.getNumRows()][mx.getNumColumns() + 1];
+            for (int i = 0; i < mx.getNumRows(); i++) {
+                data[i][0] = mx.getRowLabel(i);
+                for (int j = 0; j < mx.getNumColumns(); j++) {
+                    data[i][j + 1] = mx.getValue(i, j);
+                }
             }
-        }
-        CMatrix firstMatrix = selectedMatrices.get(0);
 
-        DoubleCMatrix newMatrix = new DoubleCMatrix("First matrix", firstMatrix.getNumRows(), firstMatrix.getNumColumns());
+            String[] header = new String[mx.getNumColumns() + 1];
+            header[0] = "Row/Column";
 
-        //how do you handle missing values? if one is null, then just set it to null?
-        //yes. Otherwise there's a huge bias.
-        for (int i = 0; i < newMatrix.getNumRows(); i++) {
-            for (int j = 0; j < newMatrix.getNumColumns(); j++) {
-                newMatrix.setValue(i, j, 0d);
+            for (int i = 0; i < mx.getNumColumns(); i++) {
+                header[i + 1] = mx.getColLabel(i);
             }
-        }
 
-        ArrayList<String> names = new ArrayList(selectedMatrices.size());
-        for (CMatrix matrix : selectedMatrices) {
-            for (int i = 0; i < matrix.getNumRows(); i++) {
-                for (int j = 0; j < matrix.getNumColumns(); j++) {
-                    try {
-                        Double v = (Double) matrix.getValue(i, j);
-                        if (v == null || v.isInfinite() || v.isNaN()) {
-                            newMatrix.setValue(i, j, null);
-                        } else {
-                            newMatrix.setValue(i, j, v + newMatrix.getValue(i, j)); //add to it
+            final DefaultTableModel model = new DefaultTableModel(data, header) {
+
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; //To change body of generated methods, choose Tools | Templates.
+                }
+
+            };
+
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    JTable matrixPreviewTable = new JTable();
+                    matrixPreviewTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                    matrixPreviewTable.getTableHeader().setReorderingAllowed(false);
+                    matrixPreviewTable.setModel(model);
+                    matrixPreviewTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+
+                        @Override
+                        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                            JLabel l = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
+                            
+                            if(isSelected){
+                                return l;
+                            }
+                            
+                            if(column == 0){
+                                l.setBackground(UI.colorLightBlue0);
+                            }
+                            else{
+                                l.setBackground(UI.colorWhite);
+                            }
+    //To change body of generated methods, choose Tools | Templates.
+                            return l;
                         }
-                    } catch (Exception e) {
-                        newMatrix.setValue(i, j, null);
-                    }
+                        
+                    });
+                    JOptionPane.showMessageDialog(
+                            CoolMapMaster.getCMainFrame(),
+                            new JScrollPane(matrixPreviewTable),
+                            "Preview of: " + mx,
+                            JOptionPane.PLAIN_MESSAGE
+                    );
                 }
-            }
+            });
 
-            names.add(matrix.getName());
         }
-
-        newMatrix.setName("Sum of" + names);
-        //
-        for (int i = 0; i < firstMatrix.getNumRows(); i++) {
-            newMatrix.setRowLabel(i, firstMatrix.getRowLabel(i));
-        }
-
-        //
-        for (int i = 0; i < firstMatrix.getNumColumns(); i++) {
-            newMatrix.setColLabel(i, firstMatrix.getColLabel(i));
-        }
-
-        CoolMapMaster.addNewBaseMatrix(newMatrix);
 
     }
 
-    private void average() {
-        List<CMatrix> selectedMatrices = getSelectedMatrices();
-        if (selectedMatrices.isEmpty()) {
-            Messenger.showWarningMessage("Please select datasets to continue.", "Empty selection");
-            return;
-        }
-
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
-            }
-        }
-        CMatrix firstMatrix = selectedMatrices.get(0);
-
-        DoubleCMatrix newMatrix = new DoubleCMatrix("First matrix", firstMatrix.getNumRows(), firstMatrix.getNumColumns());
-
-        //how do you handle missing values? if one is null, then just set it to null?
-        //yes. Otherwise there's a huge bias.
-        for (int i = 0; i < newMatrix.getNumRows(); i++) {
-            for (int j = 0; j < newMatrix.getNumColumns(); j++) {
-                newMatrix.setValue(i, j, 0d);
-            }
-        }
-
-        ArrayList<String> names = new ArrayList(selectedMatrices.size());
-        for (CMatrix matrix : selectedMatrices) {
-            for (int i = 0; i < matrix.getNumRows(); i++) {
-                for (int j = 0; j < matrix.getNumColumns(); j++) {
-                    try {
-                        Double v = (Double) matrix.getValue(i, j);
-                        if (v == null || v.isInfinite() || v.isNaN()) {
-                            newMatrix.setValue(i, j, null);
-                        } else {
-                            newMatrix.setValue(i, j, v + newMatrix.getValue(i, j)); //add to it
-                        }
-                    } catch (Exception e) {
-                        newMatrix.setValue(i, j, null);
-                    }
-                }
-            }
-
-            names.add(matrix.getName());
-        }
-
-        int itemNum = selectedMatrices.size();
-        for (int i = 0; i < newMatrix.getNumRows(); i++) {
-            for (int j = 0; j < newMatrix.getNumColumns(); j++) {
-                Double v = (Double) newMatrix.getValue(i, j);
-                if (v == null) {
-                    continue;
-                } else {
-                    newMatrix.setValue(i, j, v / itemNum);
-                }
-            }
-        }
-
-        newMatrix.setName("Average of" + names);
-        //
-        for (int i = 0; i < firstMatrix.getNumRows(); i++) {
-            newMatrix.setRowLabel(i, firstMatrix.getRowLabel(i));
-        }
-
-        //
-        for (int i = 0; i < firstMatrix.getNumColumns(); i++) {
-            newMatrix.setColLabel(i, firstMatrix.getColLabel(i));
-        }
-
-        CoolMapMaster.addNewBaseMatrix(newMatrix);
-
-    }
-
-    private void difference() {
-        List<CMatrix> selectedMatrices = getSelectedMatrices();
-        if (selectedMatrices.size() != 2) {
-            Messenger.showWarningMessage("Please select two datasets to continue.", "Invalid selection");
-            return;
-        }
-
-        for (CMatrix matrix : selectedMatrices) {
-            if (!(matrix instanceof DoubleCMatrix)) {
-                Messenger.showWarningMessage("Dataset '" + matrix + "' is not a numeric matrix.\nOperation aborted.", "Data type error.");
-                return;
-            }
-        }
-        CMatrix firstMatrix = selectedMatrices.get(0);
-        CMatrix secondMatrix = selectedMatrices.get(1);
-
-        Object[] options = new Object[]{firstMatrix + " - " + secondMatrix, secondMatrix + " - " + firstMatrix};
-        //show options
-        int returnValue = JOptionPane.showOptionDialog(CoolMapMaster.getCMainFrame(), "Choose difference", "Create difference", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-
-        if (returnValue == 0) {
-            //nothing
-        } else if (returnValue == 1) {
-            CMatrix temp = firstMatrix;
-            firstMatrix = secondMatrix;
-            secondMatrix = temp;
-        }
-        else{
-            return;
-        }
-
-        DoubleCMatrix newMatrix = new DoubleCMatrix(firstMatrix.getName() + " - " + secondMatrix.getName(), firstMatrix.getNumRows(), firstMatrix.getNumColumns());
-
-        //
-        for (int i = 0; i < newMatrix.getNumRows(); i++) {
-            for (int j = 0; j < newMatrix.getNumColumns(); j++) {
-                try {
-                    Double v1 = (Double) firstMatrix.getValue(i, j);
-                    Double v2 = (Double) secondMatrix.getValue(i, j);
-                    newMatrix.setValue(i, j, v1 - v2);
-                } catch (Exception e) {
-
-                }
-            }
-        }
-
-        for (int i = 0; i < firstMatrix.getNumRows(); i++) {
-            newMatrix.setRowLabel(i, firstMatrix.getRowLabel(i));
-        }
-
-        //
-        for (int i = 0; i < firstMatrix.getNumColumns(); i++) {
-            newMatrix.setColLabel(i, firstMatrix.getColLabel(i));
-        }
-
-        CoolMapMaster.addNewBaseMatrix(newMatrix);
-
-    }
 
     public WidgetCMatrix() {
         super("Imported data", W_MODULE, L_LEFTTOP, UI.getImageIcon(""), "Imported data");
