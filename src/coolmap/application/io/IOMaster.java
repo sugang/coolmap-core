@@ -144,7 +144,6 @@ public class IOMaster {
                             try {
 
 //                                System.out.println("Trying to import data");
-
                                 if (importerInstance.onlyImportFromSingleFile()) {
                                     importerInstance.importFromFile(f[0]);
                                 } else {
@@ -160,12 +159,10 @@ public class IOMaster {
 
                                 CoolMapMaster.addNewCOntology(ontologies);
                                 CoolMapMaster.addNewCoolMapObject(objects);
-                                
+
                                 //When the nodes were created, the contology does not exist, which resulted in base 
                                 //System.out.println(objects.iterator().next().getViewNodeRow(0).getBaseIndicesFromCOntology(null, Integer.MIN_VALUE));
                                 //The orders are quite important.
-                                
-
                                 CMConsole.logInfo("Data imported from: " + Arrays.toString(f));
 
                             } catch (Exception ex2) {
@@ -374,6 +371,11 @@ public class IOMaster {
                     path = Tools.appendPathExtension(path, "cpj");
 
                     if (saveFile.exists()) {
+                        int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), "Override existing file " + saveFile + "?", "Override warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                        if (returnVal == JOptionPane.CANCEL_OPTION) {
+                            return;
+                        }
+
                         try {
                             saveFile.delete();
                         } catch (Exception ex) {
@@ -431,12 +433,12 @@ public class IOMaster {
                 path = Tools.appendPathExtension(path, "cpj");
 
                 if (saveFile.exists()) {
-                    
+
                     int returnVal = JOptionPane.showConfirmDialog(CoolMapMaster.getCMainFrame(), "Override existing file " + saveFile + "?", "Override warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if(returnVal == JOptionPane.CANCEL_OPTION){
+                    if (returnVal == JOptionPane.CANCEL_OPTION) {
                         return;
                     }
-                    
+
                     try {
                         saveFile.delete();
                     } catch (Exception ex) {
@@ -486,25 +488,24 @@ public class IOMaster {
 
     private static void saveProject(TFile projectFile) throws Exception {
 
-            saveProjectProperties(projectFile);
-            saveCOntologies(projectFile);
-            saveCMatrices(projectFile);
-            saveCoolMapObjects(projectFile);
+        saveProjectProperties(projectFile);
+        saveCOntologies(projectFile);
+        saveCMatrices(projectFile);
+        saveCoolMapObjects(projectFile);
 
             //this is needed to commit all changes in the temp projectFile and finish the saving
-            //This is needed to synchornize the archive folder
-            //may throw an exception - not sure whether it may throw a warning
-            try {
-                TVFS.umount(projectFile);
-            } catch (Exception e) {
-                //should make sure all streams are closed
-                System.err.println("TVFS unmount error");
-            }
+        //This is needed to synchornize the archive folder
+        //may throw an exception - not sure whether it may throw a warning
+        try {
+            TVFS.umount(projectFile);
+        } catch (Exception e) {
+            //should make sure all streams are closed
+            System.err.println("TVFS unmount error");
+        }
 
-            CoolMapMaster.updateSession(Tools.removeFileExtension(projectFile.getName()), projectFile.getPath());
-            StateStorageMaster.clearAllStates();
-           
-            
+        CoolMapMaster.updateSession(Tools.removeFileExtension(projectFile.getName()), projectFile.getPath());
+        StateStorageMaster.clearAllStates();
+
         //try load project immediately
     }
 
@@ -674,9 +675,10 @@ public class IOMaster {
             JSONObject property = new JSONObject(IOUtils.toString(new TFileInputStream(propertyFile)));
 
             //try to unzip it
-            TFile directory = new TFile(projectFile.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
-            FileUtils.deleteDirectory(directory);
-            TFile.cp_rp(projectFile, directory, TArchiveDetector.NULL);
+            //no need to.
+//            TFile directory = new TFile(projectFile.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
+//            FileUtils.deleteDirectory(directory);
+//            TFile.cp_rp(projectFile, directory, TArchiveDetector.NULL);
 
             //Got to widget state are restored at the beginning of the .. not here
             loadCMatrices(projectFile, property);
@@ -741,8 +743,15 @@ public class IOMaster {
     private static void loadCoolMapObjects(TFile projectFile, JSONObject property) throws Exception {
         JSONArray coolMapObjectIDs = property.getJSONArray(IOTerm.OBJECT_COOLMAPOBJECT_ID);
         List<CoolMapObject> coolMapObjects = new ArrayList<>();
+//        System.out.println("CoolMapObjectID:" + coolMapObjectIDs);
+//        System.out.println("Length:" + coolMapObjectIDs.length());
+        
         for (int i = 0; i < coolMapObjectIDs.length(); i++) {
+            
+            
+            
             Object coolMapObjectID = coolMapObjectIDs.get(i);
+//            System.out.println("Creating coolMapObject:" + coolMapObjectID );
             TFile coolMapObjectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT + File.separator + coolMapObjectID);
             TFile coolMapPropertyFile = new TFile(coolMapObjectFolder.getAbsolutePath() + File.separator + IOTerm.FILE_PROPERTY);
             JSONObject coolMapProperty = new JSONObject(IOUtils.toString(new TFileInputStream(coolMapPropertyFile)));
@@ -765,7 +774,7 @@ public class IOMaster {
             InternalCoolMapObjectIO.restoreCoolMapObjectState(object, coolMapObjectFolder);
 
             //add matrices            
-            for (int j = 0; i < linkedCMatrixIDs.length(); i++) {
+            for (int j = 0; j < linkedCMatrixIDs.length(); j++) {
                 CMatrix matrix = CoolMapMaster.getCMatrixByID(linkedCMatrixIDs.getString(j));
                 object.addBaseCMatrix(matrix);
 //                System.out.println(matrix);
@@ -906,7 +915,9 @@ public class IOMaster {
 
 //            System.out.println(coolMapProperty);
             coolMapObjects.add(object);
-            CoolMapMaster.addNewCoolMapObject(object);
+            
+            
+//            CoolMapMaster.addNewCoolMapObject(object);
 
             CoolMapView view = object.getCoolMapView();
             //
@@ -939,9 +950,17 @@ public class IOMaster {
                 } catch (Exception e) {
                 }
             }
-        }
+            
+//            System.out.println("Current index:" + i);
+        }//break
+        
+//        System.out.println("Loading completed:");
+//        System.out.println(coolMapObjects);
+        
+//        System.out.println(CoolMapMaster.getLoadedCMatrices());
 
-//        CoolMapMaster.addNewCoolMapObject(coolMapObjects);
+        
+        CoolMapMaster.addNewCoolMapObject(coolMapObjects);
 //        CMConsole.logInfo("Load successful\nit is !\n");
 //        CMConsole.logWarning("This is a warning");
 //        CMConsole.logError("This is an error");

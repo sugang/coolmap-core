@@ -745,7 +745,6 @@ public final class CoolMapObject<BASE, VIEW> {
                         if (_cMatrices.contains(m1)) {
                             continue;
                         } else if (m1 == null || !m1.canBeGroupedTogether(m0)) {
-                            System.out.println(m1 + "Can't add, incompatible.");
                             continue;
                         } else {
                             _cMatrices.add(m1);
