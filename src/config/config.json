@@ -12,7 +12,6 @@
                     "coolmap.application.widget.impl.WidgetViewRenderer",
                     "coolmap.application.widget.impl.WidgetDataMatrix",
                     "coolmap.application.widget.impl.WidgetRadar",
-                    "coolmap.application.widget.impl.WidgetPointAnnotation",
                     "coolmap.application.widget.impl.WidgetFilter",
                     "coolmap.application.widget.impl.console.WidgetConsole",
                     "coolmap.application.widget.impl.WidgetCoolMapProperties",

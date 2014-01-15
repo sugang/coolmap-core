@@ -20,7 +20,6 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.canvas.viewmaps.CoolMapLayer;
 import coolmap.canvas.viewmaps.FilterLayer;
 import coolmap.canvas.viewmaps.MapLayer;
-import coolmap.canvas.viewmaps.PointAnnotationLayer;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrixview.model.VNode;
@@ -185,13 +184,13 @@ public final class CoolMapView<BASE, VIEW> {
 //    public void removeViewActiveCellChangedListener(CViewActiveCellChangedListener viewActiveCellChangedListener) {
 //        _viewActiveCellChangedListeners.remove(viewActiveCellChangedListener);
 //    }
-    private boolean drawAnnotation = true;
+//    private boolean drawAnnotation = true;
 
-    public synchronized void togglePaintAnnotation() {
-        drawAnnotation = !drawAnnotation;
-        _pAnnotationLayer.setRender(drawAnnotation);
-        updateCanvasEnforceOverlay();
-    }
+//    public synchronized void togglePaintAnnotation() {
+//        drawAnnotation = !drawAnnotation;
+////        _pAnnotationLayer.setRender(drawAnnotation);
+//        updateCanvasEnforceOverlay();
+//    }
 
     public void setRowPanelsVisible(boolean visible) {
         _rowDrawer.setVisible(visible);
@@ -1655,20 +1654,20 @@ public final class CoolMapView<BASE, VIEW> {
      */
     private FilterLayer _maskLayer;
     private CoolMapLayer _coolMapLayer;
-    private PointAnnotationLayer _pAnnotationLayer;
+//    private PointAnnotationLayer _pAnnotationLayer;
 
     private void _initMapLayers() {
 
         //This is the default render layer
         _coolMapLayer = new CoolMapLayer(_coolMapObject);
         _maskLayer = new FilterLayer();
-        _pAnnotationLayer = new PointAnnotationLayer(_coolMapObject);
+//        _pAnnotationLayer = new PointAnnotationLayer(_coolMapObject);
 
         addMapLayer(_coolMapLayer);
         addOverlayer(_maskLayer);
 
         //doesn't seem to be working at all
-        addOverlayer(_pAnnotationLayer);
+//        addOverlayer(_pAnnotationLayer);
     }
 
     private void _postInit() {
