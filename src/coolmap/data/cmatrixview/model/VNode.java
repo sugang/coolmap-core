@@ -566,10 +566,19 @@ public class VNode {
     /*
      * 
      */
-    public VNode duplicate() {
+    public VNode duplicate(boolean changeID) {
         //same ID, same name, same color, same multipler
         //make a entire copy of the node
-        VNode node = new VNode(_ID, _name, cOntologyID, _type);
+        String ID;
+        
+        if(changeID){
+            ID = Tools.randomID();
+        }
+        else{
+            ID = _ID;
+        }
+        
+        VNode node = new VNode(ID, _name, cOntologyID, _type);
 
         //weird why color is not saved?
         node.setViewColor(_displayColor);
@@ -582,8 +591,15 @@ public class VNode {
         node.setExpanded(_isExpanded);
         node.setViewHeight(_height); //This was not copied over
 
+
+        
         return node;
     }
+   
+    public VNode duplicate(){
+        return duplicate(false);
+    }
+    
 
     public void addChildNode(VNode node) {
         _childNodes.add(node);

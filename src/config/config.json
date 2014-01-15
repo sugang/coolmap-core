@@ -15,7 +15,8 @@
                     "coolmap.application.widget.impl.WidgetPointAnnotation",
                     "coolmap.application.widget.impl.WidgetFilter",
                     "coolmap.application.widget.impl.console.WidgetConsole",
-                    "coolmap.application.widget.impl.WidgetCoolMapProperties"
+                    "coolmap.application.widget.impl.WidgetCoolMapProperties",
+                    "coolmap.application.widget.impl.WidgetUserGroup"
                  ],
         "config": {
             "coolmap.application.widget.impl.WidgetViewRenderer":

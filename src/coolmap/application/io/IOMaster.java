@@ -17,6 +17,8 @@ import coolmap.application.io.internal.coolmapobject.InternalCoolMapObjectIO;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.LongTask;
 import coolmap.application.utils.TaskEngine;
+import coolmap.application.widget.Widget;
+import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.datarenderer.renderer.impl.TextRenderer;
@@ -51,6 +53,7 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
@@ -486,14 +489,39 @@ public class IOMaster {
 
     }
 
+    //also need to save widget states
+    private static void saveWidgets(TFile projectFile) throws Exception {
+        Set<Widget> allWidgets = WidgetMaster.getAllWidgets();
+        JSONObject widgetObject = new JSONObject();
+        for (Widget w : allWidgets) {
+            JSONObject state = w.getCurrentState();
+            if (state != null) {
+                widgetObject.put(w.getClass().getName(), state);
+            }
+        }
+
+        //Yeah nothing was saved.
+        if (widgetObject.length() > 0) {
+            TFile file = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_WIDGET + File.separator + IOTerm.FILE_DATA);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new TFileOutputStream(file)));
+            writer.write(widgetObject.toString());
+            writer.flush();
+            writer.close();
+
+//            System.out.println(file);
+//            System.out.println("state to save:" + widgetObject);
+        }
+    }
+
     private static void saveProject(TFile projectFile) throws Exception {
 
         saveProjectProperties(projectFile);
         saveCOntologies(projectFile);
         saveCMatrices(projectFile);
         saveCoolMapObjects(projectFile);
+        saveWidgets(projectFile);
 
-            //this is needed to commit all changes in the temp projectFile and finish the saving
+        //this is needed to commit all changes in the temp projectFile and finish the saving
         //This is needed to synchornize the archive folder
         //may throw an exception - not sure whether it may throw a warning
         try {
@@ -679,15 +707,37 @@ public class IOMaster {
 //            TFile directory = new TFile(projectFile.getParentFile().getAbsolutePath() + File.separator + "0000-unzipped");
 //            FileUtils.deleteDirectory(directory);
 //            TFile.cp_rp(projectFile, directory, TArchiveDetector.NULL);
-
             //Got to widget state are restored at the beginning of the .. not here
             loadCMatrices(projectFile, property);
             loadCOntologies(projectFile, property);
             loadCoolMapObjects(projectFile, property);
+            loadWidgetStates(projectFile);
 
         } catch (InterruptedException e) {
             CoolMapMaster.newSession("Untitled", null);
             //Also get some warning message
+        }
+
+    }
+
+    private static void loadWidgetStates(TFile projectFile) throws Exception {
+
+        TFile widgetFile = new TFile(projectFile.getPath() + File.separator + IOTerm.DIR_WIDGET + File.separator + IOTerm.FILE_DATA);
+        try {
+            JSONObject widgetJSON = new JSONObject(
+                    IOUtils.toString(new TFileInputStream(widgetFile))
+            );
+
+            Set<Widget> allWidgets = WidgetMaster.getAllWidgets();
+            for (Widget w : allWidgets) {
+                JSONObject config = widgetJSON.optJSONObject(w.getClass().getName());
+                if(w!=null){
+                    w.restoreState(config);
+                }
+            }
+
+        } catch (IOException ex) {
+            return;
         }
 
     }
@@ -745,11 +795,9 @@ public class IOMaster {
         List<CoolMapObject> coolMapObjects = new ArrayList<>();
 //        System.out.println("CoolMapObjectID:" + coolMapObjectIDs);
 //        System.out.println("Length:" + coolMapObjectIDs.length());
-        
+
         for (int i = 0; i < coolMapObjectIDs.length(); i++) {
-            
-            
-            
+
             Object coolMapObjectID = coolMapObjectIDs.get(i);
 //            System.out.println("Creating coolMapObject:" + coolMapObjectID );
             TFile coolMapObjectFolder = new TFile(projectFile.getAbsolutePath() + File.separator + IOTerm.DIR_COOLMAPOBJECT + File.separator + coolMapObjectID);
@@ -915,10 +963,8 @@ public class IOMaster {
 
 //            System.out.println(coolMapProperty);
             coolMapObjects.add(object);
-            
-            
-//            CoolMapMaster.addNewCoolMapObject(object);
 
+//            CoolMapMaster.addNewCoolMapObject(object);
             CoolMapView view = object.getCoolMapView();
             //
             boolean isMaximized = coolMapProperty.optBoolean(IOTerm.ATTR_VIEW_MAXIMIZED, false);
@@ -950,16 +996,13 @@ public class IOMaster {
                 } catch (Exception e) {
                 }
             }
-            
+
 //            System.out.println("Current index:" + i);
         }//break
-        
+
 //        System.out.println("Loading completed:");
 //        System.out.println(coolMapObjects);
-        
 //        System.out.println(CoolMapMaster.getLoadedCMatrices());
-
-        
         CoolMapMaster.addNewCoolMapObject(coolMapObjects);
 //        CMConsole.logInfo("Load successful\nit is !\n");
 //        CMConsole.logWarning("This is a warning");

@@ -17,7 +17,6 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
-import coolmap.module.Module;
 import coolmap.module.ModuleMaster;
 import coolmap.utils.CSplashScreen;
 import coolmap.utils.Tools;
@@ -101,9 +100,9 @@ public final class CoolMapMaster {
             widget.restoreState(null);
         }
 
-        for (Module module : ModuleMaster.getAllModules()) {
-            module.restoreState(null);
-        }
+//        for (Module module : ModuleMaster.getAllModules()) {
+//            module.restoreState(null);
+//        }
 
         COntology.clearAttributes();
         StateStorageMaster.clearAllStates();

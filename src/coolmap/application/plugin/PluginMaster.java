@@ -24,6 +24,16 @@ public class PluginMaster {
 
     private static PluginManager pluginManager;
     private static PluginManagerUtil pluginManagerUtil;
+    
+    public Collection<CoolMapPlugin> getAllPlugins(){
+        if(pluginManagerUtil != null){
+            return pluginManagerUtil.getPlugins(CoolMapPlugin.class);
+        }
+        else{
+            return null;
+        }
+    }
+    
 
     public static void initialize() {
         String pluginPath;

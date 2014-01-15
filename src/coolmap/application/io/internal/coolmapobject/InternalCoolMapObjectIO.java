@@ -277,7 +277,7 @@ public class InternalCoolMapObjectIO {
      * @return
      * @throws Exception
      */
-    private static JSONObject nodeToJSON(VNode node) throws Exception {
+    public static JSONObject nodeToJSON(VNode node) throws Exception {
         JSONObject object = new JSONObject();
         object.put(IOTerm.ATTR_NODE_ID, node.getID());
         object.put(IOTerm.ATTR_NODE_NAME, node.getName());
@@ -444,7 +444,7 @@ public class InternalCoolMapObjectIO {
 
     }
 
-    private static VNode createNodeFromJSON(JSONObject object) throws Exception {
+    public static VNode createNodeFromJSON(JSONObject object) throws Exception {
         String id = object.getString(IOTerm.ATTR_NODE_ID);
         String name = object.getString(IOTerm.ATTR_NODE_NAME);
         Double defaultViewMultiplier = object.optDouble(IOTerm.ATTR_NODE_VIEWMULTIPLIER_DEFAULT, -1);

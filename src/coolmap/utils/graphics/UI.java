@@ -260,12 +260,17 @@ public class UI {
         _iconStash.put("replaceRow", new ImageIcon(UI.class.getResource("/resources/iconReplaceRow.png")));
         _iconStash.put("rootRow", new ImageIcon(UI.class.getResource("/resources/iconRootRow.png")));
         _iconStash.put("baseRow", new ImageIcon(UI.class.getResource("/resources/iconBaseRow.png")));
+        _iconStash.put("insertRow", new ImageIcon(UI.class.getResource("/resources/iconInsertRow.png")));
 
         _iconStash.put("prependColumn", new ImageIcon(UI.class.getResource("/resources/iconPrependColumn.png")));
         _iconStash.put("appendColumn", new ImageIcon(UI.class.getResource("/resources/iconAppendColumn.png")));
         _iconStash.put("replaceColumn", new ImageIcon(UI.class.getResource("/resources/iconReplaceColumn.png")));
         _iconStash.put("rootColumn", new ImageIcon(UI.class.getResource("/resources/iconRootColumn.png")));
         _iconStash.put("baseColumn", new ImageIcon(UI.class.getResource("/resources/iconBaseColumn.png")));
+        _iconStash.put("insertColumn", new ImageIcon(UI.class.getResource("/resources/iconInsertColumn.png")));
+        
+        
+        _iconStash.put("tag", new ImageIcon(UI.class.getResource("/resources/iconTag.png")));
 
     }
 

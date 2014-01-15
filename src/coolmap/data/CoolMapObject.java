@@ -585,7 +585,7 @@ public final class CoolMapObject<BASE, VIEW> {
         notifyColumnsChanged();
 
         getCoolMapView().centerToPercentage(0.5f, 0.5f);
-        
+
         if (getViewNumColumns() == 0) {
             getCoolMapView().setActiveCell(null, null); //will it work?
         }
@@ -1775,6 +1775,32 @@ public final class CoolMapObject<BASE, VIEW> {
 
     public VNode getViewNodeColumn(int index) {
         return _vMatrix.getActiveColNode(index);
+    }
+
+    public List<VNode> getViewNodesRowSelected() {
+        ArrayList<Range<Integer>> selectedRows = getCoolMapView().getSelectedRows();
+        ArrayList<VNode> nodes = new ArrayList<>();
+
+        for (Range<Integer> range : selectedRows) {
+            for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                nodes.add(getViewNodeRow(i));
+            }
+        }
+
+        return nodes;
+    }
+
+    public List<VNode> getViewNodesColumnSelected() {
+        ArrayList<Range<Integer>> selectedColumns = getCoolMapView().getSelectedColumns();
+        ArrayList<VNode> nodes = new ArrayList<>();
+
+        for (Range<Integer> range : selectedColumns) {
+            for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                nodes.add(getViewNodeColumn(i));
+            }
+        }
+        
+        return nodes;
     }
 
 //  can build hash on the fly? sometimes not only names -> it will probably be selections.    

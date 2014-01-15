@@ -85,5 +85,7 @@ public class IOTerm {
     public final static String DIR_COOLMAPOBJECT = "coolmapobject";
     public final static String DIR_StateSnapshot = "state"; // this one is under coolmapobject
     public final static String DIR_STATE = "state";
+    public final static String DIR_WIDGET = "widget";
+    public final static String DIR_PLUGIN = "plugin";
 
 }
