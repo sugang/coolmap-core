@@ -4,7 +4,6 @@
  */
 package coolmap.canvas.sidemaps.impl;
 
-import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
@@ -33,7 +32,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -186,52 +184,51 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     private JMenuItem _expandOne, _expandToAll, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
 
     //This is only selecting the active nodes. need to select from selected nodes -> require efficient algorithms. Also will require merges
-    private void _selectSubTree() {
-        try {
-            if (_selectedNodes.isEmpty()) {
-                return;
-            }
-
-            //childNodesInTree
-            List<VNode> childNodeInTree = getCoolMapObject().getViewNodesColumnFromTreeNodes(_selectedNodes);
-            if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-                return;
-            }
-
-            //must sort with 
-            HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
-
-            VNode firstNode = childNodeInTree.get(0);
-            if (firstNode.getViewIndex() == null) {
-                return;
-            }
-            int startIndex = firstNode.getViewIndex().intValue();
-            int currentIndex = startIndex;
-
-            for (VNode node : childNodeInTree) {
-                if (node.getViewIndex() == null) {
-                    return;//should not happen
-                }
-                if (node.getViewIndex().intValue() <= currentIndex + 1) {
-                    currentIndex = node.getViewIndex().intValue();
-                    continue;
-                } else {
-                    //add last start and current
-                    selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
-                    currentIndex = node.getViewIndex().intValue();
-                    startIndex = currentIndex;
-                }
-            }
-
-            selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
-            getCoolMapView().setSelectionsColumn(selectedColumns);
-
-        } catch (Exception e) {
-
-        }
-
-    }
-
+//    private void _selectSubTree() {
+//        try {
+//            if (_selectedNodes.isEmpty()) {
+//                return;
+//            }
+//
+//            //childNodesInTree
+//            List<VNode> childNodeInTree = getCoolMapObject().getViewNodesColumnFromTreeNodesLeafOnly(_selectedNodes);
+//            if (childNodeInTree == null || childNodeInTree.isEmpty()) {
+//                return;
+//            }
+//
+//            //must sort with 
+//            HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
+//
+//            VNode firstNode = childNodeInTree.get(0);
+//            if (firstNode.getViewIndex() == null) {
+//                return;
+//            }
+//            int startIndex = firstNode.getViewIndex().intValue();
+//            int currentIndex = startIndex;
+//
+//            for (VNode node : childNodeInTree) {
+//                if (node.getViewIndex() == null) {
+//                    return;//should not happen
+//                }
+//                if (node.getViewIndex().intValue() <= currentIndex + 1) {
+//                    currentIndex = node.getViewIndex().intValue();
+//                    continue;
+//                } else {
+//                    //add last start and current
+//                    selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+//                    currentIndex = node.getViewIndex().intValue();
+//                    startIndex = currentIndex;
+//                }
+//            }
+//
+//            selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+//            getCoolMapView().setSelectionsColumn(selectedColumns);
+//
+//        } catch (Exception e) {
+//
+//        }
+//
+//    }
     private void _initPopupMenu() {
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
@@ -243,7 +240,12 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                _selectSubTree();
+                CoolMapObject obj = getCoolMapObject();
+                if (obj == null) {
+                    return;
+                }
+
+                obj.selectViewNodesColumnTree(new ArrayList(_selectedNodes));
             }
         });
 
@@ -285,6 +287,32 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
         });
         _popupMenu.add(_expandToAll);
+
+        JMenuItem expandToLeaf = new JMenuItem("Expand selected to leaf");
+        expandToLeaf.setToolTipText("Expand selected ontology nodes to the leaf level");
+        expandToLeaf.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (_selectedNodes.isEmpty()) {
+                    return;
+                }
+
+                CoolMapState state = CoolMapState.createStateColumns("Expand column nodes", getCoolMapObject(), null);
+                ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
+                Collections.sort(nodes, new VNodeHeightComparator());
+                List<VNode> nodesToBeSelected = getCoolMapObject().expandColumnNodesToLeaf(new ArrayList(_selectedNodes));
+                _selectedNodes.clear();
+                if (nodesToBeSelected != null) {
+                    _selectedNodes.addAll(nodesToBeSelected);
+                }
+                getViewPanel().repaint();
+
+                StateStorageMaster.addState(state);
+
+            }
+        });
+        _popupMenu.add(expandToLeaf);
 
         _collapse = new JMenuItem("Collapse selected");
         _collapse.setToolTipText("Collapse selected ontology nodes");
@@ -331,7 +359,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     return;
                 }
                 CoolMapState state = CoolMapState.createStateColumns("Expand columns to the next level", obj, null);
-                obj.expandColumnNodesOneLayer();
+                obj.expandColumnNodesToNextStep();
                 _selectedNodes.clear();
                 StateStorageMaster.addState(state);
             }
@@ -344,7 +372,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //            @Override
 //            public void actionPerformed(ActionEvent ae) {
 //                
-//                getCoolMapObject().expandColumnNodesOneLayer();
+//                getCoolMapObject().expandColumnNodesToNextStep();
 //            }
 //        });
         _collapseOneAll = new JMenuItem("Collapse one level"); //UI.getImageIcon("minusSmall")

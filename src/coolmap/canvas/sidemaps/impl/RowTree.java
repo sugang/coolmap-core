@@ -4,7 +4,6 @@
  */
 package coolmap.canvas.sidemaps.impl;
 
-import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.canvas.CoolMapView;
@@ -32,7 +31,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,7 +70,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private JCheckBoxMenuItem[] _linetypes = new JCheckBoxMenuItem[3];
     private float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
     private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<JCheckBoxMenuItem>();
-    private JMenuItem _expandOne, _expandToAll, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
+    private JMenuItem _expandOne, expandOne, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
 
     public void setSelectedTreeNodes(Set<VNode> treeNodes) {
 //        System.out.println("Setting selected nodes to:" + treeNodes);
@@ -84,50 +82,50 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         getViewPanel().repaint();
     }
 
-    private void _selectSubTree() {
-
-        if (_selectedNodes.isEmpty()) {
-            return;
-        }
-
-        List<VNode> childNodeInTree = getCoolMapObject().getViewNodesRowFromTreeNodes(_selectedNodes);
-        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-            return;
-        }
-
-        HashSet<Range<Integer>> selectedRows = new HashSet<Range<Integer>>();
-
-        VNode firstNode = childNodeInTree.get(0);
-        if (firstNode.getViewIndex() == null) {
-            return;
-        }
-        int startIndex = firstNode.getViewIndex().intValue();
-        int currentIndex = startIndex;
-
-        for (VNode node : childNodeInTree) {
-            //System.out.println(node.getViewIndex());
-            if (node.getViewIndex() == null) {
-                return;//should not happen
-            }
-            if (node.getViewIndex().intValue() <= currentIndex + 1) {
-                currentIndex = node.getViewIndex().intValue();
-                continue;
-            } else {
-                //add last start and current
-                selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
-                currentIndex = node.getViewIndex().intValue();
-                startIndex = currentIndex;
-            }
-        }
-
-        selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
-
-//        for (Range range : selectedRows) {
-//            System.out.println(range);
+//    private void _selectSubTree() {
+//
+//        if (_selectedNodes.isEmpty()) {
+//            return;
 //        }
-        getCoolMapView().setSelectionsRow(selectedRows);
-
-    }
+//
+//        List<VNode> childNodeInTree = getCoolMapObject().getViewNodesRowFromTreeNodesLeafOnly(_selectedNodes);
+//        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
+//            return;
+//        }
+//
+//        HashSet<Range<Integer>> selectedRows = new HashSet<Range<Integer>>();
+//
+//        VNode firstNode = childNodeInTree.get(0);
+//        if (firstNode.getViewIndex() == null) {
+//            return;
+//        }
+//        int startIndex = firstNode.getViewIndex().intValue();
+//        int currentIndex = startIndex;
+//
+//        for (VNode node : childNodeInTree) {
+//            //System.out.println(node.getViewIndex());
+//            if (node.getViewIndex() == null) {
+//                return;//should not happen
+//            }
+//            if (node.getViewIndex().intValue() <= currentIndex + 1) {
+//                currentIndex = node.getViewIndex().intValue();
+//                continue;
+//            } else {
+//                //add last start and current
+//                selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
+//                currentIndex = node.getViewIndex().intValue();
+//                startIndex = currentIndex;
+//            }
+//        }
+//
+//        selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
+//
+////        for (Range range : selectedRows) {
+////            System.out.println(range);
+////        }
+//        getCoolMapView().setSelectionsRow(selectedRows);
+//
+//    }
 
     @Override
     public void viewRendererChanged(CoolMapObject object) {
@@ -170,7 +168,13 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                _selectSubTree();
+                CoolMapObject obj = getCoolMapObject();
+                if(obj == null){
+                    return;
+                }
+                       
+                obj.selectViewNodesRowTree(new ArrayList(_selectedNodes));
+                
             }
         });
 
@@ -185,9 +189,9 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //            }
 //        });
 //        _popupMenu.add(_expandOne);
-        _expandToAll = new JMenuItem("Expand selected");
-        _expandToAll.setToolTipText("Expand selected ontology nodes to the next level");
-        _expandToAll.addActionListener(new ActionListener() {
+        expandOne = new JMenuItem("Expand selected");
+        expandOne.setToolTipText("Expand selected ontology nodes to the next level");
+        expandOne.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -211,7 +215,29 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
             }
         });
-        _popupMenu.add(_expandToAll);
+        _popupMenu.add(expandOne);
+
+        JMenuItem expandToLeaf = new JMenuItem("Expand selected to leaf");
+        expandToLeaf.setToolTipText("Expand selected ontology nodes to the leaf level");
+        expandToLeaf.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (_selectedNodes.isEmpty()) {
+                    return;
+                }
+                CoolMapState state = CoolMapState.createStateRows("Expand row nodes", getCoolMapObject(), null);
+                List<VNode> expandedNodes = getCoolMapObject().expandRowNodesToLeaf(new ArrayList(_selectedNodes));
+
+                _selectedNodes.clear();
+                if (expandedNodes != null) {
+                    _selectedNodes.addAll(expandedNodes);
+                }
+                getViewPanel().repaint();
+                StateStorageMaster.addState(state);
+            }
+        });
+        _popupMenu.add(expandToLeaf);
 
         _collapse = new JMenuItem("Collapse selected");
         _collapse.setToolTipText("Collapse selected ontology nodes");
@@ -257,7 +283,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     return;
                 }
                 CoolMapState state = CoolMapState.createStateRows("Expand rows to the next level", obj, null);
-                obj.expandRowNodesOneLayer();
+                obj.expandRowNodesToNextStep();
                 _selectedNodes.clear();
                 StateStorageMaster.addState(state);
             }
@@ -267,7 +293,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //
 //            @Override
 //            public void actionPerformed(ActionEvent ae) {
-//                getCoolMapObject().expandRowNodesOneLayer();
+//                getCoolMapObject().expandRowNodesToNextStep();
 //            }
 //        });
         _collapseOneAll = new JMenuItem("Collapse one level");
@@ -420,7 +446,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //            @Override
 //            public void popupMenuWillBecomeVisible(PopupMenuEvent pme) {
 //                _expandOne.setEnabled(false);
-//                _expandToAll.setEnabled(false);
+//                expandOne.setEnabled(false);
 //                _collapse.setEnabled(false);
 //                _colorTree.setEnabled(false);
 //                _colorChild.setEnabled(false);
@@ -439,7 +465,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //                }
 //                if (_activeNode != null && !_activeNode.isExpanded() && _activeNode.isGroupNode()) {
 //                    _expandOne.setEnabled(true);
-//                    _expandToAll.setEnabled(true);
+//                    expandOne.setEnabled(true);
 //                }
 ////                getViewPanel().removeMouseListener(ColumnTree.this);
 ////                getViewPanel().removeMouseMotionListener(ColumnTree.this);

@@ -31,7 +31,7 @@ public class ExpandRowNodesOneLevelAction extends AbstractAction {
         try{
             CoolMapObject obj = CoolMapMaster.getCoolMapObjectByID(id);
             CoolMapState state = CoolMapState.createStateRows("Expand rows to next level", obj, null);
-            obj.expandRowNodesOneLayer();
+            obj.expandRowNodesToNextStep();
             StateStorageMaster.addState(state);
         }
         catch(Exception ex){

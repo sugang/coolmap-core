@@ -563,12 +563,22 @@ public class CMainFrame extends JFrame {
 
         setMenuBar(_menuBar);
 
-        addMenuItem("", new Menu("File"), false, false);
-        addMenuItem("", new Menu("Edit"), false, false);
-        addMenuItem("", new Menu("View"), false, false);
+        addMenuItem("", new Menu(FILE), false, false);
+        addMenuItem("", new Menu(EDIT), false, false);
+        addMenuItem("", new Menu(VIEW), false, false);
+        addMenuItem("", new Menu(ANALYSIS), false, false);
+        addMenuItem("", new Menu(PLUGIN), false, false);
+        addMenuItem("", new Menu(ABOUT), false, false);
 //        addMenuItem("", new Menu("Analysis"), false, false);
 //        addMenuItem("", new Menu("About"), false, false);
     }
+    
+    public final String FILE = "File";
+    public final String EDIT = "Edit";
+    public final String VIEW = "View";
+    public final String ANALYSIS = "Analysis";
+    public final String PLUGIN = "Plugin";
+    public final String ABOUT = "About";
 
     private void _initFrame() {
 

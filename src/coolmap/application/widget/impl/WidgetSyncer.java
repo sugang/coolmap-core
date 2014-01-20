@@ -278,7 +278,7 @@ public final class WidgetSyncer extends Widget implements CViewListener, CObject
 
 //                        System.out.println(otherObject.getName());
                         otherObject.getCoolMapView().setSelectionsColumn(selectedColumnsRanges);
-
+                        
                     }
                 }
             }

@@ -177,6 +177,44 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
 
+        item = new JMenuItem("Selected Rows to Leaf");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
+
+                    ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+
+                    if (selRows == null || selRows.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selRows) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            rowNodes.add(obj.getViewNodeRow(i));
+                        }
+                    }
+
+                    CoolMapState state = CoolMapState.createStateRows("Expand selected rows", obj, null);
+
+                    List expandedNodes = obj.expandRowNodesToLeaf(rowNodes);
+
+                    if (expandedNodes == null || expandedNodes.isEmpty()) {
+                        return;
+                    }
+
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
         item = new JMenuItem("All Rows");
         addPopupMenuItem("Expand", item, false);
         item.addActionListener(new ActionListener() {
@@ -188,7 +226,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     return;
                 }
 
-                obj.expandRowNodesOneLayer();
+                obj.expandRowNodesToNextStep();
             }
         });
 
@@ -229,6 +267,43 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
 
+        item = new JMenuItem("Selected Columns to Leaf");
+        addPopupMenuItem("Expand", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
+
+                    ArrayList<VNode> columnNodes = new ArrayList<VNode>();
+
+                    if (selColumns == null || selColumns.isEmpty()) {
+                        return;
+                    }
+
+                    for (Range<Integer> range : selColumns) {
+                        for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); i++) {
+                            columnNodes.add(obj.getViewNodeColumn(i));
+                        }
+                    }
+
+                    CoolMapState state = CoolMapState.createStateColumns("Expand selected columns", obj, null);
+                    List expandedNodes = obj.expandColumnNodesToLeaf(columnNodes);
+
+                    if (expandedNodes == null || expandedNodes.isEmpty()) {
+                        return;
+                    }
+
+                    StateStorageMaster.addState(state);
+
+                } catch (Exception ex) {
+
+                }
+            }
+        });
+
         item = new JMenuItem("All Columns");
         addPopupMenuItem("Expand", item, false);
         item.addActionListener(new ActionListener() {
@@ -240,7 +315,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     return;
                 }
 
-                obj.expandColumnNodesOneLayer();
+                obj.expandColumnNodesToNextStep();
             }
         });
 
@@ -269,7 +344,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                         }
                     }
 
-                    if (selRows.isEmpty()) {
+                    if (rowNodes.isEmpty()) {
                         return;
                     }
 
@@ -644,7 +719,6 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 //        item = new MenuItem("Toggle annotation tooltip", new MenuShortcut(KeyEvent.VK_5));
 //        frame.addMenuItem("View/Canvas config", item, false, false);
 //        item.addActionListener(new ToggleAnnotationAction());
-
         MenuItem toggleRows = new MenuItem("Toggle row panels", new MenuShortcut(KeyEvent.VK_5));
         toggleRows.addActionListener(new ToggleSidePanelsRowAction());
         frame.addMenuItem("View/Canvas config", toggleRows, true, false);

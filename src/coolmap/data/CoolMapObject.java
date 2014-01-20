@@ -403,7 +403,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
     }
 
-//    public List<VNode> getViewNodesRowFromTreeNodes() {
+//    public List<VNode> getViewNodesRowFromTreeNodesLeafOnly() {
 //        return _vMatrix.getActiveRowNodes();
 //    }
 //
@@ -1193,42 +1193,41 @@ public final class CoolMapObject<BASE, VIEW> {
         return _ID;
     }
 
-    public synchronized boolean expandColumnNode(VNode node) {
-        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-
-            _vMatrix.expandColNodeToChildNodes(node);
-            getCoolMapView().updateNodeDisplayParams();
-            //Also set a new selection
-            List<VNode> childNodes = node.getChildNodes();
-            //set column selection
-//            getCoolMapView().clearSelection();
-            if (childNodes == null || childNodes.isEmpty()) {
-                getCoolMapView().clearSelection();
-            } else {
-                VNode firstNode = childNodes.get(0);
-                VNode lastNode = childNodes.get(childNodes.size() - 1);
-                Float i1 = firstNode.getViewIndex();
-                Float i2 = lastNode.getViewIndex();
-                if (i1 == null || i2 == null) {
-                    getCoolMapView().clearSelection();
-                } else {
-                    Range<Integer> columnSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
-                    getCoolMapView().setSelectionsColumn(Collections.singletonList(columnSelection));
-                }
-            }
-
-            //expansion
-            _sortTracker.clearSortedRow();
-            getCoolMapView().updateCanvasEnforceAll();
-
-            notifyColumnsChanged();
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+//    public synchronized boolean expandColumnNode(VNode node) {
+//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
+//
+//            _vMatrix.expandColNodeToChildNodes(node);
+//            getCoolMapView().updateNodeDisplayParams();
+//            //Also set a new selection
+//            List<VNode> childNodes = node.getChildNodes();
+//            //set column selection
+////            getCoolMapView().clearSelection();
+//            if (childNodes == null || childNodes.isEmpty()) {
+//                getCoolMapView().clearSelection();
+//            } else {
+//                VNode firstNode = childNodes.get(0);
+//                VNode lastNode = childNodes.get(childNodes.size() - 1);
+//                Float i1 = firstNode.getViewIndex();
+//                Float i2 = lastNode.getViewIndex();
+//                if (i1 == null || i2 == null) {
+//                    getCoolMapView().clearSelection();
+//                } else {
+//                    Range<Integer> columnSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
+//                    getCoolMapView().setSelectionsColumn(Collections.singletonList(columnSelection));
+//                }
+//            }
+//
+//            //expansion
+//            _sortTracker.clearSortedRow();
+//            getCoolMapView().updateCanvasEnforceAll();
+//
+//            notifyColumnsChanged();
+//
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     public synchronized List<VNode> expandColumnNodes(List<VNode> inputNodes, boolean select) {
         try {
             if (inputNodes == null || inputNodes.isEmpty() || !isViewMatrixValid()) {
@@ -1259,7 +1258,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //                    }
 //                }
 
-                List<VNode> toBeSelectedNodes = getViewNodesColumnFromTreeNodes(nodesToBeExpanded);
+                List<VNode> toBeSelectedNodes = getViewNodesColumnFromTreeNodesLeafOnly(nodesToBeExpanded);
                 if (toBeSelectedNodes != null) {
                     ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
                     for (VNode node : toBeSelectedNodes) {
@@ -1320,7 +1319,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //                        retainedNodes.add(node);
 //                    }
 //                }
-                List<VNode> toBeSelectedNodes = getViewNodesRowFromTreeNodes(nodesToBeExpanded);
+                List<VNode> toBeSelectedNodes = getViewNodesRowFromTreeNodesLeafOnly(nodesToBeExpanded);
                 ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
                 if (toBeSelectedNodes != null) {
@@ -1356,71 +1355,69 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-    public synchronized boolean expandRowNode(VNode node) {
-
-        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-
-            _vMatrix.expandRowNodeToChildNodes(node);
-
-            getCoolMapView().updateNodeDisplayParams();
-            //Also set a new selection
-            List<VNode> childNodes = node.getChildNodes();
-            //set column selection
-//            getCoolMapView().clearSelection();
-            if (childNodes == null || childNodes.isEmpty()) {
-                getCoolMapView().clearSelection();
-            } else {
-                VNode firstNode = childNodes.get(0);
-                VNode lastNode = childNodes.get(childNodes.size() - 1);
-                Float i1 = firstNode.getViewIndex();
-                Float i2 = lastNode.getViewIndex();
-                if (i1 == null || i2 == null) {
-                    getCoolMapView().clearSelection();
-                } else {
-                    //maybe retain the previous selection
-
-                    Range<Integer> rowSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
-                    getCoolMapView().setSelectionsRow(Collections.singletonList(rowSelection));
-                }
-            }
-
-            _sortTracker.clearSortedColumn();
-            getCoolMapView().updateCanvasEnforceAll();
-            notifyRowsChanged();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public synchronized boolean collapseColumnNode(VNode node) {
-        if (node != null && getCoolMapView() != null && node.isExpanded()) {
-
-            _vMatrix.collapseTreeColNode(node);
-            getCoolMapView().updateNodeDisplayParams();
-            //should all have something
-            Float index = node.getViewIndex();
-            if (index == null) {
-                getCoolMapView().clearSelection();
-            } else {
-                Range<Integer> selectedColumn = Range.closedOpen(index.intValue(), index.intValue() + 1);
-                getCoolMapView().setSelectionsColumn(Collections.singletonList(selectedColumn));
-                getCoolMapView().centerToSelections();
-            }
-
-            //
-            _sortTracker.clearSortedRow();
-            if (_sortTracker.lastSortedColumn != null && !_vMatrix.getActiveColumnNodes().contains(_sortTracker.lastSortedColumn)) {
-                _sortTracker.clearSortedColumn();//It's gone
-            }
-            getCoolMapView().updateCanvasEnforceAll();
-            notifyColumnsChanged();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+//    public synchronized boolean expandRowNode(VNode node) {
+//
+//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
+//
+//            _vMatrix.expandRowNodeToChildNodes(node);
+//
+//            getCoolMapView().updateNodeDisplayParams();
+//            //Also set a new selection
+//            List<VNode> childNodes = node.getChildNodes();
+//            //set column selection
+////            getCoolMapView().clearSelection();
+//            if (childNodes == null || childNodes.isEmpty()) {
+//                getCoolMapView().clearSelection();
+//            } else {
+//                VNode firstNode = childNodes.get(0);
+//                VNode lastNode = childNodes.get(childNodes.size() - 1);
+//                Float i1 = firstNode.getViewIndex();
+//                Float i2 = lastNode.getViewIndex();
+//                if (i1 == null || i2 == null) {
+//                    getCoolMapView().clearSelection();
+//                } else {
+//                    //maybe retain the previous selection
+//
+//                    Range<Integer> rowSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
+//                    getCoolMapView().setSelectionsRow(Collections.singletonList(rowSelection));
+//                }
+//            }
+//
+//            _sortTracker.clearSortedColumn();
+//            getCoolMapView().updateCanvasEnforceAll();
+//            notifyRowsChanged();
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
+//    public synchronized boolean collapseColumnNode(VNode node) {
+//        if (node != null && getCoolMapView() != null && node.isExpanded()) {
+//
+//            _vMatrix.collapseTreeColNode(node);
+//            getCoolMapView().updateNodeDisplayParams();
+//            //should all have something
+//            Float index = node.getViewIndex();
+//            if (index == null) {
+//                getCoolMapView().clearSelection();
+//            } else {
+//                Range<Integer> selectedColumn = Range.closedOpen(index.intValue(), index.intValue() + 1);
+//                getCoolMapView().setSelectionsColumn(Collections.singletonList(selectedColumn));
+//                getCoolMapView().centerToSelections();
+//            }
+//
+//            //
+//            _sortTracker.clearSortedRow();
+//            if (_sortTracker.lastSortedColumn != null && !_vMatrix.getActiveColumnNodes().contains(_sortTracker.lastSortedColumn)) {
+//                _sortTracker.clearSortedColumn();//It's gone
+//            }
+//            getCoolMapView().updateCanvasEnforceAll();
+//            notifyColumnsChanged();
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     public synchronized List<VNode> collapseColumnNodes(Collection<VNode> inputNodes, boolean select) {
         if (inputNodes == null || inputNodes.isEmpty() || getCoolMapView() == null) {
             return null;
@@ -1432,8 +1429,7 @@ public final class CoolMapObject<BASE, VIEW> {
                 nodesToCollapse.add(node);
             }
         }
-
-        _vMatrix.collapseTreeColNodes(nodesToCollapse);
+        List<VNode> collapsedNodes = _vMatrix.collapseTreeColNodes(nodesToCollapse);
 
         getCoolMapView().updateNodeDisplayParams();
         _sortTracker.clearSortedRow();
@@ -1448,7 +1444,7 @@ public final class CoolMapObject<BASE, VIEW> {
 
             ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
-            for (VNode node : nodesToCollapse) {
+            for (VNode node : collapsedNodes) {
                 if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
                     try {
                         retainedIndices.add(node.getViewIndex().intValue());
@@ -1468,7 +1464,7 @@ public final class CoolMapObject<BASE, VIEW> {
         //
 //        Collections.sort(retainedIndices, new VNodeIndexComparator());
         //then set selection 
-        return nodesToCollapse;
+        return collapsedNodes;
     }
 
     /**
@@ -1494,7 +1490,8 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-        _vMatrix.collapseTreeRowNodes(nodesToCollapse);
+        //actually collapsed nodes
+        List<VNode> collapsedNodes = _vMatrix.collapseTreeRowNodes(nodesToCollapse);
 
         getCoolMapView().updateNodeDisplayParams();
         _sortTracker.clearSortedColumn();
@@ -1506,10 +1503,11 @@ public final class CoolMapObject<BASE, VIEW> {
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
 
+        //select
         if (select) {
             ArrayList<Integer> retainedIndices = new ArrayList<Integer>();
 
-            for (VNode node : inputNodes) {
+            for (VNode node : collapsedNodes) {
                 if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
                     try {
                         retainedIndices.add(node.getViewIndex().intValue());
@@ -1526,14 +1524,14 @@ public final class CoolMapObject<BASE, VIEW> {
             }
         }
 
-        return nodesToCollapse;
+        return collapsedNodes;
     }
 
-    public boolean expandColumnNodesOneLayer() {
+    public boolean expandColumnNodesToNextStep() {
         return expandColumnNodes(getViewNodesColumn(), false) == null ? false : true;
     }
 
-    public boolean expandRowNodesOneLayer() {
+    public boolean expandRowNodesToNextStep() {
         return expandRowNodes(getViewNodesRow(), false) == null ? false : true;
     }
 
@@ -1621,107 +1619,226 @@ public final class CoolMapObject<BASE, VIEW> {
         return false;
     }
 
-    public synchronized boolean collapseRowNode(VNode node) {
-        if (node != null && getCoolMapView() != null && node.isExpanded()) {
+//    public synchronized boolean collapseRowNode(VNode node) {
+//        if (node != null && getCoolMapView() != null && node.isExpanded()) {
+//
+//            _vMatrix.collapseTreeRowNode(node);
+//
+//            getCoolMapView().updateNodeDisplayParams();
+//            //should all have something
+//            Float index = node.getViewIndex();
+//            if (index == null) {
+//                getCoolMapView().clearSelection();
+//            } else {
+//                Range<Integer> selectedRow = Range.closedOpen(index.intValue(), index.intValue() + 1);
+//                getCoolMapView().setSelectionsRow(Collections.singletonList(selectedRow));
+//                getCoolMapView().centerToSelections();
+//            }
+//
+//            //
+//            _sortTracker.clearSortedColumn();
+//            if (_sortTracker.lastSortedRow != null && !_vMatrix.getActiveRowNodes().contains(_sortTracker.lastSortedRow)) {
+//                _sortTracker.clearSortedRow();//It's gone
+//            }
+//
+//            getCoolMapView().updateCanvasEnforceAll();
+//            notifyRowsChanged();
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
+//    public synchronized boolean expandRowNodeToBottom(VNode node) {
+//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
+//
+//            List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
+//
+//            getCoolMapView().updateNodeDisplayParams();
+//
+//            getCoolMapView().clearSelection();
+//            if (childNodes == null || childNodes.isEmpty()) {
+//
+//            } else {
+//                VNode firstNode = childNodes.get(0);
+//                VNode lastNode = childNodes.get(childNodes.size() - 1);
+//                Float i1 = firstNode.getViewIndex();
+//                Float i2 = lastNode.getViewIndex();
+//
+//                if (i1 == null || i2 == null) {
+//                    getCoolMapView().clearSelection();
+//                } else {
+//                }
+//            }
+//            _sortTracker.clearSortedColumn();
+//            getCoolMapView().updateCanvasEnforceAll();
+//
+//            notifyRowsChanged();
+//
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
+    public void selectViewNodesRowTree(List<VNode> rowTreeNodes) {
 
-            _vMatrix.collapseTreeRowNode(node);
-
-            getCoolMapView().updateNodeDisplayParams();
-            //should all have something
-            Float index = node.getViewIndex();
-            if (index == null) {
-                getCoolMapView().clearSelection();
-            } else {
-                Range<Integer> selectedRow = Range.closedOpen(index.intValue(), index.intValue() + 1);
-                getCoolMapView().setSelectionsRow(Collections.singletonList(selectedRow));
-                getCoolMapView().centerToSelections();
-            }
-
-            //
-            _sortTracker.clearSortedColumn();
-            if (_sortTracker.lastSortedRow != null && !_vMatrix.getActiveRowNodes().contains(_sortTracker.lastSortedRow)) {
-                _sortTracker.clearSortedRow();//It's gone
-            }
-
-            getCoolMapView().updateCanvasEnforceAll();
-            notifyRowsChanged();
-            return true;
-        } else {
-            return false;
+        if (rowTreeNodes.isEmpty()) {
+            return;
         }
+
+        List<VNode> childNodeInTree = getViewNodesRowFromTreeNodesLeafOnly(rowTreeNodes);
+        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
+            return;
+        }
+
+        HashSet<Range<Integer>> selectedRows = new HashSet<Range<Integer>>();
+
+        VNode firstNode = childNodeInTree.get(0);
+        if (firstNode.getViewIndex() == null) {
+            return;
+        }
+        int startIndex = firstNode.getViewIndex().intValue();
+        int currentIndex = startIndex;
+
+        for (VNode node : childNodeInTree) {
+            //System.out.println(node.getViewIndex());
+            if (node.getViewIndex() == null) {
+                return;//should not happen
+            }
+            if (node.getViewIndex().intValue() <= currentIndex + 1) {
+                currentIndex = node.getViewIndex().intValue();
+                continue;
+            } else {
+                //add last start and current
+                selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
+                currentIndex = node.getViewIndex().intValue();
+                startIndex = currentIndex;
+            }
+        }
+
+        selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
+
+        getCoolMapView().setSelectionsRow(selectedRows);
     }
 
-    public synchronized boolean expandRowNodeToBottom(VNode node) {
-        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-
-            List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
-
-            getCoolMapView().updateNodeDisplayParams();
-
-            getCoolMapView().clearSelection();
-            if (childNodes == null || childNodes.isEmpty()) {
-
-            } else {
-                VNode firstNode = childNodes.get(0);
-                VNode lastNode = childNodes.get(childNodes.size() - 1);
-                Float i1 = firstNode.getViewIndex();
-                Float i2 = lastNode.getViewIndex();
-
-                if (i1 == null || i2 == null) {
-                    getCoolMapView().clearSelection();
-                } else {
-                }
-            }
-            _sortTracker.clearSortedColumn();
-            getCoolMapView().updateCanvasEnforceAll();
-
-            notifyRowsChanged();
-
-            return true;
-        } else {
-            return false;
+    public void selectViewNodesColumnTree(List<VNode> columnTreeNodes) {
+        if (columnTreeNodes.isEmpty()) {
+            return;
         }
+
+        List<VNode> childNodeInTree = getViewNodesColumnFromTreeNodesLeafOnly(columnTreeNodes);
+        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
+            return;
+        }
+
+        //must sort with 
+        HashSet<Range<Integer>> selectedColumns = new HashSet<Range<Integer>>();
+
+        VNode firstNode = childNodeInTree.get(0);
+        if (firstNode.getViewIndex() == null) {
+            return;
+        }
+        int startIndex = firstNode.getViewIndex().intValue();
+        int currentIndex = startIndex;
+
+        for (VNode node : childNodeInTree) {
+            if (node.getViewIndex() == null) {
+                return;//should not happen
+            }
+            if (node.getViewIndex().intValue() <= currentIndex + 1) {
+                currentIndex = node.getViewIndex().intValue();
+                continue;
+            } else {
+                //add last start and current
+                selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+                currentIndex = node.getViewIndex().intValue();
+                startIndex = currentIndex;
+            }
+        }
+
+        selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
+        getCoolMapView().setSelectionsColumn(selectedColumns);
+
     }
 
-    public synchronized boolean expandColumnNodeToBottom(VNode node) {
-        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
+    public synchronized List<VNode> expandRowNodesToLeaf(List<VNode> nodes) {
 
-            List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
+//        System.out.println("Expand row nodes to bottom called");
+        List<VNode> expandedNodes = _vMatrix.expandRowNodeToChildNodesAll(nodes);
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().clearSelection();
 
-            getCoolMapView().updateNodeDisplayParams();
-            getCoolMapView().clearSelection();
-
-            if (childNodes == null || childNodes.isEmpty()) {
-
-            } else {
-                VNode firstNode = childNodes.get(0);
-                VNode lastNode = childNodes.get(childNodes.size() - 1);
-                Float i1 = firstNode.getViewIndex();
-                Float i2 = lastNode.getViewIndex();
-                if (i1 == null || i2 == null) {
-                    getCoolMapView().clearSelection();
-                } else {
-                }
-            }
-            _sortTracker.clearSortedRow();
-
-            getCoolMapView().updateCanvasEnforceAll();
-
-            notifyColumnsChanged();
-            return true;
-        } else {
-            return false;
-        }
+        _sortTracker.clearSortedColumn();
+        getCoolMapView().updateCanvasEnforceAll();
+        notifyRowsChanged();
+        
+        selectViewNodesRowTree(expandedNodes);
+        
+        return expandedNodes;
     }
 
+    public synchronized List<VNode> expandColumnNodesToLeaf(List<VNode> nodes) {
+        List<VNode> expandedNodes = _vMatrix.expandColNodeToChildNodesAll(nodes);
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().clearSelection();
+
+        _sortTracker.clearSortedRow();
+        getCoolMapView().updateCanvasEnforceAll();
+        notifyColumnsChanged();
+        
+        selectViewNodesColumnTree(expandedNodes);
+
+        return expandedNodes;
+    }
+
+//    public synchronized boolean expandColumnNodeToBottom(VNode node) {
+//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
+//
+//            List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
+//
+//            getCoolMapView().updateNodeDisplayParams();
+//            getCoolMapView().clearSelection();
+//
+//            if (childNodes == null || childNodes.isEmpty()) {
+//
+//            } else {
+//                VNode firstNode = childNodes.get(0);
+//                VNode lastNode = childNodes.get(childNodes.size() - 1);
+//                Float i1 = firstNode.getViewIndex();
+//                Float i2 = lastNode.getViewIndex();
+//                if (i1 == null || i2 == null) {
+//                    getCoolMapView().clearSelection();
+//                } else {
+//                }
+//            }
+//            _sortTracker.clearSortedRow();
+//
+//            getCoolMapView().updateCanvasEnforceAll();
+//
+//            notifyColumnsChanged();
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     public synchronized boolean toggleColumnNode(VNode node) {
         if (node == null) {
             return false;
         } else {
             if (node.isExpanded()) {
-                return collapseColumnNode(node);
+//                return collapseColumnNode(node);
+                List<VNode> nodes = collapseColumnNodes(Collections.singletonList(node), true);
+                if (nodes == null || nodes.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
-                return expandColumnNodeToBottom(node);
+                List<VNode> nodes = expandColumnNodesToLeaf(Collections.singletonList(node));
+                if (nodes == null || nodes.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
 
@@ -1732,9 +1849,20 @@ public final class CoolMapObject<BASE, VIEW> {
             return false;
         } else {
             if (node.isExpanded()) {
-                return collapseRowNode(node);
+//                return collapseRowNode(node);
+                List<VNode> nodes = collapseRowNodes(Collections.singletonList(node), true);
+                if (nodes == null || nodes.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
-                return expandRowNodeToBottom(node);
+                List<VNode> nodes = expandRowNodesToLeaf(Collections.singletonList(node));
+                if (nodes == null || nodes.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
 
@@ -1799,7 +1927,7 @@ public final class CoolMapObject<BASE, VIEW> {
                 nodes.add(getViewNodeColumn(i));
             }
         }
-        
+
         return nodes;
     }
 
@@ -1838,7 +1966,7 @@ public final class CoolMapObject<BASE, VIEW> {
      * @param treeNodes
      * @return
      */
-    public List<VNode> getViewNodesColumnFromTreeNodes(Collection<VNode> treeNodes) {
+    public List<VNode> getViewNodesColumnFromTreeNodesLeafOnly(Collection<VNode> treeNodes) {
         return _vMatrix.getChildNodesInViewColumn(treeNodes);
     }
 
@@ -1868,7 +1996,7 @@ public final class CoolMapObject<BASE, VIEW> {
      * @param treeNodes
      * @return
      */
-    public List<VNode> getViewNodesRowFromTreeNodes(Collection<VNode> treeNodes) {
+    public List<VNode> getViewNodesRowFromTreeNodesLeafOnly(Collection<VNode> treeNodes) {
         return _vMatrix.getChildNodesInViewRow(treeNodes);
     }
 

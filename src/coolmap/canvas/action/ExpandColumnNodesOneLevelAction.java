@@ -34,7 +34,7 @@ public class ExpandColumnNodesOneLevelAction extends AbstractAction{
         try{
             CoolMapObject obj = CoolMapMaster.getCoolMapObjectByID(id);
             CoolMapState state = CoolMapState.createStateColumns("Expand columns to next level", obj, null);
-            obj.expandColumnNodesOneLayer();
+            obj.expandColumnNodesToNextStep();
             StateStorageMaster.addState(state);
         }
         catch(Exception ex){
