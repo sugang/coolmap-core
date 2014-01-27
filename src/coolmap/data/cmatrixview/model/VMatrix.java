@@ -323,9 +323,9 @@ public class VMatrix<BASE, VIEW> {
                 _activeColNodesInTree.add(node); //move the node into tree
 
                 //can actually return
-                if (Thread.interrupted()) {
-                    return;
-                }
+//                if (Thread.interrupted()) {
+//                    return;
+//                }
             } else {
                 newNodes.add(node);
             }
@@ -420,12 +420,12 @@ public class VMatrix<BASE, VIEW> {
                 node.mark(false); //mark it false.
 
                 //can actually return
-                if (Thread.interrupted()) {
-                    for (VNode n : nodesToExpand) {
-                        n.mark(false);
-                    }
-                    return null;
-                }
+//                if (Thread.interrupted()) {
+//                    for (VNode n : nodesToExpand) {
+//                        n.mark(false);
+//                    }
+//                    return null;
+//                }
 
             } else {
                 newNodes.add(node); //
@@ -492,12 +492,12 @@ public class VMatrix<BASE, VIEW> {
                 node.mark(false); //mark it false.
 
                 //can actually return
-                if (Thread.interrupted()) {
-                    for (VNode n : nodesToExpand) {
-                        n.mark(false);
-                    }
-                    return null;
-                }
+//                if (Thread.interrupted()) {
+//                    for (VNode n : nodesToExpand) {
+//                        n.mark(false);
+//                    }
+//                    return null;
+//                }
 
             } else {
                 newNodes.add(node); //
@@ -587,9 +587,9 @@ public class VMatrix<BASE, VIEW> {
                 _activeRowNodesInTree.add(node); //move the node into tree
 
                 //can actually return
-                if (Thread.interrupted()) {
-                    return;
-                }
+//                if (Thread.interrupted()) {
+//                    return;
+//                }
             } else {
                 newNodes.add(node);
             }
