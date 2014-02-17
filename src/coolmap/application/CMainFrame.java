@@ -321,7 +321,7 @@ public class CMainFrame extends JFrame {
             @Override
             public JSplitPane createJSplitPane() {
                 JSplitPane splitPane = super.createJSplitPane();
-                splitPane.setDividerSize(2);
+                splitPane.setDividerSize(5);
                 return splitPane;
             }
         });
