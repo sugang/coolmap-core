@@ -53,6 +53,7 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -731,7 +732,7 @@ public class IOMaster {
             Set<Widget> allWidgets = WidgetMaster.getAllWidgets();
             for (Widget w : allWidgets) {
                 JSONObject config = widgetJSON.optJSONObject(w.getClass().getName());
-                if(w!=null){
+                if (w != null) {
                     w.restoreState(config);
                 }
             }
@@ -1069,6 +1070,60 @@ public class IOMaster {
         initializeSave();
         initializeDataImporters();
         initializeOntologyImporters();
+        initializeOntologyAttributes();
+
+    }
+
+    private static void initializeOntologyAttributes() {
+        MenuItem item = new MenuItem("from tsv file");
+        CoolMapMaster.getCMainFrame().addMenuItem("File/Import ontology attributes", item, false, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = Tools.getCustomSingleFileChooser(new FileNameExtensionFilter("tsv file", "tsv", "txt"));
+                int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    if (file == null) {
+                        CMConsole.logError("No ontology attribute file was selected");
+                        return;
+                    }
+                    try {
+                        BufferedReader reader = new BufferedReader(new FileReader(file));
+                        String line;
+                        int counter = 0;
+                        String[] header = null;
+                        while((line = reader.readLine()) != null){
+                            if(counter == 0){
+                                header = line.split("\\t", -1);
+                            }
+                            else{
+                            
+                                String ele[] = line.split("\t", -1);
+                                String nodeName = ele[0];
+                                for( int i = 1; i < header.length; i++){
+                                    String attrName = header[i];
+                                    COntology.setAttribute(nodeName, attrName, ele[i]);
+                                }
+                            }
+                            counter++;
+                        }
+                        
+                        System.out.println("headers: " + Arrays.toString(header));
+                        System.out.println("Imported: " + counter);
+                        
+                        System.out.println(COntology.getAttribute("2", "Disorder class"));
+                        
+                        
+                    } catch (Exception ex) {
+                        CMConsole.logError("Error importing ontology attributes, please check data.");
+                    }
+                        
+
+                }
+            }
+        });
     }
 
 }
