@@ -1,7 +1,7 @@
 {
     "version": "0.1",
-    "plugin": {"directory": "plugin"},
-    "workspace": {"directory": "workspace"},
+    "plugin": {"directory": "plugin", "directory_relative": "true"},
+    "workspace": {"directory": "workspace", "directory_relative": "true"},
     "widget": {
         "load": [
                     "coolmap.application.widget.impl.WidgetAggregator", 

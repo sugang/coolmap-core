@@ -90,11 +90,20 @@ public class Config {
 
             //load pluginDirectory
             try {
-                pluginDirectory = workingDirectory + File.separator + configObject.getJSONObject("plugin").getString("directory");
+                String isRelative = configObject.getJSONObject("plugin").optString("directory_relative", "true");
+                String dir = configObject.getJSONObject("plugin").getString("directory");
+                if(isRelative.equals("true")){
+                    pluginDirectory = workingDirectory + File.separator + dir;
+                }
+                else{
+                    pluginDirectory = dir;
+                }
             } catch (JSONException ejson) {
                 pluginDirectory = workingDirectory + File.separator + "plugin";
             }
             configHash.put(PLUGIN_DIRECTORY, pluginDirectory);
+            System.out.println("Plugin folder:" + pluginDirectory);
+            
             
             //load workspace directory
             try{

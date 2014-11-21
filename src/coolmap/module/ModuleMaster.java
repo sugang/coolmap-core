@@ -53,6 +53,7 @@ public class ModuleMaster{
             
             try{
                 JSONArray modulesToLoad = Config.getJSONConfig().getJSONObject("module").getJSONArray("load");
+                System.out.println(modulesToLoad);
                 for(int i=0; i<modulesToLoad.length(); i++){
                     try{
                         String className = modulesToLoad.getString(i);
