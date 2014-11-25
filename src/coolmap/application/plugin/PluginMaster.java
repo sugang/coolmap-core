@@ -47,50 +47,75 @@ public class PluginMaster {
 
 //        System.out.println(pluginFolder.getAbsolutePath());
         pluginManager = PluginManagerFactory.createPluginManager();
-        pluginManager.addPluginsFrom(pluginFolder.toURI());
-
-//        after loading everything
-        pluginManagerUtil = new PluginManagerUtil(pluginManager);
-        Collection<CoolMapPlugin> plugins = pluginManagerUtil.getPlugins(CoolMapPlugin.class);
         
-        Collection<PluginInformation> pluginInfo = pluginManagerUtil.getPlugins(PluginInformation.class);
         
-        PluginInformationImpl piImpl = null;
-        if(!pluginInfo.isEmpty()){
-            piImpl = (PluginInformationImpl)pluginInfo.iterator().next();
-        }
-        
-        for (CoolMapPlugin plugin : plugins) {
-            try {
-                
-                
-                
-                
-                CMConsole.logInfo("Loaded " + plugin.getName() + " plugin");
-//                System.out.println(plugin.getName());
-                JSONObject config = new JSONObject();
-                if(piImpl != null){
-                    //gets the string
+            //exception may prevent other plugins from loading
+            //
+            //pluginManager.addPluginsFrom(pluginFolder.toURI()); //will halt program if exception not handled.
+            
+            File[] dirs = pluginFolder.listFiles();
+            for(File file : dirs){
+                if(file.isDirectory()){
                     try{
-                    Collection<String> paths = piImpl.getInformation(PluginInformation.Information.CLASSPATH_ORIGIN, plugin);
-                    if(!paths.isEmpty()){
-                        config.put(CoolMapPluginTerms.ATTR_URI, paths.iterator().next());
-                    }}
+                        pluginManager.addPluginsFrom(file.toURI());
+                    }
                     catch(Exception e){
-                        //do nothing, not found
+                        System.err.println("Error loading plugin from folder:" + file);
                     }
                 }
-                
-                
-                
-                
-                
-                plugin.initialize(config);
-                
-            } catch (Exception e) {
-                CMConsole.logWarning("Loaded '" + plugin.getName() + "' plugin");
-                CMConsole.logToFile(e);
+                else{
+                    //single jar will also work.
+                    try{
+                        pluginManager.addPluginsFrom(file.toURI());
+                    }
+                    catch(Exception e){
+                        System.err.println("Error loading plugin from file:" + file);
+                    }
+                }
             }
+            
+            
+            
+            
+
+    //            after loading everything
+            pluginManagerUtil = new PluginManagerUtil(pluginManager);
+            Collection<CoolMapPlugin> plugins = pluginManagerUtil.getPlugins(CoolMapPlugin.class);
+
+            Collection<PluginInformation> pluginInfo = pluginManagerUtil.getPlugins(PluginInformation.class);
+
+            PluginInformationImpl piImpl = null;
+            if(!pluginInfo.isEmpty()){
+                piImpl = (PluginInformationImpl)pluginInfo.iterator().next();
+            }
+
+            for (CoolMapPlugin plugin : plugins) {
+                try {
+
+
+                    CMConsole.logInfo("Loaded " + plugin.getName() + " plugin");
+    //                System.out.println(plugin.getName());
+                    JSONObject config = new JSONObject();
+                    if(piImpl != null){
+                        //gets the string
+                        try{
+                        Collection<String> paths = piImpl.getInformation(PluginInformation.Information.CLASSPATH_ORIGIN, plugin);
+                        if(!paths.isEmpty()){
+                            config.put(CoolMapPluginTerms.ATTR_URI, paths.iterator().next());
+                        }}
+                        catch(Exception e){
+                            //do nothing, not found
+                        }
+                    }
+
+                    plugin.initialize(config);
+
+                } catch (Exception e) {
+                    CMConsole.logWarning("Loaded '" + plugin.getName() + "' plugin");
+                    CMConsole.logToFile(e);
+                }
+            }
+            
+            
         }
-    }
 }
