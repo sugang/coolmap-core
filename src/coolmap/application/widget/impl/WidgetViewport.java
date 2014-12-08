@@ -27,7 +27,6 @@ import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.action.RenameCoolMapObjectAction;
-import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.BrowserLauncher;
@@ -479,29 +478,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                    if (obj == null) {
-                        return;
-                    }
-
-                    CoolMapView coolMapView = obj.getCoolMapView();
-                    MatrixCell selectedCell = coolMapView.getSelectedCell();
-                    
-                    if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
-                        return;
-                    }
-                    
-                    double selectedValue = (double)obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
-
-                    List<Rectangle> selections = _popThelargerOrLessSelections(selectedValue, obj, true);
-
-                    CoolMapState state = CoolMapState.createStateSelections("Select all larger than or equal to values", obj, null);
-                    
-                    coolMapView.addSelection(selections);
-                    StateStorageMaster.addState(state);
-                } catch (Exception ex) {
-                }
+                _popThelargerOrLessSelections(true);
             }
         });
         
@@ -511,29 +488,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
-                    if (obj == null) {
-                        return;
-                    }
-
-                    CoolMapView coolMapView = obj.getCoolMapView();
-                    MatrixCell selectedCell = coolMapView.getSelectedCell();
-                    
-                    if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
-                        return;
-                    }
-                    
-                    double selectedValue = (double)obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
-
-                    List<Rectangle> selections = _popThelargerOrLessSelections(selectedValue, obj, false);
-
-                    CoolMapState state = CoolMapState.createStateSelections("Select all less than or equal to values", obj, null);
-                    
-                    coolMapView.addSelection(selections);
-                    StateStorageMaster.addState(state);
-                } catch (Exception ex) {
-                }
+                _popThelargerOrLessSelections(false);
             }
         });
 
@@ -652,25 +607,63 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         //paste nodes from ontology browser
     }
 
-    private List<Rectangle> _popThelargerOrLessSelections(double selectedValue, CoolMapObject obj, boolean isLarger) {
-        LinkedList<Rectangle> selections = new LinkedList<>();
-
-        for (int row = 0; row < obj.getViewNumRows(); ++row) {
-            for (int col = 0; col < obj.getViewNumColumns(); ++col) {
-                double value = (double) obj.getViewValue(row, col);
-                if (isLarger && value >= selectedValue) {
-                    Rectangle rectangle = new Rectangle(col, row, 1, 1);
-                    selections.add(rectangle);
+    /**
+     * populate the selections based on the value of the pre selected cell
+     * @param isLarger indicates if users want to select values larger or less than the pre selected cell
+     */
+    private void _popThelargerOrLessSelections(boolean isLarger) {
+        try {
+            CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+            CoolMapView coolMapView = obj.getCoolMapView();
+            Set<Rectangle> selectedRegions = coolMapView.getSelections();
+            
+            if (selectedRegions.size() == 1) {
+                Rectangle selectedRec = (Rectangle) selectedRegions.toArray()[0];
+                if (selectedRec.height != 1 || selectedRec.width != 1) {
+                    CMConsole.logInfo("Only supports selecting from a single value");
                 }
-
-                if (!isLarger && value <= selectedValue) {
-                    Rectangle rectangle = new Rectangle(col, row, 1, 1);
-                    selections.add(rectangle);
+                
+                MatrixCell selectedCell = coolMapView.getSelectedCell();
+                if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
+                    CMConsole.logInfo("Please select a value first");
                 }
+                
+                Double selectedValue = (Double) obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
+                if (selectedValue == null || selectedValue.isNaN()) {
+                    CMConsole.logError("Selected Node is null or not a number");
+                }
+                
+                LinkedList<Rectangle> selections = new LinkedList<>();
+                
+                for (int row = 0; row < obj.getViewNumRows(); ++row) {
+                    for (int col = 0; col < obj.getViewNumColumns(); ++col) {
+                        Double value = (Double) obj.getViewValue(row, col);
+                        if (value == null || value.isNaN()) {
+                            continue;
+                        }
+                        
+                        if (isLarger && value >= selectedValue) {
+                            Rectangle rectangle = new Rectangle(col, row, 1, 1);
+                            selections.add(rectangle);
+                        }
+                        
+                        if (!isLarger && value <= selectedValue) {
+                            Rectangle rectangle = new Rectangle(col, row, 1, 1);
+                            selections.add(rectangle);
+                        }
+                    }
+                }
+                
+                CoolMapState state = isLarger ? CoolMapState.createStateSelections("Select all larger than or equal to values", obj, null) : CoolMapState.createStateSelections("Select all less than or equal to values", obj, null);                
+                
+                coolMapView.addSelection(selections);
+                StateStorageMaster.addState(state);
+            } else {
+                CMConsole.logInfo("Only supports selecting from a single value");
             }
+        } catch (Exception e) {
+            CMConsole.logError("Failed to select. Internal Error : " + e.getMessage());
         }
-
-        return selections;
     }
 
     public WidgetViewport() {
@@ -704,7 +697,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                     Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
 
-                    ArrayList<String> terms = new ArrayList<String>();
+                    ArrayList<String> terms = new ArrayList<>();
                     for (int i = sel.y; i < sel.y + sel.height; i++) {
                         terms.add(obj.getViewNodeRow(i).getName());
                     }
@@ -728,7 +721,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                 Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
 
-                ArrayList<String> terms = new ArrayList<String>();
+                ArrayList<String> terms = new ArrayList<>();
                 for (int i = sel.y; i < sel.y + sel.height; i++) {
                     terms.add(obj.getViewNodeRow(i).getName());
                 }
@@ -749,7 +742,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                 Rectangle sel = obj.getCoolMapView().getSelectionsUnion();
 
-                ArrayList<String> terms = new ArrayList<String>();
+                ArrayList<String> terms = new ArrayList<>();
                 for (int i = sel.y; i < sel.y + sel.height; i++) {
                     terms.add(obj.getViewNodeRow(i).getName());
                 }
@@ -902,8 +895,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             JMenu searchMenu = null;
             JMenuItem searchItem = null;
 
-            for (int i = 0; i < ele.length; i++) {
-                menuLabel = ele[i].trim();
+            for (String ele1 : ele) {
+                menuLabel = ele1.trim();
                 if (currentMenu == null) {
                     //search root
                     boolean found = false;
@@ -939,7 +932,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                         currentMenu = newMenu;
                     }
                 }
-            }//Should iterate all and found it
+            } //Should iterate all and found it
 
             if (sepBefore) {
                 currentMenu.addSeparator();
@@ -1221,16 +1214,15 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         int width = _desktop.getWidth() / 2;
         int height = _desktop.getHeight() / 2;
 
-        for (int i = 0; i < frames.length; i++) {
-            if (!frames[i].isIcon()) {
-                try {  /*
+        for (JInternalFrame frame : frames) {
+            if (!frame.isIcon()) {
+                try {
+                    /*
                      * try to make maximized frames resizable this might be
                      * vetoed
                      */
-
-                    frames[i].setMaximum(false);
-                    frames[i].reshape(x, y, width, height);
-
+                    frame.setMaximum(false);
+                    frame.reshape(x, y, width, height);
                     x += frameMargin;
                     y += frameMargin;
                     // wrap around at the desktop edge
@@ -1240,7 +1232,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     if (y + height > _desktop.getHeight()) {
                         y = 0;
                     }
-                } catch (Exception e) {
+                }catch (Exception e) {
                 }
             }
         }
@@ -1254,8 +1246,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
         // count frames that aren't iconized
         int frameCount = 0;
-        for (int i = 0; i < frames.length; i++) {
-            if (!frames[i].isIcon()) {
+        for (JInternalFrame frame : frames) {
+            if (!frame.isIcon()) {
                 frameCount++;
             }
         }
@@ -1269,12 +1261,11 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         int height = _desktop.getHeight() / rows;
         int r = 0;
         int c = 0;
-        for (int i = 0; i < frames.length; i++) {
-            if (!frames[i].isIcon()) {
+        for (JInternalFrame frame : frames) {
+            if (!frame.isIcon()) {
                 try {
-                    frames[i].setMaximum(false);
-                    frames[i].reshape(c * width,
-                            r * height, width, height);
+                    frame.setMaximum(false);
+                    frame.reshape(c * width, r * height, width, height);
                     r++;
                     if (r == rows) {
                         r = 0;
@@ -1284,7 +1275,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             height = _desktop.getHeight() / rows;
                         }
                     }
-                } catch (PropertyVetoException e) {
+                }catch (PropertyVetoException e) {
                 }
             }
         }

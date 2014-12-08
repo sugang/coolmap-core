@@ -115,7 +115,7 @@ public final class CoolMapView<BASE, VIEW> {
     //private final ActivationIndicatorLayer _activationIndicator = new ActivationIndicatorLayer();
     private final Point _cursor = new Point();
     //selections
-    private final HashSet<Rectangle> _selections = new HashSet<Rectangle>();
+    private final HashSet<Rectangle> _selections = new HashSet<>();
     private final MatrixCell _selectionAnchorCell = new MatrixCell();
     //The dimensions of row,col containers
     private final Point _colRowDimensions = new Point(150, 150);
@@ -129,7 +129,7 @@ public final class CoolMapView<BASE, VIEW> {
 //    private final HashSet<CViewActiveCellChangedListener> _viewActiveCellChangedListeners = new HashSet<CViewActiveCellChangedListener>();
 //    private final HashSet<CViewSelectionChangedListener> _viewSelectionChangedListeners = new HashSet<CViewSelectionChangedListener>();
 //    private final HashSet<CViewAnchorMovedListener> _viewAnchorMovedListeners = new HashSet<CViewAnchorMovedListener>();
-    private final HashSet<CViewListener> _viewListeners = new HashSet<CViewListener>();
+    private final HashSet<CViewListener> _viewListeners = new HashSet<>();
     private final NotificationLayer _notificationLayer = new NotificationLayer();
 
 //    private final RealTimeLayer _realTimeLayer = new RealTimeLayer();
@@ -223,8 +223,8 @@ public final class CoolMapView<BASE, VIEW> {
 //    public void removeViewSelectionChangedListener(CViewSelectionChangedListener vs) {
 //        _viewSelectionChangedListeners.remove(vs);
 //    }
-    private final ArrayList<Range<Integer>> _selectedColumns = new ArrayList<Range<Integer>>();
-    private final ArrayList<Range<Integer>> _selectedRows = new ArrayList<Range<Integer>>();
+    private final ArrayList<Range<Integer>> _selectedColumns = new ArrayList<>();
+    private final ArrayList<Range<Integer>> _selectedRows = new ArrayList<>();
 
     private void _fireViewSelectionChanged() {
         //update the selected rows and regions.
@@ -323,7 +323,7 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public ArrayList<Range<Integer>> getSelectedColumns() {
-        ArrayList<Range<Integer>> selectedColumns = new ArrayList<Range<Integer>>();
+        ArrayList<Range<Integer>> selectedColumns = new ArrayList<>();
         for (Range<Integer> r : _selectedColumns) {
             selectedColumns.add(Range.closedOpen(r.lowerEndpoint(), r.upperEndpoint()));
         }
@@ -331,7 +331,7 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public ArrayList<Range<Integer>> getSelectedRows() {
-        ArrayList<Range<Integer>> selectedRows = new ArrayList<Range<Integer>>();
+        ArrayList<Range<Integer>> selectedRows = new ArrayList<>();
         for (Range<Integer> r : _selectedRows) {
             selectedRows.add(Range.closedOpen(r.lowerEndpoint(), r.upperEndpoint()));
         }
@@ -404,17 +404,17 @@ public final class CoolMapView<BASE, VIEW> {
     public void centerToSelections() {
         if (_selections.isEmpty()) {
             return;
-        } else {
-            Area area = new Area();
-            for (Rectangle selection : _selections) {
-                if (selection != null) {
-                    area.add(new Area(selection));
-                }
-            }
-            //get a node region //node regions
-//            System.out.println("Node region:" + area.getBounds());
-            centerToRegion(area.getBounds());
         }
+        Area area = new Area();
+        for (Rectangle selection : _selections) {
+            if (selection != null) {
+                area.add(new Area(selection));
+            }
+        }
+        //get a node region //node regions
+//            System.out.println("Node region:" + area.getBounds());
+        centerToRegion(area.getBounds());
+
     }
 
     public void centerToRegion(Rectangle nodeRegion) {
@@ -733,7 +733,7 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
         selectedIndices.removeAll(Collections.singletonList(null));
-        TreeSet<Integer> selIndices = new TreeSet<Integer>(selectedIndices);
+        TreeSet<Integer> selIndices = new TreeSet<>(selectedIndices);
 
         if (selIndices.isEmpty()) {
             return;
@@ -741,7 +741,7 @@ public final class CoolMapView<BASE, VIEW> {
 
         int startIndex = selIndices.first();
         int currentIndex = startIndex;
-        HashSet<Range<Integer>> selectedRanges = new HashSet<Range<Integer>>();
+        HashSet<Range<Integer>> selectedRanges = new HashSet<>();
 
         for (Integer index : selIndices) {
             if (index <= currentIndex + 1) {
@@ -762,7 +762,7 @@ public final class CoolMapView<BASE, VIEW> {
             return;
         }
         selectedIndices.removeAll(Collections.singletonList(null));
-        TreeSet<Integer> selIndices = new TreeSet<Integer>(selectedIndices);
+        TreeSet<Integer> selIndices = new TreeSet<>(selectedIndices);
 
         if (selIndices.isEmpty()) {
             return;
@@ -770,7 +770,7 @@ public final class CoolMapView<BASE, VIEW> {
 
         int startIndex = selIndices.first();
         int currentIndex = startIndex;
-        HashSet<Range<Integer>> selectedRanges = new HashSet<Range<Integer>>();
+        HashSet<Range<Integer>> selectedRanges = new HashSet<>();
 
         for (Integer index : selIndices) {
             if (index <= currentIndex + 1) {
@@ -797,7 +797,7 @@ public final class CoolMapView<BASE, VIEW> {
             selectedRows.add(Range.closedOpen(0, _coolMapObject.getViewNumRows()));
         }
 
-        ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+        ArrayList<Rectangle> newSelections = new ArrayList<>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
                 newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
@@ -819,9 +819,8 @@ public final class CoolMapView<BASE, VIEW> {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
 
-//        System.out.println("Selected columns:" + selectedColumns);
-//        System.out.println("Selected rows:" + selectedRows);
-        ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+        ArrayList<Rectangle> newSelections;
+        newSelections = new ArrayList<Rectangle>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
                 newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
@@ -972,7 +971,7 @@ public final class CoolMapView<BASE, VIEW> {
             selectedColumns.add(Range.closedOpen(0, _coolMapObject.getViewNumColumns()));
         }
 
-        ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+        ArrayList<Rectangle> newSelections = new ArrayList<>();
         for (Range<Integer> colRange : selectedColumns) {
             for (Range<Integer> rowRange : selectedRows) {
                 newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
@@ -991,9 +990,10 @@ public final class CoolMapView<BASE, VIEW> {
 //    }
     /**
      * returns a copy of the selections
+     * @return 
      */
     public Set<Rectangle> getSelections() {
-        HashSet<Rectangle> selection = new HashSet<Rectangle>();
+        HashSet<Rectangle> selection = new HashSet<>();
         for (Rectangle r : _selections) {
             if (r == null) {
                 continue;
@@ -1005,10 +1005,7 @@ public final class CoolMapView<BASE, VIEW> {
 
 /////////////////////////////////////////////////////    
     private boolean _isValidRegion(Rectangle selection) {
-        if (_coolMapObject != null && selection != null && selection.x >= 0 && selection.y >= 0 && selection.width <= _coolMapObject.getViewNumColumns() && selection.height <= _coolMapObject.getViewNumRows()) {
-            return true;
-        }
-        return false;
+        return _coolMapObject != null && selection != null && selection.x >= 0 && selection.y >= 0 && selection.width <= _coolMapObject.getViewNumColumns() && selection.height <= _coolMapObject.getViewNumRows();
     }
 
     public Rectangle getCanvasDimension() {
@@ -1025,20 +1022,12 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public synchronized void toggleTooltip() {
-        if (paintHoverTip) {
-            paintHoverTip = false;
-        } else {
-            paintHoverTip = true;
-        }
+        paintHoverTip = !paintHoverTip;
         redrawCanvas();
     }
 
     public synchronized void toggleLabeltip() {
-        if (paintLabelsTip) {
-            paintLabelsTip = false;
-        } else {
-            paintLabelsTip = true;
-        }
+        paintLabelsTip = !paintLabelsTip;
         redrawCanvas();
     }
 
@@ -1759,7 +1748,7 @@ public final class CoolMapView<BASE, VIEW> {
             if (listenersW == null || listenersW.length == 0) {
                 _eventLayer.addMouseWheelListener(_mapMover);
             } else {
-                HashSet<MouseWheelListener> mwls = new HashSet<MouseWheelListener>(Arrays.asList(listenersW));
+                HashSet<MouseWheelListener> mwls = new HashSet<>(Arrays.asList(listenersW));
                 if (!mwls.contains(_mapMover)) {
                     _eventLayer.addMouseWheelListener(_mapMover);
                 }
@@ -1769,7 +1758,7 @@ public final class CoolMapView<BASE, VIEW> {
             if (listenersM == null || listenersM.length == 0) {
                 _eventLayer.addMouseMotionListener(_eventLayer);
             } else {
-                HashSet<MouseMotionListener> mwls = new HashSet<MouseMotionListener>(Arrays.asList(listenersM));
+                HashSet<MouseMotionListener> mwls = new HashSet<>(Arrays.asList(listenersM));
                 if (!mwls.contains(_eventLayer)) {
                     _eventLayer.addMouseMotionListener(_eventLayer);
                 }
@@ -1779,7 +1768,7 @@ public final class CoolMapView<BASE, VIEW> {
             if (listeners == null || listeners.length == 0) {
                 _eventLayer.addMouseListener(_eventLayer);
             } else {
-                HashSet<MouseListener> mwls = new HashSet<MouseListener>(Arrays.asList(listeners));
+                HashSet<MouseListener> mwls = new HashSet<>(Arrays.asList(listeners));
                 if (!mwls.contains(_eventLayer)) {
                     _eventLayer.addMouseListener(_eventLayer);
                 }
@@ -1798,7 +1787,7 @@ public final class CoolMapView<BASE, VIEW> {
             if (listenersW == null || listenersW.length == 0) {
                 _canvas.addKeyListener(_mapMover);
             } else {
-                HashSet<KeyListener> mwls = new HashSet<KeyListener>(Arrays.asList(listenersW));
+                HashSet<KeyListener> mwls = new HashSet<>(Arrays.asList(listenersW));
                 if (!mwls.contains(_mapMover)) {
                     _canvas.addKeyListener(_mapMover);
                 }
@@ -2293,10 +2282,10 @@ public final class CoolMapView<BASE, VIEW> {
      */
     public Set<Rectangle> convertNodeRegionToViewRegion(Set<Rectangle> nodeRegions) {
         if (_coolMapObject == null) {
-            return new HashSet<Rectangle>(0);
+            return new HashSet<>(0);
         }
         if (nodeRegions != null && !nodeRegions.isEmpty()) {
-            HashSet<Rectangle> viewRegions = new HashSet<Rectangle>(nodeRegions.size());
+            HashSet<Rectangle> viewRegions = new HashSet<>(nodeRegions.size());
             for (Rectangle nodeRegion : nodeRegions) {
                 if (!_isValidRegion(nodeRegion)) {
                     continue;
@@ -2329,7 +2318,7 @@ public final class CoolMapView<BASE, VIEW> {
             }
             return viewRegions;
         } else {
-            return new HashSet<Rectangle>(0);
+            return new HashSet<>(0);
         }
     }
 
@@ -2342,7 +2331,7 @@ public final class CoolMapView<BASE, VIEW> {
 
     /**
      * force to update everything note: if enforce all is called but
-     * interrupted, next call to udpates must be at least one full enforce all.
+     * interrupted, next call to updates must be at least one full enforce all.
      */
     public synchronized void updateCanvasEnforceAll() {
 

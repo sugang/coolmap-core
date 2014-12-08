@@ -483,7 +483,7 @@ public class VNode {
     //may need other expansion, collapose methods. Ok for now.
 ////////////////////////////////////////////////////////////////////////////////
     /**
-     * test wether it's a single or
+     * test whether it's a single or
      *
      * @return
      */
