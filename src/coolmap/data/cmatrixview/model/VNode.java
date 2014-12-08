@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -34,8 +35,8 @@ public class VNode {
     private VNode _parentNode = null;
     private Color _displayColor = null;
     //Immidiate child nodes in view
-    private final ArrayList<VNode> _childNodes = new ArrayList<VNode>();
-    private final ArrayList<VNode> _baseNodes = new ArrayList<VNode>();
+    private final ArrayList<VNode> _childNodes = new ArrayList<>();
+    private final ArrayList<VNode> _baseNodes = new ArrayList<>();
     //Rendering parameters
     private Float _height = null;
     private Float _index = null;
@@ -487,11 +488,7 @@ public class VNode {
      * @return
      */
     public boolean isSingleNode() {
-        if (getType() == SINGLE || getType() == LEAF) {
-            return true;
-        } else {
-            return false;
-        }
+        return getType() == SINGLE || getType() == LEAF;
     }
 
     /**
@@ -500,11 +497,7 @@ public class VNode {
      * @return
      */
     public boolean isVoidNode() {
-        if (getType() == VOID) {
-            return true;
-        } else {
-            return false;
-        }
+        return getType() == VOID;
     }
 
     /**
@@ -513,11 +506,7 @@ public class VNode {
      * @return
      */
     public boolean isGroupNode() {
-        if (getType() == ROOT || getType() == TREE) {
-            return true;
-        } else {
-            return false;
-        }
+        return Objects.equals(getType(), ROOT) || getType() == TREE;
     }
 
     public String toString() {
@@ -535,7 +524,7 @@ public class VNode {
      * @param idToNodeHash: a hash that use ID String points to nodes
      * @param nodeToNodeHash: a hash that use ID->ID to model expanded nodes
      * @param newBaseNodes: list that stores new nodes to be added to base
-     * @param newTreeNodes: list that stores new nodes to be addded to tree
+     * @param newTreeNodes: list that stores new nodes to be added to tree
      */
     public static void rebuildView(final HashMap<String, VNode> idToNodeHash, final HashMap<String, String> nodeToNodeHash, final List<VNode> newBaseNodes, final List<VNode> newTreeNodes) {
         //manually rebuild the tree state along row/columns
@@ -549,6 +538,7 @@ public class VNode {
      *
      * @param v1
      * @param v2
+     * @param zoom
      * @return
      */
     public static int distanceInclusive(VNode v1, VNode v2, float zoom) {

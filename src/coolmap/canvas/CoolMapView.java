@@ -89,10 +89,10 @@ public final class CoolMapView<BASE, VIEW> {
     private final Rectangle _mapDimension = new Rectangle();
     //
     //layers
-    private final HashSet<JComponent> _layers = new HashSet<JComponent>();
+    private final HashSet<JComponent> _layers = new HashSet<>();
     //map layers. Can be extended
-    private final ArrayList<MapLayer> _mapLayers = new ArrayList<MapLayer>();
-    private final ArrayList<MapLayer> _overLayers = new ArrayList<MapLayer>();
+    private final ArrayList<MapLayer> _mapLayers = new ArrayList<>();
+    private final ArrayList<MapLayer> _overLayers = new ArrayList<>();
     private final SelectionLayer _selectionLayer = new SelectionLayer();
     //submap bufferesize
     private int _subMapBufferSize = 350;
@@ -3397,6 +3397,10 @@ public final class CoolMapView<BASE, VIEW> {
                 repaint();
             }
         }
+    }
+    
+    public MatrixCell getSelectedCell() {
+        return _selectionAnchorCell;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

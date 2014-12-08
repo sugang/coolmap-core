@@ -19,8 +19,8 @@ import java.util.HashSet;
 public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObjectListener {
 
     private final static ActiveCoolMapObjectListenerTunnel _instance = new ActiveCoolMapObjectListenerTunnel();
-    private final static HashSet<CViewListener> _viewListeners = new HashSet<CViewListener>();
-    private final static HashSet<CObjectListener> _objectListeners = new HashSet<CObjectListener>();
+    private final static HashSet<CViewListener> _viewListeners = new HashSet<>();
+    private final static HashSet<CObjectListener> _objectListeners = new HashSet<>();
 
     public void addCViewListener(CViewListener lis) {
         if (lis != null) {
@@ -48,11 +48,7 @@ public class ActiveCoolMapObjectListenerTunnel implements CViewListener, CObject
 
     private boolean _isActiveObject(CoolMapObject object) {
         CoolMapObject activeObj = CoolMapMaster.getActiveCoolMapObject();
-        if (activeObj != null && activeObj == object) {
-            return true;
-        } else {
-            return false;
-        }
+        return activeObj != null && activeObj == object;
     }
 
     private ActiveCoolMapObjectListenerTunnel() {

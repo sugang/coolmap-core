@@ -95,11 +95,16 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         gradient.addColor(UI.colorWhite, 1f);
         labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
     }
+    
     private JPopupMenu _popupMenu;
-    private JCheckBoxMenuItem[] _linetypes = new JCheckBoxMenuItem[3];
-    private float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
-    private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<JCheckBoxMenuItem>();
+    private final JCheckBoxMenuItem[] _linetypes = new JCheckBoxMenuItem[3];
+    private final float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
+    private final ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<>();
 
+    private final LinkedHashSet<VNode> _selectedNodes = new LinkedHashSet<>();
+    
+    private final ArrayList<VNode> activeTreeNodes = new ArrayList<>();
+    
     @Override
     public void viewRendererChanged(CoolMapObject object) {
     }
@@ -273,7 +278,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 }
 
                 CoolMapState state = CoolMapState.createStateColumns("Expand column nodes", getCoolMapObject(), null);
-                ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
+                ArrayList<VNode> nodes = new ArrayList<>(_selectedNodes);
                 Collections.sort(nodes, new VNodeHeightComparator());
                 List<VNode> nodesToBeSelected = getCoolMapObject().expandColumnNodes(new ArrayList(_selectedNodes), true);
                 _selectedNodes.clear();
@@ -299,7 +304,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 }
 
                 CoolMapState state = CoolMapState.createStateColumns("Expand column nodes", getCoolMapObject(), null);
-                ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
+                ArrayList<VNode> nodes = new ArrayList<>(_selectedNodes);
                 Collections.sort(nodes, new VNodeHeightComparator());
                 List<VNode> nodesToBeSelected = getCoolMapObject().expandColumnNodesToLeaf(new ArrayList(_selectedNodes));
                 _selectedNodes.clear();
@@ -325,11 +330,12 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         return;
                     }
 
-                    CoolMapState state = CoolMapState.createStateColumns("Collapse column nodes", getCoolMapObject(), null);
+                    CoolMapObject obj = getCoolMapObject();
+                    CoolMapState state = CoolMapState.createStateColumns("Collapse column nodes", obj, null);
                     //make it more efficient by collapsing tallest nodes
-                    ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
+                    ArrayList<VNode> nodes = new ArrayList<>(_selectedNodes);
                     Collections.sort(nodes, new VNodeHeightComparator());
-                    List<VNode> collapsedNodes = getCoolMapObject().collapseColumnNodes(_selectedNodes, true);
+                    List<VNode> collapsedNodes = obj.collapseColumnNodes(_selectedNodes, true);
 
                     _selectedNodes.clear();
                     if (collapsedNodes != null) {
@@ -621,8 +627,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         } catch (Exception e) {
         }
     }
-
-    private final ArrayList<VNode> activeTreeNodes = new ArrayList<VNode>();
 
 //    private final HashMap<VNode, Float> _nodeOffset = new HashMap<VNode, Float>();
 //    private void computeNodeLocations(){
@@ -1014,7 +1018,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         }
 
     }
-    private final LinkedHashSet<VNode> _selectedNodes = new LinkedHashSet<VNode>();
+    
 //    private Color _labelBackgroundColor = UI.mixOpacity(UI.colorLightYellow, 0.7f);
 
     @Override

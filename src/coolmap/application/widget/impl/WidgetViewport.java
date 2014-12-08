@@ -24,8 +24,10 @@ import coolmap.application.widget.Widget;
 import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.application.widget.misc.CanvasWidgetPropertyChangedListener;
 import coolmap.canvas.CoolMapView;
+import coolmap.canvas.misc.MatrixCell;
 import coolmap.data.CoolMapObject;
 import coolmap.data.action.RenameCoolMapObjectAction;
+import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.state.CoolMapState;
 import coolmap.utils.BrowserLauncher;
@@ -41,7 +43,9 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
@@ -451,7 +455,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
 
                 ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
-                ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
+                ArrayList<VNode> nodesToBeRemoved = new ArrayList<>();
                 for (Range<Integer> selections : selRows) {
                     for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
                         VNode node = obj.getViewNodeRow(i);
@@ -468,6 +472,70 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
             }
         });
+        
+        item = new JMenuItem("Nodes with values greater than or equal to the selected value");
+        addPopupMenuItem("Select", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    if (obj == null) {
+                        return;
+                    }
+
+                    CoolMapView coolMapView = obj.getCoolMapView();
+                    MatrixCell selectedCell = coolMapView.getSelectedCell();
+                    
+                    if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
+                        return;
+                    }
+                    
+                    double selectedValue = (double)obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
+
+                    List<Rectangle> selections = _popThelargerOrLessSelections(selectedValue, obj, true);
+
+                    CoolMapState state = CoolMapState.createStateSelections("Select all larger than or equal to values", obj, null);
+                    
+                    coolMapView.addSelection(selections);
+                    StateStorageMaster.addState(state);
+                } catch (Exception ex) {
+                }
+            }
+        });
+        
+        item = new JMenuItem("Nodes with values less than or equal to the selected value");
+        addPopupMenuItem("Select", item, false);
+        item.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
+                    if (obj == null) {
+                        return;
+                    }
+
+                    CoolMapView coolMapView = obj.getCoolMapView();
+                    MatrixCell selectedCell = coolMapView.getSelectedCell();
+                    
+                    if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
+                        return;
+                    }
+                    
+                    double selectedValue = (double)obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
+
+                    List<Rectangle> selections = _popThelargerOrLessSelections(selectedValue, obj, false);
+
+                    CoolMapState state = CoolMapState.createStateSelections("Select all less than or equal to values", obj, null);
+                    
+                    coolMapView.addSelection(selections);
+                    StateStorageMaster.addState(state);
+                } catch (Exception ex) {
+                }
+            }
+        });
 
         item = new JMenuItem("Selected Columns");
         addPopupMenuItem("Remove", item, false);
@@ -481,7 +549,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
 
                 ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
-                ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
+                ArrayList<VNode> nodesToBeRemoved = new ArrayList<>();
                 for (Range<Integer> selections : selColumns) {
                     for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
                         VNode node = obj.getViewNodeColumn(i);
@@ -582,6 +650,27 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
 
         //paste nodes from ontology browser
+    }
+
+    private List<Rectangle> _popThelargerOrLessSelections(double selectedValue, CoolMapObject obj, boolean isLarger) {
+        LinkedList<Rectangle> selections = new LinkedList<>();
+
+        for (int row = 0; row < obj.getViewNumRows(); ++row) {
+            for (int col = 0; col < obj.getViewNumColumns(); ++col) {
+                double value = (double) obj.getViewValue(row, col);
+                if (isLarger && value >= selectedValue) {
+                    Rectangle rectangle = new Rectangle(col, row, 1, 1);
+                    selections.add(rectangle);
+                }
+
+                if (!isLarger && value <= selectedValue) {
+                    Rectangle rectangle = new Rectangle(col, row, 1, 1);
+                    selections.add(rectangle);
+                }
+            }
+        }
+
+        return selections;
     }
 
     public WidgetViewport() {
