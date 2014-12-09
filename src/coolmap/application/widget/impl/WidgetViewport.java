@@ -91,7 +91,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                         return;
                     }
 
-                    ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+                    ArrayList<Rectangle> newSelections = new ArrayList<>();
                     for (Range<Integer> range : selectedColumns) {
                         newSelections.add(new Rectangle(range.lowerEndpoint(), 0, range.upperEndpoint() - range.lowerEndpoint(), obj.getViewNumRows()));
                     }
@@ -126,7 +126,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                         return;
                     }
 
-                    ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+                    ArrayList<Rectangle> newSelections = new ArrayList<>();
                     for (Range<Integer> range : selectedRows) {
                         newSelections.add(new Rectangle(0, range.lowerEndpoint(), obj.getViewNumColumns(), range.upperEndpoint() - range.lowerEndpoint()));
                     }
@@ -152,7 +152,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
 
-                    ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+                    ArrayList<VNode> rowNodes = new ArrayList<>();
 
                     if (selRows == null || selRows.isEmpty()) {
                         return;
@@ -190,7 +190,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
 
-                    ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+                    ArrayList<VNode> rowNodes = new ArrayList<>();
 
                     if (selRows == null || selRows.isEmpty()) {
                         return;
@@ -243,7 +243,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
 
-                    ArrayList<VNode> columnNodes = new ArrayList<VNode>();
+                    ArrayList<VNode> columnNodes = new ArrayList<>();
 
                     if (selColumns == null || selColumns.isEmpty()) {
                         return;
@@ -280,7 +280,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
 
-                    ArrayList<VNode> columnNodes = new ArrayList<VNode>();
+                    ArrayList<VNode> columnNodes = new ArrayList<>();
 
                     if (selColumns == null || selColumns.isEmpty()) {
                         return;
@@ -332,7 +332,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selRows = obj.getCoolMapView().getSelectedRows();
 
-                    LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>();
+                    LinkedHashSet<VNode> rowNodes = new LinkedHashSet<>();
 
                     if (selRows == null || selRows.isEmpty()) {
                         return;
@@ -392,7 +392,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ArrayList<Range<Integer>> selColumns = obj.getCoolMapView().getSelectedColumns();
 
-                    LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>();
+                    LinkedHashSet<VNode> colNodes = new LinkedHashSet<>();
 
                     if (selColumns == null || selColumns.isEmpty()) {
                         return;
@@ -472,7 +472,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
         
-        item = new JMenuItem("Nodes with values greater than or equal to the selected value");
+        item = new JMenuItem("Greater Values");
         addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
 
@@ -482,7 +482,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
         
-        item = new JMenuItem("Nodes with values less than or equal to the selected value");
+        item = new JMenuItem("Smaller Values");
         addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
 
@@ -619,18 +619,27 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             
             if (selectedRegions.size() == 1) {
                 Rectangle selectedRec = (Rectangle) selectedRegions.toArray()[0];
+                
+                if (selectedRec.height == 0 || selectedRec.width == 0) {
+                    CMConsole.logInfo("Please select a node first");
+                    return;
+                }
+                
                 if (selectedRec.height != 1 || selectedRec.width != 1) {
                     CMConsole.logInfo("Only supports selecting from a single value");
+                    return;
                 }
                 
                 MatrixCell selectedCell = coolMapView.getSelectedCell();
                 if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
                     CMConsole.logInfo("Please select a value first");
+                    return;
                 }
                 
                 Double selectedValue = (Double) obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
                 if (selectedValue == null || selectedValue.isNaN()) {
                     CMConsole.logError("Selected Node is null or not a number");
+                    return;
                 }
                 
                 LinkedList<Rectangle> selections = new LinkedList<>();
@@ -674,6 +683,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         getContentPane().add(_toolBar, BorderLayout.NORTH);
         _initToolbar();
         _initMainMenuItem();
+        
+        // I think we should add the listner after we initiliaze the widget completely and on a top level
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
         getContentPane().setBackground(UI.colorBlack3);
@@ -830,12 +841,9 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         } else {
             String ele[] = parentPath.split("/");
             JMenu currentMenu = null;
-            String menuLabel = null;
-            JMenu searchMenu = null;
-            JMenuItem searchItem = null;
 
-            for (int i = 0; i < ele.length; i++) {
-                menuLabel = ele[i].trim();
+            for (String ele1 : ele) {
+                String menuLabel = ele1.trim();
                 if (currentMenu == null) {
                     //search root
                     boolean found = false;
@@ -844,7 +852,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             continue;
                         }
 
-                        searchMenu = (JMenu) _popupMenu.getComponent(j);
+                        JMenu searchMenu = (JMenu) _popupMenu.getComponent(j);
                         if (searchMenu.getText().equalsIgnoreCase(menuLabel)) {
                             currentMenu = searchMenu;
                             found = true;
@@ -858,7 +866,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 } else {
                     boolean found = false;
                     for (int j = 0; j < currentMenu.getItemCount(); j++) {
-                        searchItem = currentMenu.getItem(j);
+                        JMenuItem searchItem = currentMenu.getItem(j);
                         if (searchItem instanceof JMenu && ((JMenu) searchItem).getText().equalsIgnoreCase(menuLabel)) {
                             currentMenu = (JMenu) searchItem;
                             found = true;
@@ -891,12 +899,9 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         } else {
             String ele[] = parentPath.split("/");
             JMenu currentMenu = null;
-            String menuLabel = null;
-            JMenu searchMenu = null;
-            JMenuItem searchItem = null;
 
             for (String ele1 : ele) {
-                menuLabel = ele1.trim();
+                String menuLabel = ele1.trim();
                 if (currentMenu == null) {
                     //search root
                     boolean found = false;
@@ -905,7 +910,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             continue;
                         }
 
-                        searchMenu = (JMenu) _popupMenu.getComponent(j);
+                        JMenu searchMenu = (JMenu) _popupMenu.getComponent(j);
                         if (searchMenu.getText().equalsIgnoreCase(menuLabel)) {
                             currentMenu = searchMenu;
                             found = true;
@@ -919,7 +924,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 } else {
                     boolean found = false;
                     for (int j = 0; j < currentMenu.getItemCount(); j++) {
-                        searchItem = currentMenu.getItem(j);
+                        JMenuItem searchItem = currentMenu.getItem(j);
                         if (searchItem instanceof JMenu && ((JMenu) searchItem).getText().equalsIgnoreCase(menuLabel)) {
                             currentMenu = (JMenu) searchItem;
                             found = true;
