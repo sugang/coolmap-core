@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  *
@@ -18,11 +19,11 @@ public class ModuleMaster{
 
     private ModuleMaster() {
     }
-    private static HashMap<String, Module> _coolMapModules = new HashMap<String, Module>();
+    private static final HashMap<String, Module> _coolMapModules = new HashMap<>();
 
     
     public static Set<Module> getAllModules(){
-        return new HashSet<Module>(_coolMapModules.values());
+        return new HashSet<>(_coolMapModules.values());
     }
     
     public static void addModule(Module module) {
@@ -60,7 +61,7 @@ public class ModuleMaster{
                         Module module = (Module)(Class.forName(className).newInstance());
                         addModule(module); //
                     }
-                    catch(Exception e){
+                    catch(JSONException | ClassNotFoundException | InstantiationException | IllegalAccessException e){
                         System.err.println("Initializing '" + modulesToLoad.optString(i) + "' error");
                     }
                 }

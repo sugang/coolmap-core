@@ -419,7 +419,7 @@ public final class CoolMapObject<BASE, VIEW> {
 //    public List<VNode> getViewNodesCol() {
 //        return _vMatrix.getActiveColNodes();
 //    }
-     // consider enforce cache mechanism later
+    // consider enforce cache mechanism later
     public String getViewValueAsSnippet(int row, int column) {
         VIEW value = getViewValue(row, column);
         if (value == null) {
@@ -772,9 +772,7 @@ public final class CoolMapObject<BASE, VIEW> {
                     continue;
                 } else if (m1 == null || !m1.canBeGroupedTogether(m0)) {
                     System.out.println(m1 + "Can't add, incompatible.");
-                    continue;
                 } else {
-
                     _cMatrices.add(m1);
                 }
             }

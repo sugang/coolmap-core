@@ -69,7 +69,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private JPopupMenu _popupMenu;
     private JCheckBoxMenuItem[] _linetypes = new JCheckBoxMenuItem[3];
     private float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
-    private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<JCheckBoxMenuItem>();
+    private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<>();
     private JMenuItem _expandOne, expandOne, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
 
     public void setSelectedTreeNodes(Set<VNode> treeNodes) {
@@ -250,7 +250,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 }
 
                 CoolMapState state = CoolMapState.createStateRows("Collapse row nodes", getCoolMapObject(), null);
-                ArrayList<VNode> nodes = new ArrayList<VNode>(_selectedNodes);
+                ArrayList<VNode> nodes = new ArrayList<>(_selectedNodes);
                 Collections.sort(nodes, new VNodeHeightComparator());
                 List<VNode> collapsedNodes = getCoolMapObject().collapseRowNodes(_selectedNodes, true);
 
@@ -659,7 +659,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
         }
     }
-    private final LinkedHashSet<VNode> _selectedNodes = new LinkedHashSet<VNode>();
+    private final LinkedHashSet<VNode> _selectedNodes = new LinkedHashSet<>();
 
     @Override
     public boolean canRender(CoolMapObject coolMapObject) {
@@ -723,7 +723,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 //        System.err.println("===========");
     }
 
-    private final ArrayList<VNode> activeTreeNodes = new ArrayList<VNode>();
+    private final ArrayList<VNode> activeTreeNodes = new ArrayList<>();
 
     private Integer _getTreeNodeOffset(VNode treeNode, CoolMapObject object) {
         if (!treeNode.isExpanded()) {
@@ -954,7 +954,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     }
                     if (me.getClickCount() > 1) {
                         //getCoolMapObject().toggleColumnNode(node);
-                        String operationName = "";
+                        String operationName;
                         if (node.isExpanded()) {
                             operationName = "Collapse row '" + node.getViewLabel() + "'";
                         } else {

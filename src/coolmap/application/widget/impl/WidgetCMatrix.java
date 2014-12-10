@@ -11,6 +11,7 @@ import coolmap.application.utils.DataMaster;
 import coolmap.application.utils.Messenger;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.canvas.datarenderer.renderer.model.ViewRenderer;
 import coolmap.canvas.sidemaps.impl.ColumnLabels;
 import coolmap.canvas.sidemaps.impl.ColumnTree;
@@ -69,7 +70,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
     public List<CMatrix> getSelectedMatrices() {
 
         int[] selectedRows = matrixTable.getSelectedRows();
-        ArrayList<CMatrix> matrices = new ArrayList<CMatrix>();
+        ArrayList<CMatrix> matrices = new ArrayList<>();
         for (int row : selectedRows) {
 
             int index = matrixTable.convertRowIndexToModel(row);
@@ -197,7 +198,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
         if (returnVal == JOptionPane.OK_OPTION) {
 
             CMatrix m0 = matrices[0];
-            ArrayList<VNode> nodes = new ArrayList<VNode>();
+            ArrayList<VNode> nodes = new ArrayList<>();
             for (int i = 0; i < m0.getNumRows(); i++) {
                 nodes.add(new VNode(m0.getRowLabel(i)));
             }
@@ -216,8 +217,8 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                 if (Double.class.isAssignableFrom(object.getViewClass())) {
                     object.setSnippetConverter(SnippetMaster.getConverter("D13"));
                 }
-            } catch (Exception e) {
-
+            } catch (InstantiationException | IllegalAccessException e) {
+                CMConsole.logError(e.getMessage());
             }
             object.setName("Untitiled");
 
@@ -371,9 +372,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
             return;
         }
 
-        for (int index = 0; index < selectedMatrices.size(); index++) {
-            final CMatrix mx = selectedMatrices.get(index);
-
+        for (final CMatrix mx : selectedMatrices) {
             //
             Object[][] data = new Object[mx.getNumRows()][mx.getNumColumns() + 1];
             for (int i = 0; i < mx.getNumRows(); i++) {
@@ -424,7 +423,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                             else{
                                 l.setBackground(UI.colorWhite);
                             }
-    //To change body of generated methods, choose Tools | Templates.
+                            //To change body of generated methods, choose Tools | Templates.
                             return l;
                         }
                         
@@ -437,7 +436,6 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                     );
                 }
             });
-
         }
 
     }
@@ -500,7 +498,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                     //CAggregator a = obj.getAggregator();
                     //System.out.println("label disable:" + a.canAggregate(obj.getBaseClass()) + " " + obj.getBaseClass());
                     CAggregator a = (CAggregator) o;
-                    if (a != null && a.canAggregate(obj.getBaseClass())) {
+                    if (a.canAggregate(obj.getBaseClass())) {
 //                        System.out.println("pass:" + o.getClass() + obj.getBaseClass());
                         label.setEnabled(true);
                         label.setFocusable(true);
@@ -533,7 +531,7 @@ public class WidgetCMatrix extends Widget implements DataStorageListener, CMatri
                 if (CoolMapMaster.getActiveCoolMapObject() != null) {
                     CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
                     ViewRenderer renderer = (ViewRenderer) o;
-                    if (renderer != null && renderer.canRender(obj.getViewClass())) {
+                    if (renderer.canRender(obj.getViewClass())) {
                         label.setEnabled(true);
                         label.setFocusable(true);
                     } else {

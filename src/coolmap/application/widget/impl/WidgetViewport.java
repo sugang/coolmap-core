@@ -471,7 +471,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 }
             }
         });
-        
+
         item = new JMenuItem("Greater Values");
         addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
@@ -481,7 +481,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 _popThelargerOrLessSelections(true);
             }
         });
-        
+
         item = new JMenuItem("Smaller Values");
         addPopupMenuItem("Select", item, false);
         item.addActionListener(new ActionListener() {
@@ -609,62 +609,64 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
     /**
      * populate the selections based on the value of the pre selected cell
-     * @param isLarger indicates if users want to select values larger or less than the pre selected cell
+     *
+     * @param isLarger indicates if users want to select values larger or less
+     * than the pre selected cell
      */
     private void _popThelargerOrLessSelections(boolean isLarger) {
         try {
             CoolMapObject obj = CoolMapMaster.getActiveCoolMapObject();
             CoolMapView coolMapView = obj.getCoolMapView();
             Set<Rectangle> selectedRegions = coolMapView.getSelections();
-            
+
             if (selectedRegions.size() == 1) {
                 Rectangle selectedRec = (Rectangle) selectedRegions.toArray()[0];
-                
+
                 if (selectedRec.height == 0 || selectedRec.width == 0) {
                     CMConsole.logInfo("Please select a node first");
                     return;
                 }
-                
+
                 if (selectedRec.height != 1 || selectedRec.width != 1) {
                     CMConsole.logInfo("Only supports selecting from a single value");
                     return;
                 }
-                
+
                 MatrixCell selectedCell = coolMapView.getSelectedCell();
                 if (selectedCell == null || selectedCell.row == null || selectedCell.col == null) {
                     CMConsole.logInfo("Please select a value first");
                     return;
                 }
-                
+
                 Double selectedValue = (Double) obj.getViewValue(selectedCell.getRow(), selectedCell.getCol());
                 if (selectedValue == null || selectedValue.isNaN()) {
                     CMConsole.logError("Selected Node is null or not a number");
                     return;
                 }
-                
+
                 LinkedList<Rectangle> selections = new LinkedList<>();
-                
+
                 for (int row = 0; row < obj.getViewNumRows(); ++row) {
                     for (int col = 0; col < obj.getViewNumColumns(); ++col) {
                         Double value = (Double) obj.getViewValue(row, col);
                         if (value == null || value.isNaN()) {
                             continue;
                         }
-                        
+
                         if (isLarger && value >= selectedValue) {
                             Rectangle rectangle = new Rectangle(col, row, 1, 1);
                             selections.add(rectangle);
                         }
-                        
+
                         if (!isLarger && value <= selectedValue) {
                             Rectangle rectangle = new Rectangle(col, row, 1, 1);
                             selections.add(rectangle);
                         }
                     }
                 }
-                
-                CoolMapState state = isLarger ? CoolMapState.createStateSelections("Select all larger than or equal to values", obj, null) : CoolMapState.createStateSelections("Select all less than or equal to values", obj, null);                
-                
+
+                CoolMapState state = isLarger ? CoolMapState.createStateSelections("Select all larger than or equal to values", obj, null) : CoolMapState.createStateSelections("Select all less than or equal to values", obj, null);
+
                 coolMapView.addSelection(selections);
                 StateStorageMaster.addState(state);
             } else {
@@ -683,7 +685,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         getContentPane().add(_toolBar, BorderLayout.NORTH);
         _initToolbar();
         _initMainMenuItem();
-        
+
         // I think we should add the listner after we initiliaze the widget completely and on a top level
         CoolMapMaster.addActiveCoolMapChangedListener(this);
         getDockable().addPropertyChangeListener(new CanvasWidgetPropertyChangedListener());
@@ -1237,7 +1239,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                     if (y + height > _desktop.getHeight()) {
                         y = 0;
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                 }
             }
         }
@@ -1280,7 +1282,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             height = _desktop.getHeight() / rows;
                         }
                     }
-                }catch (PropertyVetoException e) {
+                } catch (PropertyVetoException e) {
                 }
             }
         }

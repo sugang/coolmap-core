@@ -7,6 +7,7 @@ package coolmap.application.widget.impl;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.ActiveCoolMapChangedListener;
 import coolmap.application.widget.Widget;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.CoolMapObject;
 import coolmap.data.aggregator.impl.*;
 import coolmap.data.aggregator.model.CAggregator;
@@ -28,15 +29,16 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
     private JComboBox _aggregators = new JComboBox();
     private DefaultComboBoxModel _model = new DefaultComboBoxModel();
     private JScrollPane _scroller = new JScrollPane();
-    private final LinkedHashSet<Class> _registeredAggregators = new LinkedHashSet<Class>();
+    private final LinkedHashSet<Class> _registeredAggregators = new LinkedHashSet<>();
 
     public LinkedHashSet<CAggregator> getLoadedRenderers() {
-        LinkedHashSet<CAggregator> aggrs = new LinkedHashSet<CAggregator>();
+        LinkedHashSet<CAggregator> aggrs = new LinkedHashSet<>();
         for (Class cls : _registeredAggregators) {
             try {
                 aggrs.add((CAggregator) cls.newInstance());
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InstantiationException | IllegalAccessException e) {
+                CMConsole.logError(e.getMessage());
+                //e.printStackTrace();
             }
         }
         return aggrs;
@@ -106,11 +108,11 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
                                 object.setAggregator(aggr);
                                 _scroller.setViewportView(object.getAggregator().getConfigUI());
                             }
-                        } catch (Exception e) {
+                        } catch (InstantiationException | IllegalAccessException e) {
                             //Failed
                             _scroller.setViewportView(null);
                             object.notifyAggregatorUpdated();
-                            e.printStackTrace();
+                            CMConsole.logError(e.getMessage());
                         }
                     }
 
@@ -132,7 +134,7 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
                     //CAggregator a = obj.getAggregator();
                     //System.out.println("label disable:" + a.canAggregate(obj.getBaseClass()) + " " + obj.getBaseClass());
                     CAggregator a = (CAggregator) o;
-                    if (a != null && a.canAggregate(obj.getBaseClass())) {
+                    if (a.canAggregate(obj.getBaseClass())) {
 //                        System.out.println("pass:" + o.getClass() + obj.getBaseClass());
                         label.setEnabled(true);
                         label.setFocusable(true);
@@ -172,7 +174,7 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
                 _updateList();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            CMConsole.logError(e.getMessage());
         }
     }
 
@@ -184,8 +186,8 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
         for (Class cls : _registeredAggregators) {
             try {
                 _model.addElement(cls.newInstance());
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InstantiationException | IllegalAccessException e) {
+                CMConsole.logError(e.getMessage());
             }
         }
         _aggregators.setModel(_model);
@@ -225,11 +227,7 @@ public class WidgetAggregator extends Widget implements ActiveCoolMapChangedList
             _scroller.setViewportView(null);
             _updatetip();
         }
-
-
-
+        
         //check to set the availability
-
-
     }
 }

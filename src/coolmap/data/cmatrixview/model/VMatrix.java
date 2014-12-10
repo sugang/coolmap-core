@@ -5,6 +5,7 @@
 package coolmap.data.cmatrixview.model;
 
 import com.google.common.collect.HashMultimap;
+import coolmap.application.widget.impl.console.CMConsole;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.utils.VNodeIndexComparator;
@@ -27,15 +28,17 @@ import java.util.Set;
  * a matrix specifically handles views
  *
  * @author gangsu
+ * @param <BASE>
+ * @param <VIEW>
  */
 public class VMatrix<BASE, VIEW> {
 
     //
     protected final String _ID;
-    protected final ArrayList<VNode> _activeRowNodes = new ArrayList<VNode>();
-    protected final ArrayList<VNode> _activeColNodes = new ArrayList<VNode>();
-    protected final ArrayList<VNode> _activeRowNodesInTree = new ArrayList<VNode>();
-    protected final ArrayList<VNode> _activeColNodesInTree = new ArrayList<VNode>();
+    protected final ArrayList<VNode> _activeRowNodes = new ArrayList<>();
+    protected final ArrayList<VNode> _activeColNodes = new ArrayList<>();
+    protected final ArrayList<VNode> _activeRowNodesInTree = new ArrayList<>();
+    protected final ArrayList<VNode> _activeColNodesInTree = new ArrayList<>();
     //
     protected final HashMultimap<String, VNode> _activeColumnNameToNodeMap = HashMultimap.create();
     protected final HashMultimap<String, VNode> _activeRowNameToNodeMap = HashMultimap.create();
@@ -151,6 +154,7 @@ public class VMatrix<BASE, VIEW> {
      * replace the colnodes with new nodes, and remove all tree nodes;
      *
      * @param nodes
+     * @param clearTree
      */
     public synchronized void setActiveColNodes(List<VNode> nodes, boolean clearTree) {
         _activeColNodes.clear();
@@ -168,6 +172,7 @@ public class VMatrix<BASE, VIEW> {
      * set the active colNodes
      *
      * @param nodes
+     * @param clearTree
      */
     public synchronized void setActiveRowNodes(List<VNode> nodes, boolean clearTree) {
         _activeRowNodes.clear();
@@ -197,7 +202,7 @@ public class VMatrix<BASE, VIEW> {
             collapseTreeColNodes(nodesToCollapse);
             nodesToRemove.addAll(nodesToCollapse);
 
-            LinkedHashSet<VNode> colNodes = new LinkedHashSet<VNode>(_activeColNodes);
+            LinkedHashSet<VNode> colNodes = new LinkedHashSet<>(_activeColNodes);
             colNodes.removeAll(nodesToRemove);
             _activeColNodes.clear();
             _activeColNodes.addAll(colNodes);
@@ -240,7 +245,7 @@ public class VMatrix<BASE, VIEW> {
             collapseTreeRowNodes(nodesToCollapse);
             nodesToRemove.addAll(nodesToCollapse);
 
-            LinkedHashSet<VNode> rowNodes = new LinkedHashSet<VNode>(_activeRowNodes);
+            LinkedHashSet<VNode> rowNodes = new LinkedHashSet<>(_activeRowNodes);
             rowNodes.removeAll(nodesToRemove);
             _activeRowNodes.clear();
             _activeRowNodes.addAll(rowNodes);
@@ -255,12 +260,15 @@ public class VMatrix<BASE, VIEW> {
         if (parentNode == null) {
             nodes.add(childNode);
             return;
-        } else if (parentNode.isMarked()) {
-            return;
-        } else {
-            parentNode.mark(true);
-            _findRootNodes(parentNode, nodes);
         }
+
+        if (parentNode.isMarked()) {
+            return;
+        }
+
+        parentNode.mark(true);
+        _findRootNodes(parentNode, nodes);
+
     }
 
 //    /**
@@ -307,7 +315,7 @@ public class VMatrix<BASE, VIEW> {
 
         Collections.sort(nodesToExpand, new VNodeIndexComparator());
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newNodes = new ArrayList<>();
 
         for (VNode node : _activeColNodes) {
             if (node.isMarked()) {
@@ -395,15 +403,15 @@ public class VMatrix<BASE, VIEW> {
 
         //generate all nodes to be added
         for (VNode node : nodesToExpand) {
-            ArrayList<VNode> nodesToBeAddedToBase = new ArrayList<VNode>();
-            ArrayList<VNode> nodesToBeAddedToTree = new ArrayList<VNode>();
+            ArrayList<VNode> nodesToBeAddedToBase = new ArrayList<>();
+            ArrayList<VNode> nodesToBeAddedToTree = new ArrayList<>();
             _findNodesToExpand(node, nodesToBeAddedToBase, nodesToBeAddedToTree);
             addToBaseHash.put(node, nodesToBeAddedToBase);
             addToTreeHash.put(node, nodesToBeAddedToTree);
         }
 
         //then
-        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newNodes = new ArrayList<>();
         for (VNode node : _activeRowNodes) {
             //nodesToExpand
             if (node.isMarked()) {
@@ -426,7 +434,6 @@ public class VMatrix<BASE, VIEW> {
 //                    }
 //                    return null;
 //                }
-
             } else {
                 newNodes.add(node); //
             }
@@ -467,15 +474,15 @@ public class VMatrix<BASE, VIEW> {
 
         //generate all nodes to be added
         for (VNode node : nodesToExpand) {
-            ArrayList<VNode> nodesToBeAddedToBase = new ArrayList<VNode>();
-            ArrayList<VNode> nodesToBeAddedToTree = new ArrayList<VNode>();
+            ArrayList<VNode> nodesToBeAddedToBase = new ArrayList<>();
+            ArrayList<VNode> nodesToBeAddedToTree = new ArrayList<>();
             _findNodesToExpand(node, nodesToBeAddedToBase, nodesToBeAddedToTree);
             addToBaseHash.put(node, nodesToBeAddedToBase);
             addToTreeHash.put(node, nodesToBeAddedToTree);
         }
 
         //then
-        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newNodes = new ArrayList<>();
         for (VNode node : _activeColNodes) {
             //nodesToExpand
             if (node.isMarked()) {
@@ -498,7 +505,6 @@ public class VMatrix<BASE, VIEW> {
 //                    }
 //                    return null;
 //                }
-
             } else {
                 newNodes.add(node); //
             }
@@ -553,6 +559,10 @@ public class VMatrix<BASE, VIEW> {
 //            _updateActiveRowNodeViewIndices();
 //        }
 //    }
+    /**
+     *
+     * @param originalNodes
+     */
     public synchronized void expandRowNodeToChildNodes(Collection<VNode> originalNodes) {
 
         for (VNode node : _activeRowNodes) {
@@ -571,7 +581,7 @@ public class VMatrix<BASE, VIEW> {
 
         Collections.sort(nodesToExpand, new VNodeIndexComparator());
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newNodes = new ArrayList<>();
 
         for (VNode node : _activeRowNodes) {
             if (node.isMarked()) {
@@ -687,16 +697,16 @@ public class VMatrix<BASE, VIEW> {
         }
 
         //find treeNodesToRemove
-        HashSet<VNode> treeNodesToRemove = new HashSet<VNode>();
+        HashSet<VNode> treeNodesToRemove = new HashSet<>();
 
-        ArrayList<VNode> collapsedNodes = new ArrayList<VNode>();
+        ArrayList<VNode> collapsedNodes = new ArrayList<>();
         for (VNode node : nodesToCollapse) {
             if (!node.isMarked()) {
 //                node.setViewColor(Color.RED);
                 collapsedNodes.add(node);
 
-                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
-                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>(); //these nodes are marked to be removed, so no worries
+                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<>();
+                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<>(); //these nodes are marked to be removed, so no worries
                 _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);
 
                 treeNodesToRemove.addAll(nodesToBeRemovedFromTree);//to be removed
@@ -724,7 +734,7 @@ public class VMatrix<BASE, VIEW> {
         _activeColNodesInTree.addAll(treeNodes);
 
         //change base nodes
-        ArrayList<VNode> newBaseNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newBaseNodes = new ArrayList<>();
         for (VNode node : _activeColNodes) {
             if (!node.isMarked()) {
                 newBaseNodes.add(node); //skp those marked to remove ones
@@ -777,11 +787,11 @@ public class VMatrix<BASE, VIEW> {
         }
 
         //then what's remaining unmarked is the highest in tree
-        HashSet<VNode> treeNodesToRemove = new HashSet<VNode>();
+        HashSet<VNode> treeNodesToRemove = new HashSet<>();
 //        HashSet<VNode> baseNodesToRemove = new HashSet<VNode>();
 
         //iterate all nodes to collapse
-        ArrayList<VNode> collapsedNodes = new ArrayList<VNode>();
+        ArrayList<VNode> collapsedNodes = new ArrayList<>();
         for (VNode node : nodesToCollapse) {
             if (!node.isMarked()) {
 
@@ -791,8 +801,8 @@ public class VMatrix<BASE, VIEW> {
                 //node.setViewColor(Color.RED);
 //                System.out.println(node.getName());
 //                node.setViewColor(Color.RED);
-                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<VNode>();
-                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<VNode>(); //these nodes are marked to be removed, so no worries
+                ArrayList<VNode> nodesToBeRemovedFromTree = new ArrayList<>();
+                ArrayList<VNode> nodesToBeRemovedFromBase = new ArrayList<>(); //these nodes are marked to be removed, so no worries
                 _collapseTreeNodeFindNodesToRemove(node, nodesToBeRemovedFromTree, nodesToBeRemovedFromBase);
 
                 treeNodesToRemove.addAll(nodesToBeRemovedFromTree);//to be removed
@@ -837,7 +847,7 @@ public class VMatrix<BASE, VIEW> {
         _activeRowNodesInTree.clear();
         _activeRowNodesInTree.addAll(treeNodes);
 
-        ArrayList<VNode> newBaseNodes = new ArrayList<VNode>();
+        ArrayList<VNode> newBaseNodes = new ArrayList<>();
         for (VNode node : _activeRowNodes) {
             if (!node.isMarked()) {
                 newBaseNodes.add(node); //skp those marked to remove ones
@@ -963,12 +973,12 @@ public class VMatrix<BASE, VIEW> {
             return;
         }
 
-        ArrayList<VNode> nodesToRemove = new ArrayList<VNode>();
+        ArrayList<VNode> nodesToRemove = new ArrayList<>();
         nodesToRemove.add(_activeColNodes.get(index));
 
         //first insert at the corresponding index.
         insertActiveColNodes(index, nodesToAdd, null);
-        removeActiveColNodes(new HashSet<VNode>(nodesToRemove));
+        removeActiveColNodes(new HashSet<>(nodesToRemove));
     }
 
     private void _replaceColNodes(List<VNode> nodesToRemove, List<VNode> nodesToAdd, int index) {
@@ -976,7 +986,7 @@ public class VMatrix<BASE, VIEW> {
             return;
         }
         insertActiveColNodes(index, nodesToAdd, null);
-        removeActiveColNodes(new HashSet<VNode>(nodesToRemove));
+        removeActiveColNodes(new HashSet<>(nodesToRemove));
     }
 
     private void _replaceRowNodes(List<VNode> nodesToRemove, List<VNode> nodesToAdd, int index) {
@@ -984,7 +994,7 @@ public class VMatrix<BASE, VIEW> {
             return;
         }
         insertActiveRowNodes(index, nodesToAdd, null);
-        removeActiveRowNodes(new HashSet<VNode>(nodesToRemove));
+        removeActiveRowNodes(new HashSet<>(nodesToRemove));
     }
 
     private void _replaceRowNodes(VNode nodeToRemove, List<VNode> nodesToAdd) {
@@ -997,12 +1007,12 @@ public class VMatrix<BASE, VIEW> {
             return;
         }
 
-        ArrayList<VNode> nodesToRemove = new ArrayList<VNode>();
+        ArrayList<VNode> nodesToRemove = new ArrayList<>();
         nodesToRemove.add(_activeRowNodes.get(index));
 
         //first insert at the corresponding index.
         insertActiveRowNodes(index, nodesToAdd, null);
-        removeActiveRowNodes(new HashSet<VNode>(nodesToRemove));
+        removeActiveRowNodes(new HashSet<>(nodesToRemove));
     }
 
 //    public void printMatrix(){
@@ -1028,7 +1038,7 @@ public class VMatrix<BASE, VIEW> {
     public final VIEW getValue(int row, int col, CAggregator<BASE, VIEW> aggr, List<CMatrix<BASE>> matrices) {
 
         //System.out.println("matrices:" +matrices);
-        ArrayList<CMatrix> matricesCopy = new ArrayList<CMatrix>();
+        ArrayList<CMatrix> matricesCopy = new ArrayList<>();
         matricesCopy.addAll(matrices);
 
         if (matrices == null || matrices.isEmpty()) {
@@ -1074,7 +1084,7 @@ public class VMatrix<BASE, VIEW> {
             } else {
                 //multi matrix
                 //BASE[] values = Array.newInstance(BASE., i)
-                ArrayList<BASE> values = new ArrayList<BASE>(matrices.size());
+                ArrayList<BASE> values = new ArrayList<>(matrices.size());
                 for (CMatrix<BASE> m : matrices) {
                     values.add(m.getValue(baseRow, baseCol));
                 }
@@ -1091,7 +1101,7 @@ public class VMatrix<BASE, VIEW> {
                 return null;
             }
 
-            ArrayList<BASE> values = new ArrayList<BASE>(matrices.size() * baseColumnIndices.length);
+            ArrayList<BASE> values = new ArrayList<>(matrices.size() * baseColumnIndices.length);
             for (CMatrix<BASE> m : matrices) {
                 for (Integer colIndex : baseColumnIndices) {
                     values.add(m.getValue(baseRow, colIndex));
@@ -1114,7 +1124,7 @@ public class VMatrix<BASE, VIEW> {
                 return null;
             }
 
-            ArrayList<BASE> values = new ArrayList<BASE>(matrices.size() * baseRowIndices.length);
+            ArrayList<BASE> values = new ArrayList<>(matrices.size() * baseRowIndices.length);
             for (CMatrix<BASE> m : matrices) {
                 for (Integer rowIndex : baseRowIndices) {
                     values.add(m.getValue(rowIndex, baseCol));
@@ -1134,7 +1144,7 @@ public class VMatrix<BASE, VIEW> {
                 return null;
             }
 
-            ArrayList<BASE> values = new ArrayList<BASE>(matrices.size() * baseRowIndices.length);
+            ArrayList<BASE> values = new ArrayList<>(matrices.size() * baseRowIndices.length);
             for (CMatrix<BASE> m : matrices) {
                 for (Integer rowIndex : baseRowIndices) {
                     for (Integer colIndex : baseColIndices) {
@@ -1269,16 +1279,16 @@ public class VMatrix<BASE, VIEW> {
     }
 
     public void sortColumn(int column, int descending, CAggregator<BASE, VIEW> aggr, List<CMatrix<BASE>> matrices) {
-        ArrayList<VNode> nodes = new ArrayList<VNode>(_activeColNodes);
+        ArrayList<VNode> nodes = new ArrayList<>(_activeColNodes);
 
     }
 
     public List<VNode> getActiveColumnNodes() {
-        return new ArrayList<VNode>(_activeColNodes);
+        return new ArrayList<>(_activeColNodes);
     }
 
     public List<VNode> getActiveRowNodes() {
-        return new ArrayList<VNode>(_activeRowNodes);
+        return new ArrayList<>(_activeRowNodes);
     }
 
     public int getNumRows() {
@@ -1328,8 +1338,8 @@ public class VMatrix<BASE, VIEW> {
             if (treeNodes == null || treeNodes.isEmpty()) {
                 return null;
             } else {
-                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
-                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+                ArrayList<VNode> childNodesInView = new ArrayList<>();
+                HashSet<VNode> visitedNodes = new HashSet<>();
 
                 for (VNode treeNode : treeNodes) {
                     //fetch a tree node
@@ -1362,8 +1372,8 @@ public class VMatrix<BASE, VIEW> {
             if (treeNodes == null || treeNodes.isEmpty()) {
                 return null;
             } else {
-                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
-                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+                ArrayList<VNode> childNodesInView = new ArrayList<>();
+                HashSet<VNode> visitedNodes = new HashSet<>();
 
                 for (VNode treeNode : treeNodes) {
                     //fetch a tree node
@@ -1396,8 +1406,8 @@ public class VMatrix<BASE, VIEW> {
             if (treeNodes == null || treeNodes.isEmpty()) {
                 return null;
             } else {
-                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
-                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+                ArrayList<VNode> childNodesInView = new ArrayList<>();
+                HashSet<VNode> visitedNodes = new HashSet<>();
 
                 for (VNode treeNode : treeNodes) {
                     //fetch a tree node and begin from the first one
@@ -1415,7 +1425,7 @@ public class VMatrix<BASE, VIEW> {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            CMConsole.logError(e.getMessage());
             return null;
         }
     }
@@ -1431,8 +1441,8 @@ public class VMatrix<BASE, VIEW> {
             if (treeNodes == null || treeNodes.isEmpty()) {
                 return null;
             } else {
-                ArrayList<VNode> childNodesInView = new ArrayList<VNode>();
-                HashSet<VNode> visitedNodes = new HashSet<VNode>();
+                ArrayList<VNode> childNodesInView = new ArrayList<>();
+                HashSet<VNode> visitedNodes = new HashSet<>();
 
                 for (VNode treeNode : treeNodes) {
                     //fetch a tree node and begin from the first one
@@ -1449,7 +1459,7 @@ public class VMatrix<BASE, VIEW> {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            CMConsole.logError(e.getMessage());
             return null;
         }
     }
@@ -1466,7 +1476,8 @@ public class VMatrix<BASE, VIEW> {
         if (node.isSingleNode() || node.isGroupNode() && !node.isExpanded()) {
             //add
             return;
-        } else if (node.isGroupNode() && node.isExpanded()) {
+        }
+        if (node.isGroupNode() && node.isExpanded()) {
             List<VNode> children = node.getChildNodes();
             for (VNode cNode : children) {
                 _getAllNodesFromTreeNodes(cNode, childNodesInView, visitedNodes);
@@ -1590,8 +1601,8 @@ public class VMatrix<BASE, VIEW> {
             System.arraycopy(input, 0, result, 0, target);
             //Copy the selected regions
             cursor = target;
-            for (int i = 0; i < ranges.length; i++) {
-                for (int j = ranges[i][0]; j < ranges[i][1]; j++) {
+            for (int[] range : ranges) {
+                for (int j = range[0]; j < range[1]; j++) {
                     result[cursor++] = input[j];
                 }
             }
@@ -1717,9 +1728,9 @@ public class VMatrix<BASE, VIEW> {
                 }
             }
 
-            for (int i = 0; i < secondRanges.length; i++) {
-                secondRanges[i][0] = secondRanges[i][0] - target;
-                secondRanges[i][1] = secondRanges[i][1] - target;
+            for (int[] secondRange : secondRanges) {
+                secondRange[0] = secondRange[0] - target;
+                secondRange[1] = secondRange[1] - target;
             }
 
             VNode[] firstHalfShifted = _multiShift(firstHalf, firstHalf.length, firstRanges);
@@ -1809,7 +1820,6 @@ public class VMatrix<BASE, VIEW> {
             Float startViewIndexInTree = _activeRowNodesInTree.get(searchIndexStart).getViewIndex();
             Float endViewIndexInTree = _activeRowNodesInTree.get(searchIndexEnd).getViewIndex();
 
-            Integer searchIndexMiddle = null;
             Float viewIndexMiddle;
 
             if (fromViewIndex <= startViewIndexInTree) {
@@ -1820,7 +1830,7 @@ public class VMatrix<BASE, VIEW> {
 
                 while (searchIndexStart != searchIndexEnd - 1 && searchIndexStart != searchIndexEnd) {
 
-                    searchIndexMiddle = (searchIndexStart + searchIndexEnd) / 2;
+                    Integer searchIndexMiddle = (searchIndexStart + searchIndexEnd) / 2;
                     viewIndexMiddle = _activeRowNodesInTree.get(searchIndexMiddle).getViewIndex();
 
                     if (viewIndexMiddle <= fromViewIndex) {
@@ -1841,7 +1851,7 @@ public class VMatrix<BASE, VIEW> {
             }
 
             searchIndexEnd = _activeRowNodesInTree.size() - 1;
-            ArrayList<VNode> nodesToReturn = new ArrayList<VNode>();
+            ArrayList<VNode> nodesToReturn = new ArrayList<>();
             for (int i = iStart; i <= searchIndexEnd; i++) {
                 VNode node = _activeRowNodesInTree.get(i);
                 if (node == null || node.getViewIndex() == null) {
@@ -1880,7 +1890,6 @@ public class VMatrix<BASE, VIEW> {
             Float startViewIndexInTree = _activeColNodesInTree.get(searchIndexStart).getViewIndex();
             Float endViewIndexInTree = _activeColNodesInTree.get(searchIndexEnd).getViewIndex();
 
-            Integer searchIndexMiddle = null;
             Float viewIndexMiddle;
 
             if (fromViewIndex <= startViewIndexInTree) {
@@ -1891,7 +1900,7 @@ public class VMatrix<BASE, VIEW> {
 
                 while (searchIndexStart != searchIndexEnd - 1 && searchIndexStart != searchIndexEnd) {
 
-                    searchIndexMiddle = (searchIndexStart + searchIndexEnd) / 2;
+                    Integer searchIndexMiddle = (searchIndexStart + searchIndexEnd) / 2;
                     viewIndexMiddle = _activeColNodesInTree.get(searchIndexMiddle).getViewIndex();
 
                     if (viewIndexMiddle <= fromViewIndex) {
@@ -1912,7 +1921,7 @@ public class VMatrix<BASE, VIEW> {
             }
 
             searchIndexEnd = _activeColNodesInTree.size() - 1;
-            ArrayList<VNode> nodesToReturn = new ArrayList<VNode>();
+            ArrayList<VNode> nodesToReturn = new ArrayList<>();
             for (int i = iStart; i <= searchIndexEnd; i++) {
                 VNode node = _activeColNodesInTree.get(i);
                 if (node == null || node.getViewIndex() == null) {
@@ -1954,7 +1963,7 @@ public class VMatrix<BASE, VIEW> {
         if (nodes == null) {
             return null;
         } else {
-            return new ArrayList<VNode>(nodes);
+            return new ArrayList<>(nodes);
         }
     }
 
@@ -1963,7 +1972,7 @@ public class VMatrix<BASE, VIEW> {
         if (nodes == null) {
             return null;
         } else {
-            return new ArrayList<VNode>(nodes);
+            return new ArrayList<>(nodes);
         }
     }
 
@@ -2042,11 +2051,11 @@ public class VMatrix<BASE, VIEW> {
     }
 
     public List<VNode> getTreeNodesRow() {
-        return new ArrayList<VNode>(_activeRowNodesInTree);
+        return new ArrayList<>(_activeRowNodesInTree);
     }
 
     public List<VNode> getTreeNodesColumn() {
-        return new ArrayList<VNode>(_activeColNodesInTree);
+        return new ArrayList<>(_activeColNodesInTree);
     }
 
     /**
@@ -2055,7 +2064,7 @@ public class VMatrix<BASE, VIEW> {
      * @return
      */
     public Set<VNode> getDepthOneTreeNodesRow() {
-        HashSet<VNode> depthOneNodes = new HashSet<VNode>();
+        HashSet<VNode> depthOneNodes = new HashSet<>();
         for (VNode node : _activeRowNodes) {
             if (node.getParentNode() != null) {
                 depthOneNodes.add(node.getParentNode());
@@ -2066,9 +2075,11 @@ public class VMatrix<BASE, VIEW> {
 
     /**
      * returns only nodes with depth/1 in view
+     *
+     * @return
      */
     public Set<VNode> getDepthOneTreeNodesCol() {
-        HashSet<VNode> depthOneNodes = new HashSet<VNode>();
+        HashSet<VNode> depthOneNodes = new HashSet<>();
         for (VNode node : _activeColNodes) {
             if (node.getParentNode() != null) {
                 depthOneNodes.add(node.getParentNode());

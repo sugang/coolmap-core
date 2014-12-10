@@ -103,7 +103,6 @@ public final class CoolMapMaster {
 //        for (Module module : ModuleMaster.getAllModules()) {
 //            module.restoreState(null);
 //        }
-
         COntology.clearAttributes();
         StateStorageMaster.clearAllStates();
     }
@@ -331,8 +330,6 @@ public final class CoolMapMaster {
         matrix.destroy();
     }
 
-    
-
     public static void renameCMatrix(String matrixID, String newName) {
         CMatrix mx = getCMatrixByID(matrixID);
         if (mx == null) {
@@ -341,17 +338,15 @@ public final class CoolMapMaster {
         mx.setName(newName);
         DataMaster.fireCMatrixListenerNameChanged(mx, newName);
     }
-    
-    public static void renameCOntology(String ontologyID, String newName){
+
+    public static void renameCOntology(String ontologyID, String newName) {
         COntology cOntology = getCOntologyByID(ontologyID);
-        if(ontologyID == null){
+        if (ontologyID == null) {
             return;
         }
         cOntology.setName(newName);
         DataMaster.fireCOntologyNameChanged(cOntology);
     }
-
-
 
     public static void destroyCMatrices(Collection<CMatrix> matrices) {
         if (matrices == null) {
@@ -402,7 +397,6 @@ public final class CoolMapMaster {
             if (!rowNodesToRemove.isEmpty() || !colNodesToRemove.isEmpty()) {
                 StateStorageMaster.clearStates(object);
             }
-
         }
 
         if (ontology.isDestroyed() && _contologies.values().contains(ontology)) {
