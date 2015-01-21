@@ -8,11 +8,11 @@ import com.google.common.base.Objects;
 import coolmap.utils.Tools;
 import java.lang.reflect.Array;
 import java.util.List;
-import java.util.UUID;
 
 /**
  *
- * @author gangsu
+ * @author gangsu 
+ * @param <T>
  */
 public abstract class CMatrix<T> {
 
@@ -76,7 +76,7 @@ public abstract class CMatrix<T> {
      * @param toRow
      * @param fromCol
      * @param toCol
-     * @return
+     * @return 
      */
     public final T[][] getMatrixCopy(int fromRow, int toRow, int fromCol, int toCol) {
         if (toRow <= fromRow || toCol <= fromCol) {
@@ -143,7 +143,7 @@ public abstract class CMatrix<T> {
     /**
      * returns the index for the row label
      *
-     * @param label
+     * @param name
      * @return
      */
     public abstract Integer getIndexOfRowName(String name);
@@ -151,7 +151,7 @@ public abstract class CMatrix<T> {
     /**
      * returns the index for the col label
      *
-     * @param label
+     * @param name
      * @return
      */
     public abstract Integer getIndexOfColName(String name);
@@ -320,19 +320,11 @@ public abstract class CMatrix<T> {
     }
 
     public final boolean containsRowLabel(String label) {
-        if (getIndexOfRowName(label) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return getIndexOfRowName(label) != null;
     }
 
     public final boolean containsColLabel(String label) {
-        if (getIndexOfColName(label) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return getIndexOfColName(label) != null;
     }
 
     /**
