@@ -8,7 +8,7 @@ import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.COntologyListener;
 import coolmap.application.listeners.DataStorageListener;
-import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
+import coolmap.application.listeners.TreeNodesSelectedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
@@ -86,7 +86,7 @@ import org.json.JSONObject;
  *
  * @author gangsu
  */
-public class WidgetCOntology extends Widget implements DataStorageListener, COntologyListener, SingleOntologyNodeSelectedListener {
+public class WidgetCOntology extends Widget implements DataStorageListener, COntologyListener, TreeNodesSelectedListener {
 
     private JXTable _ontologyTable = new JXTable();
     private JComboBox _ontologyCombo = new JComboBox();
@@ -101,7 +101,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
     }
 
     @Override
-    public void singleNodeSelected(EventObject eventObject) {
+    public void treeNodesSelected (EventObject eventObject) {
         List<VNode> nodes = (List<VNode>) eventObject.getSource();
         COntology selectedOntology = (COntology) _ontologyCombo.getSelectedItem();
 

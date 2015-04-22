@@ -5,7 +5,7 @@
 package coolmap.canvas.sidemaps.impl;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
+import coolmap.application.listeners.TreeNodesSelectedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.ontology.WidgetCOntology;
@@ -81,7 +81,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     //private final HashSet<Point> _nodeOffset = new HashSet<Point>();
     private final Color[] labelColors;
     
-    private final SingleOntologyNodeSelectedListener _singleNodeSelectedListener;
+    private final TreeNodesSelectedListener _singleNodeSelectedListener;
 
     public ColumnTree(CoolMapObject object) {
         super(object);
@@ -1045,8 +1045,8 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
     }
     
-    private void fireSingleNodeSelected(EventObject event) {
-        _singleNodeSelectedListener.singleNodeSelected(event);
+    private void fireTreeNodesSelected(EventObject event) {
+        _singleNodeSelectedListener.treeNodesSelected(event);
     }
     
 //    private Color _labelBackgroundColor = UI.mixOpacity(UI.colorLightYellow, 0.7f);
@@ -1096,7 +1096,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 mouseMoved(me);
 
                 EventObject event = new EventObject(new LinkedList<>(_selectedNodes));
-                fireSingleNodeSelected(event);
+                fireTreeNodesSelected(event);
                 
             }
         }

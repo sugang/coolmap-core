@@ -11,6 +11,6 @@ import java.util.EventObject;
  *
  * @author Keqiang Li
  */
-public interface SingleOntologyNodeSelectedListener {
-    public void singleNodeSelected(EventObject eventObject);
+public interface TreeNodesSelectedListener {
+    public void treeNodesSelected(EventObject eventObject);
 }

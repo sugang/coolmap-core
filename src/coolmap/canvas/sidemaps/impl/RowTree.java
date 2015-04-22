@@ -5,7 +5,7 @@
 package coolmap.canvas.sidemaps.impl;
 
 import coolmap.application.CoolMapMaster;
-import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
+import coolmap.application.listeners.TreeNodesSelectedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.widget.WidgetMaster;
 import coolmap.application.widget.impl.ontology.WidgetCOntology;
@@ -78,7 +78,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<>();
     private JMenuItem _expandOne, expandOne, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
     
-    private final SingleOntologyNodeSelectedListener _singleNodeSelectedListener;
+    private final TreeNodesSelectedListener _treeNodesSelectedListener;
 
     public void setSelectedTreeNodes(Set<VNode> treeNodes) {
 //        System.out.println("Setting selected nodes to:" + treeNodes);
@@ -165,7 +165,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
         
         WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
-        this._singleNodeSelectedListener = widgetCOntology;
+        this._treeNodesSelectedListener = widgetCOntology;
     }
 
     private void _initPopupMenu() {
@@ -952,8 +952,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     public void selectionChanged(CoolMapObject obj) {
     }
 
-    private void fireSingleNodeSelected(EventObject event) {
-        _singleNodeSelectedListener.singleNodeSelected(event);
+    private void fireTreeNodesSelected(EventObject event) {
+        _treeNodesSelectedListener.treeNodesSelected(event);
     }
     
     @Override
@@ -995,7 +995,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 mouseMoved(me);
                       
                 EventObject event = new EventObject(new LinkedList<>(_selectedNodes));
-                fireSingleNodeSelected(event);
+                fireTreeNodesSelected(event);
             }
         }
     }
