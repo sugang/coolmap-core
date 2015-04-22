@@ -783,11 +783,11 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
         MenuItem item;
 
-        item = new MenuItem("Zoom in", new MenuShortcut(KeyEvent.VK_PLUS));
+        item = new MenuItem("Zoom in", new MenuShortcut(KeyEvent.VK_0));
         frame.addMenuItem("View", item, false, false);
         item.addActionListener(new ZoomInAction());
 
-        item = new MenuItem("Zoom out", new MenuShortcut(KeyEvent.VK_MINUS));
+        item = new MenuItem("Zoom out", new MenuShortcut(KeyEvent.VK_9));
         frame.addMenuItem("View", item, false, false);
         item.addActionListener(new ZoomOutAction());
 
@@ -861,7 +861,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             break;
                         }
                     }//end of search all items, not found, add new entry
-                    if (found == false) {
+                    if (!found) {
                         currentMenu = new JMenu(menuLabel);
                         _popupMenu.add((JMenu) currentMenu);
                     }
@@ -875,7 +875,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                             break;
                         }
                     }
-                    if (found == false) {
+                    if (!found) {
                         JMenu newMenu = new JMenu(menuLabel);
                         currentMenu.add(newMenu);
                         currentMenu = newMenu;

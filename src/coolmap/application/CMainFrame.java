@@ -162,9 +162,7 @@ public class CMainFrame extends JFrame {
             writer.close();
 
             //append
-        } catch (IOException ex) {
-            Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException ex) {
             Logger.getLogger(CMainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
 

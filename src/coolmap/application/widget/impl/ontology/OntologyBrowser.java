@@ -43,22 +43,22 @@ import org.jdesktop.core.animation.timing.TimingTarget;
 public class OntologyBrowser {
 
     private COntology activeOntology;
-    private OntologyVisualizer visualizer;
+    private final OntologyVisualizer visualizer;
     private String activeTerm;
     private ArrayList<String> parents;
     private ArrayList<String> children;
     private ArrayList<String> siblings;
 
-    private Color activeCenterNodeColor = new Color(255, 255, 255);
-    private Color centerNodeColor = new Color(230, 230, 230);
-    private Color shadowColor = new Color(200, 200, 200);
-    private Color activeParentNodeColor = new Color(254, 224, 139);
-    private Color parentNodeColor = new Color(253, 174, 97);
-    private Color activeChildColor = new Color(217, 239, 139);
-    private Color childNodeColor = new Color(166, 217, 106);
-    private Color transparentBackground = new Color(255, 255, 255, 200);
+    private static final Color activeCenterNodeColor = new Color(255, 255, 255);
+    private static final Color centerNodeColor = new Color(230, 230, 230);
+    private static final Color shadowColor = new Color(200, 200, 200);
+    private static final Color activeParentNodeColor = new Color(254, 224, 139);
+    private static final Color parentNodeColor = new Color(253, 174, 97);
+    private static final Color activeChildColor = new Color(217, 239, 139);
+    private static final Color childNodeColor = new Color(166, 217, 106);
+    private static final Color transparentBackground = new Color(255, 255, 255, 200);
 
-    private Set<OntologyBrowserActiveTermChangedListener> listeners = new HashSet<>();
+    private final Set<OntologyBrowserActiveTermChangedListener> listeners = new HashSet<>();
 
     public void addActiveTermChangedListener(OntologyBrowserActiveTermChangedListener lis) {
         listeners.add(lis);
@@ -89,7 +89,7 @@ public class OntologyBrowser {
      */
     public void jumpToActiveTerm(String term) {
 
-        if (term == activeTerm) {
+        if (term == null ? activeTerm == null : term.equals(activeTerm)) {
             return;
         }
 
@@ -136,16 +136,16 @@ public class OntologyBrowser {
         });
     }
 
-    private MouseActionResponder mouseResponder = new MouseActionResponder();
-    private KeyStrokeResponder keyResponder = new KeyStrokeResponder();
+    private final MouseActionResponder mouseResponder = new MouseActionResponder();
+    private final KeyStrokeResponder keyResponder = new KeyStrokeResponder();
     private boolean parentsColumnActive = false;
     private boolean centerColumnActive = false;
     private boolean childrenColumnActive = false;
-    private float fontSize = 12f;
+    private static final float fontSize = 12f;
 
     private Font labelFont;
     private Font labelFontBold;
-    private int cellHeight = 20;
+    private final int cellHeight = 20;
     private Font messageFont;
 
     private enum nodeType {
