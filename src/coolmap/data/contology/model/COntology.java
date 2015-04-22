@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ import java.util.Set;
  * @author gangsu
  */
 public final class COntology {
+    
+    public static final int USER_PREFER_INITIAL_EXPANDED_NODE_NUMBER = 150;
 
     public static final Integer ROW = 0;
     public static final Integer COLUMN = 1;
@@ -380,6 +383,28 @@ public final class COntology {
             }
         }
         return rootNodes;
+    }
+    
+    public int getFittingLevels() {
+        
+        int levelStep = 0;
+        Collection<VNode> curLevel = getRootNodes();
+        int curNumber = curLevel.size();
+        while (curNumber < USER_PREFER_INITIAL_EXPANDED_NODE_NUMBER) {
+            Collection<VNode> nextLevel = new LinkedList();
+            for (VNode node : curLevel) {
+                List<VNode> children = node.getChildNodes();
+                nextLevel.addAll(children);
+            }
+            if (nextLevel.size() <= 0) break;
+            curNumber += nextLevel.size();
+            if (curNumber < USER_PREFER_INITIAL_EXPANDED_NODE_NUMBER)
+                levelStep++;
+            curLevel = nextLevel;
+            
+        }
+        
+        return levelStep;
     }
 
     public List<VNode> getRootNodesOrdered() {

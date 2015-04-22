@@ -5,7 +5,10 @@
 package coolmap.canvas.sidemaps.impl;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
 import coolmap.application.state.StateStorageMaster;
+import coolmap.application.widget.WidgetMaster;
+import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
@@ -30,9 +33,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.JCheckBoxMenuItem;
@@ -74,6 +80,8 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     //This records the offset of node: x = parentNode 
     //private final HashSet<Point> _nodeOffset = new HashSet<Point>();
     private final Color[] labelColors;
+    
+    private final SingleOntologyNodeSelectedListener _singleNodeSelectedListener;
 
     public ColumnTree(CoolMapObject object) {
         super(object);
@@ -94,6 +102,9 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         gradient.addColor(new Color(245, 245, 245), 0f);
         gradient.addColor(UI.colorWhite, 1f);
         labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
+        
+        WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
+        this._singleNodeSelectedListener = widgetCOntology;
     }
     
     private JPopupMenu _popupMenu;
@@ -941,6 +952,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 if (label == null) {
                     label = "";
                 }
+
                 g2D.setFont(_hoverFont);
 
                 int labelHeight = g2D.getFontMetrics().stringWidth(label) + 6;
@@ -948,7 +960,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
                 g2D.setColor(UI.colorBlack5);
                 g2D.fillRoundRect(x - labelWidth + 1, y - labelHeight - 2 + 1, labelWidth, labelHeight, 4, 5);
-                //g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
+                g2D.fillRoundRect(x - labelWidth - 10 + 1, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
                 if (_selectedNodes.size() > 1) {
                     int ci = (int) (labelColors.length * 1.0f * index / _selectedNodes.size());
@@ -961,22 +973,28 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     g2D.setColor(Color.WHITE);
                 }
 
-                //g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+                g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
                 //g2D.setColor(UI.colorBlack2);
                 //g2D.drawString(label, x - labelWidth - 7, y - 5);
-                g2D.fillRoundRect(x - labelWidth, y - labelHeight - 2, labelWidth, labelHeight, 4, 5);
+                //g2D.fillRoundRect(x - labelWidth, y - labelHeight - 2, labelWidth, labelHeight, 4, 5);
+                
+                g2D.setColor(UI.colorBlack2);                
+                BufferedImage image = Tools.createStringImage(g2D, label);
+                g2D.rotate(-Math.PI / 2);
+                g2D.drawImage(image, null, -y + 4, x - labelWidth - 4);
+                g2D.rotate(Math.PI / 2);
 
-                g2D.setColor(UI.colorBlack2);
-                g2D.setFont(_hoverFontRotated);
-                g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
+                
+//                g2D.setFont(_hoverFontRotated);
+//                g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
 
                 index++;
             }
         }
 
         if (_activeNodePoint != null && _activeNode != null && _plotHover) {
-            g2D.setFont(_hoverFont);
-            g2D.setColor(UI.colorBlack3);
+//            g2D.setFont(_hoverFont);
+//            g2D.setColor(UI.colorBlack3);
 
             int x = _activeNodePoint.x + getCoolMapView().getMapAnchor().x;
             int y = height + _activeNodePoint.y;
@@ -987,6 +1005,8 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             }
 //            int labelWidth = g2D.getFontMetrics().stringWidth(label);
 //            int labelHeight = g2D.getFontMetrics().getHeight();
+            
+            g2D.setFont(_hoverFont);
             int labelHeight = g2D.getFontMetrics().stringWidth(label) + 6;
             int labelWidth = g2D.getFontMetrics().getHeight() + 4;
 
@@ -999,9 +1019,15 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //            g2D.fillRoundRect(x - labelWidth - 10, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
             g2D.fillRoundRect(x - labelWidth, y - labelHeight - 2, labelWidth, labelHeight, 4, 5);
 
+//            g2D.setColor(UI.colorBlack2);
+//            g2D.setFont(_hoverFontRotated);
+//            g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
+            
             g2D.setColor(UI.colorBlack2);
-            g2D.setFont(_hoverFontRotated);
-            g2D.drawString(label, x - labelWidth + 13, y - 2 - 2);
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            g2D.rotate(-Math.PI / 2);
+            g2D.drawImage(image, null, -y + 4, x - labelWidth + 2);
+            g2D.rotate(Math.PI / 2);
 //            g2D.drawString(label, x - labelWidth - 7, y - 5);
 
             //g2D.drawString(_activeNode.getViewLabel(), _activeNodePoint.x + getCoolMapView().getMapAnchor().x, height + _activeNodePoint.y);
@@ -1017,6 +1043,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
         }
 
+    }
+    
+    private void fireSingleNodeSelected(EventObject event) {
+        _singleNodeSelectedListener.singleNodeSelected(event);
     }
     
 //    private Color _labelBackgroundColor = UI.mixOpacity(UI.colorLightYellow, 0.7f);
@@ -1035,6 +1065,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                     _screenRegion = null;
 
                 } else {
+                    
                     if (_selectedNodes.contains(node)) {
                         _selectedNodes.remove(node);
                     } else {
@@ -1063,6 +1094,10 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 //single click
                 getViewPanel().repaint();
                 mouseMoved(me);
+
+                EventObject event = new EventObject(new LinkedList<>(_selectedNodes));
+                fireSingleNodeSelected(event);
+                
             }
         }
     }

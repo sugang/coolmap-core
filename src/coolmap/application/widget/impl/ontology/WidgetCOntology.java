@@ -8,6 +8,7 @@ import com.google.common.collect.Range;
 import coolmap.application.CoolMapMaster;
 import coolmap.application.listeners.COntologyListener;
 import coolmap.application.listeners.DataStorageListener;
+import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
 import coolmap.application.state.StateStorageMaster;
 import coolmap.application.utils.DataMaster;
 import coolmap.application.widget.Widget;
@@ -40,11 +41,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultRowSorter;
@@ -56,7 +56,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -87,9 +86,8 @@ import org.json.JSONObject;
  *
  * @author gangsu
  */
-public class WidgetCOntology extends Widget implements DataStorageListener, COntologyListener {
+public class WidgetCOntology extends Widget implements DataStorageListener, COntologyListener, SingleOntologyNodeSelectedListener {
 
-    private JPanel _container = new JPanel();
     private JXTable _ontologyTable = new JXTable();
     private JComboBox _ontologyCombo = new JComboBox();
     private JPopupMenu _popupMenu = new JPopupMenu();
@@ -102,11 +100,39 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         _ontologyCombo.repaint();
     }
 
+    @Override
+    public void singleNodeSelected(EventObject eventObject) {
+        List<VNode> nodes = (List<VNode>) eventObject.getSource();
+        COntology selectedOntology = (COntology) _ontologyCombo.getSelectedItem();
+
+        if (nodes.size() == 1) {
+            if (nodes.get(0).getCOntologyID().equals(selectedOntology.getID())) {
+                String term = nodes.get(0).getName();
+                _ontologyBrowswer.jumpToActiveTerm(term);
+
+                Integer modelRow = nodeToTableRowHash.get(term);
+                if (modelRow == null) {
+                    return;
+                }
+
+                int viewRow = _ontologyTable.convertRowIndexToView(modelRow);
+
+                _ontologyTable.getSelectionModel().setSelectionInterval(viewRow, viewRow); //This does not fire the list selection listener. great! otherwise it would be a pain
+                //This will fire back; however when the two terms are equal the cicular thing is broken on the other side
+                //now I just need to find this row!
+                _ontologyTable.scrollRectToVisible(new Rectangle(_ontologyTable.getCellRect(viewRow, 0, true)));
+            }
+        } else {
+            _ontologyBrowswer.jumpToActiveTerm(null);
+            _ontologyTable.getSelectionModel().clearSelection();
+        }
+    }
+
     private class BrowserSelectionListener implements OntologyBrowserActiveTermChangedListener {
 
         @Override
         public void activeTermChanged(String term, COntology ontology) {
-//            System.out.println("Term changed");
+            
             if (ontology != (COntology) _ontologyCombo.getSelectedItem()) { //this should change later -> to a private one
                 return;
             }
@@ -117,7 +143,6 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
             }
 
             int viewRow = _ontologyTable.convertRowIndexToView(modelRow);
-//            System.out.println(viewRow);
 
             _ontologyTable.getSelectionModel().setSelectionInterval(viewRow, viewRow); //This does not fire the list selection listener. great! otherwise it would be a pain
             //This will fire back; however when the two terms are equal the cicular thing is broken on the other side
@@ -154,6 +179,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
     private class CheckListRenderer extends JCheckBox
             implements ListCellRenderer {
 
+        @Override
         public Component getListCellRendererComponent(
                 JList list, Object value, int index,
                 boolean isSelected, boolean hasFocus) {
@@ -174,23 +200,11 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 
     private JPopupMenu configPopupMenu = new JPopupMenu();
 
-//    private class ColumnDialog extends JDialog{
-//        public ColumnDialog(){
-//            setTitle("Configure Ontology Table Columns");
-//            setLayout(new GridBagLayout());
-//        }
-//        
-//        public boolean showDialog
-//    }
-    private final Executor executor;
-
     public WidgetCOntology() {
 
         super("Ontology Table", W_DATA, L_DATAPORT, UI.getImageIcon("textList"), null);
 
         DataMaster.addCOntologyListener(this);
-
-        executor = Executors.newSingleThreadExecutor();
 
         _ontologyTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -256,6 +270,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 
                 visibleColumns.addMouseListener(new MouseAdapter() {
 
+                    @Override
                     public void mouseClicked(MouseEvent event) {
 
                         if (SwingUtilities.isLeftMouseButton(event)) {
@@ -286,7 +301,6 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                 dialog.setLocation(pt);
                 dialog.setVisible(true);
 
-                //System.out.println("selected:" + pane.getValue());
                 try {
                     Object val = pane.getValue();
                     if (val != null && Integer.parseInt(val.toString()) == JOptionPane.OK_OPTION) {
@@ -546,7 +560,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 
                         CMatrix mx = (CMatrix) obj.getBaseCMatrices().get(0);
 
-                        ArrayList<VNode> rowNodes = new ArrayList<VNode>();
+                        ArrayList<VNode> rowNodes = new ArrayList<>();
                         for (Object label : mx.getRowLabelsAsList()) {
                             rowNodes.add(new VNode(label.toString()));
                         }
@@ -585,7 +599,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
 
-                                    ArrayList<VNode> rowNodes = new ArrayList<VNode>(labels.size());
+                                    ArrayList<VNode> rowNodes = new ArrayList<>(labels.size());
                                     for (String label : labels) {
                                         rowNodes.add(new VNode(label, ontology));
                                     }
@@ -617,14 +631,12 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                                 }
                             });
 
-                        };
+                        }
                     }
 
                 } catch (Exception ex) {
 
                 }
-
-                //
                 menu.show(rowSetbutton, e.getX(), e.getY());
             }
         }); //finished adding mouse listener
@@ -657,6 +669,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 
         columnSetbutton.addMouseListener(new MouseAdapter() {
 
+            @Override
             public void mousePressed(MouseEvent e) {
 
                 JPopupMenu menu = new JPopupMenu();
@@ -672,7 +685,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 
                         CMatrix mx = (CMatrix) obj.getBaseCMatrices().get(0);
 
-                        ArrayList<VNode> colNodes = new ArrayList<VNode>();
+                        ArrayList<VNode> colNodes = new ArrayList<>();
                         for (Object label : mx.getColLabelsAsList()) {
                             colNodes.add(new VNode(label.toString()));
                         }
@@ -706,7 +719,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
 
-                                    ArrayList<VNode> columnNodes = new ArrayList<VNode>(labels.size());
+                                    ArrayList<VNode> columnNodes = new ArrayList<>(labels.size());
                                     for (String label : labels) {
                                         columnNodes.add(new VNode(label, ontology));
                                     }
@@ -738,7 +751,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                                 }
                             });
 
-                        };
+                        }
                     }
                 } catch (Exception ex) {
 
@@ -826,6 +839,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                 CoolMapState state = CoolMapState.createStateRows("Row replacement", obj, null);
                 obj.replaceRowNodes(ontology.getRootNodesOrdered(), null);
                 StateStorageMaster.addState(state);
+                int levelStep = ontology.getFittingLevels();
+                obj.fitRowNodes(levelStep);
             }
         });
 
@@ -885,6 +900,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                 CoolMapState state = CoolMapState.createStateColumns("Column replacement", obj, null);
                 obj.replaceColumnNodes(ontology.getRootNodesOrdered(), null);
                 StateStorageMaster.addState(state);
+                
+                int levelStep = ontology.getFittingLevels();
+                obj.fitColumnNodes(levelStep);
             }
         });
 
@@ -1002,7 +1020,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         //add a default header
     }
 
-    private ArrayList<String> tableHeaders = new ArrayList<String>();
+    private ArrayList<String> tableHeaders = new ArrayList<>();
 
     @Override
     public void coolMapObjectAdded(CoolMapObject newObject) {
@@ -1060,14 +1078,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                 TableColumnModel columnModel = _ontologyTable.getColumnModel();
                 TableModel currentTableModel = _ontologyTable.getModel();
 
-                ArrayList<String> order = new ArrayList<String>();
+                ArrayList<String> order = new ArrayList<>();
                 for (int i = 0; i < columnModel.getColumnCount(); i++) {
                     TableColumn col = columnModel.getColumn(i);
 //                        System.out.println(col + cold);
                     order.add(col.getIdentifier().toString());
                 }
 
-                HashSet<String> visibles = new HashSet<String>();
+                HashSet<String> visibles = new HashSet<>();
                 visibles.addAll(order);
 
                 //This would contain everything
@@ -1084,7 +1102,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
 //                    System.out.println(order);
 //                    TableColumnModel newModel = _ontologyTable.getColumnModel();
 //                    System.out.println("Visible columns:" + visibles);
-                    HashSet<TableColumnExt> toBeHidden = new HashSet<TableColumnExt>();
+                    HashSet<TableColumnExt> toBeHidden = new HashSet<>();
                     for (int i = 0; i < _ontologyTable.getColumnCount(true); i++) {
                         TableColumnExt colExt = _ontologyTable.getColumnExt(i);
 
@@ -1098,7 +1116,7 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
                         ext.setVisible(false);
                     }
 
-                    HashMap<String, TableColumn> columns = new HashMap<String, TableColumn>();
+                    HashMap<String, TableColumn> columns = new HashMap<>();
 //                    columns.put(colExt.getIdentifier().toString(), _ontologyTable.getColumn(i));
                     while (_ontologyTable.getColumnCount() > 0) {
                         TableColumn col = _ontologyTable.getColumn(0);
@@ -1284,10 +1302,10 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
             return new DefaultTableModel();
         }
 
-        HashSet<String> nodes = new HashSet<String>();
+        HashSet<String> nodes = new HashSet<>();
         nodes.addAll(ontology.getAllNodesWithChildren());
         nodes.addAll(ontology.getAllNodesWithParents());
-        ArrayList<String> sortedNodes = new ArrayList<String>();
+        ArrayList<String> sortedNodes = new ArrayList<>();
         sortedNodes.addAll(nodes);
         Collections.sort(sortedNodes);
 
@@ -1318,6 +1336,8 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
             data[i][3] = parent == null ? 0 : parent.size();
             data[i][4] = (parent == null || parent.isEmpty()) ? "" : Arrays.toString(parent.toArray());
             data[i][5] = ontology.getMinimalDepthFromLeaves(node);
+            
+            nodeToTableRowHash.put(node, i);
 
             if (attributeNames == null || attributeNames.isEmpty()) {
                 continue;
@@ -1327,11 +1347,9 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
             for (int k = 0; k < attributeNames.size(); k++) {
                 Object value = COntology.getAttribute(node, attributeNames.get(k));
                 if (value != null) {
-                    data[i][k + 6] = value;
+                    data[i][k + offset] = value;
                 }
             }
-
-            nodeToTableRowHash.put(node, i);
         }
 
         OntologyTableModel model = new OntologyTableModel(data, headers);
@@ -1359,14 +1377,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }
@@ -1401,14 +1419,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }
@@ -1441,14 +1459,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }
@@ -1489,14 +1507,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }
@@ -1530,14 +1548,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }
@@ -1572,14 +1590,14 @@ public class WidgetCOntology extends Widget implements DataStorageListener, COnt
         }
 
 //        int col = _ontologyTable.getColumn("Node Name").getModelIndex();
-        ArrayList<String> nodes = new ArrayList<String>(rows.length);
+        ArrayList<String> nodes = new ArrayList<>(rows.length);
 
         for (int row : rows) {
             row = _ontologyTable.convertRowIndexToModel(row);
             nodes.add((String) _ontologyTable.getModel().getValueAt(row, 0));
         }
 
-        ArrayList<VNode> newNodes = new ArrayList<VNode>(nodes.size());
+        ArrayList<VNode> newNodes = new ArrayList<>(nodes.size());
         for (String n : nodes) {
             newNodes.add(new VNode(n, ontology));
         }

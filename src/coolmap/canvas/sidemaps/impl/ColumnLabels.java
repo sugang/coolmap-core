@@ -15,6 +15,7 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -26,7 +27,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Set;
 import javax.swing.JComponent;
@@ -192,7 +193,13 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             //Sometimes the label is drawn, but not shown.
             //System.out.println(label + " " + anchorX + " " + anchorY);
             g2D.setColor(UI.colorBlack3);
-            g2D.drawString(label, anchorX + cellWidth - _maxDescent - (cellWidth - _fontSize) / 2 - 1, anchorY + cellHeight - _liftSize);
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            int x = anchorX;
+            int y = anchorY + cellHeight - _liftSize;
+            g2D.rotate(-Math.PI / 2);
+            g2D.drawImage(image, null, -y, x);
+            g2D.rotate(Math.PI / 2);
+            
         }
 
         if (node.isGroupNode()) {
@@ -503,11 +510,14 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     @Override
     protected void prepareRender(Graphics2D g2D) {
-        AffineTransform at = new AffineTransform();
-        at.rotate(-Math.PI / 2);
-        g2D.setFont(_zoomControlX.getBoldFont().deriveFont(at));
+        g2D.setFont(_zoomControlX.getBoldFont());
         _maxDescent = g2D.getFontMetrics().getMaxDescent();
         _fontSize = _zoomControlX.getBoldFont().getSize();
+//        AffineTransform at = new AffineTransform();
+//        at.rotate(-Math.PI / 2);
+//        g2D.setFont(_zoomControlX.getBoldFont().deriveFont(at));
+//        _maxDescent = g2D.getFontMetrics().getMaxDescent();
+//        _fontSize = _zoomControlX.getBoldFont().getSize();
     }
 
     @Override

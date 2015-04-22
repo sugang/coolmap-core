@@ -5,7 +5,10 @@
 package coolmap.canvas.sidemaps.impl;
 
 import coolmap.application.CoolMapMaster;
+import coolmap.application.listeners.SingleOntologyNodeSelectedListener;
 import coolmap.application.state.StateStorageMaster;
+import coolmap.application.widget.WidgetMaster;
+import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
@@ -29,9 +32,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.JCheckBoxMenuItem;
@@ -71,6 +77,8 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     private float[] _heightMultiples = new float[]{1, 2, 3, 4, 5, 8, 10, 12, 16, 18, 20, 24, 36, 48, 60};
     private ArrayList<JCheckBoxMenuItem> _heightMultipleItems = new ArrayList<>();
     private JMenuItem _expandOne, expandOne, _collapse, _expandOneAll, _collapseOneAll, _colorTree, _colorChild, _clearColor, _selectSubtree;
+    
+    private final SingleOntologyNodeSelectedListener _singleNodeSelectedListener;
 
     public void setSelectedTreeNodes(Set<VNode> treeNodes) {
 //        System.out.println("Setting selected nodes to:" + treeNodes);
@@ -155,6 +163,9 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         gradient.addColor(new Color(245, 245, 245), 0f);
         gradient.addColor(UI.colorWhite, 1f);
         labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
+        
+        WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
+        this._singleNodeSelectedListener = widgetCOntology;
     }
 
     private void _initPopupMenu() {
@@ -605,7 +616,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 int labelHeight = g2D.getFontMetrics().getHeight();
 
                 g2D.setColor(UI.colorBlack5);
-                g2D.fillRoundRect(x + 2, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
+                g2D.fillRoundRect(x + 2, y + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
 //                g2D.setColor(UI.colorWhite);
                 if (_selectedNodes.size() > 1) {
@@ -618,10 +629,12 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 } else {
                     g2D.setColor(Color.WHITE);
                 }
-                g2D.fillRoundRect(x + 2, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
-
+                g2D.fillRoundRect(x + 2, y, labelWidth + 6, labelHeight + 4, 4, 5);
+              
                 g2D.setColor(UI.colorBlack2);
-                g2D.drawString(label, x + 4, y - 5);
+                BufferedImage image = Tools.createStringImage(g2D, label);
+                g2D.drawImage(image, null, x + 4, y);
+                //g2D.drawString(label, x + 4, y - 5);
 
                 index++;
             }
@@ -641,13 +654,15 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             int labelHeight = g2D.getFontMetrics().getHeight();
 
             g2D.setColor(UI.colorBlack5);
-            g2D.fillRoundRect(x + 2, y - 4 - labelHeight + 1, labelWidth + 6, labelHeight + 4, 4, 5);
+            g2D.fillRoundRect(x + 4, y + 1, labelWidth + 6, labelHeight + 4, 4, 5);
 
             g2D.setColor(UI.colorLightYellow);
-            g2D.fillRoundRect(x + 2, y - 4 - labelHeight, labelWidth + 6, labelHeight + 4, 4, 5);
+            g2D.fillRoundRect(x + 4, y, labelWidth + 6, labelHeight + 4, 4, 5);
 
             g2D.setColor(UI.colorBlack2);
-            g2D.drawString(label, x + 4, y - 5);
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            g2D.drawImage(image, null, x + 6, y);
+            //g2D.drawString(label, x + 4, y - 5);
         }
 
         if (_isSelecting && _selectionStartPoint != null && _selectionEndPoint != null && _screenRegion != null) {
@@ -937,6 +952,10 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
     public void selectionChanged(CoolMapObject obj) {
     }
 
+    private void fireSingleNodeSelected(EventObject event) {
+        _singleNodeSelectedListener.singleNodeSelected(event);
+    }
+    
     @Override
     public void mouseClicked(MouseEvent me) {
         if (SwingUtilities.isLeftMouseButton(me)) {
@@ -974,6 +993,9 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 //single click
                 getViewPanel().repaint();
                 mouseMoved(me);
+                      
+                EventObject event = new EventObject(new LinkedList<>(_selectedNodes));
+                fireSingleNodeSelected(event);
             }
         }
     }

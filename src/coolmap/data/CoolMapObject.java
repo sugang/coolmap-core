@@ -1535,6 +1535,18 @@ public final class CoolMapObject<BASE, VIEW> {
     public boolean expandColumnNodesToNextStep() {
         return expandColumnNodes(getViewNodesColumn(), false) != null;
     }
+    
+    public void fitColumnNodes(int levelStep) {
+        for (int i = 0; i < levelStep; ++i) {
+            expandColumnNodesToNextStep();
+        }
+    }
+    
+    public void fitRowNodes(int levelStep) {
+        for (int i = 0; i < levelStep; ++i) {
+            expandRowNodesToNextStep();
+        }
+    }
 
     public boolean expandRowNodesToNextStep() {
         return expandRowNodes(getViewNodesRow(), false) != null;

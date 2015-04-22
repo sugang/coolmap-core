@@ -5,6 +5,11 @@
 package coolmap.utils;
 
 import com.google.common.collect.Range;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -221,21 +226,18 @@ public class Tools {
 
         return filename.substring(0, extensionIndex);
     }
-    
-    public static String appendPathExtension(String fileName, String extension){
-        if(fileName == null){
+
+    public static String appendPathExtension(String fileName, String extension) {
+        if (fileName == null) {
             return null;
         }
-        
-        if(fileName.toLowerCase().endsWith(extension.toLowerCase())){
+
+        if (fileName.toLowerCase().endsWith(extension.toLowerCase())) {
             return fileName;
-        }
-        else{
+        } else {
             return fileName + "." + extension;
         }
     }
-    
-    
 
     public static double[][] convertViewToDouble(Object[][] view) {
         if (view == null) {
@@ -254,5 +256,21 @@ public class Tools {
             }
         }
         return m;
+    }
+
+    public static BufferedImage createStringImage(Graphics g, String s) {
+        int w = g.getFontMetrics().stringWidth(s) + 5;
+        int h = g.getFontMetrics().getHeight();
+
+        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D imageGraphics = image.createGraphics();
+        imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        imageGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        imageGraphics.setColor(Color.BLACK);
+        imageGraphics.setFont(g.getFont());
+        imageGraphics.drawString(s, 0, h - g.getFontMetrics().getDescent());
+        imageGraphics.dispose();
+
+        return image;
     }
 }

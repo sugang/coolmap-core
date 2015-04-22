@@ -15,17 +15,21 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -340,8 +344,13 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 
         String label = node.getViewLabel();
         if (label != null) {
+            
             g2D.setColor(UI.colorBlack3);
-            g2D.drawString(label, anchorX + _marginSize, anchorY + cellHeight - _maxDescent - (cellHeight - _fontSize) / 2 + 1);
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            int x = anchorX + _marginSize;
+            int y = anchorY + cellHeight - _maxDescent - (cellHeight - _fontSize) / 2 + 1;
+            g2D.drawImage(image, null, x - 5, y - 10);
+
         }
 
         if (node.isGroupNode()) {

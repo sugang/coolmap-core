@@ -23,7 +23,7 @@ import javax.swing.UIManager;
  *
  * @author gangsu
  */
-public class Main {
+public class CoolMap {
 
     public static void main(String args[]) {
         //actual main
@@ -203,7 +203,7 @@ public class Main {
 //            CTest.ttest(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1));
 //            CTest.anova(object, CTest.Dimension.ROW, object.getViewNodeRow(0), object.getViewNodeRow(1), object.getViewNodeRow(2));
         } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CoolMap.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -371,7 +371,7 @@ public class Main {
      try {
 
      //need to get the json file
-     //                        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+     //                        String path = CoolMap.class.getProtectionDomain().getCodeSource().getLocation().getPath();
      //                        String decodedPath = path;
      //The working path can't be set to the dist path
      //                        System.out.println("\nWorking path:" + path);
@@ -538,10 +538,10 @@ public class Main {
      ////
      ////            @Override
      ////            public void actionPerformed(ActionEvent ae) {
-     ////                Main.snapshotRow = new StateSnapshot("Row", System.currentTimeMillis(), object, COntology.ROW);
-     ////                Main.snapshotColumn = new StateSnapshot("Column", System.currentTimeMillis(), object, COntology.COLUMN);
+     ////                CoolMap.snapshotRow = new StateSnapshot("Row", System.currentTimeMillis(), object, COntology.ROW);
+     ////                CoolMap.snapshotColumn = new StateSnapshot("Column", System.currentTimeMillis(), object, COntology.COLUMN);
      ////
-     ////                System.out.println(Main.snapshotRow.getDisplayLabel());
+     ////                System.out.println(CoolMap.snapshotRow.getDisplayLabel());
      ////            }
      ////        });
      ////        toolBar.add(btn);
