@@ -81,7 +81,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     //private final HashSet<Point> _nodeOffset = new HashSet<Point>();
     private final Color[] labelColors;
     
-    private final TreeNodesSelectedListener _singleNodeSelectedListener;
+    private final TreeNodesSelectedListener _treeNodesSelectedListener;
 
     public ColumnTree(CoolMapObject object) {
         super(object);
@@ -104,7 +104,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         labelColors = gradient.generateGradient(CImageGradient.InterType.Linear);
         
         WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
-        this._singleNodeSelectedListener = widgetCOntology;
+        this._treeNodesSelectedListener = widgetCOntology;
     }
     
     private JPopupMenu _popupMenu;
@@ -1046,7 +1046,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     }
     
     private void fireTreeNodesSelected(EventObject event) {
-        _singleNodeSelectedListener.treeNodesSelected(event);
+        _treeNodesSelectedListener.treeNodesSelected(event);
     }
     
 //    private Color _labelBackgroundColor = UI.mixOpacity(UI.colorLightYellow, 0.7f);

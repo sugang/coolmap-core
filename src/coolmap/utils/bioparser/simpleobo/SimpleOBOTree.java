@@ -59,7 +59,6 @@ public class SimpleOBOTree {
                     simpleOboTree.addEntry(currentEntry); //if it's not null, add a new entry
                     currentEntry = null;
                 }
-                continue;
             } else if (line.startsWith("[Term]")) {
                 currentEntry = new SimpleOBOEntry();
                 //
@@ -68,28 +67,24 @@ public class SimpleOBOTree {
                 if (line.startsWith("id:")) {
                     //the current entry must not be null
                     //try{
-                    currentChildTerm = line.substring(4);
+                    
+                    currentChildTerm = line.substring(3).trim();
                     currentEntry.setID(currentChildTerm);
-                    //}
-                    //catch(Exception e){
-                    //    System.out.println(line);
-                    //}
-                    continue;
+
                 } else if (line.startsWith("name:")) {
                     //the current entry must not be null
-                    currentEntry.setName(line.substring(6));
-                    continue;
+                    currentEntry.setName(line.substring(5).trim());
+
                 } else if (line.startsWith("namespace:")) {
                     //the current entry must not be null
                     currentEntry.setNamespace(line.substring(11));
-                    continue;
+
                 } else if (line.startsWith("is_a:")) {
                     //the current entry must not be null
-                    line = line.substring(6);
-                    line = line.substring(0, line.indexOf(" "));
-                    simpleOboTree.addTreeBranch(line, currentChildTerm);
-                    currentEntry.addParent(line);
-                    continue;
+                    String parent = line.substring(5).trim();
+                    simpleOboTree.addTreeBranch(parent, currentChildTerm);
+                    currentEntry.addParent(parent);
+
                 } else {
                     //add attributes
 

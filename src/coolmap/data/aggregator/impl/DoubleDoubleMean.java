@@ -7,7 +7,6 @@ package coolmap.data.aggregator.impl;
 import coolmap.data.aggregator.model.CAggregator;
 import coolmap.data.cmatrix.model.CMatrix;
 import java.util.Collection;
-import java.util.List;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 /**
@@ -33,7 +32,6 @@ public class DoubleDoubleMean extends CAggregator<Double, Double>{
             return null;
         }
 
-        Double value;
         Mean mean = new Mean();
         for (Double item : items) {
             if (item != null && !item.isNaN()) {

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.utils;
 
 import java.io.BufferedReader;
@@ -29,7 +24,7 @@ public class Config {
     
     
     private static JSONObject configObject = new JSONObject();
-    private static HashMap<String, String> configHash = new HashMap<String, String>();
+    private static final HashMap<String, String> configHash = new HashMap<>();
     
     private static boolean isInitialized = false;
     
