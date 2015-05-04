@@ -38,10 +38,10 @@ public class WidgetViewRenderer extends Widget implements ActiveCoolMapChangedLi
     private JComboBox _viewRenderers = new JComboBox();
     private DefaultComboBoxModel _model = new DefaultComboBoxModel();
     private JScrollPane _scroller = new JScrollPane();
-    private final LinkedHashSet<Class> _registeredRenderers = new LinkedHashSet<Class>();
+    private final LinkedHashSet<Class> _registeredRenderers = new LinkedHashSet<>();
 
     public LinkedHashSet<ViewRenderer> getLoadedRenderers() {
-        LinkedHashSet<ViewRenderer> renderers = new LinkedHashSet<ViewRenderer>();
+        LinkedHashSet<ViewRenderer> renderers = new LinkedHashSet<>();
         for (Class cls : _registeredRenderers) {
             try {
                 renderers.add((ViewRenderer) cls.newInstance());

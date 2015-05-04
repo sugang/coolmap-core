@@ -42,7 +42,7 @@ import javax.swing.WindowConstants;
  * @author sugang
  */
 public class GradientEditorPanel extends JPanel {
-    
+
     private final GradientEditor editor = new GradientEditor();
     private JButton addButton = null; //new JButton("Add");
     /**
@@ -56,27 +56,28 @@ public class GradientEditorPanel extends JPanel {
 
     private float minValue = 0.0f;
     private float maxValue = 1.0f;
-    
-    private JToolBar toolBar;
 
-//    public JToolBar getToolBar(){
-//        return toolBar;
-//    }
-//    public final JButton applyButton;
+    private JToolBar toolBar;
     
+    private ActionListener actionListener;
+    
+    public void setActionListener(ActionListener listener) {
+        this.actionListener = listener;
+    }
+
     public GradientEditorPanel() {
-        
+
         setBorder(BorderFactory.createTitledBorder("Gradient Editor"));
-        
+
         setLayout(new BorderLayout());
         add(editor, BorderLayout.CENTER);
-        
+
         toolBar = new JToolBar();
         toolBar.setFloatable(false);
         toolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
-        
+
         add(toolBar, BorderLayout.NORTH);
-        
+
         addButton = new JButton("Add Point", UI.getImageIcon("plusSmall"));
         editButton = new JButton("Edit Point", UI.getImageIcon("pen"));
         delButton = new JButton("Remove Point", UI.getImageIcon("minusSmall"));
@@ -88,9 +89,8 @@ public class GradientEditorPanel extends JPanel {
         toolBar.add(editButton);
 //        delButton.setBounds(180, 70, 75, 20);
         toolBar.add(delButton);
-        
+
 //        toolBar.add(applyButton);
-        
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 editor.addPoint();
@@ -106,15 +106,15 @@ public class GradientEditorPanel extends JPanel {
                 editor.editPoint();
             }
         });
-        
+
         this.setPreferredSize(new Dimension(150, 180));
         this.setMinimumSize(new Dimension(150, 180));
     }
-    
+
     public int getNumPoints() {
         return editor.getControlPointCount();
     }
-    
+
     public Color getColorAt(int index) {
         try {
             return editor.getColor(index);
@@ -122,24 +122,24 @@ public class GradientEditorPanel extends JPanel {
             return null;
         }
     }
-    
+
     public LinearGradientPaint getLinearGradientPaint(int x1, int y1, int x2, int y2) {
         Color c[] = new Color[getNumPoints()];
         float p[] = new float[getNumPoints()];
-        
+
         for (int i = 0; i < getNumPoints(); i++) {
             c[i] = getColorAt(i);
             p[i] = getColorPositionAt(i);
         }
-        
+
         try {
-            
+
             return new LinearGradientPaint(x1, y1, x2, y2, p, c);
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     public float getColorPositionAt(int index) {
         try {
             return editor.getPointPos(index);
@@ -147,19 +147,19 @@ public class GradientEditorPanel extends JPanel {
             return -1;
         }
     }
-    
+
     public void setStart(Color color) {
         if (color != null) {
             editor.setStart(color);
         }
     }
-    
+
     public void setEnd(Color color) {
         if (color != null) {
             editor.setEnd(color);
         }
     }
-    
+
     public void addColor(Color color, float pos) {
         if (color == null || pos < 0 || pos > 1) {
             return;
@@ -167,21 +167,21 @@ public class GradientEditorPanel extends JPanel {
             editor.addPoint(pos, color);
         }
     }
-    
+
     public void clearColors() {
         editor.clearPoints();
     }
-    
+
     public void setMinValue(float val) {
         minValue = val;
         editor.repaint();
     }
-    
+
     public void setMaxValue(float val) {
         maxValue = val;
         editor.repaint();
     }
-    
+
     public static void main(String[] argv) {
         UI.initialize();
         JFrame frame = new JFrame();
@@ -217,9 +217,9 @@ public class GradientEditorPanel extends JPanel {
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        
+
     }
-    
+
     private final class GradientEditor extends JPanel implements ComponentListener {
 
         /**
@@ -275,10 +275,10 @@ public class GradientEditorPanel extends JPanel {
          */
         public GradientEditor() {
             setLayout(null);
-            
+
             AffineTransform at = new AffineTransform();
             at.rotate(Math.PI / 2.5);
-            
+
             tickFont = UI.fontMono.deriveFont(at).deriveFont(Font.BOLD).deriveFont(12f);
 
 //        addButton = new JButton(UI.getImageIcon("plusSmall"));
@@ -309,34 +309,46 @@ public class GradientEditorPanel extends JPanel {
 //        });
             list.add(new ControlPoint(Color.white, 0));
             list.add(new ControlPoint(Color.black, 1));
-            
+
             poly.addPoint(0, 0);
             poly.addPoint(5, 10);
             poly.addPoint(-5, 10);
-            
+
             this.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mousePressed(MouseEvent e) {
                     selectPoint(e.getX(), e.getY());
                     repaint(0);
-                    
+
                     if (e.getClickCount() == 2) {
                         editPoint();
                     }
                 }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (!isEnabled()) {
+                        return;
+                    }
+
+                    updateRenderer();
+                }
             });
-            
+
             this.addMouseMotionListener(new MouseMotionListener() {
+                @Override
                 public void mouseDragged(MouseEvent e) {
                     movePoint(e.getX(), e.getY());
                     repaint(0);
                 }
-                
+
+                @Override
                 public void mouseMoved(MouseEvent e) {
                 }
             });
-            
+
             this.addComponentListener(this);
-            
+
         }
 
         /**
@@ -344,7 +356,7 @@ public class GradientEditorPanel extends JPanel {
          */
         public void setEnabled(boolean enabled) {
             super.setEnabled(enabled);
-            
+
             Component[] components = getComponents();
             for (int i = 0; i < components.length; i++) {
                 components[i].setEnabled(enabled);
@@ -390,11 +402,11 @@ public class GradientEditorPanel extends JPanel {
         private boolean checkPoint(int mx, int my, ControlPoint pt) {
             int dx = (int) Math.abs((10 + (width * pt.pos)) - mx);
             int dy = Math.abs((y + barHeight + 7) - my);
-            
+
             if ((dx < 5) && (dy < 7)) {
                 return true;
             }
-            
+
             return false;
         }
 
@@ -410,12 +422,12 @@ public class GradientEditorPanel extends JPanel {
                     list.add(i + 1, point);
                     break;
                 }
-                
+
             }
             selected = point;
             sortPoints();
             repaint(0);
-            
+
             fireUpdate();
         }
 
@@ -433,7 +445,7 @@ public class GradientEditorPanel extends JPanel {
                     if (second == lastPt) {
                         return -1;
                     }
-                    
+
                     float a = ((ControlPoint) first).pos;
                     float b = ((ControlPoint) second).pos;
                     return (int) ((a - b) * 10000);
@@ -468,7 +480,7 @@ public class GradientEditorPanel extends JPanel {
             if (!isEnabled()) {
                 return;
             }
-            
+
             for (int i = 1; i < list.size() - 1; i++) {
                 if (checkPoint(mx, my, (ControlPoint) list.get(i))) {
                     selected = (ControlPoint) list.get(i);
@@ -483,7 +495,7 @@ public class GradientEditorPanel extends JPanel {
                 selected = (ControlPoint) list.get(list.size() - 1);
                 return;
             }
-            
+
             selected = null;
         }
 
@@ -494,7 +506,7 @@ public class GradientEditorPanel extends JPanel {
             if (!isEnabled()) {
                 return;
             }
-            
+
             if (selected == null) {
                 return;
             }
@@ -504,7 +516,7 @@ public class GradientEditorPanel extends JPanel {
             if (list.indexOf(selected) == list.size() - 1) {
                 return;
             }
-            
+
             list.remove(selected);
             sortPoints();
             repaint(0);
@@ -521,7 +533,7 @@ public class GradientEditorPanel extends JPanel {
             if (!isEnabled()) {
                 return;
             }
-            
+
             if (selected == null) {
                 return;
             }
@@ -531,11 +543,11 @@ public class GradientEditorPanel extends JPanel {
             if (list.indexOf(selected) == list.size() - 1) {
                 return;
             }
-            
+
             float newPos = (mx - 10) / (float) width;
             newPos = Math.min(1, newPos);
             newPos = Math.max(0, newPos);
-            
+
             selected.pos = newPos;
             sortPoints();
             fireUpdate();
@@ -545,33 +557,33 @@ public class GradientEditorPanel extends JPanel {
          * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
          */
         public void paintComponent(Graphics g1d) {
-            
+
             super.paintComponent(g1d);
-            
+
             Graphics2D g = (Graphics2D) g1d;
             width = getWidth() - 30;
             x = 10;
             y = 20;
             barHeight = 25;
-            
+
             g.getTransform();//this is the way to save it. It's funny I can't restore to origin!
 
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setStroke(UI.stroke1_5);
             for (int i = 0; i < list.size() - 1; i++) {
-                
+
                 ControlPoint now = (ControlPoint) list.get(i);
                 ControlPoint next = (ControlPoint) list.get(i + 1);
-                
+
                 int size = (int) ((next.pos - now.pos) * width);
                 g.setPaint(new GradientPaint(x, y, now.col, x + size, y, next.col));
                 g.fillRoundRect(x, y, size + 1, barHeight, 2, 2);
                 x += size;
             }
-            
+
             g.setColor(Color.black);
             g.drawRect(10, y, width, barHeight - 1);
-            
+
             for (int i = 0; i < list.size(); i++) {
                 g.setStroke(UI.stroke1_5);
                 ControlPoint pt = (ControlPoint) list.get(i);
@@ -580,7 +592,7 @@ public class GradientEditorPanel extends JPanel {
                 g.fillPolygon(poly);
                 g.setColor(Color.black);
                 g.drawPolygon(poly);
-                
+
                 if (pt == selected) {
                     g.setStroke(UI.stroke3);
                     g.setColor(UI.colorLightGreen1);
@@ -588,7 +600,7 @@ public class GradientEditorPanel extends JPanel {
                     //g.fillRect(-5, 12, 10, 3);
                     g.drawPolygon(poly);
                 }
-                
+
                 g.translate(-10 - (width * pt.pos), -y - barHeight);
             }
 
@@ -600,7 +612,7 @@ public class GradientEditorPanel extends JPanel {
             g.setFont(tickFont);
             g.setStroke(UI.stroke1_5);
             for (int i = 0; i <= tickNum; i++) {
-                
+
                 g.setColor(UI.colorGrey5);
                 g.drawLine(0, 0, 0, 10);
 
@@ -609,15 +621,15 @@ public class GradientEditorPanel extends JPanel {
                 g.translate(-4, 17);
                 g.drawString(df.format(i * (maxValue - minValue) / tickNum + minValue), 0, 0);
                 g.translate(4, -17);
-                
+
                 g.translate((int) (Math.round(1.0 * width / tickNum)), 0);
             }
-            
+
         }
-        
+
         private DecimalFormat df = new DecimalFormat("#.###");
         private final Font tickFont;
-        
+
         private int tickNum = 10;
 
         /**
@@ -664,14 +676,13 @@ public class GradientEditorPanel extends JPanel {
          * include start and end points)
          */
         public void clearPoints() {
-            
+
             //why it keeps the first one and last one?
-            while(list.size() > 2) {
+            while (list.size() > 2) {
                 list.remove(1);
             }
-            
+
 //            System.err.println("Remaining points:" + list.size());
-            
             repaint(0);
             fireUpdate();
         }
@@ -705,21 +716,21 @@ public class GradientEditorPanel extends JPanel {
         public Color getColor(int index) {
             return ((ControlPoint) list.get(index)).col;
         }
-        
+
         @Override
         public void componentResized(ComponentEvent e) {
             width = getWidth();
             repaint();
         }
-        
+
         @Override
         public void componentMoved(ComponentEvent e) {
         }
-        
+
         @Override
         public void componentShown(ComponentEvent e) {
         }
-        
+
         @Override
         public void componentHidden(ComponentEvent e) {
         }
@@ -752,10 +763,19 @@ public class GradientEditorPanel extends JPanel {
             }
         }
 
-        /**
-         * Simple test case for the gradient painter
-         *
-         * @param argv The arguments supplied at the command line
-         */
+        private void updateRenderer() {
+            if (selected == null) {
+                return;
+            }
+            if (list.indexOf(selected) == 0) {
+                return;
+            }
+            if (list.indexOf(selected) == list.size() - 1) {
+                return;
+            }
+            
+            ActionEvent e = new ActionEvent(this, 1, "");
+            actionListener.actionPerformed(e);
+        }
     }
 }

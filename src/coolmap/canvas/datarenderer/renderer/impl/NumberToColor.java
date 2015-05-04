@@ -51,7 +51,7 @@ import org.json.JSONObject;
  *
  * @author sugang
  */
-public class NumberToColor extends ViewRenderer<Double> {
+public class NumberToColor extends ViewRenderer<Double> implements ActionListener{
 
     private GradientEditorPanel editor;
 
@@ -191,6 +191,9 @@ public class NumberToColor extends ViewRenderer<Double> {
 //        c.weightx = 0.8;
 
         editor = new GradientEditorPanel();
+        
+        editor.setActionListener(this);
+        
         configUI.add(editor, c);
 
         c.gridx = 0;
@@ -268,6 +271,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                             editor.setMinValue(ranges[0].floatValue());
                             editor.setMaxValue(ranges[1].floatValue());
                         }
+                        updateRenderer();
                     } catch (Exception ex) {
                         minValueField.setText("-1");
                         maxValueField.setText("1");
@@ -374,6 +378,7 @@ public class NumberToColor extends ViewRenderer<Double> {
                     MinMaxItem item = (MinMaxItem) (presetRangeComboBox.getSelectedItem());
                     minValueField.setText(item.getMinMax().lowerEndpoint().toString());
                     maxValueField.setText(item.getMinMax().upperEndpoint().toString());
+                    updateRenderer();
                 } catch (Exception ex) {
                     minValueField.setText("-1");
                     maxValueField.setText("1");
@@ -968,6 +973,11 @@ public class NumberToColor extends ViewRenderer<Double> {
     @Override
     public JComponent getConfigUI() {
         return configUI;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        updateRenderer();
     }
 
     private class DataMinMaxItem extends MinMaxItem {

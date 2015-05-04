@@ -107,8 +107,6 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         _description = description;
     }
 
-    ;
-
     public void updateRenderer() {
         updateRendererChanges();
         if (getConfigUI() != null) {
