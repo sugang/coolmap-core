@@ -190,6 +190,8 @@ public class UI {
         _iconStash.put("insertColumn", new ImageIcon(UI.class.getResource("/resources/iconDownload2.png")));
         _iconStash.put("insertRow", new ImageIcon(UI.class.getResource("/resources/iconDownload2_rotate.png")));
         _iconStash.put("trashBin", new ImageIcon(UI.class.getResource("/resources/iconTrashbin.png")));
+        _iconStash.put("checkboxChecked", new ImageIcon(UI.class.getResource("/resources/icon_checkbox_checked.png")));
+        _iconStash.put("checkboxUnchecked", new ImageIcon(UI.class.getResource("/resources/icon_checkbox_unchecked.png")));
         _iconStash.put("plusSmall", new ImageIcon(UI.class.getResource("/resources/iconPlusSmall.png")));
         _iconStash.put("minusSmall", new ImageIcon(UI.class.getResource("/resources/iconMinusSmall.png")));
         _iconStash.put("plusSmallThin", new ImageIcon(UI.class.getResource("/resources/iconPlusSmallThin.png")));

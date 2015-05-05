@@ -45,14 +45,20 @@ import org.jdesktop.core.animation.timing.TimingTarget;
  */
 public class ColumnLabels extends ColumnMap<Object, Object> implements MouseListener, MouseMotionListener {
 
-    private ZoomControl _zoomControlX;
-    private int _fontSize = 0;
-    private int _maxDescent = 0;
-    private int _liftSize = 16;
-    private Rectangle _activeRectangle = new Rectangle();
+    private final ZoomControl _zoomControlX;
+    private int _fontSize;
+    private int _maxDescent;
+    private final int _liftSize = 16;
+    private final Rectangle _activeRectangle = new Rectangle();
     private final JPopupMenu _menu = new JPopupMenu();
     private final JMenuItem _sortAscending;
-    private final JMenuItem _sortDescending, _removeSelected;
+    private final JMenuItem _sortDescending, _removeSelected, _multiSelectionMenuItem;
+
+    private boolean multiSelectionSwitch = false;
+
+    public void setMultiSelectionSwitch(boolean on) {
+        this.multiSelectionSwitch = on;
+    }
 
     @Override
     public String getName() {
@@ -61,6 +67,9 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     public ColumnLabels(CoolMapObject object) {
         super(object);
+        
+        this._maxDescent = 0;
+        this._fontSize = 0;
 
         getViewPanel().setName(getName());
 
@@ -69,6 +78,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
         _sortAscending = new JMenuItem("Sort ascending", UI.getImageIcon("upThin"));
         _sortDescending = new JMenuItem("Sort dscending", UI.getImageIcon("downThin"));
+        _multiSelectionMenuItem = new JMenuItem();
         _zoomControlX = getCoolMapView().getZoomControlX();
 
         _sortAscending.addActionListener(new ActionListener() {
@@ -113,6 +123,13 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                     }
                 }
 
+                if (multiSelectionSwitch) {
+                    _multiSelectionMenuItem.setText("Disable column multi-selection");
+                    _multiSelectionMenuItem.setIcon(UI.getImageIcon("checkboxChecked"));
+                } else {
+                    _multiSelectionMenuItem.setText("Enable column multi-selection");
+                    _multiSelectionMenuItem.setIcon(UI.getImageIcon("checkboxUnchecked"));
+                }
             }
 
             @Override
@@ -137,7 +154,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
                 if (isDataViewValid()) {
                     CoolMapObject obj = getCoolMapObject();
                     ArrayList<Range<Integer>> selColumns = getCoolMapView().getSelectedColumns();
-                    ArrayList<VNode> nodesToBeRemoved = new ArrayList<VNode>();
+                    ArrayList<VNode> nodesToBeRemoved = new ArrayList<>();
                     for (Range<Integer> selections : selColumns) {
                         for (int i = selections.lowerEndpoint(); i < selections.upperEndpoint(); i++) {
                             VNode node = obj.getViewNodeColumn(i);
@@ -157,6 +174,15 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         });
 
         _menu.add(_removeSelected);
+
+        _multiSelectionMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                multiSelectionSwitch = !multiSelectionSwitch;
+            }
+        });
+        _menu.add(_multiSelectionMenuItem);
 
     }
 
@@ -199,7 +225,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             g2D.rotate(-Math.PI / 2);
             g2D.drawImage(image, null, -y, x);
             g2D.rotate(Math.PI / 2);
-            
+
         }
 
         if (node.isGroupNode()) {
@@ -552,6 +578,25 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
         ArrayList<Range<Integer>> selectedColumns = view.getSelectedColumns();
 
+        if (multiSelectionSwitch) {
+            if (me.isShiftDown()) {
+                _newSpanSelection(obj, targetCol);
+            } else {
+                boolean containRange = false;
+                for (Range<Integer> range : selectedColumns) {
+                    if (range.contains(targetCol)) {
+                        _removeSingleSelection(obj, targetCol);
+                        containRange = true;
+                        break;
+                    }
+                }
+                if (containRange == false) {
+                    _addSingleSelection(obj, targetCol);
+                }
+            }
+            return;
+        }
+
         //create new selections
         if (me.isControlDown() || me.isMetaDown()) {
             if (selectedColumns.isEmpty()) {
@@ -580,12 +625,6 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         else {
             _newSingleSelection(obj, targetCol);
         }
-
-//        if (me.getClickCount() > 1) {
-//            CoolMapState state = CoolMapState.createStateSelections("Clear selection", obj, null);
-//            view.clearSelection();
-//            StateStorageMaster.addState(state);
-//        }
     }
 
     private void _newSpanSelection(CoolMapObject obj, int targetCol) {
@@ -617,7 +656,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             }
             selectedColumns.add(newRange);
             //build a new selection like this
-            ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+            ArrayList<Rectangle> newSelections = new ArrayList<>();
 
             ArrayList<Range<Integer>> selectedRows = view.getSelectedRows();
 
@@ -640,7 +679,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
             selectedRows.add(Range.closedOpen(0, obj.getViewNumRows()));
         }
 
-        ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+        ArrayList<Rectangle> newSelections = new ArrayList<>();
         for (Range<Integer> range : selectedRows) {
             newSelections.add(new Rectangle(targetCol, range.lowerEndpoint(), 1, range.upperEndpoint() - range.lowerEndpoint()));
         }
@@ -660,7 +699,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         }
 
         //the only difference is that the view was not cleared
-        ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
+        ArrayList<Rectangle> newSelections = new ArrayList<>();
         for (Range<Integer> range : selectedRows) {
             newSelections.add(new Rectangle(targetCol, range.lowerEndpoint(), 1, range.upperEndpoint() - range.lowerEndpoint()));
         }
@@ -682,51 +721,53 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         ArrayList<Range<Integer>> selectedColumns = view.getSelectedColumns();
         if (selectedColumns.isEmpty()) {
             return;
-        } else {
-            Range<Integer> tempRange = null;
-            for (Range<Integer> range : selectedColumns) {
-                if (range.contains(targetCol)) {
-                    tempRange = range;
-                    break;
-                }
-            }
-
-            //System.out.println("temp range:" + tempRange);
-            if (tempRange == null) {
-                return; //no range contain this range
-            } else {
-                if (tempRange.lowerEndpoint().intValue() == targetCol && tempRange.upperEndpoint().intValue() == targetCol + 1) {
-                    selectedColumns.remove(tempRange);
-
-                } else {
-                    //split the rectangles, and remove that columns
-                    selectedColumns.remove(tempRange);
-                    //move lower end up by 1
-                    if (tempRange.lowerEndpoint().intValue() == targetCol) {
-                        tempRange = Range.closedOpen(targetCol + 1, tempRange.upperEndpoint());
-                        selectedColumns.add(tempRange);
-                    } else if (tempRange.upperEndpoint().intValue() == targetCol + 1) {
-                        tempRange = Range.closedOpen(tempRange.lowerEndpoint(), targetCol);
-                        selectedColumns.add(tempRange);
-                    } else {
-                        selectedColumns.add(Range.closedOpen(tempRange.lowerEndpoint(), targetCol));
-                        selectedColumns.add(Range.closedOpen(targetCol + 1, tempRange.upperEndpoint()));
-                    }
-                }
-                //use selected rows and selected columns to rebuild 
-                ArrayList<Rectangle> newSelections = new ArrayList<Rectangle>();
-                for (Range<Integer> colRange : selectedColumns) {
-                    for (Range<Integer> rowRange : selectedRows) {
-                        newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
-                    }
-                }
-
-                CoolMapState state = CoolMapState.createStateSelections("Remove selected column", obj, null);
-                view.setSelections(newSelections);
-                StateStorageMaster.addState(state);
-                //does not change anchor col
+        }
+        
+        Range<Integer> tempRange = null;
+        for (Range<Integer> range : selectedColumns) {
+            if (range.contains(targetCol)) {
+                tempRange = range;
+                break;
             }
         }
+
+        //System.out.println("temp range:" + tempRange);
+        if (tempRange == null) {
+            return; //no range contain this range
+        }
+        
+        if (tempRange.lowerEndpoint() == targetCol && tempRange.upperEndpoint() == targetCol + 1) {
+            selectedColumns.remove(tempRange);
+
+        } else {
+            //split the rectangles, and remove that columns
+            selectedColumns.remove(tempRange);
+            //move lower end up by 1
+            if (tempRange.lowerEndpoint() == targetCol) {
+                tempRange = Range.closedOpen(targetCol + 1, tempRange.upperEndpoint());
+                selectedColumns.add(tempRange);
+            } else if (tempRange.upperEndpoint() == targetCol + 1) {
+                tempRange = Range.closedOpen(tempRange.lowerEndpoint(), targetCol);
+                selectedColumns.add(tempRange);
+            } else {
+                selectedColumns.add(Range.closedOpen(tempRange.lowerEndpoint(), targetCol));
+                selectedColumns.add(Range.closedOpen(targetCol + 1, tempRange.upperEndpoint()));
+            }
+        }
+        //use selected rows and selected columns to rebuild 
+        ArrayList<Rectangle> newSelections = new ArrayList<>();
+        for (Range<Integer> colRange : selectedColumns) {
+            for (Range<Integer> rowRange : selectedRows) {
+                newSelections.add(new Rectangle(colRange.lowerEndpoint(), rowRange.lowerEndpoint(), colRange.upperEndpoint() - colRange.lowerEndpoint(), rowRange.upperEndpoint() - rowRange.lowerEndpoint()));
+            }
+        }
+
+        CoolMapState state = CoolMapState.createStateSelections("Remove selected column", obj, null);
+        view.setSelections(newSelections);
+        StateStorageMaster.addState(state);
+            //does not change anchor col
+        
+        
     }
     //allowing multiple selection makes it super complex...
     private boolean _dragStart = false;
@@ -739,9 +780,11 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
     public void mousePressed(MouseEvent me) {
         if (SwingUtilities.isLeftMouseButton(me) && isDataViewValid()) {
 
+            // get the column in me.getX()
             _startCol = getCoolMapView().getCurrentCol(me.getX());
 
             ArrayList<Range<Integer>> selectedCols = getCoolMapView().getSelectedColumns();
+            // if this col is in the selected columns, a drag starts.
             for (Range<Integer> range : selectedCols) {
                 if (range.contains(_startCol)) {
                     _dragStart = true;
@@ -756,18 +799,20 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     @Override
     public void mouseReleased(MouseEvent me) {
+        // if it's a drag
         if (SwingUtilities.isLeftMouseButton(me) && isDataViewValid() && _dragStart) {
+            // get the end column
             Integer endCol = getCoolMapView().getCurrentCol(me.getX());
             if (endCol != null) {
                 //System.out.println("Drag column to:" + endCol);
-                if (_startCol != null && _startCol.intValue() != endCol.intValue()) {
+                if (_startCol != null && _startCol != endCol) {
                     ArrayList<Range<Integer>> columns = getCoolMapView().getSelectedColumns();
                     if (columns == null || columns.isEmpty()) {
                         return;
                     }
 
                     CoolMapState state = CoolMapState.createStateColumns("Shift columns", getCoolMapObject(), null);
-                    getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol.intValue());
+                    getCoolMapView().getCoolMapObject().multiShiftColumns(getCoolMapView().getSelectedColumns(), endCol);
 
                     StateStorageMaster.addState(state);
 

@@ -29,8 +29,10 @@ import org.json.JSONObject;
 /**
  *
  * @author gangsu
+ * @param <BASE>
+ * @param <VIEW>
  */
-public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectListener, StateSavable{
+public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectListener, StateSavable {
 
     private final ViewPanel _viewPanel = new ViewPanel();
     private final static GraphicsConfiguration _graphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -47,65 +49,54 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
         _mapBuffer = null;
     }
 
+    @Override
     public void aggregatorUpdated(CoolMapObject object) {
     }
 
-    ;
-    
+    @Override
     public void rowsChanged(CoolMapObject object) {
     }
 
-    ;
-    
+    @Override
     public void columnsChanged(CoolMapObject object) {
     }
 
-    ;
-    
+    @Override
     public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
 
-    ;
-    
     public void stateStorageUpdated(CoolMapObject object) {
     }
-
-    ;
     
+    @Override
     public void viewRendererChanged(CoolMapObject object) {
     }
-
-    ;
     
+    @Override
     public void viewFilterChanged(CoolMapObject object) {
     }
 
-    ;
-    
+    @Override
     public void selectionChanged(CoolMapObject object) {
     }
 
-    ;
+    @Override
     public void mapAnchorMoved(CoolMapObject object) {
     }
 
-    ;
+    @Override
     public void activeCellChanged(CoolMapObject object, MatrixCell oldCell, MatrixCell newCell) {
     }
 
-    ;
+    @Override
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-    ;
     public void subSelectionRowChanged(CoolMapObject object) {
     }
 
-    ;
     public void subSelectionColumnChanged(CoolMapObject object) {
     }
-
-    ;
     
     
 
@@ -173,11 +164,7 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
      */
     public boolean isDataViewValid() {
         CoolMapView view = getCoolMapView();
-        if (view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewMatrixValid()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewMatrixValid());
     }
 
     /**
@@ -199,8 +186,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
             _mapBuffer = null;
             return;
         }
-
-
 
         int width = dimension.width;
         int height = _viewPanel.getHeight();
@@ -300,8 +285,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
 
     public abstract String getName();
 
-    
-
     /**
      *
      */
@@ -325,7 +308,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
                 return;
             }
 
-
             if (_coolMapObject == null) {
                 return;
             }
@@ -335,7 +317,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
             }
 
             Graphics2D g2D = (Graphics2D) grphcs;
-
 
             if (canvas.isAntiAliased()) {
                 g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -347,7 +328,6 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
             Rectangle subMapDim = canvas.getSubMapDimension();
             g2D.drawImage(_mapBuffer, subMapDim.x, 0, this);
             postPaint(g2D, _coolMapObject, _viewPanel.getWidth(), _viewPanel.getHeight());
-
 
             if (!canRender(_coolMapObject)) {
                 if (_icon != null) {
@@ -399,8 +379,5 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
     public boolean restoreState(JSONObject savedState) {
         return false;
     }
-    
-    
-    
-    
+
 }
