@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -1233,6 +1234,19 @@ public final class CoolMapObject<BASE, VIEW> {
 //            return false;
 //        }
 //    }
+    
+    private List<VNode> getSelectedColumnNodes() {
+        ArrayList<Range<Integer>> originalSelectedColumns = getCoolMapView().getSelectedColumns();
+        LinkedList<VNode> originalSelectedVNodes = new LinkedList<>();
+        for (Range<Integer> range : originalSelectedColumns) {
+            for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); ++i) {
+                VNode columnNode = getCoolMapView().getCoolMapObject().getViewNodeColumn(i);
+                originalSelectedVNodes.add(columnNode);
+            }
+        }
+        return originalSelectedVNodes;
+    }
+    
     public synchronized List<VNode> expandColumnNodes(List<VNode> inputNodes, boolean select) {
         try {
             if (inputNodes == null || inputNodes.isEmpty() || !isViewMatrixValid()) {
@@ -1246,7 +1260,8 @@ public final class CoolMapObject<BASE, VIEW> {
                 }
             }
 
-//            System.out.println("Trying to expand" + nodesToBeExpanded);
+            List<VNode> originalSelectedVNodes = getSelectedColumnNodes();
+
             _vMatrix.expandColNodeToChildNodes(nodesToBeExpanded);
 
             getCoolMapView().clearSelection();
@@ -1254,34 +1269,30 @@ public final class CoolMapObject<BASE, VIEW> {
             _sortTracker.clearSortedRow();
             getCoolMapView().updateCanvasEnforceAll();
 
-            if (select) {
-                //reselect the child inputNodes of these inputNodes
-//                ArrayList<VNode> retainedNodes = new ArrayList<VNode>();
-//                for (VNode node : inputNodes) {
-//                    if (node != null && node.isGroupNode() && node.isExpanded()) {
-//                        retainedNodes.add(node);
-//                    }
-//                }
+            if (select) { // if the expanded nodes and its children will be selected
 
                 List<VNode> toBeSelectedNodes = getViewNodesColumnFromTreeNodesLeafOnly(nodesToBeExpanded);
+
                 if (toBeSelectedNodes != null) {
-                    ArrayList<Integer> retainedIndices = new ArrayList<>();
-                    for (VNode node : toBeSelectedNodes) {
-                        if (node != null && node.getViewIndex() != null) {
-                            try {
-                                retainedIndices.add(node.getViewIndex().intValue());
-                            } catch (Exception e) {
+                    originalSelectedVNodes.addAll(toBeSelectedNodes);
+                }
+            }
 
-                            }
-                        }
-                    }
-                    HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
+            ArrayList<Integer> retainedIndices = new ArrayList<>();
+            for (VNode node : originalSelectedVNodes) {
+                if (node != null && node.getViewIndex() != null) {
+                    try {
+                        retainedIndices.add(node.getViewIndex().intValue());
+                    } catch (Exception e) {
 
-                    if (columnSelections != null) {
-                        getCoolMapView().setSelectionsColumn(columnSelections);
-                        getCoolMapView().centerToSelections();
                     }
                 }
+            }
+            HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
+
+            if (columnSelections != null) {
+                getCoolMapView().setSelectionsColumn(columnSelections);
+                //getCoolMapView().centerToSelections();
             }
 
             notifyColumnsChanged();
@@ -1291,6 +1302,18 @@ public final class CoolMapObject<BASE, VIEW> {
             System.err.println("Minor issue: expand column error");
             return null;
         }
+    }
+    
+    private List<VNode> getSelectedRowNodes () {
+        ArrayList<Range<Integer>> originalSelectedRows = getCoolMapView().getSelectedRows();
+        LinkedList<VNode> originalSelectedVNodes = new LinkedList<>();
+        for (Range<Integer> range : originalSelectedRows) {
+            for (int i = range.lowerEndpoint(); i < range.upperEndpoint(); ++i) {
+                VNode rowNode = getCoolMapView().getCoolMapObject().getViewNodeRow(i);
+                originalSelectedVNodes.add(rowNode);
+            }
+        }
+        return originalSelectedVNodes;
     }
 
     public synchronized List<VNode> expandRowNodes(List<VNode> nodes, boolean select) {
@@ -1307,8 +1330,11 @@ public final class CoolMapObject<BASE, VIEW> {
                     nodesToBeExpanded.add(node);
                 }
             }
-            //add a filtering step
 
+            
+            List<VNode> originalSelectedVNodes = getSelectedRowNodes();
+
+            //add a filtering step
             _vMatrix.expandRowNodeToChildNodes(nodesToBeExpanded);
 
             getCoolMapView().clearSelection();
@@ -1317,41 +1343,30 @@ public final class CoolMapObject<BASE, VIEW> {
             getCoolMapView().updateCanvasEnforceAll();
 
             if (select) {
-
-//                ArrayList<VNode> retainedNodes = new ArrayList<VNode>();
-//                for (VNode node : nodes) {
-//                    if (node != null && node.isGroupNode() && node.isExpanded()) {
-//                        retainedNodes.add(node);
-//                    }
-//                }
                 List<VNode> toBeSelectedNodes = getViewNodesRowFromTreeNodesLeafOnly(nodesToBeExpanded);
-                ArrayList<Integer> retainedIndices = new ArrayList<>();
-
                 if (toBeSelectedNodes != null) {
-                    for (VNode node : toBeSelectedNodes) {
-                        if (node != null && node.getViewIndex() != null) {
-                            try {
-                                retainedIndices.add(node.getViewIndex().intValue());
-                            } catch (Exception e) {
+                    originalSelectedVNodes.addAll(toBeSelectedNodes);
+                }
+            }
+            ArrayList<Integer> retainedIndices = new ArrayList<>();
+            for (VNode node : originalSelectedVNodes) {
+                if (node != null && node.getViewIndex() != null) {
+                    try {
+                        retainedIndices.add(node.getViewIndex().intValue());
+                    } catch (Exception e) {
 
-                            }
-                        }
-                    }
-                    HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(retainedIndices);
-
-                    if (rowSelections != null) {
-                        getCoolMapView().setSelectionsRow(rowSelections);
-                        getCoolMapView().centerToSelections();
                     }
                 }
+            }
+            HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(retainedIndices);
+
+            if (rowSelections != null) {
+                getCoolMapView().setSelectionsRow(rowSelections);
+                //getCoolMapView().centerToSelections();
             }
 
             notifyRowsChanged();
 
-            //The row node height should not be null. How can it be null?
-//            for(VNode node : getViewNodesRowTree(0, 10)){
-//                System.out.println(node.getName() + " " + node.getViewHeightInTree());
-//            }
             return nodesToBeExpanded;
 
         } catch (Exception e) {
@@ -1434,6 +1449,9 @@ public final class CoolMapObject<BASE, VIEW> {
                 nodesToCollapse.add(node);
             }
         }
+
+        List<VNode> originalSelectedVNodes = getSelectedColumnNodes();
+        
         List<VNode> collapsedNodes = _vMatrix.collapseTreeColNodes(nodesToCollapse);
 
         getCoolMapView().updateNodeDisplayParams();
@@ -1444,31 +1462,34 @@ public final class CoolMapObject<BASE, VIEW> {
         getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyColumnsChanged();
-
+        
         if (select) {
+            originalSelectedVNodes.addAll(collapsedNodes);
+        }
 
-            ArrayList<Integer> retainedIndices = new ArrayList<>();
+        HashSet<Integer> retainedIndices = new HashSet<>();
+        HashSet<VNode> displayedColumnNodes = new HashSet<>(getViewNodesColumn());
 
-            for (VNode node : collapsedNodes) {
-                if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
-                    try {
-                        retainedIndices.add(node.getViewIndex().intValue());
-                    } catch (Exception e) {
-
+        for (VNode node : originalSelectedVNodes) {
+            if (node != null && node.getViewIndex() != null) {
+                try {
+                     if (displayedColumnNodes.contains(node)) {
+                        int index = node.getViewIndex().intValue();
+                        retainedIndices.add(index);
                     }
+                } catch (Exception e) {
+
                 }
             }
-
-            HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(retainedIndices);
-
-            if (columnSelections != null) {
-                getCoolMapView().setSelectionsColumn(columnSelections);
-                getCoolMapView().centerToSelections();
-            }
         }
-        //
-//        Collections.sort(retainedIndices, new VNodeIndexComparator());
-        //then set selection 
+
+        HashSet<Range<Integer>> columnSelections = Tools.createRangesFromIndices(new ArrayList<>(retainedIndices));
+
+        if (columnSelections != null) {
+            getCoolMapView().setSelectionsColumn(columnSelections);
+            //getCoolMapView().centerToSelections();
+        }
+        
         return collapsedNodes;
     }
 
@@ -1494,6 +1515,8 @@ public final class CoolMapObject<BASE, VIEW> {
                 nodesToCollapse.add(node);
             }
         }
+        
+        List<VNode> originalSelectedVNodes = getSelectedRowNodes();
 
         //actually collapsed nodes
         List<VNode> collapsedNodes = _vMatrix.collapseTreeRowNodes(nodesToCollapse);
@@ -1507,28 +1530,36 @@ public final class CoolMapObject<BASE, VIEW> {
         getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
+        
 
         //select
         if (select) {
-            ArrayList<Integer> retainedIndices = new ArrayList<>();
+            originalSelectedVNodes.addAll(collapsedNodes);
+        }
 
-            for (VNode node : collapsedNodes) {
-                if (node != null && node.getViewIndex() != null && node.isGroupNode()) {
-                    try {
-                        retainedIndices.add(node.getViewIndex().intValue());
-                    } catch (Exception e) {
+        HashSet<Integer> retainedIndices = new HashSet<>();
+        HashSet<VNode> displayedRowNodes = new HashSet<>(getViewNodesRow());
 
+        for (VNode node : originalSelectedVNodes) {
+            if (node != null && node.getViewIndex() != null) {
+                try {
+                    if (displayedRowNodes.contains(node)) {
+                        int index = node.getViewIndex().intValue();
+                        retainedIndices.add(index);
                     }
-                }
-            }
-            HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(retainedIndices);
+                } catch (Exception e) {
 
-            if (rowSelections != null) {
-                getCoolMapView().setSelectionsRow(rowSelections);
-                getCoolMapView().centerToSelections();
+                }
             }
         }
 
+        HashSet<Range<Integer>> rowSelections = Tools.createRangesFromIndices(new ArrayList<>(retainedIndices));
+
+        if (rowSelections != null) {
+            getCoolMapView().setSelectionsRow(rowSelections);
+            //getCoolMapView().centerToSelections();
+        }
+        
         return collapsedNodes;
     }
 
@@ -1696,22 +1727,21 @@ public final class CoolMapObject<BASE, VIEW> {
 //            return false;
 //        }
 //    }
-    public void selectViewNodesRowTree(List<VNode> rowTreeNodes) {
-
+    
+    private HashSet<Range<Integer>> getViewNodesRowTreeSelection(List<VNode> rowTreeNodes) {
+        HashSet<Range<Integer>> selectedRows = new HashSet<>();
         if (rowTreeNodes.isEmpty()) {
-            return;
+            return selectedRows;
         }
 
         List<VNode> childNodeInTree = getViewNodesRowFromTreeNodesLeafOnly(rowTreeNodes);
         if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-            return;
+            return selectedRows;
         }
-
-        HashSet<Range<Integer>> selectedRows = new HashSet<>();
 
         VNode firstNode = childNodeInTree.get(0);
         if (firstNode.getViewIndex() == null) {
-            return;
+            return selectedRows;
         }
         int startIndex = firstNode.getViewIndex().intValue();
         int currentIndex = startIndex;
@@ -1719,7 +1749,7 @@ public final class CoolMapObject<BASE, VIEW> {
         for (VNode node : childNodeInTree) {
             //System.out.println(node.getViewIndex());
             if (node.getViewIndex() == null) {
-                return;//should not happen
+                return selectedRows;//should not happen
             }
             if (node.getViewIndex().intValue() <= currentIndex + 1) {
                 currentIndex = node.getViewIndex().intValue();
@@ -1732,33 +1762,36 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
-
-        getCoolMapView().setSelectionsRow(selectedRows);
+        return selectedRows;
     }
-
-    public void selectViewNodesColumnTree(List<VNode> columnTreeNodes) {
+    
+    public void selectViewNodesRowTree(List<VNode> rowTreeNodes) {
+        getCoolMapView().setSelectionsRow(getViewNodesRowTreeSelection(rowTreeNodes));
+    }
+    
+    private HashSet<Range<Integer>> getViewNodesColumnTreeSelection(List<VNode> columnTreeNodes) {
+        HashSet<Range<Integer>> selectedColumns = new HashSet<>();
+        
         if (columnTreeNodes.isEmpty()) {
-            return;
+            return selectedColumns;
         }
 
         List<VNode> childNodeInTree = getViewNodesColumnFromTreeNodesLeafOnly(columnTreeNodes);
         if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-            return;
+            return selectedColumns;
         }
 
-        //must sort with 
-        HashSet<Range<Integer>> selectedColumns = new HashSet<>();
 
         VNode firstNode = childNodeInTree.get(0);
         if (firstNode.getViewIndex() == null) {
-            return;
+            return selectedColumns;
         }
         int startIndex = firstNode.getViewIndex().intValue();
         int currentIndex = startIndex;
 
         for (VNode node : childNodeInTree) {
             if (node.getViewIndex() == null) {
-                return;//should not happen
+                return selectedColumns;//should not happen
             }
             if (node.getViewIndex().intValue() <= currentIndex + 1) {
                 currentIndex = node.getViewIndex().intValue();
@@ -1771,13 +1804,17 @@ public final class CoolMapObject<BASE, VIEW> {
         }
 
         selectedColumns.add(Range.closedOpen(startIndex, currentIndex + 1));
-        getCoolMapView().setSelectionsColumn(selectedColumns);
+        return selectedColumns;
+    }
 
+    public void selectViewNodesColumnTree(List<VNode> columnTreeNodes) {
+        getCoolMapView().setSelectionsColumn(getViewNodesColumnTreeSelection(columnTreeNodes));
     }
 
     public synchronized List<VNode> expandRowNodesToLeaf(List<VNode> nodes) {
-
-//        System.out.println("Expand row nodes to bottom called");
+        
+        List<VNode> originalSelectedRowNodes = getSelectedRowNodes();
+        
         List<VNode> expandedNodes = _vMatrix.expandRowNodeToChildNodesAll(nodes);
         getCoolMapView().updateNodeDisplayParams();
         getCoolMapView().clearSelection();
@@ -1785,13 +1822,19 @@ public final class CoolMapObject<BASE, VIEW> {
         _sortTracker.clearSortedColumn();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
+        
+        Set<Range<Integer>> rowSelections = getViewNodesRowTreeSelection(expandedNodes);
+        Set<Range<Integer>> originalSelections = getVNodesSelections(originalSelectedRowNodes);
 
-        selectViewNodesRowTree(expandedNodes);
+        rowSelections.addAll(originalSelections);
+        getCoolMapView().setSelectionsRow(rowSelections);
 
         return expandedNodes;
     }
 
     public synchronized List<VNode> expandColumnNodesToLeaf(List<VNode> nodes) {
+        List<VNode> originalSelectedColumnNodes = getSelectedColumnNodes();
+        
         List<VNode> expandedNodes = _vMatrix.expandColNodeToChildNodesAll(nodes);
         getCoolMapView().updateNodeDisplayParams();
         getCoolMapView().clearSelection();
@@ -1799,11 +1842,36 @@ public final class CoolMapObject<BASE, VIEW> {
         _sortTracker.clearSortedRow();
         getCoolMapView().updateCanvasEnforceAll();
         notifyColumnsChanged();
-
-        selectViewNodesColumnTree(expandedNodes);
-
+        
+        Set<Range<Integer>> columnSelections = getViewNodesColumnTreeSelection(expandedNodes);
+        Set<Range<Integer>> originalSelections = getVNodesSelections(originalSelectedColumnNodes);
+        
+        columnSelections.addAll(originalSelections);
+        
+        getCoolMapView().setSelectionsColumn(columnSelections);
         return expandedNodes;
     }
+
+    private Set<Range<Integer>> getVNodesSelections(List<VNode> originalSelectedVNodes) {
+        HashSet<Integer> retainedIndices = new HashSet<>();
+
+        for (VNode node : originalSelectedVNodes) {
+            if (node != null && node.getViewIndex() != null) {
+                try {
+                    int index = node.getViewIndex().intValue();
+                    retainedIndices.add(index);
+
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        HashSet<Range<Integer>> selections = Tools.createRangesFromIndices(new ArrayList<>(retainedIndices));
+        return selections;
+    }
+    
+    
 
 //    public synchronized boolean expandColumnNodeToBottom(VNode node) {
 //        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
