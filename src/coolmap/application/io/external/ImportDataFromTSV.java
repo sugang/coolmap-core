@@ -32,7 +32,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class ImportDataFromTSV implements ImportData {
 
-    private HashSet<CoolMapObject> objects = new HashSet<CoolMapObject>();
+    private HashSet<CoolMapObject> objects = new HashSet<>();
 
     public void importFromFiles(File... files) throws Exception {
 
@@ -40,7 +40,7 @@ public class ImportDataFromTSV implements ImportData {
         for (File file : files) {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
-                ArrayList<String> dataLines = new ArrayList<String>();
+                ArrayList<String> dataLines = new ArrayList<>();
 
                 String header = reader.readLine();
 
@@ -95,7 +95,7 @@ public class ImportDataFromTSV implements ImportData {
                 object.setName(Tools.removeFileExtension(file.getName()));
                 object.addBaseCMatrix(matrix);
 
-                ArrayList<VNode> nodes = new ArrayList<VNode>();
+                ArrayList<VNode> nodes = new ArrayList<>();
                 for (Object label : matrix.getRowLabelsAsList()) {
                     nodes.add(new VNode(label.toString()));
                 }

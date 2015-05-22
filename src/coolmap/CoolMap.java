@@ -35,7 +35,6 @@ public class CoolMap {
                 CoolMapMaster.getCMainFrame().loadWorkspace(Config.getProperty(Config.WORKSPACE_DIRECTORY) + "/default.dck");
 
                 CMConsole.log("CoolMap initialized.");
-
             }
         });
         
