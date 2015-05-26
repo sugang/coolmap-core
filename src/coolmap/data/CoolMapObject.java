@@ -293,27 +293,63 @@ public final class CoolMapObject<BASE, VIEW> {
         return _coolMapView;
     }
     
-    //
     public void hideColumnNodesWithoutData(){
-        System.out.println("Hide col nodes w/o data");
+        
         for(VNode node : getViewNodesColumn()){
-            Integer[] baseIndices = node.getBaseIndicesFromCOntology(_cMatrices.get(0), COntology.COLUMN);
-//            System.out.println(baseIndices.length);
-            if(baseIndices == null || baseIndices.length == 0){
-                //hide
-                node.setViewMultiplier(0f);
+            if (node.isGroupNode()) {
+                Integer[] baseIndices = node.getBaseIndicesFromCOntology(_cMatrices.get(0), COntology.COLUMN);
+                if(baseIndices == null || baseIndices.length == 0){
+                    node.setViewMultiplier(0f);
+                }      
+            } else {
+                if (!_cMatrices.get(0).containsColLabel(node.getViewLabel())) {
+                    node.setViewMultiplier(0f);
+                }
             }
-            
-            
         }
-        //
         getCoolMapView().updateNodeDisplayParams();
         getCoolMapView().updateCanvasEnforceAll();
         
     }
     
-    //
+    public void showColumnNodesWithoutData(){
+        
+        for(VNode node : getViewNodesColumn()){
+            if (node.getCurrentViewMultiplier() == 0f) {
+                node.setViewMultiplier(node.getDefaultViewMultiplier());
+            }
+        }
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().updateCanvasEnforceAll();
+        
+    }
+
     public void hideRowNodesWithoutData(){
+        for(VNode node : getViewNodesRow()){
+            if (node.isGroupNode()) {
+                Integer[] baseIndices = node.getBaseIndicesFromCOntology(_cMatrices.get(0), COntology.ROW);
+                if(baseIndices == null || baseIndices.length == 0){
+                    node.setViewMultiplier(0f);
+                }       
+            } else {
+                if (!_cMatrices.get(0).containsRowLabel(node.getViewLabel())) {
+                    node.setViewMultiplier(0f);
+                }
+            }
+        }
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().updateCanvasEnforceAll();
+    }
+    
+    public void showRowNodesWithoutData(){
+        
+        for(VNode node : getViewNodesRow()){
+            if (node.getCurrentViewMultiplier() == 0f) {
+                node.setViewMultiplier(node.getDefaultViewMultiplier());
+            }
+        }
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().updateCanvasEnforceAll();
         
     }
     

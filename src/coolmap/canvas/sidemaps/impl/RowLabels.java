@@ -79,7 +79,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         this._marginSize = 16;
     }
 
-    public RowLabels(CoolMapObject obj) {
+    public RowLabels(final CoolMapObject obj) {
         super(obj);
         this._marginSize = 16;
 
@@ -153,6 +153,30 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
         getViewPanel().setComponentPopupMenu(_menu);
         _menu.add(_sortAscending);
         _menu.add(_sortDescending);
+        
+        JMenuItem hideRowNodesWithoutData = new JMenuItem("Hide Empty Row Nodes");
+        hideRowNodesWithoutData.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                obj.hideRowNodesWithoutData();
+            }
+        });
+
+        _menu.add(hideRowNodesWithoutData);
+
+        JMenuItem showRowNodesWithoutData = new JMenuItem("Show Empty Row Nodes");
+        showRowNodesWithoutData.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                obj.showRowNodesWithoutData();
+            }
+        });
+
+        _menu.add(showRowNodesWithoutData);
+        
+        _menu.addSeparator();
 
         _removeSelected = new JMenuItem("Remove selected rows (w/o expanded nodes)", UI.getImageIcon("trashBin"));
         _removeSelected.addActionListener(new ActionListener() {
@@ -363,7 +387,7 @@ public class RowLabels extends RowMap<Object, Object> implements MouseListener, 
 
     @Override
     protected void renderRow(Graphics2D g2D, CoolMapObject<Object, Object> object, VNode node, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        if (node == null || getCoolMapView() == null) {
+        if (node == null || getCoolMapView() == null || node.getCurrentViewMultiplier() == 0f) {
             return;
         }
 

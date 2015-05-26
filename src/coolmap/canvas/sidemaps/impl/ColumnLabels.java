@@ -30,6 +30,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Set;
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -65,9 +66,9 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         return "Column Labels";
     }
 
-    public ColumnLabels(CoolMapObject object) {
+    public ColumnLabels(final CoolMapObject object) {
         super(object);
-        
+
         this._maxDescent = 0;
         this._fontSize = 0;
 
@@ -144,6 +145,29 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         getViewPanel().setComponentPopupMenu(_menu);
         _menu.add(_sortAscending);
         _menu.add(_sortDescending);
+
+        JMenuItem hideColumnNodesWithoutData = new JMenuItem("Hide Empty Column Nodes");
+        hideColumnNodesWithoutData.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                object.hideColumnNodesWithoutData();
+            }
+        });
+
+        _menu.add(hideColumnNodesWithoutData);
+
+        JMenuItem showColumnNodesWithoutData = new JMenuItem("Show Empty Column Nodes");
+        showColumnNodesWithoutData.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                object.showColumnNodesWithoutData();
+            }
+        });
+
+        _menu.add(showColumnNodesWithoutData);
+
         _menu.addSeparator();
 
         _removeSelected = new JMenuItem("Remove selected columns (w/o expanded nodes)", UI.getImageIcon("trashBin"));
@@ -209,7 +233,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
 
     @Override
     protected void renderColumn(Graphics2D g2D, CoolMapObject<Object, Object> object, VNode node, int anchorX, int anchorY, int cellWidth, int cellHeight) {
-        if (node == null || getCoolMapView() == null) {
+        if (node == null || getCoolMapView() == null || node.getCurrentViewMultiplier() == 0f) {
             return;
         }
 
@@ -722,7 +746,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         if (selectedColumns.isEmpty()) {
             return;
         }
-        
+
         Range<Integer> tempRange = null;
         for (Range<Integer> range : selectedColumns) {
             if (range.contains(targetCol)) {
@@ -735,7 +759,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         if (tempRange == null) {
             return; //no range contain this range
         }
-        
+
         if (tempRange.lowerEndpoint() == targetCol && tempRange.upperEndpoint() == targetCol + 1) {
             selectedColumns.remove(tempRange);
 
@@ -766,8 +790,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         view.setSelections(newSelections);
         StateStorageMaster.addState(state);
             //does not change anchor col
-        
-        
+
     }
     //allowing multiple selection makes it super complex...
     private boolean _dragStart = false;
