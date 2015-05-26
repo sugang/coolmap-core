@@ -292,6 +292,32 @@ public final class CoolMapObject<BASE, VIEW> {
     public CoolMapView<BASE, VIEW> getCoolMapView() {
         return _coolMapView;
     }
+    
+    //
+    public void hideColumnNodesWithoutData(){
+        System.out.println("Hide col nodes w/o data");
+        for(VNode node : getViewNodesColumn()){
+            Integer[] baseIndices = node.getBaseIndicesFromCOntology(_cMatrices.get(0), COntology.COLUMN);
+//            System.out.println(baseIndices.length);
+            if(baseIndices == null || baseIndices.length == 0){
+                //hide
+                node.setViewMultiplier(0f);
+            }
+            
+            
+        }
+        //
+        getCoolMapView().updateNodeDisplayParams();
+        getCoolMapView().updateCanvasEnforceAll();
+        
+    }
+    
+    //
+    public void hideRowNodesWithoutData(){
+        
+    }
+    
+    
 //    public void zoomIn(boolean zoomX, boolean zoomY) {
 //        _canvas.zoomIn(zoomX, zoomY);
 //    }

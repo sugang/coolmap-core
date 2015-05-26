@@ -55,6 +55,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 /**
  *
@@ -1104,6 +1105,22 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
             }
         });
         _zoomSubBar.add(button);
+        
+        button = new JButton(UI.getImageIcon("rootColumn"));
+        button.setToolTipText("Hide Columns w/o data");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if(object != null){
+                    object.hideColumnNodesWithoutData();
+                }
+            
+            }
+        });
+        _zoomSubBar.add(button);
 
         _zoomSubBar.addSeparator();
 
@@ -1150,6 +1167,22 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
         _zoomSubBar.add(button);
 
+        button = new JButton(UI.getImageIcon("rootRow"));
+        button.setToolTipText("Hide Rows w/o data");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if (object != null) {
+
+                    object.hideRowNodesWithoutData();
+                }                   
+            }
+        });
+        _zoomSubBar.add(button);    
+        
         _zoomSubBar.setBackground(UI.colorLightBlue0);
         _toolBar.add(_zoomSubBar);
 
