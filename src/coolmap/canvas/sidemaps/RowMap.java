@@ -144,8 +144,6 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         @Override
         protected void paintComponent(Graphics grphcs) {
 
-
-
             super.paintComponent(grphcs);
             if (!isDataViewValid()) {
 
@@ -305,63 +303,38 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 
     public abstract String getName();
     
-        public void aggregatorUpdated(CoolMapObject object) {
+    public void aggregatorUpdated(CoolMapObject object) {
     }
-
-    ;
     
     public void rowsChanged(CoolMapObject object) {
     }
-
-    ;
     
     public void columnsChanged(CoolMapObject object) {
     }
-
-    ;
-    
+ 
     public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
-
-    ;
     
     public void stateStorageUpdated(CoolMapObject object) {
     }
-
-    ;
     
     public void viewRendererChanged(CoolMapObject object) {
     }
-
-    ;
     
     public void viewFilterChanged(CoolMapObject object) {
     }
-
-    ;
     
     public void selectionChanged(CoolMapObject object) {
     }
 
-    ;
     public void mapAnchorMoved(CoolMapObject object) {
     }
 
-    ;
     public void activeCellChanged(CoolMapObject object, MatrixCell oldCell, MatrixCell newCell) {
     }
 
-    ;
     public void mapZoomChanged(CoolMapObject object) {
     }
-
-    ;
-//    public void subSelectionRowChanged(CoolMapObject object) {
-//    }
-//
-//    ;
-//    public void subSelectionColumnChanged(CoolMapObject object) {
-//    }
 
     @Override
     public JSONObject getCurrentState() {
@@ -371,8 +344,6 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
     @Override
     public boolean restoreState(JSONObject savedState) {
         return false;
-    }
-    
-    
+    }  
     
 }

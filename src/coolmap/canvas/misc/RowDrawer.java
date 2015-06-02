@@ -47,8 +47,8 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
 //    private int _defaultWidth = 200;
 //    private int _drawerCointainerWidth = _defaultWidth;
     private Integer _stackCounter = 0;
-    private ArrayList<CDrawerHandle> _drawerHandles = new ArrayList<CDrawerHandle>();
-    private ArrayList<RowMap> _rowMaps = new ArrayList<RowMap>();
+    private ArrayList<CDrawerHandle> _drawerHandles = new ArrayList<>();
+    private ArrayList<RowMap> _rowMaps = new ArrayList<>();
     private CDrawerContainerHandle _handle = new CDrawerContainerHandle();
     private final int _drawerContainerHandleHeight = 30;
     private final int _drawerContainerHandleWidth = 10;

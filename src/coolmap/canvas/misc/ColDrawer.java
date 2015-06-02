@@ -47,8 +47,8 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
     //private int _drawerContainerHeight = _defaultHeight; //actual height
     //private int __lastHeight = __defaultHeight; //records the last height before collapse
     private Integer _stackCounter = 0;
-    private ArrayList<CDrawerHandle> _drawerHandles = new ArrayList<CDrawerHandle>();
-    private ArrayList<ColumnMap> _columnMaps = new ArrayList<ColumnMap>();
+    private ArrayList<CDrawerHandle> _drawerHandles = new ArrayList<>();
+    private ArrayList<ColumnMap> _columnMaps = new ArrayList<>();
     //private ArrayList<Integer> _drawerHeights = new ArrayList<Integer>();
     private final int _drawerContainerHandleHeight = 10;
     private final int _drawerContainerHandleWidth = 30;

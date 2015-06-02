@@ -131,6 +131,22 @@ public final class CoolMapView<BASE, VIEW> {
 //    private final HashSet<CViewAnchorMovedListener> _viewAnchorMovedListeners = new HashSet<CViewAnchorMovedListener>();
     private final HashSet<CViewListener> _viewListeners = new HashSet<>();
     private final NotificationLayer _notificationLayer = new NotificationLayer();
+    
+    public void moveRowMapToBottom(RowMap rowMap) {
+        _rowDrawer.moveRowMapToBottom(rowMap);
+    }
+    
+    public void removeRowMap(RowMap rowMap) {
+        _rowDrawer.removeRowMap(rowMap);
+    }
+    
+    public void moveColumnMapToBottom(ColumnMap columnMap) {
+        _colDrawer.moveColumnMapToBottom(columnMap);
+    }
+    
+    public void removeColumnMap(ColumnMap columnMap) {
+        _colDrawer.removeColumnMap(columnMap);
+    }
 
 //    private final RealTimeLayer _realTimeLayer = new RealTimeLayer();
     public void addColumnMap(ColumnMap map) {
