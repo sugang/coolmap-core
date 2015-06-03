@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.canvas.misc;
 
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.sidemaps.ColumnMap;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -25,6 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -243,7 +241,7 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
     }
 
     public void clearColumnMaps() {
-        _stackCounter = new Integer(2);//Need to change the stack counter to 2
+        _stackCounter = 2;//Need to change the stack counter to 2
         _initialHeight = _defaultInitialHeight;
         for (CDrawerHandle handle : _drawerHandles) {
             remove(handle);
@@ -271,8 +269,8 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
                 addColumnMap(columnMap);
             }
         }
-        for (int i = 0; i < _drawerHandles.size(); i++) {
-            _drawerHandles.get(i).updateDrawerBoundsWithContainer(getBounds());
+        for (CDrawerHandle _drawerHandle : _drawerHandles) {
+            _drawerHandle.updateDrawerBoundsWithContainer(getBounds());
         }
 
         for (ColumnMap map : _columnMaps) {
@@ -284,7 +282,7 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
     }
 
     public List<ColumnMap> getColumnMaps() {
-        return new ArrayList<ColumnMap>(_columnMaps);
+        return new ArrayList<>(_columnMaps);
     }
 
     /**
@@ -361,13 +359,11 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
         Rectangle b = (Rectangle) getBounds().clone();
         _background.setBounds(0, 0, b.width, b.height - _drawerContainerHandleHeight);
 
-        for (int i = 0; i < _drawerHandles.size(); i++) {
-            _drawerHandles.get(i).updateDrawerBoundsWithContainer(b);
+        for (CDrawerHandle _drawerHandle : _drawerHandles) {
+            _drawerHandle.updateDrawerBoundsWithContainer(b);
         }
 
         _colRowDimensions.y = getHeight();
-
-        //System.out.println(ColDrawer.this.getBounds());
     }
 
     @Override
@@ -699,18 +695,28 @@ public class ColDrawer extends JLayeredPane implements ComponentListener {
             g2D.setPaint(__paint);
             g2D.fillRect(0, 0, getWidth(), getHeight());
 
-            g2D.setColor(UI.colorBlack2);
-
             g2D.setFont(__labelFont);
             String label = __contentPane.getName();
             if (label == null || label.length() == 0) {
                 label = "Untitled";
             }
-            g2D.fillRoundRect(1, -3, g2D.getFontMetrics().stringWidth(label) + 14, _drawerHandleHeight + 2, 4, 4);
+            
+            int stringWidth = g2D.getFontMetrics().stringWidth(label);
+            int stringHeight = g2D.getFontMetrics().getHeight();
+            
+            int x = 1;
+            int y = 1;
+            
+            int width = stringWidth + 4;
+            int height = stringHeight + 4;
+
+            g2D.setColor(UI.colorBlack2);
+            g2D.fillRoundRect(x, y, width, height, 4, 4);
 
             g2D.setColor(UI.colorGrey1);
-
-            g2D.drawString(label, 5, 10);
+            
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            g2D.drawImage(image, null, x + 2, y - 2);
         }
 
         public JComponent getDrawer() {

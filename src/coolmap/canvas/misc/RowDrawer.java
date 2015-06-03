@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.canvas.misc;
 
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.sidemaps.RowMap;
+import coolmap.utils.Tools;
 import coolmap.utils.graphics.CAnimator;
 import coolmap.utils.graphics.UI;
 import java.awt.Color;
@@ -25,7 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,19 +57,18 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
     private final int _defaultInitialWidth = 120;
     private int _initialWidth = _defaultInitialWidth;
 
-    public void clearBuffer(){
-        for(RowMap map : _rowMaps){
+    public void clearBuffer() {
+        for (RowMap map : _rowMaps) {
             map.clearBuffer();
         }
     }
-    
-    public void updateDrawerBuffers(){
-        for(RowMap map : _rowMaps){
+
+    public void updateDrawerBuffers() {
+        for (RowMap map : _rowMaps) {
             map.updateBuffer();
         }
     }
-    
-    
+
     @Override
     public void setEnabled(boolean bln) {
         super.setEnabled(bln);
@@ -160,8 +156,8 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                 addRowMap(rowMap);
             }
         }
-        for (int i = 0; i < _drawerHandles.size(); i++) {
-            _drawerHandles.get(i).updateDrawerBoundsWithContainer(getBounds());
+        for (CDrawerHandle _drawerHandle : _drawerHandles) {
+            _drawerHandle.updateDrawerBoundsWithContainer(getBounds());
         }
 
         for (RowMap map : _rowMaps) {
@@ -173,7 +169,7 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
     }
 
     public List<RowMap> getRowMaps() {
-        return new ArrayList<RowMap>(_rowMaps);
+        return new ArrayList<>(_rowMaps);
     }
 
     public void updateDrawerBuffers(int minRow, int maxRow, int minCol, int maxCol, Rectangle dimension) {
@@ -181,10 +177,9 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             rowMap.updateBuffer(minRow, maxRow, minCol, maxCol, dimension);
         }
     }
-    
 
     public void clearRowMaps() {
-        _stackCounter = new Integer(2);//Need to change the stack counter to 2
+        _stackCounter = 2;//Need to change the stack counter to 2
         _initialWidth = _defaultInitialWidth;
         for (CDrawerHandle handle : _drawerHandles) {
             remove(handle);
@@ -235,20 +230,19 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             handle.updateDrawerBoundsWithContainer(RowDrawer.this.getBounds());
         }
     }
-    
-    public RowMap getRowMap(String className){
-        try{
-            for(RowMap map : _rowMaps){
-                if(map.getClass().getName().equals(className))
+
+    public RowMap getRowMap(String className) {
+        try {
+            for (RowMap map : _rowMaps) {
+                if (map.getClass().getName().equals(className)) {
                     return map;
+                }
             }
             return null;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
-    
 
     public void addRowMap(RowMap rowMap, int initialWidth) {
         if (rowMap == null) {
@@ -258,14 +252,12 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
         if (_rowMaps.contains(rowMap)) {
             return;
         }
-        
-        for(RowMap existingRowMap : _rowMaps){
-            if(existingRowMap.getClass().equals(rowMap.getClass())){
+
+        for (RowMap existingRowMap : _rowMaps) {
+            if (existingRowMap.getClass().equals(rowMap.getClass())) {
                 return;
             }
         }
-        
-        
 
         JComponent panel = rowMap.getViewPanel();
 
@@ -291,7 +283,7 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
         rowMap.getCoolMapView().addCViewListener(rowMap);
         rowMap.getCoolMapObject().addCObjectDataListener(rowMap);
 
-        if(RowDrawer.this.getBounds().getWidth() > 0){
+        if (RowDrawer.this.getBounds().getWidth() > 0) {
             handle.updateDrawerBoundsWithContainer(RowDrawer.this.getBounds());
             rowMap.updateBuffer();
         }
@@ -303,7 +295,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
 
         _colRowDimensions.x -= delta;
 
-
         if (_colRowDimensions.x < _drawerContainerHandleWidth + _drawerHandles.size() * _drawerHandleWidth) {
             _colRowDimensions.x = _drawerContainerHandleWidth + _drawerHandles.size() * _drawerHandleWidth;
         }
@@ -312,14 +303,12 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             _colRowDimensions.x = this.getParent().getWidth();
         }
 
-
         setBounds(new Rectangle(0, 0, this.getParent().getWidth(), this.getParent().getHeight()));
         //set the containers bounds to
         //width ---
         _background.setBounds(_drawerContainerHandleWidth, 0, _colRowDimensions.x - _drawerContainerHandleWidth, getHeight());
 
         //also all drawers need to update width
-
     }
 
     public void setDrawerContainerWidth(int newWidth) {
@@ -399,11 +388,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             MouseAdapter blocker = new MouseAdapter() {
             };
             _background.addMouseListener(blocker);
-            AffineTransform at = new AffineTransform();
-            at.rotate(-Math.PI / 2);
-            __labelFontRotated = __labelFont.deriveFont(at);
-
-
         }
 
         public CDrawerHandle(RowMap map, int initalWidth) {
@@ -450,7 +434,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                 }
             });
 
-
         }
         private Color c = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
 
@@ -459,7 +442,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
         }
         private GradientPaint __paint = new GradientPaint(0, 0, UI.colorBlack6, _drawerHandleWidth, 0, UI.colorBlack3);
         private Font __labelFont = UI.fontPlain.deriveFont(Font.BOLD).deriveFont(11f);
-        private Font __labelFontRotated;
 
         @Override
         public void paintComponent(Graphics g) {
@@ -472,40 +454,33 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             g2D.setPaint(__paint);
             g2D.fillRect(0, 0, getWidth(), getHeight());
 
-
-
-            //g2D.setFont(__labelFontRotated);
             String label = __contentPane.getName();
             if (label == null || label.length() == 0) {
                 label = "Untitled";
             }
 
-            if (label != null) {
+            g2D.setFont(__labelFont);
+            int stringWidth = g2D.getFontMetrics(__labelFont).stringWidth(label);
+            int stringHeight = g2D.getFontMetrics(__labelFont).getHeight();
 
+            int x = 1;
+            int y = 1;
 
-                int stringHeight = g2D.getFontMetrics(__labelFont).stringWidth(label);
-                int stringWidth = g2D.getFontMetrics(__labelFont).getHeight();
-                int maxDescent = g2D.getFontMetrics(__labelFont).getMaxDescent();
+            // to make the enclosing rectangle wider than the actual text in it.
+            int width = stringHeight + 4;
+            int height = stringWidth + 4;
 
-                //System.out.println(stringHeight + " " + stringWidth + " " + maxDescent);
+            g2D.setColor(UI.colorBlack2);
+            g2D.fillRoundRect(x,
+                    y,
+                    width, height, 4, 4);
 
-                int x = 1;
-                int y = this.getHeight() - (stringHeight + 7) - 3;
-                int width = stringWidth;
-                int height = stringHeight + 7;
+            g2D.setColor(UI.colorGrey1);
 
-
-                g2D.setFont(__labelFontRotated);
-
-                //this.getHeight()-3-g2D.getFontMetrics().stringWidth(__contentPane.getName())+14
-                g2D.setColor(UI.colorBlack2);
-                g2D.fillRoundRect(x,
-                        y,
-                        width, height, 4, 4);
-
-                g2D.setColor(UI.colorGrey1);
-                g2D.drawString(label, stringWidth - maxDescent - 1, this.getHeight() - 3 - 4);
-            }
+            BufferedImage image = Tools.createStringImage(g2D, label);
+            g2D.rotate(Math.PI / 2);
+            g2D.drawImage(image, null, y + 2, -x - stringHeight);
+            g2D.rotate(-Math.PI / 2);
 
         }
 
@@ -554,16 +529,13 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
 //            Rectangle b = getBounds();
 //            b.x -= delta;
 //            setBounds(b);
-
             //__contentPane.setBounds(b.x + _drawerHandleWidth, 0, __drawerWidth, this.getParent().getHeight());//Content pane is directly added
-
             //update width.
             //System.out.println(__contentPane.getBounds());
             int delta = width - __drawerWidth;
             __drawerWidth = width;
 
             Rectangle bounds = this.getBounds();
-
 
             bounds.x = this.getParent().getWidth() - width - _drawerHandleWidth;
             setBounds(bounds);
@@ -590,24 +562,9 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                 }
             }
 
-
-
-
-//            System.out.println("Cointainer rectangle:" + b.getBounds());
             Rectangle bound = new Rectangle(b.width - __drawerWidth - _drawerHandleWidth + _drawerContainerHandleWidth, 0, _drawerHandleWidth, b.height);
 
             setBounds(bound);
-
-
-
-
-//            System.out.println(bound.x);
-//            System.out.println(this.getParent().getWidth());
-//            System.out.println(this.getParent().getWidth() - bound.x);
-
-
-
-
 
 //            System.out.println("Parent panel:" + getParent());
 //          Sometimes the parent might be null. The order of things are initialized can be quite random...            
@@ -635,10 +592,7 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
 
 //                System.out.println("Toggle should start");
 //                System.out.println(maxWidth + " " + this.getX());
-
-
 //                System.out.println(this.getX() + " " + maxWidth);
-
                 if (this.getX() >= maxWidth - _drawerHandleWidth - 10) {
                     __toggleDrawerAnimator.startReverse();
                 } else {
@@ -648,7 +602,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                 }
 
             }
-
 
         }
         private int _paneWidth;
@@ -727,7 +680,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2D.setColor(UI.colorGrey4);
 
-
             g2D.fillRoundRect(3, 4 - 8, this.getWidth() + 4, this.getHeight() + 4, 10, 10);
             g2D.setStroke(UI.stroke1_5);
             g2D.setColor(UI.colorBlack2);
@@ -738,10 +690,8 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
             g2D.setColor(UI.colorBlack4);
             g2D.drawLine(5, 8 - 4, 5, _drawerContainerHandleHeight - 8);
 
-
             g2D.setColor(UI.colorBlack4);
             g2D.drawLine(7, 8 - 4, 7, _drawerContainerHandleHeight - 8);
-
 
         }
 
@@ -775,10 +725,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                         }
                     });
 
-
-
-
-
                 } else {
                     _targetContainerToggle.setLastWidth(_colRowDimensions.x);
                     _toggleContainerAnimator.start();
@@ -787,7 +733,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
                     }
                 }
             }
-
 
         }
 
@@ -815,7 +760,6 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
         public void mouseDragged(MouseEvent me) {
             if (SwingUtilities.isLeftMouseButton(me) && __isDragging) {
                 int delta = me.getXOnScreen() - __anchorX;
-
 
                 _updateCointainerWidth(delta);
 

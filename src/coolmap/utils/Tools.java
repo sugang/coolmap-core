@@ -266,7 +266,7 @@ public class Tools {
         Graphics2D imageGraphics = image.createGraphics();
         imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         imageGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        imageGraphics.setColor(Color.BLACK);
+        imageGraphics.setColor(g.getColor());
         imageGraphics.setFont(g.getFont());
         imageGraphics.drawString(s, 0, h - g.getFontMetrics().getDescent());
         imageGraphics.dispose();
