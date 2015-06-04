@@ -803,9 +803,7 @@ public final class CoolMapObject<BASE, VIEW> {
         if (matrix == null || matrix.length == 0) {
             return;
         }
-//            _cMatrices.clear();
-        //need to check
-        //need to make sure everyone is compatible
+        
         if (_cMatrices.isEmpty()) {
             if (matrix.length > 1) {
                 CMatrix<BASE> m0 = matrix[0];

@@ -45,19 +45,16 @@ public class PluginMaster {
 
         File pluginFolder = new File(pluginPath);
 
-//        System.out.println(pluginFolder.getAbsolutePath());
         pluginManager = PluginManagerFactory.createPluginManager();
-        
-        
-            //exception may prevent other plugins from loading
-            //
-            //pluginManager.addPluginsFrom(pluginFolder.toURI()); //will halt program if exception not handled.
             
             File[] dirs = pluginFolder.listFiles();
             for(File file : dirs){
                 if(file.isDirectory()){
                     try{
-                        pluginManager.addPluginsFrom(file.toURI());
+                        if (file.getName().endsWith(".plugin")) {
+                            pluginManager.addPluginsFrom(file.toURI());
+                        }
+                        
                     }
                     catch(Exception e){
                         System.err.println("Error loading plugin from folder:" + file);
@@ -66,17 +63,15 @@ public class PluginMaster {
                 else{
                     //single jar will also work.
                     try{
-                        pluginManager.addPluginsFrom(file.toURI());
+                        if (file.getName().endsWith(".jar")) {
+                            pluginManager.addPluginsFrom(file.toURI());
+                        }
                     }
                     catch(Exception e){
                         System.err.println("Error loading plugin from file:" + file);
                     }
                 }
-            }
-            
-            
-            
-            
+            }    
 
     //            after loading everything
             pluginManagerUtil = new PluginManagerUtil(pluginManager);
@@ -94,7 +89,7 @@ public class PluginMaster {
 
 
                     CMConsole.logInfo("Loaded " + plugin.getName() + " plugin");
-    //                System.out.println(plugin.getName());
+
                     JSONObject config = new JSONObject();
                     if(piImpl != null){
                         //gets the string
