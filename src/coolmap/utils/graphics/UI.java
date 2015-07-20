@@ -271,7 +271,11 @@ public class UI {
         _iconStash.put("baseColumn", new ImageIcon(UI.class.getResource("/resources/iconBaseColumn.png")));
         _iconStash.put("insertColumn", new ImageIcon(UI.class.getResource("/resources/iconInsertColumn.png")));
         
-        
+        _iconStash.put("row_collapse", new ImageIcon(UI.class.getResource("/resources/row_collapse.png")));
+        _iconStash.put("row_expand", new ImageIcon(UI.class.getResource("/resources/row_expand.png")));
+        _iconStash.put("column_collapse", new ImageIcon(UI.class.getResource("/resources/column_collapse.png")));
+        _iconStash.put("column_expand", new ImageIcon(UI.class.getResource("/resources/column_expand.png")));
+               
         _iconStash.put("tag", new ImageIcon(UI.class.getResource("/resources/iconTag.png")));
 
     }

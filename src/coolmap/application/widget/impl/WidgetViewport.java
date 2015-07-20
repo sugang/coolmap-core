@@ -1153,6 +1153,75 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         
         _zoomSubBar.setBackground(UI.colorLightBlue0);
         _toolBar.add(_zoomSubBar);
+        
+        
+        _toolBar.addSeparator();
+
+        button = new JButton(UI.getImageIcon("row_expand"));
+        button.setToolTipText("Expand row ontology nodes for one level");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if (object != null) {
+                    object.expandRowNodesToNextStep();    
+                }
+            }
+        });
+
+        _toolBar.add(button);
+        
+        button = new JButton(UI.getImageIcon("row_collapse"));
+        button.setToolTipText("Collapse row ontology nodes for one level");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if (object != null) {
+                    object.collapseRowNodesOneLayer();    
+                }
+            }
+        });
+
+        _toolBar.add(button);
+        
+        _toolBar.addSeparator();
+        
+        button = new JButton(UI.getImageIcon("column_expand"));
+        button.setToolTipText("Expand column ontology nodes for one level");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if (object != null) {
+                    object.expandColumnNodesToNextStep();    
+                }
+            }
+        });
+
+        _toolBar.add(button);
+        
+        button = new JButton(UI.getImageIcon("column_collapse"));
+        button.setToolTipText("Collapse column ontology nodes for one level");
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
+                if (object != null) {
+                    object.collapseColumnNodesOneLayer();    
+                }
+            }
+        });
+
+        _toolBar.add(button);
 
 //        button = new JButton("Task");
 //        button.addActionListener(new ActionListener() {

@@ -11,6 +11,7 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.module.Module;
 import coolmap.utils.Config;
+import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,8 +26,8 @@ import org.json.JSONObject;
  */
 public class SideMapModule extends Module {
 
-    private static final HashSet<Class> columnMaps = new LinkedHashSet<Class>();
-    private static final HashSet<Class> rowMaps = new LinkedHashSet<Class>();
+    private static final HashSet<Class> columnMaps = new LinkedHashSet<>();
+    private static final HashSet<Class> rowMaps = new LinkedHashSet<>();
 
     public SideMapModule() {
 //        System.out.println("Side maps initialized");
@@ -80,9 +81,9 @@ public class SideMapModule extends Module {
 //        System.err.println(rowMap);
 
         try {
-            MenuItem item = new MenuItem(((RowMap) rowMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
-
-            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", item, false, false);
+            Menu menu = new Menu(((RowMap) rowMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
+            
+            MenuItem item = new MenuItem("Toggle");
             item.addActionListener(new ActionListener() {
 
                 @Override
@@ -91,11 +92,14 @@ public class SideMapModule extends Module {
                         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                         object.getCoolMapView().addRowMap(rowMap.getConstructor(CoolMapObject.class).newInstance(object));
                     } catch (Exception ex) {
-//                    ex.printStackTrace();
-                        //need an error logging system
                     }
                 }
             });
+            
+            menu.add(item);
+
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", menu, false, false);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
