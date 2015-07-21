@@ -19,6 +19,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +36,11 @@ import org.jdesktop.core.animation.timing.TimingTarget;
  *
  * @author Keqiang Li
  */
-public class ColumnHighlightor extends ColumnMap<Object, Object> {
+public class ColumnHighlightor extends ColumnMap<Object, Object> implements MouseMotionListener {
 
     private final HoverTarget _hoverTarget = new HoverTarget();
     private final Animator _hoverAnimator = CAnimator.createInstance(_hoverTarget, 150);
-    
+
     private final Rectangle _activeRectangle = new Rectangle();
 
     private AggregationUtil.AggregationType aggregationType;
@@ -67,6 +69,8 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> {
 
         _zoomControlX = getCoolMapView().getZoomControlX();
         initPopupMenu();
+        
+        getViewPanel().addMouseMotionListener(this);
     }
 
     private void initPopupMenu() {
@@ -296,6 +300,23 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> {
     @Override
     protected void prepareRender(Graphics2D g2D) {
         g2D.setFont(_zoomControlX.getBoldFont());
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        CoolMapView view = getCoolMapView();
+        if (view != null) {
+            Integer col = view.getCurrentCol(e.getX());
+            MatrixCell oldCell = view.getActiveCell();
+            MatrixCell newCell = new MatrixCell(oldCell.getRow(), col);
+            if (!newCell.valueEquals(oldCell)) {
+                view.setActiveCell(view.getActiveCell(), newCell);
+            }
+        }
     }
 
     private class HoverTarget implements TimingTarget {

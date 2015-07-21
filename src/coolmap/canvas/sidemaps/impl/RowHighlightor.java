@@ -17,9 +17,12 @@ import coolmap.utils.statistics.LabelToColor;
 import coolmap.utils.statistics.MatrixUtil;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +39,7 @@ import org.jdesktop.core.animation.timing.TimingTarget;
  * @author Keqiang Li
  */
 
-public class RowHighlightor extends RowMap<Object, Object> {
+public class RowHighlightor extends RowMap<Object, Object> implements MouseMotionListener {
     
     private final HoverTarget _hoverTarget = new HoverTarget();
     private final Animator _hoverAnimator = CAnimator.createInstance(_hoverTarget, 150);
@@ -76,6 +79,8 @@ public class RowHighlightor extends RowMap<Object, Object> {
         _zoomControlY = getCoolMapView().getZoomControlY();
 
         initPopupMenu();
+        
+        getViewPanel().addMouseMotionListener(this);
     }
 
     private void initPopupMenu() {
@@ -281,6 +286,25 @@ public class RowHighlightor extends RowMap<Object, Object> {
 
     @Override
     public void selectionChanged(CoolMapObject obj) {
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        CoolMapView view = getCoolMapView();
+        if (view != null) {
+            Point mouse = translateToCanvas(e.getX(), e.getY());
+
+            Integer row = view.getCurrentRow(mouse.y);
+            MatrixCell oldCell = view.getActiveCell();
+            MatrixCell newCell = new MatrixCell(row, oldCell.getCol());
+            if (!newCell.valueEquals(oldCell)) {
+                view.setActiveCell(view.getActiveCell(), newCell);
+            }
+        }
     }
 
     private class HoverTarget implements TimingTarget {
