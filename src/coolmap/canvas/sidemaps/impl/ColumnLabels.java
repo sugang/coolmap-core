@@ -540,7 +540,7 @@ public class ColumnLabels extends ColumnMap<Object, Object> implements MouseList
         if (node == null || node.getViewOffset() == null) {
             return;
         }
-        _activeRectangle.x = (int) (getCoolMapView().getMapAnchor().x + node.getViewOffset());
+    _activeRectangle.x = (int) (getCoolMapView().getMapAnchor().x + node.getViewOffset());
         _activeRectangle.y = 0;
         _activeRectangle.width = (int) node.getViewSizeInMap(view.getZoomX());
     }

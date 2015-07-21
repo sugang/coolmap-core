@@ -11,7 +11,6 @@ import coolmap.canvas.sidemaps.RowMap;
 import coolmap.data.CoolMapObject;
 import coolmap.module.Module;
 import coolmap.utils.Config;
-import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,7 +60,6 @@ public class SideMapModule extends Module {
 
                         Class<ColumnMap> cls = (Class<ColumnMap>) Class.forName(colMapClass);
 
-//                        ColumnMap map = cls.getDeclaredConstructor(CoolMapObject.class).newInstance();
                         registerSideMapColumn(cls);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -81,9 +79,8 @@ public class SideMapModule extends Module {
 //        System.err.println(rowMap);
 
         try {
-            Menu menu = new Menu(((RowMap) rowMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
+            MenuItem item = new MenuItem(((RowMap) rowMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
             
-            MenuItem item = new MenuItem("Toggle");
             item.addActionListener(new ActionListener() {
 
                 @Override
@@ -92,13 +89,12 @@ public class SideMapModule extends Module {
                         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                         object.getCoolMapView().addRowMap(rowMap.getConstructor(CoolMapObject.class).newInstance(object));
                     } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
                 }
             });
-            
-            menu.add(item);
 
-            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", menu, false, false);
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Row side/", item, false, false);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +107,7 @@ public class SideMapModule extends Module {
 //        System.err.println(columnMap);
         try {
             MenuItem item = new MenuItem(((ColumnMap) columnMap.getConstructor(CoolMapObject.class).newInstance(new CoolMapObject())).getName());
-            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Column side/", item, false, false);
+
             item.addActionListener(new ActionListener() {
 
                 @Override
@@ -120,11 +116,13 @@ public class SideMapModule extends Module {
                         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                         object.getCoolMapView().addColumnMap(columnMap.getConstructor(CoolMapObject.class).newInstance(object));
                     } catch (Exception ex) {
-//                    ex.printStackTrace();
-                        //need an error logging system
+                        ex.printStackTrace();
                     }
                 }
             });
+            
+            CoolMapMaster.getCMainFrame().addMenuItem("View/Canvas config/Column side/", item, false, false);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

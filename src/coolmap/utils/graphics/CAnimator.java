@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.utils.graphics;
 
 import java.util.concurrent.TimeUnit;
@@ -16,8 +12,8 @@ import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
  */
 public class CAnimator {
 
-    private static SwingTimerTimingSource _timingSource = new SwingTimerTimingSource();
-    private static AccelerationInterpolator _easing = new AccelerationInterpolator(0.35, 0.35);
+    private static final SwingTimerTimingSource _timingSource = new SwingTimerTimingSource();
+    private static final AccelerationInterpolator _easing = new AccelerationInterpolator(0.35, 0.35);
     
     public static Animator createInstance(TimingTarget target, int duration){
         _timingSource.init();
