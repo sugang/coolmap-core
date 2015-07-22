@@ -376,7 +376,7 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
         }
         
     }
-    private Rectangle _activeRectangle = new Rectangle();
+    private final Rectangle _activeRectangle = new Rectangle();
 
     private void _updateRectangle(MatrixCell activeCell) {
         CoolMapView view = getCoolMapView();
