@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.application.plugin;
 
 import coolmap.application.widget.impl.console.CMConsole;
@@ -52,10 +47,7 @@ public class PluginMaster {
         for (File file : dirs) {
             if (file.isDirectory()) {
                 try {
-                    if (file.getName().endsWith(".plugin")) {
-                        pluginManager.addPluginsFrom(file.toURI());
-                    }
-
+                    pluginManager.addPluginsFrom(file.toURI());
                 } catch (Exception e) {
                     System.err.println("Error loading plugin from folder:" + file);
                 }

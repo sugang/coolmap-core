@@ -567,8 +567,6 @@ public class CMainFrame extends JFrame {
         addMenuItem("", new Menu(ANALYSIS), false, false);
         addMenuItem("", new Menu(PLUGIN), false, false);
         addMenuItem("", new Menu(ABOUT), false, false);
-//        addMenuItem("", new Menu("Analysis"), false, false);
-//        addMenuItem("", new Menu("About"), false, false);
     }
     
     public final String FILE = "File";
