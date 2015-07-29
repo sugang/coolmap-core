@@ -5,7 +5,7 @@ import coolmap.utils.Config;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 import net.xeoh.plugins.base.PluginInformation;
 import net.xeoh.plugins.base.PluginManager;
@@ -82,14 +82,16 @@ public class PluginMaster {
                 if (piImpl != null) {
                     //gets the string
                     try {
-                        Collection<String> paths = piImpl.getInformation(PluginInformation.Information.CLASSPATH_ORIGIN, plugin);
 
+                        Collection<String> paths = piImpl.getInformation(PluginInformation.Information.CLASSPATH_ORIGIN, plugin);
                         if (!paths.isEmpty()) {
                             String path = paths.iterator().next();
                             
                             if (path != null) {
-                                URL url = new URL(path);
-                                BufferedReader reader = new BufferedReader(new FileReader(url.getPath() + "config.json"));
+                                URI uri = new URI(path);
+                                URI parent = uri.getPath().endsWith(File.pathSeparator) ? uri.resolve("..") : uri.resolve(".");
+                                
+                                BufferedReader reader = new BufferedReader(new FileReader(parent.getPath() + "config.json"));
                                 StringBuilder sb = new StringBuilder();
                                 String line;
                                 while ((line = reader.readLine()) != null) {
