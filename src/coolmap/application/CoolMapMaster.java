@@ -13,10 +13,18 @@ import coolmap.application.utils.DataMaster;
 import coolmap.application.utils.Session;
 import coolmap.application.widget.Widget;
 import coolmap.application.widget.WidgetMaster;
+import coolmap.canvas.datarenderer.renderer.impl.NumberToColor;
+import coolmap.canvas.sidemaps.impl.ColumnLabels;
+import coolmap.canvas.sidemaps.impl.ColumnTree;
+import coolmap.canvas.sidemaps.impl.RowLabels;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
+import coolmap.data.aggregator.impl.DoubleDoubleMean;
+import coolmap.data.cmatrix.impl.DoubleCMatrix;
 import coolmap.data.cmatrix.model.CMatrix;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.contology.model.COntology;
+import coolmap.data.snippet.DoubleSnippet1_3;
 import coolmap.module.ModuleMaster;
 import coolmap.utils.CSplashScreen;
 import coolmap.utils.Tools;
@@ -406,6 +414,59 @@ public final class CoolMapMaster {
         DataMaster.fireCOntologyToBeDestroyed(ontology);
         _contologies.remove(ontology.getID());
         ontology.destroy();
+    }
+
+    public static void loadNewMatrix(String matrixName, double[][] data, String[] rowLabels, String[] columnLabels, int rowNum, int colNum) {
+        DoubleCMatrix matrix = new DoubleCMatrix(matrixName, rowNum, colNum);
+        
+        if (rowLabels != null) {
+            for (int i = 0; i < rowLabels.length; ++i) {
+                String rowLabel = rowLabels[i];
+                matrix.setRowLabel(i, rowLabel);
+            }
+        }
+        
+        if (columnLabels != null) {
+            for (int j = 0; j < columnLabels.length; ++j) {
+                String columnLabel = columnLabels[j];
+                matrix.setColLabel(j, columnLabel);
+
+            }
+        }
+
+        for (int i = 0; i < rowNum; ++i) {
+            for (int j = 0; j < colNum; ++j) {
+                Double value = data[i][j];
+                matrix.setValue(i, j, value);
+            }
+        }
+
+        CoolMapObject object = new CoolMapObject();
+        object.setName(Tools.removeFileExtension(matrixName));
+        object.addBaseCMatrix(matrix);
+
+        ArrayList<VNode> nodes = new ArrayList<>();
+        for (Object label : matrix.getRowLabelsAsList()) {
+            nodes.add(new VNode(label.toString()));
+        }
+        object.insertRowNodes(nodes);
+
+        nodes.clear();
+        for (Object label : matrix.getColLabelsAsList()) {
+            nodes.add(new VNode(label.toString()));
+        }
+        object.insertColumnNodes(nodes);
+
+        object.setAggregator(new DoubleDoubleMean());
+        object.setSnippetConverter(new DoubleSnippet1_3());
+        object.setViewRenderer(new NumberToColor(), true);
+
+        object.getCoolMapView().addColumnMap(new ColumnLabels(object));
+        object.getCoolMapView().addColumnMap(new ColumnTree(object));
+        object.getCoolMapView().addRowMap(new RowLabels(object));
+        object.getCoolMapView().addRowMap(new RowTree(object));
+
+        CoolMapMaster.addNewCoolMapObject(object);
     }
 
 }

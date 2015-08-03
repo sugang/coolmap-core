@@ -15,29 +15,6 @@ public class MatrixUtils {
     public static final int DIRECTION_ROW = 0;
     public static final int DIRECTION_COLUMN = 1;
 
-    public static void main(String[] args) {
-        try {
-            Double[][] x = new Double[4000][4000];
-            fillDoubleWithGradient(x);
-
-            long t1 = System.nanoTime();
-
-            //transpose(x, Double.class, 2);
-            //transpose(x, Double.class); //takes about 400ms for a full transpose
-
-            transpose(x);
-            
-//            System.out.println((System.nanoTime() - t1) / 1000000f);
-
-            //printMatrix();
-            
-            
-        } catch (Exception e) {
-        }
-        
-        
-    }
-
     public static <T extends Object> T[][] transpose(T[][] input, Class<T> type) throws InterruptedException {
         //T[][] returnMx = (T[][])(new Object[input[0].length][input.length]);
         if (input == null || input.length == 0 || input[0].length == 0) {
