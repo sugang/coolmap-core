@@ -192,7 +192,8 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 //        
 //        return null;
 //    }
-    public BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
+    
+    public BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float xPercentage, float yPercentage) {
         try {
             if (data == null) {
                 return null;
@@ -204,8 +205,8 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             float zoomX = view.getZoomX();
             float zoomY = view.getZoomY();
 
-            float mapWidth = view.getMapWidth() * percentage;
-            float mapHeight = view.getMapHeight() * percentage;
+            float mapWidth = view.getMapWidth() * xPercentage;
+            float mapHeight = view.getMapHeight() * yPercentage;
 
             if (mapWidth <= 0) {
                 mapWidth = 1;
@@ -228,26 +229,19 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             float currentWidth = 0;
             float currentHeight = 0;
 
-//        try{
-//            Thread.sleep(5000);
-//        }
-//        catch(Exception e){
-//            
-//        }
-//        Thread.sleep(1000);
             //then render
             for (int i = 0; i < data.getViewNumRows(); i++) {
                 VNode rowNode = data.getViewNodeRow(i);
-                currentAnchorY = rowNode.getViewOffset() * percentage;
-                currentHeight = rowNode.getViewSizeInMap(zoomY) * percentage;
+                currentAnchorY = rowNode.getViewOffset() * yPercentage;
+                currentHeight = rowNode.getViewSizeInMap(zoomY) * yPercentage;
                 if (currentHeight < 1) {
                     currentHeight = 1;
                 }
 
                 for (int j = 0; j < data.getViewNumColumns(); j++) {
                     VNode colNode = data.getViewNodeColumn(j);
-                    currentAnchorX = colNode.getViewOffset() * percentage;
-                    currentWidth = colNode.getViewSizeInMap(zoomX) * percentage;
+                    currentAnchorX = colNode.getViewOffset() * xPercentage;
+                    currentWidth = colNode.getViewSizeInMap(zoomX) * xPercentage;
                     if (currentWidth < 1) {
                         currentWidth = 1;
                     }
@@ -256,13 +250,6 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
 
                     //use low definition mode
                     renderCellLD(v, rowNode, colNode, g2D, Math.round(currentAnchorX), Math.round(currentAnchorY), Math.round(currentWidth), Math.round(currentHeight));
-//                try{
-//                    Thread.sleep(50);
-//                }
-//                
-//                catch(InterruptedException e){
-//                    throw e;
-//                }
 
                     if (Thread.interrupted()) {
                         return null;
@@ -278,6 +265,11 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         } catch (Exception e) {
             return null;
         }
+    }
+    
+    
+    public BufferedImage getRenderedFullMap(CoolMapObject<?, VIEW> data, float percentage) {
+        return getRenderedFullMap(data, percentage, percentage);
     }
 
     public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
