@@ -17,6 +17,8 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.task.ColumnTreeNodeExpandingTaskImpl;
+import coolmap.task.RowTreeNodeExpandingTaskImpl;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
@@ -37,10 +39,13 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -245,9 +250,61 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 //        }
 //
 //    }
+    private List<VNode> DFSFindNames(List<VNode> activeColumnNodes, Set<String> names) {
+        List<VNode> containingNodes = new LinkedList<>();
+
+        for (VNode node : activeColumnNodes) {
+            if (isContainingNode(node, names)) {
+                containingNodes.add(node);
+            }
+        }
+
+        return containingNodes;
+    }
+
+    private boolean isContainingNode(VNode node, Set<String> names) {
+        if (node.isSingleNode()) {
+            return names.contains(node.getName());
+        }
+        List<VNode> childNodes = node.getChildNodes();
+        for (VNode childNode : childNodes) {
+            if (isContainingNode(childNode, names)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private void _initPopupMenu() {
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
+        
+        JMenuItem enrichItem = new JMenuItem("enrichment gene list");
+
+        enrichItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<VNode> activeColumnNodes = getCoolMapObject().getViewNodesColumn();
+                Set<String> names = new HashSet<>();
+                names.add("PTGES3");
+                names.add("TXNIP");
+                names.add("PIK3C2A");
+                names.add("CCNT1");
+                List<VNode> containingNodes = DFSFindNames(activeColumnNodes, names);
+
+                ExecutorService service = Executors.newSingleThreadExecutor();
+
+                ColumnTreeNodeExpandingTaskImpl task = new ColumnTreeNodeExpandingTaskImpl(containingNodes, 3000, CoolMapMaster.getActiveCoolMapObject());
+
+                task.addNameToHighlight(names);
+
+                service.submit(task);
+            }
+
+        });
+        
+        _popupMenu.add(enrichItem);
 
         _selectSubtree = new JMenuItem("Select columns");
         _selectSubtree.setToolTipText("Select columns with selected ontology nodes");
