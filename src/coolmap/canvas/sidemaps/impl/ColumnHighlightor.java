@@ -42,6 +42,12 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> implements Mous
     private final Animator _hoverAnimator = CAnimator.createInstance(_hoverTarget, 150);
 
     private final Rectangle _activeRectangle = new Rectangle();
+    
+    private String labelValueFormatString = "%.2f";
+    
+    public void setLabelValueFormatString(String format) {
+        labelValueFormatString = format;
+    }
 
     private AggregationUtil.AggregationType aggregationType;
 
@@ -50,10 +56,16 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> implements Mous
     private final ZoomControl _zoomControlX;
 
     private LabelToColor labelToColor;
+    
+    private boolean aggregationEnabled = true;
 
     @Override
     public String getName() {
         return "Column Highlightor";
+    }
+    
+    public void setAggregationEnabled(boolean enabled) {
+        aggregationEnabled = enabled;
     }
 
     public void setAggregationType(AggregationUtil.AggregationType type) {
@@ -149,22 +161,32 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> implements Mous
                     return;
                 }
 
-                List<Object> leafNames = MatrixUtil.getColumnLeafNodeNames(node, matrix);
-                List<Double> allLeafValues = new ArrayList<>();
+                
+                if (aggregationEnabled) {
+                    List<Object> leafNames = MatrixUtil.getColumnLeafNodeNames(node, matrix);
+                    List<Double> allLeafValues = new ArrayList<>();
 
-                for (Object name : leafNames) {
-                    String leafName = (String) name;
-                    if (!labelToColor.containsLabel(leafName)) {
-                        continue; // doesn't have this leaf
+                    for (Object name : leafNames) {
+                        String leafName = (String) name;
+                        if (!labelToColor.containsLabel(leafName)) {
+                            continue; // doesn't have this leaf
+                        }
+                        allLeafValues.add(labelToColor.getValue(leafName));
                     }
-                    allLeafValues.add(labelToColor.getValue(leafName));
-                }
 
-                if (allLeafValues.isEmpty()) {
-                    return;
+                    if (allLeafValues.isEmpty()) {
+                        return;
+                    }
+                    
+                    value = AggregationUtil.doAggregation(allLeafValues, aggregationType);
+                } else {
+                    if (labelToColor.containsLabel(label)) {
+                        value = labelToColor.getValue(label);
+                    } else {
+                        return;
+                    }
                 }
-
-                value = AggregationUtil.doAggregation(allLeafValues, aggregationType);
+                
                 color = labelToColor.getColor(value);
             } else {
 
@@ -187,7 +209,7 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> implements Mous
             }
 
             if (isLabelVisible) {
-                BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
+                BufferedImage image = Tools.createStringImage(g2D, "" + String.format(labelValueFormatString, value));
                 g2D.rotate(-Math.PI / 2);
                 g2D.drawImage(image, null, -anchorY - cellHeight + 8, anchorX);
                 g2D.rotate(Math.PI / 2);

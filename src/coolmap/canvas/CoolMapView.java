@@ -225,9 +225,6 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     private void _fireViewActiveCellChanged(MatrixCell oldCell, MatrixCell newCell) {
-//        for (CViewActiveCellChangedListener viewActiveCellChangedListener : _viewActiveCellChangedListeners) {
-//            viewActiveCellChangedListener.activeCellChanged(_coolMapObject, oldCell, newCell);
-//        }
         for (CViewListener listener : _viewListeners) {
             listener.activeCellChanged(_coolMapObject, oldCell, newCell);
         }

@@ -8,11 +8,13 @@ import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
+import coolmap.canvas.sidemaps.util.SideTreeUtil;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.task.ColumnTreeNodeExpandingTaskImpl;
 import coolmap.task.RowTreeNodeExpandingTaskImpl;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
@@ -33,16 +35,15 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -125,31 +126,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
         this._treeNodesSelectedListener = widgetCOntology;
     }
-
-    private List<VNode> DFSFindNames(List<VNode> activeRowNodes, Set<String> names) {
-        List<VNode> containingNodes = new LinkedList<>();
-        
-        for (VNode node : activeRowNodes) {
-            if (isContainingNode(node, names)) {
-                containingNodes.add(node);
-            }
-        }
-        
-        return containingNodes;
-    }
-    
-    private boolean isContainingNode(VNode node, Set<String> names) {
-        if (node.isSingleNode()) {
-            return names.contains(node.getName());
-        }
-        List<VNode> childNodes = node.getChildNodes();
-        for (VNode childNode : childNodes) {
-            if (isContainingNode(childNode, names)) {
-                return true;
-            }
-        }
-        return false;
-    }
     
     private void _initPopupMenu() {
         _popupMenu = new JPopupMenu();
@@ -162,20 +138,50 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<VNode> activeRowNodes = getCoolMapObject().getViewNodesRow();
                 Set<String> names = new HashSet<>();
                 names.add("S178");
+                names.add("S197");
                 names.add("S10");
                 names.add("S25");
                 names.add("S159");
-                List<VNode> containingNodes = DFSFindNames(activeRowNodes, names);
+                
+                List<VNode> rootNodes;
+                
+                Map<VNode, Integer> countedMapping = new HashMap<>();
+                
+                List<VNode> allNodes = getCoolMapObject().getViewTreeNodesRow();
                 
                 ExecutorService service = Executors.newSingleThreadExecutor();
-                
-                RowTreeNodeExpandingTaskImpl task = new RowTreeNodeExpandingTaskImpl(containingNodes, 3000, CoolMapMaster.getActiveCoolMapObject());
-                
-                task.addNameToHighlight(names);
-                
+                RowTreeNodeExpandingTaskImpl task;
+                if (allNodes.isEmpty()) {
+                    rootNodes = getCoolMapObject().getViewNodesRow();
+                    List<VNode> returnedRootNodes = SideTreeUtil.DFSFindRootNodesContainingNameNumber(rootNodes, names, countedMapping);
+                    
+                    task = new RowTreeNodeExpandingTaskImpl(returnedRootNodes, countedMapping, 3000, CoolMapMaster.getActiveCoolMapObject());
+                    
+                } else {
+                    List<VNode> activeRowNodes = getCoolMapObject().getViewNodesRow();
+                    
+                    rootNodes = new LinkedList<>();
+                    for (VNode node : allNodes) {
+                        if (node.getParentNode() == null) {
+                            rootNodes.add(node);
+                        }
+                    }
+                    
+                    SideTreeUtil.DFSFindRootNodesContainingNameNumber(rootNodes, names, countedMapping);
+                    
+                    activeRowNodes.retainAll(countedMapping.keySet());
+                    
+                    List<VNode> returnedList = new ArrayList<>(activeRowNodes);
+                    for (VNode node : activeRowNodes) {
+                        if (node.isSingleNode()) {
+                            returnedList.remove(node);
+                        }
+                    }
+                    
+                    task = new RowTreeNodeExpandingTaskImpl(returnedList, countedMapping, 3000, CoolMapMaster.getActiveCoolMapObject());
+                }
                 service.submit(task);
             }
 

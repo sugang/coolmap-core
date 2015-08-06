@@ -43,6 +43,14 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
     
     private final HoverTarget _hoverTarget = new HoverTarget();
     private final Animator _hoverAnimator = CAnimator.createInstance(_hoverTarget, 150);
+    
+    private String labelValueFormatString = "%.2f";
+    
+    public void setLabelValueFormatString(String format) {
+        labelValueFormatString = format;
+    }
+    
+    private boolean aggregationEnabled = true;
 
     private AggregationType aggregationType;
 
@@ -54,6 +62,10 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
     @Override
     public String getName() {
         return "Row Highlightor";
+    }
+    
+    public void setAggregationEnabled(boolean enabled) {
+        aggregationEnabled = enabled;
     }
     
     public LabelToColor getLabelToColor() {
@@ -209,24 +221,31 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
                 CMatrix matrix = (CMatrix) CoolMapMaster.getActiveCoolMapObject().getBaseCMatrices().get(0);
                 if (matrix == null) {
                     return;
-                }
+                }      
 
-                List<Object> leafNames = MatrixUtil.getRowLeafNodeNames(node, matrix);
-                List<Double> allLeafValues = new ArrayList<>();
+                if (aggregationEnabled) {
+                    List<Object> leafNames = MatrixUtil.getRowLeafNodeNames(node, matrix);
+                    List<Double> allLeafValues = new ArrayList<>();
 
-                for (Object name : leafNames) {
-                    String leafName = (String) name;
-                    if (!labelToColor.containsLabel(leafName)) {
-                        continue; // doesn't have this leaf
+                    for (Object name : leafNames) {
+                        String leafName = (String) name;
+                        if (!labelToColor.containsLabel(leafName)) {
+                            continue; // doesn't have this leaf
+                        }
+                        allLeafValues.add(labelToColor.getValue(leafName));
                     }
-                    allLeafValues.add(labelToColor.getValue(leafName));
-                }
 
-                if (allLeafValues.isEmpty()) {
-                    return;
+                    if (allLeafValues.isEmpty()) {
+                        return;
+                    }
+                    value = AggregationUtil.doAggregation(allLeafValues, aggregationType);  
+                } else {
+                    if (labelToColor.containsLabel(label)) {
+                        value = labelToColor.getValue(label);
+                    } else {
+                        return;
+                    } 
                 }
-
-                value = AggregationUtil.doAggregation(allLeafValues, aggregationType);
                 color = labelToColor.getColor(value);
 
             } else {
@@ -251,7 +270,7 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
             // can set this value to false to remove the labels. (sometimes we only need color)
             if (isLabelVisible) {
 
-                BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
+                BufferedImage image = Tools.createStringImage(g2D, "" + String.format(labelValueFormatString, value));
 
                 g2D.drawImage(image, null, anchorX + 10, anchorY);
             }

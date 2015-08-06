@@ -5,6 +5,7 @@ import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import java.awt.Rectangle;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -12,8 +13,8 @@ import java.util.List;
  */
 public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
 
-    public RowTreeNodeExpandingTaskImpl(List<VNode> initialNodes, long timeInterval, CoolMapObject obj) {
-        super(initialNodes, timeInterval, obj);
+    public RowTreeNodeExpandingTaskImpl(List<VNode> initialNodes,  Map<VNode, Integer> mappings, long timeInterval, CoolMapObject obj) {
+        super(initialNodes, mappings, timeInterval, obj);
     }
 
     @Override
@@ -28,39 +29,25 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
             }
         }
     }
-
-    @Override
-    protected void actionWithinInterval() {
-        updateRowHighlightor();
-    }
     
-    private void updateRowHighlightor() {
+    @Override
+    protected void updateHighlightor() {
         CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
-        if (attachedCoolMapObject == null || getNameSet().isEmpty()) {
+        if (attachedCoolMapObject == null) {
             return;
         }
 
         RowHighlightor rowHighlightor = (RowHighlightor) attachedCoolMapObject.getCoolMapView().getRowMap(RowHighlightor.class.getName());
         if (rowHighlightor == null) {
             rowHighlightor = new RowHighlightor(attachedCoolMapObject, getLabelToColor());
-            rowHighlightor.setLabelVisible(false);
+            rowHighlightor.setLabelVisible(true);
+            rowHighlightor.setAggregationEnabled(false);
+            rowHighlightor.setLabelValueFormatString("%.0f");
             attachedCoolMapObject.getCoolMapView().addRowMap(rowHighlightor);
             attachedCoolMapObject.getCoolMapView().moveRowMapToBottom(rowHighlightor);
         } else {
             rowHighlightor.setLabelToColor(getLabelToColor());
             attachedCoolMapObject.getCoolMapView().updateRowMapBuffersEnforceAll();
-        }
-    }
-
-    @Override
-    protected void prepareForRuning() {
-        CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
-        if (attachedCoolMapObject == null) return;
-        
-        RowHighlightor rowHighlightor = (RowHighlightor) attachedCoolMapObject.getCoolMapView().getRowMap(RowHighlightor.class.getName());
-        
-        if (rowHighlightor != null) {
-            attachedCoolMapObject.getCoolMapView().removeRowMap(rowHighlightor);
         }
     }
 }
