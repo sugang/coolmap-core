@@ -55,6 +55,10 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
     public String getName() {
         return "Row Highlightor";
     }
+    
+    public LabelToColor getLabelToColor() {
+        return labelToColor;
+    }
 
     @Override
     public void nameChanged(CoolMapObject object) {
@@ -243,10 +247,14 @@ public class RowHighlightor extends RowMap<Object, Object> implements MouseMotio
             } else {
                 g2D.fillRect(anchorX - 4, anchorY, 10, cellHeight);
             }
+            
+            // can set this value to false to remove the labels. (sometimes we only need color)
+            if (isLabelVisible) {
 
-            BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
+                BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
 
-            g2D.drawImage(image, null, anchorX + 10, anchorY);
+                g2D.drawImage(image, null, anchorX + 10, anchorY);
+            }
 
         }
     }

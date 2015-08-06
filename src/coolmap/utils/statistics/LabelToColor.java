@@ -32,4 +32,8 @@ public class LabelToColor {
     public Color getColor(double value) {
         return valueToColorUtil.convertToColor(value);
     }
+    
+    public Map<String, Double> getLabelToValue() {
+        return labelToValue;
+    }
 }

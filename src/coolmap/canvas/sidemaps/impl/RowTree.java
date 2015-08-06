@@ -13,6 +13,7 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.task.RowTreeNodeExpandingTaskImpl;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
@@ -32,10 +33,16 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -86,50 +93,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         getViewPanel().repaint();
     }
 
-//    private void _selectSubTree() {
-//
-//        if (_selectedNodes.isEmpty()) {
-//            return;
-//        }
-//
-//        List<VNode> childNodeInTree = getCoolMapObject().getViewNodesRowFromTreeNodesLeafOnly(_selectedNodes);
-//        if (childNodeInTree == null || childNodeInTree.isEmpty()) {
-//            return;
-//        }
-//
-//        HashSet<Range<Integer>> selectedRows = new HashSet<Range<Integer>>();
-//
-//        VNode firstNode = childNodeInTree.get(0);
-//        if (firstNode.getViewIndex() == null) {
-//            return;
-//        }
-//        int startIndex = firstNode.getViewIndex().intValue();
-//        int currentIndex = startIndex;
-//
-//        for (VNode node : childNodeInTree) {
-//            //System.out.println(node.getViewIndex());
-//            if (node.getViewIndex() == null) {
-//                return;//should not happen
-//            }
-//            if (node.getViewIndex().intValue() <= currentIndex + 1) {
-//                currentIndex = node.getViewIndex().intValue();
-//                continue;
-//            } else {
-//                //add last start and current
-//                selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
-//                currentIndex = node.getViewIndex().intValue();
-//                startIndex = currentIndex;
-//            }
-//        }
-//
-//        selectedRows.add(Range.closedOpen(startIndex, currentIndex + 1));
-//
-////        for (Range range : selectedRows) {
-////            System.out.println(range);
-////        }
-//        getCoolMapView().setSelectionsRow(selectedRows);
-//
-//    }
     @Override
     public void viewRendererChanged(CoolMapObject object) {
     }
@@ -162,10 +125,64 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         WidgetCOntology widgetCOntology = (WidgetCOntology) WidgetMaster.getWidget(WidgetCOntology.class.getName());
         this._treeNodesSelectedListener = widgetCOntology;
     }
+
+    private List<VNode> DFSFindNames(List<VNode> activeRowNodes, Set<String> names) {
+        List<VNode> containingNodes = new LinkedList<>();
+        
+        for (VNode node : activeRowNodes) {
+            if (isContainingNode(node, names)) {
+                containingNodes.add(node);
+            }
+        }
+        
+        return containingNodes;
+    }
+    
+    private boolean isContainingNode(VNode node, Set<String> names) {
+        if (node.isSingleNode()) {
+            return names.contains(node.getName());
+        }
+        List<VNode> childNodes = node.getChildNodes();
+        for (VNode childNode : childNodes) {
+            if (isContainingNode(childNode, names)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     private void _initPopupMenu() {
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
+        
+        
+        JMenuItem enrichItem = new JMenuItem("enrichment gene list");
+        
+        enrichItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<VNode> activeRowNodes = getCoolMapObject().getViewNodesRow();
+                Set<String> names = new HashSet<>();
+                names.add("S178");
+                names.add("S10");
+                names.add("S25");
+                names.add("S159");
+                List<VNode> containingNodes = DFSFindNames(activeRowNodes, names);
+                
+                ExecutorService service = Executors.newSingleThreadExecutor();
+                
+                RowTreeNodeExpandingTaskImpl task = new RowTreeNodeExpandingTaskImpl(containingNodes, 3000, CoolMapMaster.getActiveCoolMapObject());
+                
+                task.addNameToHighlight(names);
+                
+                service.submit(task);
+            }
+
+
+        }); 
+        
+        _popupMenu.add(enrichItem);
         
         _selectSubtree = new JMenuItem("Select rows");
         _selectSubtree.setToolTipText("Select rows with selected ontology nodes");
@@ -699,10 +716,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         } catch (Exception e) {
             
         }
-
-//        System.err.println("=Row tree nodes=");
-//        System.err.println(rowTreeNodes);
-//        System.err.println("===========");
     }
     
     private final ArrayList<VNode> activeTreeNodes = new ArrayList<>();
@@ -728,13 +741,6 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
         return (leftOffset + rightOffset) / 2;
     }
 
-//    @Override
-//    public void subSelectionRowChanged(CoolMapObject object) {
-//    }
-//
-//    @Override
-//    public void subSelectionColumnChanged(CoolMapObject object) {
-//    }
     private void _renderTreeNodes(Graphics2D g2D, CoolMapObject object, int fromRow, int toRow, int fromCol, int toCol, float zoomX, float zoomY, int renderWidth, int renderHeight) {
         
         List<VNode> treeNodes = object.getViewTreeNodesRow(); //should contain all tree nodes

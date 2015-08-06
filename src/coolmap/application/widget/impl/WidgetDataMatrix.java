@@ -353,6 +353,7 @@ public class WidgetDataMatrix extends Widget implements CObjectListener, CViewLi
             });
         } catch (Exception e) {
             System.err.println("Minor issue when attempting to update table model. Possibly due to render cancelation");
+            e.printStackTrace();
         }
     }
 

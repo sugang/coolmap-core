@@ -186,10 +186,12 @@ public class ColumnHighlightor extends ColumnMap<Object, Object> implements Mous
                 g2D.fillRect(anchorX, anchorY + cellHeight - 5, cellWidth, 10);
             }
 
-            BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
-            g2D.rotate(-Math.PI / 2);
-            g2D.drawImage(image, null, -anchorY - cellHeight + 8, anchorX);
-            g2D.rotate(Math.PI / 2);
+            if (isLabelVisible) {
+                BufferedImage image = Tools.createStringImage(g2D, "" + String.format("%.2f", value));
+                g2D.rotate(-Math.PI / 2);
+                g2D.drawImage(image, null, -anchorY - cellHeight + 8, anchorX);
+                g2D.rotate(Math.PI / 2);
+            }
         }
     }
 

@@ -55,7 +55,6 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 /**
  *
@@ -1167,6 +1166,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
                     object.expandRowNodesToNextStep();    
+                    object.getCoolMapView().centerToPercentage(0.5f, 0.5f);
                 }
             }
         });
@@ -1182,7 +1182,8 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
 
                 CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
-                    object.collapseRowNodesOneLayer();    
+                    object.collapseRowNodesOneLayer();  
+                    object.getCoolMapView().centerToPercentage(0.5f, 0.5f);
                 }
             }
         });
@@ -1201,6 +1202,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
                     object.expandColumnNodesToNextStep();    
+                    object.getCoolMapView().centerToPercentage(0.5f, 0.5f);
                 }
             }
         });
@@ -1217,6 +1219,7 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
                 CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
                 if (object != null) {
                     object.collapseColumnNodesOneLayer();    
+                    object.getCoolMapView().centerToPercentage(0.5f, 0.5f);
                 }
             }
         });

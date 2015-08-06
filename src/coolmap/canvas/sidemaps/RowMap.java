@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.canvas.sidemaps;
 
 import coolmap.canvas.CoolMapView;
@@ -31,6 +27,8 @@ import org.json.JSONObject;
 /**
  *
  * @author gangsu
+ * @param <BASE>
+ * @param <VIEW>
  */
 public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListener, StateSavable {
 
@@ -43,6 +41,12 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
     private Font _messageFont;
     //private AffineTransform _rotationTransform;
     
+    protected boolean isLabelVisible = true;
+    
+    public void setLabelVisible(boolean isVisible) {
+        isLabelVisible = isVisible;
+    }
+
     public void destroy(){
         _mapBuffer = null;
     }
@@ -105,7 +109,9 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
      * paint underneath the buffer
      *
      * @param g2D
-     * @param canvas
+     * @param object
+     * @param width
+     * @param height
      */
     protected abstract void prePaint(final Graphics2D g2D, final CoolMapObject<BASE, VIEW> object, int width, int height);
 
@@ -114,8 +120,9 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
     /**
      *
      * @param g2D
-     * @param canvas
-     * @param yOffset amount ot add to compensate the parent container Y
+     * @param object
+     * @param width
+     * @param height
      */
     protected abstract void postPaint(final Graphics2D g2D, final CoolMapObject<BASE, VIEW> object, int width, int height);
 
@@ -127,11 +134,7 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 
     public boolean isDataViewValid() {
         CoolMapView view = getCoolMapView();
-        if (view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewMatrixValid()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(view == null || view.getCoolMapObject() == null || !view.getCoolMapObject().isViewMatrixValid());
     }
 
     public CoolMapObject<BASE, VIEW> getCoolMapObject() {
@@ -274,6 +277,7 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         }
         catch(Exception e){
             System.err.println("Minor issue when rendering row map");
+            e.printStackTrace();
         }
     }
 
@@ -303,36 +307,46 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
 
     public abstract String getName();
     
+    @Override
     public void aggregatorUpdated(CoolMapObject object) {
     }
     
+    @Override
     public void rowsChanged(CoolMapObject object) {
     }
     
+    @Override
     public void columnsChanged(CoolMapObject object) {
     }
  
+    @Override
     public void coolMapObjectBaseMatrixChanged(CoolMapObject object) {
     }
     
     public void stateStorageUpdated(CoolMapObject object) {
     }
     
+    @Override
     public void viewRendererChanged(CoolMapObject object) {
     }
     
+    @Override
     public void viewFilterChanged(CoolMapObject object) {
     }
     
+    @Override
     public void selectionChanged(CoolMapObject object) {
     }
 
+    @Override
     public void mapAnchorMoved(CoolMapObject object) {
     }
 
+    @Override
     public void activeCellChanged(CoolMapObject object, MatrixCell oldCell, MatrixCell newCell) {
     }
 
+    @Override
     public void mapZoomChanged(CoolMapObject object) {
     }
 

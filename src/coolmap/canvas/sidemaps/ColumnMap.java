@@ -40,6 +40,12 @@ public abstract class ColumnMap<BASE, VIEW> implements CViewListener, CObjectLis
     private final CoolMapObject<BASE, VIEW> _coolMapObject;
     private ImageIcon _icon;
     private Font _messageFont;
+    
+    protected boolean isLabelVisible = true;
+    
+    public void setLabelVisible(boolean isVisible) {
+        isLabelVisible = isVisible;
+    }
 
     public void clearBuffer() {
         _mapBuffer = null;

@@ -358,7 +358,7 @@ public class VNode {
         if (!_isChildNodeLoaded) {
             _loadChildNodesFromCOntology();
         }
-        return new ArrayList<VNode>(_childNodes);
+        return new ArrayList<>(_childNodes);
     }
 
     public void colorTree(Color color) {

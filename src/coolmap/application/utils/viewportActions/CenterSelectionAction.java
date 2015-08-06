@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package coolmap.application.utils.viewportActions;
 
 import coolmap.application.CoolMapMaster;
@@ -25,7 +20,6 @@ public class CenterSelectionAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         CoolMapObject object = CoolMapMaster.getActiveCoolMapObject();
         if (object != null) {
 
