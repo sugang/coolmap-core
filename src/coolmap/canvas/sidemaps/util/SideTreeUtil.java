@@ -35,7 +35,6 @@ public class SideTreeUtil {
 
             }
         }
-
         return rootNodes;
     }
 
