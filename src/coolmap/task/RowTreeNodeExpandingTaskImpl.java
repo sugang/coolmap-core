@@ -36,6 +36,8 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         if (attachedCoolMapObject == null) {
             return;
         }
+        
+        if (getMappings().isEmpty()) return;
 
         RowHighlightor rowHighlightor = (RowHighlightor) attachedCoolMapObject.getCoolMapView().getRowMap(RowHighlightor.class.getName());
         if (rowHighlightor == null) {

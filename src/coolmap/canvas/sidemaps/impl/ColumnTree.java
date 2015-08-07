@@ -18,7 +18,6 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
-import coolmap.task.ColumnTreeNodeExpandingTaskImpl;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
@@ -36,25 +35,31 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -210,61 +215,86 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
         _popupMenu = new JPopupMenu();
         getViewPanel().setComponentPopupMenu(_popupMenu);
         
-        JMenuItem enrichItem = new JMenuItem("enrichment gene list");
-
-        enrichItem.addActionListener(new ActionListener() {
+        
+        JMenu enrichmentMenu = new JMenu("Highlight nodes with names");
+        
+        JMenuItem enrichFromList = new JMenuItem("Type comma separated name list");
+        
+        enrichFromList.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<VNode> rootNodes;
-                
-                Set<String> names = new HashSet<>();
-                names.add("PTGES3");
-                names.add("TXNIP");
-                names.add("PIK3C2A");
-                names.add("CCNT1");
-                
-                Map<VNode, Integer> countedMapping = new HashMap<>();
-                
-                List<VNode> allNodes = getCoolMapObject().getViewTreeNodesColumn();
-                
-                ExecutorService service = Executors.newSingleThreadExecutor();
-                ColumnTreeNodeExpandingTaskImpl task;
-                if (allNodes.isEmpty()) {
-                    rootNodes = getCoolMapObject().getViewNodesColumn();
-                    List<VNode> returnedRootNodes = SideTreeUtil.DFSFindRootNodesContainingNameNumber(rootNodes, names, countedMapping);
-                    
-                    task = new ColumnTreeNodeExpandingTaskImpl(returnedRootNodes, countedMapping, 3000, CoolMapMaster.getActiveCoolMapObject());
-                    
-                } else {
-                    List<VNode> activeColumnNodes = getCoolMapObject().getViewNodesColumn();
-                    
-                    rootNodes = new LinkedList<>();
-                    for (VNode node : allNodes) {
-                        if (node.getParentNode() == null) {
-                            rootNodes.add(node);
-                        }
-                    }
-                    
-                    SideTreeUtil.DFSFindRootNodesContainingNameNumber(rootNodes, names, countedMapping);
-                    
-                    activeColumnNodes.retainAll(countedMapping.keySet());
-                    
-                    List<VNode> returnedList = new ArrayList<>(activeColumnNodes);
-                    for (VNode node : activeColumnNodes) {
-                        if (node.isSingleNode()) {
-                            returnedList.remove(node);
-                        }
-                    }
-                    
-                    task = new ColumnTreeNodeExpandingTaskImpl(returnedList, countedMapping, 3000, CoolMapMaster.getActiveCoolMapObject());
+                String input = JOptionPane.showInputDialog("Type a comma separated name list, such as gene names");
+                if (input == null || input.trim().isEmpty()) {
+                    return;
                 }
-                service.submit(task);
+
+                String[] allNames = input.split(",");
+
+                if (allNames.length == 0) {
+                    return;
+                }
+
+                Set<String> names = new HashSet<>();
+                for (String name : allNames) {
+                    names.add(name.trim().toLowerCase());
+                }
+
+                if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, false)) {
+                    JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
+                }
             }
 
         });
         
-        _popupMenu.add(enrichItem);
+        enrichmentMenu.add(enrichFromList);
+        
+        JMenuItem enrichFromFile = new JMenuItem("Comma seperated names from file");
+        
+        enrichFromFile.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                        "Text Files", "txt", "csv");
+                chooser.setFileFilter(filter);
+                int returnVal = chooser.showOpenDialog(CoolMapMaster.getCMainFrame());
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    
+                    BufferedReader reader;
+                    try {
+                        reader = new BufferedReader(new FileReader(file));
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(ColumnTree.class.getName()).log(Level.SEVERE, null, ex);
+                        return;
+                    }
+                    
+                    Set<String> names = new HashSet<>();
+                    try {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] allNames = line.split(",");
+                            if (allNames.length == 0) continue;
+                            for (String name : allNames) {
+                                names.add(name.trim().toLowerCase());
+                            }
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(ColumnTree.class.getName()).log(Level.SEVERE, null, ex);
+                        return;
+                    }
+
+                    if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, false)) {
+                        JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
+                    }
+                }
+            }
+        });
+        
+        enrichmentMenu.add(enrichFromFile);
+        _popupMenu.add(enrichmentMenu);
 
         _selectSubtree = new JMenuItem("Select columns");
         _selectSubtree.setToolTipText("Select columns with selected ontology nodes");

@@ -24,7 +24,7 @@ public class ColumnTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
             attachedCoolMapObject.expandColumnNodes(nodesToExpand, true);
             VNode nextRoot = getRootNodesToExpand().peek();
             if (nextRoot != null) {
-                Rectangle nodeRegion = new Rectangle(nextRoot.getViewIndex().intValue(), attachedCoolMapObject.getViewNodesColumn().size() / 2, 1, 1);
+                Rectangle nodeRegion = new Rectangle(nextRoot.getViewIndex().intValue(), attachedCoolMapObject.getViewNodesRow().size() / 2, 1, 1);
                 attachedCoolMapObject.getCoolMapView().centerToRegion(nodeRegion);
             }
         }
@@ -36,6 +36,8 @@ public class ColumnTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         if (attachedCoolMapObject == null) {
             return;
         }
+        
+        if (getMappings().isEmpty()) return;
 
         ColumnHighlightor columnHighlightor = (ColumnHighlightor) attachedCoolMapObject.getCoolMapView().getColumnMap(ColumnHighlightor.class.getName());
         if (columnHighlightor == null) {

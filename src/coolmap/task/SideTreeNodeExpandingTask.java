@@ -38,7 +38,7 @@ public abstract class SideTreeNodeExpandingTask implements Callable<Boolean>, Ac
         return mappings;
     }
 
-    public SideTreeNodeExpandingTask(final List<VNode> initialNodes, Map<VNode, Integer> mappings, long timeInterval, CoolMapObject obj) {
+    public SideTreeNodeExpandingTask(final List<VNode> initialNodes, final Map<VNode, Integer> mappings, long timeInterval, CoolMapObject obj) {
         this.period = timeInterval;
         this.coolMapObject = obj;
 
@@ -61,6 +61,7 @@ public abstract class SideTreeNodeExpandingTask implements Callable<Boolean>, Ac
             public void run() {
 
                 if (curNodesToExpand.isEmpty()) {
+                    coolMapObject.getCoolMapView().clearSelection();
                     VNode nextRoot = allRootNodesToExpand.peek();
                     if (nextRoot != null) {
                         curNodesToExpand.add(nextRoot);
@@ -75,7 +76,8 @@ public abstract class SideTreeNodeExpandingTask implements Callable<Boolean>, Ac
                 List<VNode> childNodes = new LinkedList<>();
                 for (VNode node : curNodesToExpand) {
                     for (VNode childNode : node.getChildNodes()) {
-                        if (childNode.isGroupNode()) {
+                        // only expand nodes contains hitting nodes
+                        if (childNode.isGroupNode() && mappings.containsKey(childNode)) {
                             childNodes.add(childNode);
                         }
                     }
@@ -84,7 +86,7 @@ public abstract class SideTreeNodeExpandingTask implements Callable<Boolean>, Ac
                 curNodesToExpand = childNodes;
 
                 if (curNodesToExpand.isEmpty()) {
-                    allRootNodesToExpand.poll();                   
+                    allRootNodesToExpand.poll();
                 }
 
                 actionWithinInterval();
