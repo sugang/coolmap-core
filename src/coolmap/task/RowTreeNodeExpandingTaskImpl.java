@@ -18,11 +18,12 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
     }
 
     @Override
-    protected void expand(List<VNode> nodesToExpand) {    
+    protected void expand(List<VNode> nodesToExpand) {
+        super.expand(nodesToExpand);
         CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
         if (attachedCoolMapObject != null) {
             attachedCoolMapObject.expandRowNodes(nodesToExpand, true);
-            VNode nextRoot = getRootNodesToExpand().peek();
+            VNode nextRoot = getCurExpandingRoot();
             if (nextRoot != null) {
                 Rectangle nodeRegion = new Rectangle(attachedCoolMapObject.getViewNodesColumn().size() / 2, nextRoot.getViewIndex().intValue(), 1, 1);
                 attachedCoolMapObject.getCoolMapView().centerToRegion(nodeRegion);
@@ -50,6 +51,19 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         } else {
             rowHighlightor.setLabelToColor(getLabelToColor());
             attachedCoolMapObject.getCoolMapView().updateRowMapBuffersEnforceAll();
+        }
+    }
+
+    @Override
+    protected void collapse(List<VNode> curNodesToExpand) {
+        CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
+        if (attachedCoolMapObject != null) {
+            attachedCoolMapObject.collapseRowNodes(curNodesToExpand, true);
+            VNode nextRoot = getCurExpandingRoot();
+            if (nextRoot != null) {
+                Rectangle nodeRegion = new Rectangle(attachedCoolMapObject.getViewNodesColumn().size() / 2, nextRoot.getViewIndex().intValue(), 1, 1);
+                attachedCoolMapObject.getCoolMapView().centerToRegion(nodeRegion);
+            }
         }
     }
 }

@@ -8,12 +8,12 @@ import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.RowMap;
-import coolmap.canvas.sidemaps.util.SideTreeUtil;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.task.ExpandingControlDialog;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
@@ -158,10 +158,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 for (String name : allNames) {
                     names.add(name.trim().toLowerCase());
                 }
+                
+                List<Set<String>> temp = new LinkedList<>();
+                temp.add(names);
 
-                if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, true)) {
-                    JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
-                }
+                new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), false, true, temp, getCoolMapObject()).setVisible(true);
             }
 
         });
@@ -206,9 +207,11 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                         Logger.getLogger(ColumnTree.class.getName()).log(Level.SEVERE, null, ex);
                         return;
                     }
-                    if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, true)) {
-                        JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
-                    }
+                    
+                    List<Set<String>> temp = new LinkedList<>();
+                    temp.add(names);
+
+                    new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), false, true, temp, getCoolMapObject()).setVisible(true);
                 }
             }
         });

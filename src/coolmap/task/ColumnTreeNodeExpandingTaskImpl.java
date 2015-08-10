@@ -19,10 +19,11 @@ public class ColumnTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
 
     @Override
     protected void expand(List<VNode> nodesToExpand) {
+        super.expand(nodesToExpand);
         CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
         if (attachedCoolMapObject != null) {
             attachedCoolMapObject.expandColumnNodes(nodesToExpand, true);
-            VNode nextRoot = getRootNodesToExpand().peek();
+            VNode nextRoot = getCurExpandingRoot();
             if (nextRoot != null) {
                 Rectangle nodeRegion = new Rectangle(nextRoot.getViewIndex().intValue(), attachedCoolMapObject.getViewNodesRow().size() / 2, 1, 1);
                 attachedCoolMapObject.getCoolMapView().centerToRegion(nodeRegion);
@@ -36,8 +37,10 @@ public class ColumnTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         if (attachedCoolMapObject == null) {
             return;
         }
-        
-        if (getMappings().isEmpty()) return;
+
+        if (getMappings().isEmpty()) {
+            return;
+        }
 
         ColumnHighlightor columnHighlightor = (ColumnHighlightor) attachedCoolMapObject.getCoolMapView().getColumnMap(ColumnHighlightor.class.getName());
         if (columnHighlightor == null) {
@@ -50,6 +53,19 @@ public class ColumnTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         } else {
             columnHighlightor.setLabelToColor(getLabelToColor());
             attachedCoolMapObject.getCoolMapView().updateColumnMapBuffersEnforceAll();
+        }
+    }
+
+    @Override
+    protected void collapse(List<VNode> curNodesToExpand) {
+        CoolMapObject attachedCoolMapObject = getAttachedCoolMapObject();
+        if (attachedCoolMapObject != null) {
+            attachedCoolMapObject.collapseColumnNodes(curNodesToExpand, true);
+            VNode nextRoot = getCurExpandingRoot();
+            if (nextRoot != null) {
+                Rectangle nodeRegion = new Rectangle(nextRoot.getViewIndex().intValue(), attachedCoolMapObject.getViewNodesRow().size() / 2, 1, 1);
+                attachedCoolMapObject.getCoolMapView().centerToRegion(nodeRegion);
+            }
         }
     }
 

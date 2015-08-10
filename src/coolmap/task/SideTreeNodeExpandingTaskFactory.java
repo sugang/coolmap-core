@@ -1,8 +1,5 @@
 package coolmap.task;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  * @author Keqiang Li

@@ -8,7 +8,6 @@ import coolmap.application.widget.impl.ontology.WidgetCOntology;
 import coolmap.canvas.CoolMapView;
 import coolmap.canvas.misc.MatrixCell;
 import coolmap.canvas.sidemaps.ColumnMap;
-import coolmap.canvas.sidemaps.util.SideTreeUtil;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
@@ -235,10 +234,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 for (String name : allNames) {
                     names.add(name.trim().toLowerCase());
                 }
-
-                if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, false)) {
-                    JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
-                }
             }
 
         });
@@ -282,9 +277,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         return;
                     }
 
-                    if (!SideTreeUtil.startExpandingTask(getCoolMapObject(), names, false)) {
-                        JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Names passed in didn't match any nodes");
-                    }
                 }
             }
         });
