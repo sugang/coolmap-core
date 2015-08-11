@@ -109,8 +109,10 @@ public abstract class SideTreeNodeExpandingTask implements ActiveCoolMapChangedL
                     }
                 }
 
+                // expand the nodes
                 expand(curNodesToExpand);
 
+                // check all the child nodes of the expanded nodes to see if having more nodes to further expand
                 List<VNode> childNodes = new LinkedList<>();
                 for (VNode node : curNodesToExpand) {
                     for (VNode childNode : node.getChildNodes()) {

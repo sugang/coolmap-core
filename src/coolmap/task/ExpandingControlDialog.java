@@ -1,8 +1,10 @@
 package coolmap.task;
 
+import coolmap.application.CoolMapMaster;
 import coolmap.canvas.sidemaps.util.SideTreeUtil;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
+import java.awt.Dialog;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -67,15 +70,13 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
 
         setLocation(parent.getSize().width / 2, parent.getSize().height / 2);
 
-        initUIs();
+        if (!nodeListsToExpand.isEmpty()) {
+            startExpandingNextList();
+        } else {
+            dispose();
+        }
     }
-
-    private void initUIs() {
-        previousStateButton.setVisible(false);
-        nextStateButton.setVisible(false);
-        startAndPauseButton.setText("Start Expanding");
-    }
-
+    
     public boolean isExpanding() {
         return isExpanding;
     }
@@ -88,11 +89,18 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
             previousStateButton.setVisible(false);
             nextStateButton.setVisible(false);
             expandingStatus.setText("Expanding");
+            setVisible(false);
+            setModal(true);
+            setVisible(true);
         } else {
             startAndPauseButton.setText("Resume Expanding");
             previousStateButton.setVisible(true);
             nextStateButton.setVisible(true);
             expandingStatus.setText("Paused");
+            setModalityType(Dialog.ModalityType.MODELESS);
+            setVisible(false);
+            setModal(false);
+            setVisible(true);
         }
     }
 
@@ -115,6 +123,7 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Expanding Control");
 
+        expandingNodeList.setBorder(javax.swing.BorderFactory.createTitledBorder("Current node list"));
         jScrollPane1.setViewportView(expandingNodeList);
 
         startAndPauseButton.setText("Start/Pause");
@@ -146,32 +155,30 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(startAndPauseButton, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(expandingStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(startAndPauseButton, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
                     .addComponent(previousStateButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(nextStateButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(expandingStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(nextStateButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(expandingStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(previousStateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(startAndPauseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(nextStateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addComponent(expandingStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(startAndPauseButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(previousStateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(nextStateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -236,9 +243,8 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
         if (!nodeListsToExpand.isEmpty()) {
             startExpandingNextList();
         } else {
-            expandingStatus.setText("Expanding Finished");
-            startAndPauseButton.setText("Start Over");
-            setIsExpanding(false);
+            JOptionPane.showMessageDialog(CoolMapMaster.getCMainFrame(), "Expanding finished");
+            dispose();
         }
     }
 

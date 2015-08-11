@@ -150,7 +150,7 @@ public final class CoolMapView<BASE, VIEW> {
 
 //    private final RealTimeLayer _realTimeLayer = new RealTimeLayer();
     public void addColumnMap(ColumnMap map) {
-        _colDrawer.addColumnMap(map);
+        _colDrawer.addColumnMap(map);  
     }
 
     public ColumnMap getColumnMap(String className) {
@@ -170,7 +170,7 @@ public final class CoolMapView<BASE, VIEW> {
     }
 
     public void addRowMap(RowMap map) {
-        _rowDrawer.addRowMap(map);
+        _rowDrawer.addRowMap(map);  
     }
 
     public void addCViewListener(CViewListener listener) {

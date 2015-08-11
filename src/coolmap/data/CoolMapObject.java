@@ -1322,7 +1322,6 @@ public final class CoolMapObject<BASE, VIEW> {
 
             _vMatrix.expandColNodeToChildNodes(nodesToBeExpanded);
 
-            getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
             _sortTracker.clearSortedRow();
             getCoolMapView().updateCanvasEnforceAll();
@@ -1398,7 +1397,6 @@ public final class CoolMapObject<BASE, VIEW> {
             //add a filtering step
             _vMatrix.expandRowNodeToChildNodes(nodesToBeExpanded);
 
-            getCoolMapView().clearSelection();
             getCoolMapView().updateNodeDisplayParams();
             _sortTracker.clearSortedColumn();
             getCoolMapView().updateCanvasEnforceAll();
@@ -1441,69 +1439,6 @@ public final class CoolMapObject<BASE, VIEW> {
         }
     }
 
-//    public synchronized boolean expandRowNode(VNode node) {
-//
-//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-//
-//            _vMatrix.expandRowNodeToChildNodes(node);
-//
-//            getCoolMapView().updateNodeDisplayParams();
-//            //Also set a new selection
-//            List<VNode> childNodes = node.getChildNodes();
-//            //set column selection
-////            getCoolMapView().clearSelection();
-//            if (childNodes == null || childNodes.isEmpty()) {
-//                getCoolMapView().clearSelection();
-//            } else {
-//                VNode firstNode = childNodes.get(0);
-//                VNode lastNode = childNodes.get(childNodes.size() - 1);
-//                Float i1 = firstNode.getViewIndex();
-//                Float i2 = lastNode.getViewIndex();
-//                if (i1 == null || i2 == null) {
-//                    getCoolMapView().clearSelection();
-//                } else {
-//                    //maybe retain the previous selection
-//
-//                    Range<Integer> rowSelection = Range.closedOpen(i1.intValue(), i2.intValue() + 1);
-//                    getCoolMapView().setSelectionsRow(Collections.singletonList(rowSelection));
-//                }
-//            }
-//
-//            _sortTracker.clearSortedColumn();
-//            getCoolMapView().updateCanvasEnforceAll();
-//            notifyRowsChanged();
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
-//    public synchronized boolean collapseColumnNode(VNode node) {
-//        if (node != null && getCoolMapView() != null && node.isExpanded()) {
-//
-//            _vMatrix.collapseTreeColNode(node);
-//            getCoolMapView().updateNodeDisplayParams();
-//            //should all have something
-//            Float index = node.getViewIndex();
-//            if (index == null) {
-//                getCoolMapView().clearSelection();
-//            } else {
-//                Range<Integer> selectedColumn = Range.closedOpen(index.intValue(), index.intValue() + 1);
-//                getCoolMapView().setSelectionsColumn(Collections.singletonList(selectedColumn));
-//                getCoolMapView().centerToSelections();
-//            }
-//
-//            //
-//            _sortTracker.clearSortedRow();
-//            if (_sortTracker.lastSortedColumn != null && !_vMatrix.getActiveColumnNodes().contains(_sortTracker.lastSortedColumn)) {
-//                _sortTracker.clearSortedColumn();//It's gone
-//            }
-//            getCoolMapView().updateCanvasEnforceAll();
-//            notifyColumnsChanged();
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
     public synchronized List<VNode> collapseColumnNodes(Collection<VNode> inputNodes, boolean select) {
         if (inputNodes == null || inputNodes.isEmpty() || getCoolMapView() == null) {
             return null;
@@ -1527,11 +1462,10 @@ public final class CoolMapObject<BASE, VIEW> {
         if (_sortTracker.lastSortedColumn != null && !_vMatrix.getActiveColumnNodes().contains(_sortTracker.lastSortedColumn)) {
             _sortTracker.clearSortedColumn();//It's gone
         }
-        getCoolMapView().clearSelection();
+
         getCoolMapView().updateCanvasEnforceAll();
         notifyColumnsChanged();
-        
-        
+               
         if (select) {
             if (collapsedNodes != null) {
                 nodesToSelect.addAll(collapsedNodes);
@@ -1603,7 +1537,6 @@ public final class CoolMapObject<BASE, VIEW> {
             _sortTracker.clearSortedRow();//It's gone
         }
 
-        getCoolMapView().clearSelection();
         getCoolMapView().updateCanvasEnforceAll();
         notifyRowsChanged();
         
@@ -1747,67 +1680,6 @@ public final class CoolMapObject<BASE, VIEW> {
         //It's tricky because intermediate nodes need also to be removed
         return false;
     }
-
-//    public synchronized boolean collapseRowNode(VNode node) {
-//        if (node != null && getCoolMapView() != null && node.isExpanded()) {
-//
-//            _vMatrix.collapseTreeRowNode(node);
-//
-//            getCoolMapView().updateNodeDisplayParams();
-//            //should all have something
-//            Float index = node.getViewIndex();
-//            if (index == null) {
-//                getCoolMapView().clearSelection();
-//            } else {
-//                Range<Integer> selectedRow = Range.closedOpen(index.intValue(), index.intValue() + 1);
-//                getCoolMapView().setSelectionsRow(Collections.singletonList(selectedRow));
-//                getCoolMapView().centerToSelections();
-//            }
-//
-//            //
-//            _sortTracker.clearSortedColumn();
-//            if (_sortTracker.lastSortedRow != null && !_vMatrix.getActiveRowNodes().contains(_sortTracker.lastSortedRow)) {
-//                _sortTracker.clearSortedRow();//It's gone
-//            }
-//
-//            getCoolMapView().updateCanvasEnforceAll();
-//            notifyRowsChanged();
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
-//    public synchronized boolean expandRowNodeToBottom(VNode node) {
-//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-//
-//            List<VNode> childNodes = _vMatrix.expandRowNodeToChildNodesAll(node);
-//
-//            getCoolMapView().updateNodeDisplayParams();
-//
-//            getCoolMapView().clearSelection();
-//            if (childNodes == null || childNodes.isEmpty()) {
-//
-//            } else {
-//                VNode firstNode = childNodes.get(0);
-//                VNode lastNode = childNodes.get(childNodes.size() - 1);
-//                Float i1 = firstNode.getViewIndex();
-//                Float i2 = lastNode.getViewIndex();
-//
-//                if (i1 == null || i2 == null) {
-//                    getCoolMapView().clearSelection();
-//                } else {
-//                }
-//            }
-//            _sortTracker.clearSortedColumn();
-//            getCoolMapView().updateCanvasEnforceAll();
-//
-//            notifyRowsChanged();
-//
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
     
     private HashSet<Range<Integer>> getViewNodesRowTreeSelection(List<VNode> rowTreeNodes) {
         HashSet<Range<Integer>> selectedRows = new HashSet<>();
@@ -1898,7 +1770,6 @@ public final class CoolMapObject<BASE, VIEW> {
         
         List<VNode> expandedNodes = _vMatrix.expandRowNodeToChildNodesAll(nodes);
         getCoolMapView().updateNodeDisplayParams();
-        getCoolMapView().clearSelection();
 
         _sortTracker.clearSortedColumn();
         getCoolMapView().updateCanvasEnforceAll();
@@ -1932,7 +1803,6 @@ public final class CoolMapObject<BASE, VIEW> {
        
         List<VNode> expandedNodes = _vMatrix.expandColNodeToChildNodesAll(nodes);
         getCoolMapView().updateNodeDisplayParams();
-        getCoolMapView().clearSelection();
 
         _sortTracker.clearSortedRow();
         getCoolMapView().updateCanvasEnforceAll();
@@ -1977,38 +1847,6 @@ public final class CoolMapObject<BASE, VIEW> {
         return selections;
     }
     
-    
-
-//    public synchronized boolean expandColumnNodeToBottom(VNode node) {
-//        if (node != null && getCoolMapView() != null && !node.isExpanded()) {
-//
-//            List<VNode> childNodes = _vMatrix.expandColNodeToChildNodesAll(node);
-//
-//            getCoolMapView().updateNodeDisplayParams();
-//            getCoolMapView().clearSelection();
-//
-//            if (childNodes == null || childNodes.isEmpty()) {
-//
-//            } else {
-//                VNode firstNode = childNodes.get(0);
-//                VNode lastNode = childNodes.get(childNodes.size() - 1);
-//                Float i1 = firstNode.getViewIndex();
-//                Float i2 = lastNode.getViewIndex();
-//                if (i1 == null || i2 == null) {
-//                    getCoolMapView().clearSelection();
-//                } else {
-//                }
-//            }
-//            _sortTracker.clearSortedRow();
-//
-//            getCoolMapView().updateCanvasEnforceAll();
-//
-//            notifyColumnsChanged();
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
     public synchronized boolean toggleColumnNode(VNode node) {
         if (node == null) {
             return false;
@@ -2192,41 +2030,7 @@ public final class CoolMapObject<BASE, VIEW> {
     public ViewRenderer<VIEW> getViewRenderer() {
         return _viewRenderer;
     }
-
-//    public AnnotationRenderer<BASE, VIEW> getAnnotationRenderer() {
-//        return _annotationRenderer;
-//    }
-//    public Filter<VIEW> getViewFilter() {
-//        return _viewFilter;
-//    }
-//    public void restoreSnapshot(StateSnapshot snapshot, boolean trackState) {
-//
-//        if (snapshot == null) {
-//            return;
-//        } else {
-//            _vMatrix.restoreState(snapshot.duplicate());
-//            _sortTracker.clearSortedRow();
-//            _sortTracker.clearSortedColumn();
-//            getCoolMapView().updateNodeDisplayParams();
-//            getCoolMapView().clearSelection();
-//            if (snapshot.getDirection() == COntology.ROW) {
-//                getCoolMapView().setSelectionsRow(snapshot.getSelections());
-//            } else {
-//                getCoolMapView().setSelectionsColumn(snapshot.getSelections());
-//            }
-//            getCoolMapView().updateCanvasEnforceAll();
-//
-//            if (snapshot.getDirection() == COntology.ROW) {
-//                notifyRowsChanged();
-//            } else if (snapshot.getDirection() == COntology.COLUMN) {
-//                notifyColumnsChanged();
-//            }
-//
-//            if (trackState) {
-//                _stateStorage.addState(snapshot);
-//            }
-//        }
-//    }
+    
     /**
      * The state can be restored from a previously saved This state also must
      * contain

@@ -282,7 +282,7 @@ public class RowDrawer extends JLayeredPane implements ComponentListener {
         _initialWidth -= 50;
         rowMap.getCoolMapView().addCViewListener(rowMap);
         rowMap.getCoolMapObject().addCObjectDataListener(rowMap);
-
+        
         if (RowDrawer.this.getBounds().getWidth() > 0) {
             handle.updateDrawerBoundsWithContainer(RowDrawer.this.getBounds());
             rowMap.updateBuffer();

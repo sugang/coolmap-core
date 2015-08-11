@@ -1225,62 +1225,6 @@ public final class WidgetViewport extends Widget implements ActiveCoolMapChanged
         });
 
         _toolBar.add(button);
-
-//        button = new JButton("Task");
-//        button.addActionListener(new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                ServiceMaster.getTaskEngine().submitTask(new LongTask("Hierarchical Clustering 1") {
-//
-//                    @Override
-//                    public void run() {
-//                        System.out.println("Task started 1");
-//                        try {
-//                            HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-//                        } catch (Exception e) {
-//                            return;
-//                        }
-//                        System.out.println("Task ended 1");
-//                    }
-//
-//                    @Override
-//                    public String getMessage() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public double getProgress() {
-//                        return -1;
-//                    }
-//                });
-//
-//                ServiceMaster.getTaskEngine().submitTask(new LongTask("Hierarchical Clustering 2") {
-//
-//                    @Override
-//                    public void run() {
-//                        System.out.println("Task started 2");
-//                        try {
-//                            HCluster.hclustRow(CoolMapMaster.getActiveCoolMapObject(), HierarchicalAgglomerativeClustering.ClusterLinkage.MEAN_LINKAGE, Similarity.SimType.COSINE);
-//                        } catch (Exception e) {
-//                            return;
-//                        }
-//                        System.out.println("Task ended 2");
-//                    }
-//
-//                    @Override
-//                    public String getMessage() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public double getProgress() {
-//                        return -1;
-//                    }
-//                });
-//            }
-//        });
-//        _toolBar.add(button);
     }
 
     public void cascadeWindows() {

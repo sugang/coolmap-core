@@ -143,7 +143,7 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                String input = JOptionPane.showInputDialog("Type a comma separated name list, such as gene names");
+                String input = JOptionPane.showInputDialog("Type comma separated node names, such as gene names");
                 if (input == null || input.trim().isEmpty()) {
                     return;
                 }
@@ -159,17 +159,17 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                     names.add(name.trim().toLowerCase());
                 }
                 
-                List<Set<String>> temp = new LinkedList<>();
-                temp.add(names);
+                List<Set<String>> nameLists = new LinkedList<>();
+                nameLists.add(names);
 
-                new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), false, true, temp, getCoolMapObject()).setVisible(true);
+                new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), true, true, nameLists, getCoolMapObject()).setVisible(true);
             }
 
         });
 
         enrichmentMenu.add(enrichFromList);
 
-        JMenuItem enrichFromFile = new JMenuItem("Comma seperated names from file");
+        JMenuItem enrichFromFile = new JMenuItem("Multiple lines of comma seperated node names from file");
 
         enrichFromFile.addActionListener(new ActionListener() {
 
@@ -191,10 +191,12 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                         return;
                     }
 
-                    Set<String> names = new HashSet<>();
+                    List<Set<String>> nameLists = new LinkedList<>();
+                    
                     try {
                         String line;
                         while ((line = reader.readLine()) != null) {
+                            Set<String> names = new HashSet<>();
                             String[] allNames = line.split(",");
                             if (allNames.length == 0) {
                                 continue;
@@ -202,16 +204,14 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                             for (String name : allNames) {
                                 names.add(name.trim().toLowerCase());
                             }
+                            nameLists.add(names);
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(ColumnTree.class.getName()).log(Level.SEVERE, null, ex);
                         return;
                     }
-                    
-                    List<Set<String>> temp = new LinkedList<>();
-                    temp.add(names);
 
-                    new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), false, true, temp, getCoolMapObject()).setVisible(true);
+                    new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), true, true, nameLists, getCoolMapObject()).setVisible(true);
                 }
             }
         });

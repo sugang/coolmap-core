@@ -13,6 +13,7 @@ import coolmap.data.cmatrixview.model.VNode;
 import coolmap.data.cmatrixview.utils.VNodeHeightComparator;
 import coolmap.data.contology.model.COntology;
 import coolmap.data.state.CoolMapState;
+import coolmap.task.ExpandingControlDialog;
 import coolmap.utils.CImageGradient;
 import coolmap.utils.Tools;
 import coolmap.utils.graphics.UI;
@@ -160,9 +161,6 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
     public void mapZoomChanged(CoolMapObject object) {
     }
 
-//    @Override
-//    public void stateStorageUpdated(CoolMapObject object) {
-//    }
     @Override
     public void gridChanged(CoolMapObject object) {
     }
@@ -219,7 +217,7 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                String input = JOptionPane.showInputDialog("Type a comma separated name list, such as gene names");
+                String input = JOptionPane.showInputDialog("Type comma separated node names, such as gene names");
                 if (input == null || input.trim().isEmpty()) {
                     return;
                 }
@@ -234,13 +232,18 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                 for (String name : allNames) {
                     names.add(name.trim().toLowerCase());
                 }
+
+                List<Set<String>> nameLists = new LinkedList<>();
+                nameLists.add(names);
+
+                new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), true, false, nameLists, getCoolMapObject()).setVisible(true);
             }
 
         });
         
         enrichmentMenu.add(enrichFromList);
         
-        JMenuItem enrichFromFile = new JMenuItem("Comma seperated names from file");
+        JMenuItem enrichFromFile = new JMenuItem("Multiple lines of comma seperated node names from file");
         
         enrichFromFile.addActionListener(new ActionListener() {
 
@@ -262,20 +265,25 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
                         return;
                     }
                     
-                    Set<String> names = new HashSet<>();
+                    List<Set<String>> nameLists = new LinkedList<>();
+                    
                     try {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String[] allNames = line.split(",");
+                            Set<String> names = new HashSet<>();
                             if (allNames.length == 0) continue;
                             for (String name : allNames) {
                                 names.add(name.trim().toLowerCase());
                             }
+                            nameLists.add(names);
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(ColumnTree.class.getName()).log(Level.SEVERE, null, ex);
                         return;
                     }
+                    
+                    new ExpandingControlDialog(CoolMapMaster.getCMainFrame(), true, false, nameLists, getCoolMapObject()).setVisible(true);
 
                 }
             }

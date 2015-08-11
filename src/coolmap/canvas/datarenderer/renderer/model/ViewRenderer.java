@@ -24,6 +24,7 @@ import org.json.JSONObject;
 /**
  *
  * @author gangsu
+ * @param <VIEW>
  */
 public abstract class ViewRenderer<VIEW> implements StateSavable {
 
@@ -272,7 +273,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
         return getRenderedFullMap(data, percentage, percentage);
     }
 
-    public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) throws InterruptedException {
+    public synchronized BufferedImage getRenderedMap(CoolMapObject<?, VIEW> data, int fromRow, int toRow, int fromCol, int toCol, final float zoomX, final float zoomY) {
         if (data == null || data.getViewNumColumns() == 0 || data.getViewNumRows() == 0 || fromRow < 0 || fromRow > data.getViewNumRows() || fromCol < 0 || fromCol > data.getViewNumColumns()) {
             //System.out.println("Error occured");
 //            System.out.println("Render exception occured. Check render range and data");
@@ -282,7 +283,7 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
             //System.out.println((int)zoomX);
             if (!canRender(data.getViewClass())) {
                 return null;
-            };
+            }
 
             //
             if (data.getViewNumColumns() > _multiThreadThreshold
@@ -356,18 +357,15 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                 thread.start();
             }
 
-            for (Thread thread : threads) {
-                thread.join();
-            }
 
-            //if thread is interrupted, return immediately.
-            if (Thread.currentThread().isInterrupted()) {
+            try {
                 for (Thread thread : threads) {
-                    if (thread.isAlive()) {
-                        thread.interrupt();
-                    }
+                    thread.join();
                 }
-                throw new InterruptedException();
+            } catch (InterruptedException ie) {
+                System.out.println("last renderring didn't finish");
+                //Logger.getLogger(ViewRenderer.class.getName()).log(Level.WARNING, null, ie);
+                return null;
             }
 
             //Do something after render

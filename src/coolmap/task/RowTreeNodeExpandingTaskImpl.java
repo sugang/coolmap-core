@@ -1,6 +1,9 @@
 package coolmap.task;
 
+import coolmap.application.CoolMapMaster;
+import coolmap.canvas.sidemaps.RowMap;
 import coolmap.canvas.sidemaps.impl.RowHighlightor;
+import coolmap.canvas.sidemaps.impl.RowTree;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
 import java.awt.Rectangle;
@@ -39,7 +42,7 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         }
         
         if (getMappings().isEmpty()) return;
-
+     
         RowHighlightor rowHighlightor = (RowHighlightor) attachedCoolMapObject.getCoolMapView().getRowMap(RowHighlightor.class.getName());
         if (rowHighlightor == null) {
             rowHighlightor = new RowHighlightor(attachedCoolMapObject, getLabelToColor());
@@ -51,7 +54,7 @@ public class RowTreeNodeExpandingTaskImpl extends SideTreeNodeExpandingTask {
         } else {
             rowHighlightor.setLabelToColor(getLabelToColor());
             attachedCoolMapObject.getCoolMapView().updateRowMapBuffersEnforceAll();
-        }
+        }    
     }
 
     @Override

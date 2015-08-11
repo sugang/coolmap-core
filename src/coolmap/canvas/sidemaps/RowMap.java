@@ -243,6 +243,8 @@ public abstract class RowMap<BASE, VIEW> implements CViewListener, CObjectListen
         if (width <= 0) {
             width = 200;
         }
+        
+        width = 300;
 
         if (width > 0 && height > 0) {
             BufferedImage buffer = _graphicsConfiguration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
