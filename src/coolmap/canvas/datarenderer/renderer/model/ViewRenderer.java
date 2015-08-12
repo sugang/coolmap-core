@@ -285,93 +285,90 @@ public abstract class ViewRenderer<VIEW> implements StateSavable {
                 return null;
             }
 
-            //
-            if (data.getViewNumColumns() > _multiThreadThreshold
-                    && data.getViewNumRows() > 1
-                    || data.getViewNumRows() > _multiThreadThreshold
-                    && data.getViewNumColumns() > 1) {
-                _threadNum = 2;
-            } else {
-                _threadNum = 1;
-            }
+            try {
+                //
+                if (data.getViewNumColumns() > _multiThreadThreshold
+                        && data.getViewNumRows() > 1
+                        || data.getViewNumRows() > _multiThreadThreshold
+                        && data.getViewNumColumns() > 1) {
+                    _threadNum = 2;
+                } else {
+                    _threadNum = 1;
+                }
 
 //            _threadNum = 1;
-            //do something before render
-            preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+                //do something before render
+                preRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
 
-            //Can process!
-            int numRow = toRow - fromRow;
-            int numCol = toCol - fromCol;
+                //Can process!
+                int numRow = toRow - fromRow;
+                int numCol = toCol - fromCol;
 
-            VNode rMin = data.getViewNodeRow(fromRow);
-            VNode rMax = data.getViewNodeRow(toRow - 1);//Inclusive
-            VNode cMin = data.getViewNodeColumn(fromCol);
-            VNode cMax = data.getViewNodeColumn(toCol - 1);
+                VNode rMin = data.getViewNodeRow(fromRow);
+                VNode rMax = data.getViewNodeRow(toRow - 1);//Inclusive
+                VNode cMin = data.getViewNodeColumn(fromCol);
+                VNode cMax = data.getViewNodeColumn(toCol - 1);
 
-            int imageWidth = (int) (cMax.getViewOffset() - cMin.getViewOffset() + cMax.getViewSizeInMap(zoomX));
-            int imageHeight = (int) (rMax.getViewOffset() - rMin.getViewOffset() + rMax.getViewSizeInMap(zoomY));
+                int imageWidth = (int) (cMax.getViewOffset() - cMin.getViewOffset() + cMax.getViewSizeInMap(zoomX));
+                int imageHeight = (int) (rMax.getViewOffset() - rMin.getViewOffset() + rMax.getViewSizeInMap(zoomY));
 
 //            System.out.println(imageWidth + " " + imageHeight);
-            //This is the bottom map, no need to be transparent.
-            BufferedImage viewMap = _graphicsConfiguration.createCompatibleImage(imageWidth, imageHeight, Transparency.OPAQUE);
+                //This is the bottom map, no need to be transparent.
+                BufferedImage viewMap = _graphicsConfiguration.createCompatibleImage(imageWidth, imageHeight, Transparency.OPAQUE);
 
-            int mapRowSectionSize = numRow / _threadNum;
-            int mapColSectionSize = numCol / _threadNum;
+                int mapRowSectionSize = numRow / _threadNum;
+                int mapColSectionSize = numCol / _threadNum;
 //        int imageRowSectionSize = (int)( mapRowSectionSize * zoomY );
 //        int imageColSectionSize = (int)( mapColSectionSize * zoomX );
 
-            Thread[] threads = new Thread[_threadNum * _threadNum];
+                Thread[] threads = new Thread[_threadNum * _threadNum];
 
-            int matrixFromRow;
-            int matrixToRow;
-            int matrixFromCol;
-            int matrixToCol;
+                int matrixFromRow;
+                int matrixToRow;
+                int matrixFromCol;
+                int matrixToCol;
 
-            int subImageAnchorX;
-            int subImageAnchorY;
+                int subImageAnchorX;
+                int subImageAnchorY;
 
-            for (int i = 0; i < _threadNum; i++) {
-                for (int j = 0; j < _threadNum; j++) {
-                    matrixFromRow = fromRow + i * mapRowSectionSize;
-                    matrixToRow = fromRow + (i + 1) * mapRowSectionSize;
-                    matrixFromCol = fromCol + j * mapColSectionSize;
-                    matrixToCol = fromCol + (j + 1) * mapColSectionSize;
+                for (int i = 0; i < _threadNum; i++) {
+                    for (int j = 0; j < _threadNum; j++) {
+                        matrixFromRow = fromRow + i * mapRowSectionSize;
+                        matrixToRow = fromRow + (i + 1) * mapRowSectionSize;
+                        matrixFromCol = fromCol + j * mapColSectionSize;
+                        matrixToCol = fromCol + (j + 1) * mapColSectionSize;
 
-                    if (i == _threadNum - 1) {
-                        matrixToRow = toRow;
+                        if (i == _threadNum - 1) {
+                            matrixToRow = toRow;
+                        }
+
+                        if (j == _threadNum - 1) {
+                            matrixToCol = toCol;
+                        }
+
+                        subImageAnchorX = (int) (data.getViewNodeColumn(matrixFromCol).getViewOffset() - data.getViewNodeColumn(fromCol).getViewOffset());
+                        subImageAnchorY = (int) (data.getViewNodeRow(matrixFromRow).getViewOffset() - data.getViewNodeRow(fromRow).getViewOffset());
+
+                        threads[i * _threadNum + j] = new Thread(new ViewRendererRunner(data, matrixFromRow, matrixToRow, matrixFromCol, matrixToCol, viewMap, subImageAnchorX, subImageAnchorY, zoomX, zoomY));
+
                     }
-
-                    if (j == _threadNum - 1) {
-                        matrixToCol = toCol;
-                    }
-
-                    subImageAnchorX = (int) (data.getViewNodeColumn(matrixFromCol).getViewOffset() - data.getViewNodeColumn(fromCol).getViewOffset());
-                    subImageAnchorY = (int) (data.getViewNodeRow(matrixFromRow).getViewOffset() - data.getViewNodeRow(fromRow).getViewOffset());
-
-                    threads[i * _threadNum + j] = new Thread(new ViewRendererRunner(data, matrixFromRow, matrixToRow, matrixFromCol, matrixToCol, viewMap, subImageAnchorX, subImageAnchorY, zoomX, zoomY));
-
                 }
-            }
 
-            for (Thread thread : threads) {
-                thread.start();
-            }
+                for (Thread thread : threads) {
+                    thread.start();
+                }
 
-
-            try {
                 for (Thread thread : threads) {
                     thread.join();
                 }
-            } catch (InterruptedException ie) {
-                System.out.println("last renderring didn't finish");
-                //Logger.getLogger(ViewRenderer.class.getName()).log(Level.WARNING, null, ie);
+
+//Do something after render
+                postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
+
+                return viewMap;
+            } catch (Exception e) {
                 return null;
             }
-
-            //Do something after render
-            postRender(fromRow, toRow, fromCol, toCol, zoomX, zoomY);
-
-            return viewMap;
         }
     }//end of get rendered map
 

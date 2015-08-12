@@ -176,14 +176,19 @@ public class ColumnTree extends ColumnMap implements MouseListener, MouseMotionL
             item.setSelected(true);
 
             String label = item.getText();
-            if (label.equals("Straight")) {
-                _drawingType = STRAIGHT;
-            } else if (label.equals("Orthogonal")) {
-                _drawingType = ORTHOGONAL;
-            } else if (label.equals("Curve")) {
-                _drawingType = CURVE;
-            } else {
-                _drawingType = STRAIGHT;
+            switch (label) {
+                case "Straight":
+                    _drawingType = STRAIGHT;
+                    break;
+                case "Orthogonal":
+                    _drawingType = ORTHOGONAL;
+                    break;
+                case "Curve":
+                    _drawingType = CURVE;
+                    break;
+                default:
+                    _drawingType = STRAIGHT;
+                    break;
             }
             updateBuffer();
         }

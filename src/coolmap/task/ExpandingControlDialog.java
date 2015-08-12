@@ -4,7 +4,6 @@ import coolmap.application.CoolMapMaster;
 import coolmap.canvas.sidemaps.util.SideTreeUtil;
 import coolmap.data.CoolMapObject;
 import coolmap.data.cmatrixview.model.VNode;
-import java.awt.Dialog;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -97,7 +96,6 @@ public class ExpandingControlDialog extends javax.swing.JDialog implements SideT
             previousStateButton.setVisible(true);
             nextStateButton.setVisible(true);
             expandingStatus.setText("Paused");
-            setModalityType(Dialog.ModalityType.MODELESS);
             setVisible(false);
             setModal(false);
             setVisible(true);

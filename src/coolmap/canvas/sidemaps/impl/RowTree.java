@@ -364,31 +364,27 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
                 Color color = chooser.showDialog(getViewPanel().getTopLevelAncestor(), "Chooser brush color", _leafColor);
                 if (color == null) {
                     return;
-                } else {
-//                    if (_activeNode != null) {
-//                        _activeNode.colorTree(color);
-//                        getCoolMapView().updateRowMapBuffersEnforceAll();
-//                    }
-                    try {
-                        //
-                        if (_selectedNodes.isEmpty()) {
-                            return;
-                        }
-                        List<VNode> nodes = getCoolMapObject().getViewNodesRowFromTreeNodesAll(_selectedNodes);
-                        for (VNode node : nodes) {
-                            node.setViewColor(color);
-                        }
-
-                        for (VNode node : _selectedNodes) {
-                            node.setViewColor(color);
-                        }
-
-                        getCoolMapView().updateRowMapBuffersEnforceAll();
-                    } catch (Exception e) {
-                        //
-
-                    }
                 }
+                try {
+                    //
+                    if (_selectedNodes.isEmpty()) {
+                        return;
+                    }
+                    List<VNode> nodes = getCoolMapObject().getViewNodesRowFromTreeNodesAll(_selectedNodes);
+                    for (VNode node : nodes) {
+                        node.setViewColor(color);
+                    }
+
+                    for (VNode node : _selectedNodes) {
+                        node.setViewColor(color);
+                    }
+
+                    getCoolMapView().updateRowMapBuffersEnforceAll();
+                } catch (Exception e) {
+                    //
+
+                }
+
             }
         });
 
@@ -564,14 +560,19 @@ public class RowTree extends RowMap implements MouseListener, MouseMotionListene
             item.setSelected(true);
 
             String label = item.getText();
-            if (label.equals("Straight")) {
-                _drawingType = STRAIGHT;
-            } else if (label.equals("Orthogonal")) {
-                _drawingType = ORTHOGONAL;
-            } else if (label.equals("Curve")) {
-                _drawingType = CURVE;
-            } else {
-                _drawingType = STRAIGHT;
+            switch (label) {
+                case "Straight":
+                    _drawingType = STRAIGHT;
+                    break;
+                case "Orthogonal":
+                    _drawingType = ORTHOGONAL;
+                    break;
+                case "Curve":
+                    _drawingType = CURVE;
+                    break;
+                default:
+                    _drawingType = STRAIGHT;
+                    break;
             }
             updateBuffer();
         }

@@ -192,7 +192,7 @@ public abstract class SideTreeNodeExpandingTask implements ActiveCoolMapChangedL
         return new LabelToColor(labelToValue, 0d, highlightorMax);
     }
 
-    protected synchronized void resume() {
+    protected void resume() {
 
         // have to re-initialize the task, otherwise won't work
         initTask();
@@ -202,11 +202,11 @@ public abstract class SideTreeNodeExpandingTask implements ActiveCoolMapChangedL
         time.schedule(internalTask, 0, period);
     }
 
-    protected synchronized void pause() {
+    protected void pause() {
         internalTask.cancel();
     }
 
-    protected synchronized void next() {
+    protected void next() {
         // if got nothing to expand, check the root queue for nodes to be expanded
         if (curNodesToExpand.isEmpty()) {
             coolMapObject.getCoolMapView().clearSelection();
@@ -235,7 +235,7 @@ public abstract class SideTreeNodeExpandingTask implements ActiveCoolMapChangedL
         curNodesToExpand = childNodes;
     }
 
-    protected synchronized void previous() {
+    protected void previous() {
         if (nodeListExpanded.isEmpty()) {
             return;
         }
